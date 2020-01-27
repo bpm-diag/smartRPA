@@ -1,26 +1,33 @@
-# https://stackoverflow.com/questions/18599339/python-watchdog-monitoring-file-for-changes
-
+# https://docs.microsoft.com/en-us/windows/win32/api/
 from time import sleep
 from datetime import datetime
 from getpass import getuser #user id
 from os.path import expanduser #user folder
+from os import listdir
 from sys import platform #detect running os
+from sys import exit
+from threading import Thread
 import csv
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-import win32com.client #access running programs
+import pythoncom #for win32 thread
+import win32com.client #access running programs, part of pywin32
 from winregistry import WinRegistry as Reg #access registry
+#pywin32 for folder changes api
+import win32file 
+import win32event
+import win32con
+
+RECENT_ITEMS_PATH = expanduser("~")+"\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
 
 # https://pythonhosted.org/watchdog/api.html#event-handler-classes
+# https://stackoverflow.com/questions/18599339/python-watchdog-monitoring-file-for-changes
 class MyHandler(RegexMatchingEventHandler):
     def __init__(self):
       super(MyHandler, self).__init__(ignore_regexes=['^[.]{1}.*', '.*/[.]{1}.*', '.*\\[.]{1}.*']) #ignore hidden files
 
     def on_any_event(self, event):
-        if event.src_path == expanduser("~")+"\\AppData\\Roaming\\Microsoft\\Windows\\Recent": # Every time that you open a file, a new shortcut to this file is added to the recent folder. When I end up here, I need to detect which file has been added, that is the most recent file/folder open
-            
-            print(f"{datetime.now()} {getuser()} OS-System OpenFile/Folder {event.event_type} {event.src_path}")
-        elif any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules']): #exclude folders
+        if any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules']): #exclude folders
             return
         else:
             if event.event_type == "moved": #destination path is available
@@ -31,9 +38,24 @@ class MyHandler(RegexMatchingEventHandler):
             else: #created,deleted
                 print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
 
+# monitor file changes
+def watchFolder():
+    my_event_handler = MyHandler()
+    path = expanduser("~") #user home folder
+    my_observer = Observer()
+    my_observer.schedule(my_event_handler, path, recursive=True)
+    my_observer.start()
+    try:
+        while True:
+            sleep(1)
+    except KeyboardInterrupt:
+        my_observer.stop()
+    my_observer.join()
+
 # Detects programs opened and closed
 def logProcessesWin(): 
     #https://stackoverflow.com/a/1187338
+    pythoncom.CoInitialize()
     strComputer = "."
     objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
     objSWbemServices = objWMIService.ConnectServer(strComputer,"root\cimv2")
@@ -69,8 +91,11 @@ def logProcessesWin():
                 if app not in open_programs: 
                     open_programs.append(app)
                     pathList = list(filter(lambda prog: prog.Name == app, colItems)) #find the given program in the list of running processes and take its path
-                    if pathList: path=pathList[0].ExecutablePath # check if path exists
-                    print(f"{datetime.now()} {getuser()} AppOpen {app} {path}")
+                    if pathList: #path to program is known
+                        path=pathList[0].ExecutablePath # check if path exists
+                        print(f"{datetime.now()} {getuser()} AppOpen {app} {path}")
+                    else: 
+                        print(f"{datetime.now()} {getuser()} AppOpen {app}")
             
             new_programs_len = len(new_programs)
         if len(closed_programs): #set is not empty
@@ -78,14 +103,11 @@ def logProcessesWin():
                 if app in open_programs: 
                     open_programs.remove(app)
                     pathList = list(filter(lambda prog: prog.Name == app, colItems)) #find the given program in the list of running processes and take its path
-                    if pathList: path=pathList[0].ExecutablePath # check if path exists
-                    print(f"{datetime.now()} {getuser()} AppClose {app} {path}")
-
-
-def logProcessesUnix(): #TODO
-    print("UNIX has not been implemented yet...")
-    while True:
-        sleep(1)
+                    if pathList: #path to program is known
+                        path=pathList[0].ExecutablePath # check if path exists
+                        print(f"{datetime.now()} {getuser()} AppClose {app} {path}")
+                    else: 
+                        print(f"{datetime.now()} {getuser()} AppClose {app}")
 
 # return list of programs uninstalled by user
 def findUninstall():
@@ -103,32 +125,50 @@ def findUninstall():
             uninstalls.append(displayName)
     print(uninstalls)
 
+#http://timgolden.me.uk/python/win32_how_do_i/watch_directory_for_changes.html#use_findfirstchange 
+def watchRecentsFolder():
+    change_handle = win32file.FindFirstChangeNotification ( #sets up a handle for watching file changes
+    RECENT_ITEMS_PATH, #path to watch
+    0, #boolean indicating whether the directories underneath the one specified are to be watched
+    win32con.FILE_NOTIFY_CHANGE_FILE_NAME #list of flags as to what kind of changes to watch for https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstchangenotificationa#parameters
+    )
+    # Loop forever, listing any file changes. The WaitFor... will
+    #  time out every half a second allowing for keyboard interrupts
+    #  to terminate the loop.
+    try:
+        old_path_contents = dict ([(f, None) for f in listdir (RECENT_ITEMS_PATH)])
+        while 1:
+            result = win32event.WaitForSingleObject(change_handle, 500)
+            # If the WaitFor... returned because of a notification (as
+            #  opposed to timing out or some error) then look for the
+            #  changes in the directory contents.
+            if result == win32con.WAIT_OBJECT_0:
+                new_path_contents = dict ([(f, None) for f in listdir (RECENT_ITEMS_PATH)])
+                added = [f for f in new_path_contents if not f in old_path_contents]
+                #deleted = [f for f in old_path_contents if not f in new_path_contents]
+                if added: 
+                    #print ("Added: ", ", ".join (added))
+                    print(f"{datetime.now()} {getuser()} OS-System OpenFile/Folder {added[0]}")
+                #if deleted: print ("Deleted: ", ", ".join (deleted))
+                old_path_contents = new_path_contents
+                win32file.FindNextChangeNotification (change_handle)
+    finally:
+        win32file.FindCloseChangeNotification (change_handle)
 
 if __name__ == "__main__":
-    
-    my_event_handler = MyHandler()
-    path = expanduser("~") #user home folder
-    my_observer = Observer()
-    my_observer.schedule(my_event_handler, path, recursive=True)
-    my_observer.start()
-    
     print("Logger started...")
-    
     try:
-        # while True:
-        #     sleep(1)
-        if platform == "linux" or platform == "linux2": # linux
-            logProcessesUnix()
-        elif platform == "darwin": # OS X
-            logProcessesUnix()
-        elif platform == "win32": #windows
-            logProcessesWin()
-    
-    except KeyboardInterrupt:
-        my_observer.stop()
-    
-    my_observer.join()
-    
-
-
+        t1=Thread(target=watchFolder)
+        t2=Thread(target=logProcessesWin)
+        t3=Thread(target=watchRecentsFolder)
+        t1.start()
+        sleep(1)
+        t2.start()
+        sleep(1)
+        t3.start()  
+    except (KeyboardInterrupt, SystemExit):
+        t1.join()
+        t2.join()
+        t3.join()
+        exit(0)
 
