@@ -3,38 +3,35 @@
 from time import sleep
 from datetime import datetime
 from getpass import getuser #user id
-from os.path import expanduser
-from sys import platform
-from sys import exit
+from os.path import expanduser #user folder
+from sys import platform #detect running os
 import csv
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-import win32com.client
+import win32com.client #access running programs
+from winregistry import WinRegistry as Reg #access registry
 
 # https://pythonhosted.org/watchdog/api.html#event-handler-classes
 class MyHandler(RegexMatchingEventHandler):
     def __init__(self):
       super(MyHandler, self).__init__(ignore_regexes=['^[.]{1}.*', '.*/[.]{1}.*', '.*\\[.]{1}.*']) #ignore hidden files
-    # def on_modified(self, event):
-    #     pass
-    # def on_created(self, event):
-    #     pass
-    # def on_deleted(self, event):
-    #     pass
-    # def on_moved(self, event):
-    #     pass
+
     def on_any_event(self, event):
-        if any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules']): #exclude folders
+        if event.src_path == expanduser("~")+"\\AppData\\Roaming\\Microsoft\\Windows\\Recent": # Every time that you open a file, a new shortcut to this file is added to the recent folder. When I end up here, I need to detect which file has been added, that is the most recent file/folder open
+            
+            print(f"{datetime.now()} {getuser()} OS-System OpenFile/Folder {event.event_type} {event.src_path}")
+        elif any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules']): #exclude folders
             return
         else:
-            if event.event_type == "moved":
+            if event.event_type == "moved": #destination path is available
                 print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
                 return
-            elif event.event_type == "modified":
+            elif event.event_type == "modified": #avoid spam
                 return
-            else:
+            else: #created,deleted
                 print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
 
+# Detects programs opened and closed
 def logProcessesWin(): 
     #https://stackoverflow.com/a/1187338
     strComputer = "."
@@ -44,7 +41,7 @@ def logProcessesWin():
     programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe" ,"BackgroundTransferHost.exe", "backgroundTaskHost.exe", "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe"]
 
     # create initial set of running processes
-    colItems = objSWbemServices.ExecQuery("Select * from Win32_Process")
+    colItems = objSWbemServices.ExecQuery("Select * from Win32_Process") #access windows sql database of currently running process (also used by task manager)
     running=[] #set of running programs
     for objItem in colItems:
         if objItem.Name not in running and objItem.Name not in programs_to_ignore:
@@ -85,9 +82,27 @@ def logProcessesWin():
                     print(f"{datetime.now()} {getuser()} AppClose {app} {path}")
 
 
-def monitorProcessesUnix():
+def logProcessesUnix(): #TODO
+    print("UNIX has not been implemented yet...")
     while True:
         sleep(1)
+
+# return list of programs uninstalled by user
+def findUninstall():
+    #HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall
+    #HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall
+    reg = Reg() #https://github.com/shpaker/winregistry#usage
+    path = r'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall'
+    keys = reg.read_key(path)['keys']
+    uninstalls=[]
+    for k in keys:
+        values = reg.read_key(path+'\\'+k)['values']
+        dn=list(filter(lambda x: x['value'] == 'DisplayName', values))
+        if len(dn):
+            displayName= dn[0].get('data')
+            uninstalls.append(displayName)
+    print(uninstalls)
+
 
 if __name__ == "__main__":
     
@@ -103,9 +118,9 @@ if __name__ == "__main__":
         # while True:
         #     sleep(1)
         if platform == "linux" or platform == "linux2": # linux
-            monitorProcessesUnix()
+            logProcessesUnix()
         elif platform == "darwin": # OS X
-            monitorProcessesUnix()
+            logProcessesUnix()
         elif platform == "win32": #windows
             logProcessesWin()
     
@@ -114,6 +129,6 @@ if __name__ == "__main__":
     
     my_observer.join()
     
-    
+
 
 
