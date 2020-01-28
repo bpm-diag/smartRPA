@@ -1,0 +1,34 @@
+{
+    "name": "Passive Listener",
+    "version": "1.7",
+    "description": "Records Actions to a logger",
+    "icons": {
+        "128": "128.png"
+        },
+    "background": {
+        "scripts": [
+            "background.js","jquery-3.3.1.min.js"
+        ],
+        "persistent": false
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "js": [
+                "contentscript.js"
+            ]
+        }
+    ],
+    
+    "permissions": [
+        "tabs","storage","declarativeContent","webNavigation"
+    ],
+    "browser_action": {
+        "default_popup": "popup.html"
+      },
+    "manifest_version": 2
+}
+

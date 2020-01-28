@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Passive Listener Plugin</title>
+    <style type="text/css">
+        body {
+            margin: 10px;
+            white-space: nowrap;
+        }
+
+        h1 {
+            font-size: 15px;
+        }
+
+        #container {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+    <script src="jquery-3.3.1.min.js"></script>
+    <script src="popup.js">  </script>
+</head>
+<!-- work in progress: button that enables / disables the plugin from the popup -->
+
+<body>
+    <button id="button">storage</button>
+    <div id="storage"></div>
+    <input type="checkbox" id="record">
+
+    <script type="text/javascript">
+
+        // function showtofrom(e) {
+        //     var evt = window.event || e
+        //     if (evt.type == "mouseover") { //for onmouseover event
+        //         var fromElement = evt.fromElement || evt.relatedTarget
+        //         statusdiv1.innerHTML = 'From Element: ' + fromElement.id
+        //     }
+        //     else { //for onmouseout event
+        //         var toElement = evt.toElement || evt.relatedTarget
+        //         statusdiv2.innerHTML = 'To Element: ' + toElement.id
+        //     }
+        // }
+
+
+        document.getElementById("button").onclick = function () {
+            var storage1 = document.getElementById("storage");
+            storage1.innerHTML = localStorage.getItem('checkboxValue');
+        };
+
+
+
+        $("#record").on("change", function () {
+            var storage1 = document.getElementById("storage");
+            value = this.checked;
+            console.log("clicked " + value)
+            localStorage.setItem('checkboxValue', value);
+            console.log("storage updated: " + localStorage.getItem('checkboxValue'));
+            storage1.innerHTML = localStorage.getItem('checkboxValue');
+            //alert("Hello! I am an alert box!!");
+        });
+            // var statusdiv2 = document.getElementById("statusto")
+
+            // document.body.onmouseover = showtofrom
+            // document.body.onmouseout = showtofrom
+
+    </script>
+</body>
+
+</html>
