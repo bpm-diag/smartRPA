@@ -1,56 +1,48 @@
-import os
-import sys
-import ctypes
-from ctypes import wintypes
-import win32con
+from pynput.keyboard import Key, KeyCode, Listener
+from vk_codes import *
 
-byref = ctypes.byref
-user32 = ctypes.windll.user32
+# Your functions
 
-HOTKEYS = {
-  1 : (win32con.VK_F3, win32con.MOD_WIN),
-  2 : (win32con.VK_F4, win32con.MOD_WIN)
+def function_1(key):
+    print(f'Pressed {key}')
+    print(vk_codes[key])
+
+def function_2(key):
+    print('Executed function_2')
+    print(vk_codes[key])
+
+# Create a mapping of keys to function (use frozenset as sets are not hashable - so they can't be used as keys)
+combination_to_function = {
+    frozenset([Key.shift, KeyCode(char='a')]): function_1, # No `()` after function_1 because we want to pass the function, not the value of the function
+    frozenset([Key.shift, KeyCode(char='A')]): function_1,
+    frozenset([Key.shift, KeyCode(char='b')]): function_2,
+    frozenset([Key.shift, KeyCode(char='B')]): function_2,
+    frozenset([Key.ctrl_l, KeyCode(char='a')]): function_1,
 }
 
-def handle_win_f3 ():
-  os.startfile (os.environ['TEMP'])
+# Currently pressed keys
+current_keys = set()
 
-def handle_win_f4 ():
-  user32.PostQuitMessage (0)
+def on_press(key):
+    # When a key is pressed, add it to the set we are keeping track of and check if this set is in the dictionary
+    try:
+        print('alphanumeric key {0} pressed'.format(
+            key))
+    except AttributeError:
+        print('special key {0} pressed'.format(
+            key))
+            
+    current_keys.add(key)
+    if frozenset(current_keys) in combination_to_function:
+        # If the current set of keys are in the mapping, execute the function
+        combination_to_function[frozenset(current_keys)](key)
 
-HOTKEY_ACTIONS = {
-  1 : handle_win_f3,
-  2 : handle_win_f4
-}
+def on_release(key):
+    # When a key is released, remove it from the set of keys we are keeping track of
+    if key in current_keys: current_keys.remove(key) 
+    if key == Key.esc:
+        # Stop listener
+        return False
 
-
-# RegisterHotKey takes:
-#  Window handle for WM_HOTKEY messages (None = this thread)
-#  arbitrary id unique within the thread
-#  modifiers (MOD_SHIFT, MOD_ALT, MOD_CONTROL, MOD_WIN)
-#  VK code (either ord ('x') or one of win32con.VK_*)
-#
-for id, (vk, modifiers) in HOTKEYS.items ():
-  print "Registering id", id, "for key", vk
-  if not user32.RegisterHotKey (None, id, modifiers, vk):
-    print "Unable to register id", id
-
-#
-# Home-grown Windows message loop: does
-#  just enough to handle the WM_HOTKEY
-#  messages and pass everything else along.
-#
-try:
-  msg = wintypes.MSG ()
-  while user32.GetMessageA (byref (msg), None, 0, 0) != 0:
-    if msg.message == win32con.WM_HOTKEY:
-      action_to_take = HOTKEY_ACTIONS.get (msg.wParam)
-      if action_to_take:
-        action_to_take ()
-
-    user32.TranslateMessage (byref (msg))
-    user32.DispatchMessageA (byref (msg))
-
-finally:
-  for id in HOTKEYS.keys ():
-    user32.UnregisterHotKey (None, id)
+with Listener(on_press=on_press, on_release=on_release) as listener:
+    listener.join()
