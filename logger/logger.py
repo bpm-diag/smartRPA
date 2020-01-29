@@ -20,11 +20,12 @@ import win32con
 
 RECENT_ITEMS_PATH = expanduser("~")+"\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
 
+
 # https://pythonhosted.org/watchdog/api.html#event-handler-classes
 # https://stackoverflow.com/questions/18599339/python-watchdog-monitoring-file-for-changes
-class MyHandler(RegexMatchingEventHandler):
+class WatchFilesHandler(RegexMatchingEventHandler):
     def __init__(self):
-      super(MyHandler, self).__init__(ignore_regexes=['^[.]{1}.*', '.*/[.]{1}.*', '.*\\[.]{1}.*']) #ignore hidden files
+      super(WatchFilesHandler, self).__init__(ignore_regexes=['^[.]{1}.*', '.*/[.]{1}.*', '.*\\[.]{1}.*']) #ignore hidden files
 
     def on_any_event(self, event):
         if any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules']): #exclude folders
@@ -40,7 +41,7 @@ class MyHandler(RegexMatchingEventHandler):
 
 # monitor file changes
 def watchFolder():
-    my_event_handler = MyHandler()
+    my_event_handler = WatchFilesHandler()
     path = expanduser("~") #user home folder
     my_observer = Observer()
     my_observer.schedule(my_event_handler, path, recursive=True)
