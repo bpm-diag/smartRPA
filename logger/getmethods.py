@@ -10,7 +10,7 @@ def print_members(obj, obj_name="placeholder_name"):
         print("Object has no attribute '_prop_map_get_'")
         print("Check if the initial COM object was created with"
               "'win32com.client.gencache.EnsureDispatch()'")
-        raise
+        raise 
     methods = [m[0] for m in getmembers(obj) if (not m[0].startswith("_") and "clsid" not in m[0].lower())]
 
     if len(fields) + len(methods) > 0:

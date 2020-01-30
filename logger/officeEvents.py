@@ -7,8 +7,8 @@ import types
 from datetime import datetime
 from getpass import getuser #user id
 
-import threading
-stopEvent = threading.Event()
+# import threading
+# stopEvent = threading.Event()
 
 def excelEvents():
     class ExcelEvents:
@@ -20,6 +20,7 @@ def excelEvents():
             #if type(wb) != types.InstanceType or type(wn) != types.InstanceType:
             #    raise (RuntimeError, "The transformer doesnt appear to have translated this for us!")
             self.seen_events["OnWindowActivate"] = None
+            print("{} {} windowActive".format(datetime.now(),getuser()))
         def OnWindowDeactivate(self, wb, wn):
             self.seen_events["OnWindowDeactivate"] = None
         def OnSheetDeactivate(self, sh):
@@ -33,9 +34,10 @@ def excelEvents():
 
     class WorkbookEvents:
         def OnActivate(self):
-            print ("workbook OnActivate")
+            print("{} {} workbookActive".format(datetime.now(),getuser()))
         def OnBeforeRightClick(self, Target, Cancel):
-            print ("It's a Worksheet Event")
+            #print ("It's a Worksheet Event")
+            print("{} {} workbookRightClick {}".format(datetime.now(),getuser(),Target))
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetactivate
         def OnSheetActivate(self, *args):
             print("{} {} selectWorksheet {}".format(datetime.now(),getuser(),args[0].Name))
@@ -54,7 +56,7 @@ def excelEvents():
                 #print(f"{datetime.now()} {getuser()} MS-EXCEL getCell {cells_selected}")
             #args[0].Range('A1').Value = 'You selected cell ' + str(args[1].Address)
         def OnBeforeSave(self, *args):
-                print("{} {} wbSaved".format(datetime.now(),getuser()))
+                print("{} {} workbookSaved".format(datetime.now(),getuser()))
 
     class WorksheetEvents:
         def OnActivate(self):
@@ -62,15 +64,18 @@ def excelEvents():
 
     e = DispatchWithEvents("Excel.Application", ExcelEvents)
     e.seen_events = {}
-    e.Visible=1
-    book = e.Workbooks.Add()
+    e.Visible=1 #open window 
+    book = e.Workbooks.Add() #create workbook that contains sheet
     book = DispatchWithEvents(book, WorkbookEvents)
     print ("Book activated", book)
     sheet = e.Worksheets(1)
     sheet = DispatchWithEvents(sheet, WorksheetEvents)
+    print("{} {} workbookFont {}".format(datetime.now(),getuser(), e.StandardFont ))
+    print("{} {} workbookFontSize {}".format(datetime.now(),getuser(), e.StandardFontSize ))
 
-    if not _WaitForFinish(e):
-        e.Quit()
+    runLoop(e)
+    #if not runLoop(e):
+    #    e.Quit()
     if not _CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]):
         sys.exit(1)
 
@@ -79,23 +84,43 @@ def wordEvents():
     class WordEvents:
         def OnDocumentChange(self):
             self.seen_events["OnDocumentChange"] = None
+            print("{} {} documentChange".format(datetime.now(),getuser()))
+        def OnNewDocument(self):
+            self.seen_events["OnDocumentChange"] = None
+            print("{} {} newDocument".format(datetime.now(),getuser()))
         def OnWindowActivate(self, doc, wn):
             self.seen_events["OnWindowActivate"] = None
+            print("{} {} wordOpened".format(datetime.now(),getuser()))
+        def OnDocumentBeforeSave(self, *args):
+            print("{} {} documentSaved".format(datetime.now(),getuser()))
+        def OnDocumentBeforePrint(self, *args):
+            print("{} {} documentPrinted".format(datetime.now(),getuser()))
         def OnQuit(self):
             self.seen_events["OnQuit"] = None
-            stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
+            # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
 
     w = DispatchWithEvents("Word.Application", WordEvents)
     w.seen_events = {}
     w.Visible = 1
     w.Documents.Add()
-    #print ("Press any key when finished with Word, or wait 10 seconds...")
-    if not _WaitForFinish(w):
+    if not runLoop(w):
         w.Quit()
     if not _CheckSeenEvents(w, ["OnDocumentChange", "OnWindowActivate"]):
         sys.exit(1)
 
+def runLoop(ob):
+    while 1:
+        pythoncom.PumpWaitingMessages() #listen for events
+        try:
+            if not ob.Visible: # Gone invisible - we need to pretend we timed out, so the app is quit.
+                return 0
+        except pythoncom.com_error: # Excel is busy (eg, editing the cell) - ignore
+            pass
+    return 1
+
+
 def _WaitForFinish(ob):
+
     while 1:
         # if msvcrt.kbhit(): #Return true if a keypress is waiting to be read
         #     msvcrt.getch() #Read a keypress and return the resulting character. Nothing is echoed to the console. This call will block if a keypress is not already available, but will not wait for Enter to be pressed.
@@ -123,13 +148,8 @@ def _CheckSeenEvents(o, events):
             rc = 0
     return rc
 
-def test():
-    import sys
+if __name__=='__main__':
     if "noword" not in sys.argv[1:]:
         wordEvents()
     if "noexcel" not in sys.argv[1:]:
         excelEvents()
-    print ("Word and Excel event tests passed.")
-
-if __name__=='__main__':
-    test()
