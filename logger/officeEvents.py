@@ -10,7 +10,7 @@ from getpass import getuser #user id
 import threading
 stopEvent = threading.Event()
 
-def TestExcel():
+def excelEvents():
     class ExcelEvents:
         def OnNewWorkbook(self, wb):
             #if type(wb) != types.InstanceType:
@@ -25,13 +25,11 @@ def TestExcel():
         def OnSheetDeactivate(self, sh):
             self.seen_events["OnSheetDeactivate"] = None
         def OnSheetBeforeDoubleClick(self, Sh, Target, Cancel):
-            if Target.Column % 2 == 0:
-                print ("You can double-click there...")
-            else:
-                print ("You can not double-click there...")
             # This function is a void, so the result ends up in
             # the only ByRef - Cancel.
-                return 1
+            if Target is not None or Target != 'None': print("{} {} doubleClickCellWithValue {}".format(datetime.now(),getuser(), Target ))
+            else: print("{} {} doubleClickEmptyCell".format(datetime.now(),getuser()))
+            return 1
 
     class WorkbookEvents:
         def OnActivate(self):
@@ -40,9 +38,11 @@ def TestExcel():
             print ("It's a Worksheet Event")
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetactivate
         def OnSheetActivate(self, *args):
-            activated_sheet = args[0].Name
-            print("{} {} selectWorksheet {}".format(datetime.now(),getuser(),activated_sheet))
+            print("{} {} selectWorksheet {}".format(datetime.now(),getuser(),args[0].Name))
             #print(f"{datetime.now()} {getuser()} MS-EXCEL selectWorksheet {activated_sheet}")
+        # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetchange
+        def OnSheetChange(self, *args):
+            print("{} {} editCell {}".format(datetime.now(),getuser(),args[1]))
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetselectionchange
         def OnSheetSelectionChange(self, *args): 
             cells_selected = args[1].Address.replace('$','') #value returned is in the format $B$3:$D$3, I remove $ sign
@@ -53,27 +53,29 @@ def TestExcel():
                 print("{} {} getCells {}".format(datetime.now(),getuser(),cells_selected))
                 #print(f"{datetime.now()} {getuser()} MS-EXCEL getCell {cells_selected}")
             #args[0].Range('A1').Value = 'You selected cell ' + str(args[1].Address)
-        def OnSheetChange(self, *args):
-            print(args[0])
-            print(args[1])
+        def OnBeforeSave(self, *args):
+                print("{} {} wbSaved".format(datetime.now(),getuser()))
+
+    class WorksheetEvents:
+        def OnActivate(self):
+            print ("worksheet OnActivate")
 
     e = DispatchWithEvents("Excel.Application", ExcelEvents)
     e.seen_events = {}
     e.Visible=1
     book = e.Workbooks.Add()
     book = DispatchWithEvents(book, WorkbookEvents)
-    print ("Have book", book)
-#    sheet = e.Worksheets(1)
-#    sheet = DispatchWithEvents(sheet, WorksheetEvents)
+    print ("Book activated", book)
+    sheet = e.Worksheets(1)
+    sheet = DispatchWithEvents(sheet, WorksheetEvents)
 
-    #print ("Double-click in a few of the Excel cells...")
-    #print ("Press any key when finished with Excel, or wait 10 seconds...")
     if not _WaitForFinish(e):
         e.Quit()
     if not _CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]):
         sys.exit(1)
 
-def TestWord():
+def wordEvents():
+    
     class WordEvents:
         def OnDocumentChange(self):
             self.seen_events["OnDocumentChange"] = None
@@ -81,13 +83,13 @@ def TestWord():
             self.seen_events["OnWindowActivate"] = None
         def OnQuit(self):
             self.seen_events["OnQuit"] = None
-            stopEvent.set()
+            stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
 
     w = DispatchWithEvents("Word.Application", WordEvents)
     w.seen_events = {}
     w.Visible = 1
     w.Documents.Add()
-    print ("Press any key when finished with Word, or wait 10 seconds...")
+    #print ("Press any key when finished with Word, or wait 10 seconds...")
     if not _WaitForFinish(w):
         w.Quit()
     if not _CheckSeenEvents(w, ["OnDocumentChange", "OnWindowActivate"]):
@@ -95,20 +97,20 @@ def TestWord():
 
 def _WaitForFinish(ob):
     while 1:
-        if msvcrt.kbhit():
-            msvcrt.getch()
-            break
+        # if msvcrt.kbhit(): #Return true if a keypress is waiting to be read
+        #     msvcrt.getch() #Read a keypress and return the resulting character. Nothing is echoed to the console. This call will block if a keypress is not already available, but will not wait for Enter to be pressed.
+        #     break
         pythoncom.PumpWaitingMessages()
-        stopEvent.wait(.2)
-        if stopEvent.isSet():
-            stopEvent.clear()
-            break
+        # stopEvent.wait(.2) # https://docs.python.org/2/library/threading.html#event-objects
+        # if stopEvent.isSet():
+        #     stopEvent.clear()
+        #     break
         try:
             if not ob.Visible:
                 # Gone invisible - we need to pretend we timed
                 # out, so the app is quit.
                 return 0
-        except pythoncom.com_error:
+        except pythoncom.com_error: 
             # Excel is busy (eg, editing the cell) - ignore
             pass
     return 1
@@ -124,9 +126,9 @@ def _CheckSeenEvents(o, events):
 def test():
     import sys
     if "noword" not in sys.argv[1:]:
-        TestWord()
+        wordEvents()
     if "noexcel" not in sys.argv[1:]:
-        TestExcel()
+        excelEvents()
     print ("Word and Excel event tests passed.")
 
 if __name__=='__main__':
