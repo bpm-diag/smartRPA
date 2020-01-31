@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.simplifier"},{"l":"com.simplifier.pre_processing"},{"l":"com.simplifier.rules.navigation"},{"l":"com.simplifier.rules.read"},{"l":"com.simplifier.rules.write"},{"l":"com.simplifier.validation"}]
