@@ -125,7 +125,6 @@ def findUninstall():
             uninstalls.append(displayName)
     print(uninstalls)
 
-#http://timgolden.me.uk/python/win32_how_do_i/watch_directory_for_changes.html#use_findfirstchange 
 def watchRecentsFolder():
     RECENT_ITEMS_PATH = expanduser("~")+"\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
     change_handle = win32file.FindFirstChangeNotification ( #sets up a handle for watching file changes
@@ -156,7 +155,6 @@ def watchRecentsFolder():
     finally:
         win32file.FindCloseChangeNotification(change_handle)
 
-#https://win32com.goermezer.de/microsoft/windows/find-selected-files-in-windows-explorer.html
 def detectSelectedFilesInExplorer(): 
     # look in the makepy output for IE for the 'CLSIDToClassMap' dictionary, and find the entry for 'ShellWindows'
     clsid='{9BA05972-F6A8-11CF-A442-00A0C90A8F39}'
@@ -214,7 +212,6 @@ def GetUserShellFolders():
         return {}
 
 #This script watches for activity at the installed printers and writes a logfile. It shows how much a user has printed on wich printer (works also with network printers).
-# http://timgolden.me.uk/python/wmi/cookbook.html#watch-for-new-print-jobs
 def printerLogger():
     import wmi
     c = wmi.WMI ()

@@ -1,4 +1,3 @@
-# https://win32com.goermezer.de/microsoft/ms-office/events-in-microsoft-word-and-excel.html
 from win32com.client import DispatchWithEvents, Dispatch
 import msvcrt, pythoncom
 import time, sys
@@ -25,7 +24,7 @@ def excelEvents():
         def OnSheetDeactivate(self, sh):
             self.seen_events["OnSheetDeactivate"] = None
         def OnSheetBeforeDoubleClick(self, Sh, Target, Cancel):
-            # This function is a void, so the result ends up in
+            # This function is a vo id, so the result ends up in
             # the only ByRef - Cancel.
             if Target is not None or Target != 'None': print("{} {} doubleClickCellWithValue {}".format(datetime.now(),getuser(), Target ))
             else: print("{} {} doubleClickEmptyCell".format(datetime.now(),getuser()))
@@ -38,7 +37,7 @@ def excelEvents():
         
         def OnBeforeRightClick(self, Target, Cancel):
             #print ("It's a Worksheet Event")
-            print("{} {} workbookRightClick {}".format(datetime.now(),getuser(),Target))
+            print("{} {} MS-EXCEL workbookRightClick {}".format(datetime.now(),getuser(),Target))
         
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetactivate
         def OnSheetActivate(self, Sh):
@@ -48,20 +47,20 @@ def excelEvents():
         def OnSheetChange(self, Sh, Target):
             d = dict(zip(range(1,27),ascii_uppercase)) #dictionary to convert numbers in letters
             letter = d.get(Target.Column) if d.get(Target.Column) != None else Target.Column #Target.Column is the columnt number, I want to convert it to letter as shown in excel
-            print("{} {} editCellSheet {} {}".format(datetime.now(),getuser(), f"{letter}{Target.Row}" ,Target.Value))
+            print("{} {} MS-EXCEL editCellSheet {} {}".format(datetime.now(),getuser(), f"{letter}{Target.Row}" ,Target.Value))
         
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetselectionchange
         def OnSheetSelectionChange(self, Sh, Target): 
             cells_selected = Target.Address.replace('$','') #value returned is in the format $B$3:$D$3, I remove $ sign
             value = Target.Value if Target.Value != None else ""
             if ':' in cells_selected: #range of cells selected
-                print(f"{datetime.now()} {getuser()} MS-EXCEL getRange {cells_selected} {value}")
+                print(f"{datetime.now()} {getuser()} MS-EXCEL getRange {cells_selected}")
             else: #single cell selected
                 print(f"{datetime.now()} {getuser()} MS-EXCEL getCell {cells_selected} {value}")
             #args[0].Range('A1').Value = 'You selected cell ' + str(args[1].Address)
             
         def OnBeforeSave(self, *args):
-            print("{} {} workbookSaved".format(datetime.now(),getuser()))
+            print("{} {} MS-EXCEL workbookSaved".format(datetime.now(),getuser()))
 
     class WorksheetEvents:
         def OnActivate(self):

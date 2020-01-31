@@ -1,6 +1,5 @@
 pywin32
 winregistry
+WMI
 watchdog
 requests
-WMI
-pynput
