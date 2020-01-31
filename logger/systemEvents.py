@@ -18,29 +18,28 @@ import win32file
 import win32event
 import win32con
 
-RECENT_ITEMS_PATH = expanduser("~")+"\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
-
-
-# https://pythonhosted.org/watchdog/api.html#event-handler-classes
-# https://stackoverflow.com/questions/18599339/python-watchdog-monitoring-file-for-changes
-class WatchFilesHandler(RegexMatchingEventHandler):
-    def __init__(self):
-      super(WatchFilesHandler, self).__init__(ignore_regexes=['^[.]{1}.*', '.*/[.]{1}.*', '.*\\[.]{1}.*']) #ignore hidden files
-
-    def on_any_event(self, event):
-        if any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules']): #exclude folders
-            return
-        else:
-            if event.event_type == "moved": #destination path is available
-                print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
-                return
-            elif event.event_type == "modified": #avoid spam
-                return
-            else: #created,deleted
-                print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
-
 # monitor file changes
 def watchFolder():
+
+    # https://pythonhosted.org/watchdog/api.html#event-handler-classes
+    # https://stackoverflow.com/questions/18599339/python-watchdog-monitoring-file-for-changes
+    class WatchFilesHandler(RegexMatchingEventHandler):
+        def __init__(self):
+            super(WatchFilesHandler, self).__init__(ignore_regexes=['^[.]{1}.*', '.*/[.]{1}.*', '.*\\[.]{1}.*']) #ignore hidden files
+
+        def on_any_event(self, event):
+            if any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules','.TMP']): #exclude folders
+                return
+            else:
+                if event.event_type == "moved": #destination path is available
+                    print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
+                    return
+                elif event.event_type == "modified": #avoid spam
+                    return
+                else: #created,deleted
+                    print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
+
+                    
     my_event_handler = WatchFilesHandler()
     path = expanduser("~") #user home folder
     my_observer = Observer()
@@ -56,15 +55,15 @@ def watchFolder():
 # Detects programs opened and closed
 def logProcessesWin(): 
     #https://stackoverflow.com/a/1187338
-    pythoncom.CoInitialize()
+    pythoncom.CoInitialize() #needed for thread
     strComputer = "."
     objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
     objSWbemServices = objWMIService.ConnectServer(strComputer,"root\cimv2")
 
-    programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe" ,"BackgroundTransferHost.exe", "backgroundTaskHost.exe", "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe"]
+    programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe" ,"BackgroundTransferHost.exe", "backgroundTaskHost.exe", "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe","plugin_host.exe"]
 
-    # create initial set of running processes
-    colItems = objSWbemServices.ExecQuery("Select * from Win32_Process") #access windows sql database of currently running process (also used by task manager)
+    # create initial set of running processes using Windows Management Instrumentation (WMI)
+    colItems = objSWbemServices.ExecQuery("Select * from Win32_Process") #access windows sql database of currently running process (also used by task manager) https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-process
     running=[] #set of running programs
     for objItem in colItems:
         if objItem.Name not in running and objItem.Name not in programs_to_ignore:
@@ -128,6 +127,7 @@ def findUninstall():
 
 #http://timgolden.me.uk/python/win32_how_do_i/watch_directory_for_changes.html#use_findfirstchange 
 def watchRecentsFolder():
+    RECENT_ITEMS_PATH = expanduser("~")+"\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
     change_handle = win32file.FindFirstChangeNotification ( #sets up a handle for watching file changes
     RECENT_ITEMS_PATH, #path to watch
     0, #boolean indicating whether the directories underneath the one specified are to be watched
@@ -154,25 +154,77 @@ def watchRecentsFolder():
                 old_path_contents = new_path_contents
                 win32file.FindNextChangeNotification (change_handle)
     finally:
-        win32file.FindCloseChangeNotification (change_handle)
+        win32file.FindCloseChangeNotification(change_handle)
 
-if __name__ == "__main__":
-    print("Logger started...")
+#https://win32com.goermezer.de/microsoft/windows/find-selected-files-in-windows-explorer.html
+def detectSelectedFilesInExplorer(): 
+    # look in the makepy output for IE for the 'CLSIDToClassMap' dictionary, and find the entry for 'ShellWindows'
+    clsid='{9BA05972-F6A8-11CF-A442-00A0C90A8F39}'
+    ShellWindows=win32com.client.Dispatch(clsid)
+
+    # a busy state can be detected:
+    # while ShellWindows[0].Busy == False:
+    # go in for-loop here
+
+    for i in range(ShellWindows.Count):
+        print (ShellWindows[i].LocationURL)
+        for j in range(ShellWindows[i].Document.SelectedItems().Count):
+            path = ShellWindows[i].Document.SelectedItems().Item(j).Path
+            print(f"Selected {path} in Windows Explorer")
+
+    # Be careful: Internet Explorer uses also the same CLSID. You should implement a detection!
+
+def GetUserShellFolders():
+    # Routine to grab all the Windows Shell Folder locations from the registry.  If successful, returns dictionary
+    # of shell folder locations indexed on Windows keyword for each; otherwise, returns an empty dictionary.
+    import winreg
+    return_dict = {}
+
+    # First open the registry hive
     try:
-        t1=Thread(target=watchFolder)
-        t2=Thread(target=logProcessesWin)
-        t3=Thread(target=watchRecentsFolder)
-        #daemon threads are closed when main ends
-        t1.daemon = True
-        t2.daemon = True
-        t3.daemon = True  
-        t1.start()
-        t2.start()
-        t3.start()
-        while 1: #keep main active
-            #sleep(1)
-            pass
-    except (KeyboardInterrupt, SystemExit):
-        print("Closing threads...")
-        exit(0)
+        Hive = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
+    except WindowsError:
+        print ("Can't connect to registry hive HKEY_CURRENT_USER.")
+        return return_dict
+
+    # Then open the registry key where Windows stores the Shell Folder locations
+    try:
+        Key = winreg.OpenKey(Hive, "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
+    except WindowsError:
+        print ("Can't open registry key Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders.")
+        winreg.CloseKey(Hive)
+        return return_dict
+
+    # Nothing failed above, so enumerate through all the Shell Folder values and return in a dictionary
+    # This relies on error at end of 
+    try:
+        #i = 0
+        #while 1:
+        for i in range(0, winreg.QueryInfoKey(Key)[1]):
+            name, value, val_type = winreg.EnumValue(Key, i)
+            return_dict[name] = value
+            i += 1
+        winreg.CloseKey(Key)                           # Only use with for loop
+        winreg.CloseKey(Hive)                          # Only use with for loop
+        return return_dict                              # Only use with for loop
+    except WindowsError:
+        # In case of failure before read completed, don't return partial results
+        winreg.CloseKey(Key)
+        winreg.CloseKey(Hive)
+        return {}
+
+#This script watches for activity at the installed printers and writes a logfile. It shows how much a user has printed on wich printer (works also with network printers).
+# http://timgolden.me.uk/python/wmi/cookbook.html#watch-for-new-print-jobs
+def printerLogger():
+    import wmi
+    c = wmi.WMI ()
+
+    print_job_watcher = c.watch_for (
+    notification_type="Creation",
+    wmi_class="Win32_PrintJob",
+    delay_secs=1
+    )
+    while 1:
+        pj = print_job_watcher ()
+        print(f"{datetime.now()} {pj.Owner} OS-System printSubmitted {pj.Name} {pj.TotalPages}") 
 

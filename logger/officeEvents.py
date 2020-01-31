@@ -3,15 +3,14 @@ from win32com.client import DispatchWithEvents, Dispatch
 import msvcrt, pythoncom
 import time, sys
 import types
-
 from datetime import datetime
 from getpass import getuser #user id
-
-# import threading
-# stopEvent = threading.Event()
+from string import ascii_uppercase
 
 def excelEvents():
     class ExcelEvents:
+        def setApplication(self, application):
+            self.application = application
         def OnNewWorkbook(self, wb):
             #if type(wb) != types.InstanceType:
             #    raise (RuntimeError, "The transformer doesnt appear to have translated this for us!")
@@ -33,34 +32,45 @@ def excelEvents():
             return 1
 
     class WorkbookEvents:
+        
         def OnActivate(self):
             print("{} {} workbookActive".format(datetime.now(),getuser()))
+        
         def OnBeforeRightClick(self, Target, Cancel):
             #print ("It's a Worksheet Event")
             print("{} {} workbookRightClick {}".format(datetime.now(),getuser(),Target))
+        
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetactivate
-        def OnSheetActivate(self, *args):
-            print("{} {} selectWorksheet {}".format(datetime.now(),getuser(),args[0].Name))
-            #print(f"{datetime.now()} {getuser()} MS-EXCEL selectWorksheet {activated_sheet}")
+        def OnSheetActivate(self, Sh):
+            print(f"{datetime.now()} {getuser()} MS-EXCEL selectWorksheet {Sh.Name}")
+        
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetchange
-        def OnSheetChange(self, *args):
-            print("{} {} editCell {}".format(datetime.now(),getuser(),args[1]))
+        def OnSheetChange(self, Sh, Target):
+            d = dict(zip(range(1,27),ascii_uppercase)) #dictionary to convert numbers in letters
+            letter = d.get(Target.Column) if d.get(Target.Column) != None else Target.Column #Target.Column is the columnt number, I want to convert it to letter as shown in excel
+            print("{} {} editCellSheet {} {}".format(datetime.now(),getuser(), f"{letter}{Target.Row}" ,Target.Value))
+        
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetselectionchange
-        def OnSheetSelectionChange(self, *args): 
-            cells_selected = args[1].Address.replace('$','') #value returned is in the format $B$3:$D$3, I remove $ sign
+        def OnSheetSelectionChange(self, Sh, Target): 
+            cells_selected = Target.Address.replace('$','') #value returned is in the format $B$3:$D$3, I remove $ sign
+            value = Target.Value if Target.Value != None else ""
             if ':' in cells_selected: #range of cells selected
-                print("{} {} getRange {}".format(datetime.now(),getuser(),cells_selected))
-                #print(f"{datetime.now()} {getuser()} MS-EXCEL getRange {cells_selected}")
+                print(f"{datetime.now()} {getuser()} MS-EXCEL getRange {cells_selected} {value}")
             else: #single cell selected
-                print("{} {} getCells {}".format(datetime.now(),getuser(),cells_selected))
-                #print(f"{datetime.now()} {getuser()} MS-EXCEL getCell {cells_selected}")
+                print(f"{datetime.now()} {getuser()} MS-EXCEL getCell {cells_selected} {value}")
             #args[0].Range('A1').Value = 'You selected cell ' + str(args[1].Address)
+            
         def OnBeforeSave(self, *args):
-                print("{} {} workbookSaved".format(datetime.now(),getuser()))
+            print("{} {} workbookSaved".format(datetime.now(),getuser()))
 
     class WorksheetEvents:
         def OnActivate(self):
             print ("worksheet OnActivate")
+        # def OnChange(self, Target):
+        #     print(Target.Row)
+        #     print(Target.Column)
+        #     print(Target.Value)
+        #     print("onchange {}".format(Target))
 
     e = DispatchWithEvents("Excel.Application", ExcelEvents)
     e.seen_events = {}
@@ -76,8 +86,7 @@ def excelEvents():
     runLoop(e)
     #if not runLoop(e):
     #    e.Quit()
-    if not _CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]):
-        sys.exit(1)
+    if not CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]): sys.exit(1)
 
 def wordEvents():
     
@@ -85,9 +94,9 @@ def wordEvents():
         def OnDocumentChange(self):
             self.seen_events["OnDocumentChange"] = None
             print("{} {} documentChange".format(datetime.now(),getuser()))
-        def OnNewDocument(self):
-            self.seen_events["OnDocumentChange"] = None
-            print("{} {} newDocument".format(datetime.now(),getuser()))
+        # def OnNewDocument(self):
+        #     self.seen_events["OnDocumentChange"] = None
+        #     print("{} {} newDocument".format(datetime.now(),getuser()))
         def OnWindowActivate(self, doc, wn):
             self.seen_events["OnWindowActivate"] = None
             print("{} {} wordOpened".format(datetime.now(),getuser()))
@@ -103,53 +112,127 @@ def wordEvents():
     w.seen_events = {}
     w.Visible = 1
     w.Documents.Add()
-    if not runLoop(w):
-        w.Quit()
-    if not _CheckSeenEvents(w, ["OnDocumentChange", "OnWindowActivate"]):
-        sys.exit(1)
+    
+    runLoop(w)
+    
+    if not CheckSeenEvents(w, ["OnDocumentChange", "OnWindowActivate"]): sys.exit(1)
+
+
+def powerpointEvents():
+    
+    class powerpointEvents:
+        def OnDocumentChange(self):
+            self.seen_events["OnDocumentChange"] = None
+            print("{} {} documentChange".format(datetime.now(),getuser()))
+        # def OnNewDocument(self):
+        #     self.seen_events["OnDocumentChange"] = None
+        #     print("{} {} newDocument".format(datetime.now(),getuser()))
+        def OnWindowActivate(self, doc, wn):
+            self.seen_events["OnWindowActivate"] = None
+            print("{} {} powerpointOpened".format(datetime.now(),getuser()))
+        def OnDocumentBeforeSave(self, *args):
+            print("{} {} documentSaved".format(datetime.now(),getuser()))
+        def OnDocumentBeforePrint(self, *args):
+            print("{} {} documentPrinted".format(datetime.now(),getuser()))
+        def OnQuit(self):
+            self.seen_events["OnQuit"] = None
+            # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
+        def OnPresentationNewSlide(self,Sld):
+            print(Sld)
+            print("{} {} MS-POWERPOINT newSlideAdded".format(datetime.now(),getuser()))
+
+    p = DispatchWithEvents("powerpoint.Application", powerpointEvents)
+    p.seen_events = {}
+    p.Visible = 1
+    p.Presentations.Add()
+    
+    runLoop(p)
+    
+    if not CheckSeenEvents(p, ["OnDocumentChange", "OnWindowActivate"]): sys.exit(1)
+
+def outlookEvents():
+    #https://stackoverflow.com/questions/49695160/how-to-continuously-monitor-a-new-mail-in-outlook-and-unread-mails-of-a-specific
+    class outlookEvents:
+        def OnDocumentChange(self):
+            self.seen_events["OnDocumentChange"] = None
+            print("{} {} documentChange".format(datetime.now(),getuser()))
+        # def OnNewDocument(self):
+        #     self.seen_events["OnDocumentChange"] = None
+        #     print("{} {} newDocument".format(datetime.now(),getuser()))
+        def OnWindowActivate(self, doc, wn):
+            self.seen_events["OnWindowActivate"] = None
+            print("{} {} outlookOpened".format(datetime.now(),getuser()))
+        def OnDocumentBeforeSave(self, *args):
+            print("{} {} documentSaved".format(datetime.now(),getuser()))
+        def OnDocumentBeforePrint(self, *args):
+            print("{} {} documentPrinted".format(datetime.now(),getuser()))
+        def OnQuit(self):
+            self.seen_events["OnQuit"] = None
+            # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
+        def __init__(self):
+            # First action to do when using the class in the DispatchWithEvents     
+            inbox = self.Application.GetNamespace("MAPI").GetDefaultFolder(6)
+            messages = inbox.Items
+            # Check for unread emails when starting the event
+            for message in messages:
+                if message.UnRead:
+                    print (message.Subject) # Or whatever code you wish to execute.
+
+        def OnQuit(self):
+            # To stop PumpMessages() when Outlook Quit
+            # Note: Not sure it works when disconnecting!!
+            ctypes.windll.user32.PostQuitMessage(0)
+
+        def OnNewMailEx(self, receivedItemsIDs):
+        # RecrivedItemIDs is a collection of mail IDs separated by a ",".
+        # You know, sometimes more than 1 mail is received at the same moment.
+            for ID in receivedItemsIDs.split(","):
+                mail = self.Session.GetItemFromID(ID)
+                subject = mail.Subject
+                print (subject)   
+                try: 
+                    command = re.search(r"%(.*?)%", subject).group(1)
+                    print (command) # Or whatever code you wish to execute.
+                except:
+                    pass
+
+    o = DispatchWithEvents("outlook.Application", outlookEvents)
+    o.seen_events = {}
+    o.Visible = 1
+    inbox = o.GetNamespace("MAPI").GetDefaultFolder(6)
+    #o.Presentations.Add()
+    
+    runLoop(o)
+    if not CheckSeenEvents(p, ["OnDocumentChange", "OnWindowActivate"]): sys.exit(1)
 
 def runLoop(ob):
     while 1:
         pythoncom.PumpWaitingMessages() #listen for events
         try:
             if not ob.Visible: # Gone invisible - we need to pretend we timed out, so the app is quit.
+                print("Application has been closed. Shutting down...")
                 return 0
         except pythoncom.com_error: # Excel is busy (eg, editing the cell) - ignore
             pass
     return 1
 
-
-def _WaitForFinish(ob):
-
-    while 1:
-        # if msvcrt.kbhit(): #Return true if a keypress is waiting to be read
-        #     msvcrt.getch() #Read a keypress and return the resulting character. Nothing is echoed to the console. This call will block if a keypress is not already available, but will not wait for Enter to be pressed.
-        #     break
-        pythoncom.PumpWaitingMessages()
-        # stopEvent.wait(.2) # https://docs.python.org/2/library/threading.html#event-objects
-        # if stopEvent.isSet():
-        #     stopEvent.clear()
-        #     break
-        try:
-            if not ob.Visible:
-                # Gone invisible - we need to pretend we timed
-                # out, so the app is quit.
-                return 0
-        except pythoncom.com_error: 
-            # Excel is busy (eg, editing the cell) - ignore
-            pass
-    return 1
-
-def _CheckSeenEvents(o, events):
+def CheckSeenEvents(o, events):
     rc = 1
     for e in events:
-        if not o.seen_events.has_key(e):
+        if not e in o.seen_events:
             print ("ERROR: Expected event did not trigger", e)
             rc = 0
     return rc
 
+
 if __name__=='__main__':
-    if "noword" not in sys.argv[1:]:
+    print("Launching application...")
+    args=sys.argv[1:]
+    if "word" in args:
         wordEvents()
-    if "noexcel" not in sys.argv[1:]:
+    elif "excel" in args:
         excelEvents()
+    elif "powerpoint" in args:
+        powerpointEvents()
+    elif "outlook" in args:
+        outlookEvents()
