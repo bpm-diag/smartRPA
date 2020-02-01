@@ -1,5 +1,5 @@
-pywin32
-winregistry
-WMI
+pywin32; platform_system == "Windows"
+winregistry; platform_system == "Windows"
+WMI; platform_system == "Windows"
 watchdog
 requests

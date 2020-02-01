@@ -1,6 +1,7 @@
 # https://docs.microsoft.com/en-us/windows/win32/api/
 from sys import exit
 from threading import Thread
+from gui import *
 from systemEvents import *
 from officeEvents import *
 
