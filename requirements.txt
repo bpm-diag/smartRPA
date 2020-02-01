@@ -3,3 +3,4 @@ winregistry; platform_system == "Windows"
 WMI; platform_system == "Windows"
 watchdog
 requests
+xlwings

@@ -1,10 +1,13 @@
-from win32com.client import DispatchWithEvents, Dispatch
-import msvcrt, pythoncom
+
 import time, sys
 import types
 from datetime import datetime
 from getpass import getuser #user id
 from string import ascii_uppercase
+from platform import system
+if system()=="Windows":
+    from win32com.client import DispatchWithEvents, Dispatch
+    import pythoncom
 
 def excelEvents():
     class ExcelEvents:

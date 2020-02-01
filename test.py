@@ -6,12 +6,12 @@ def showDialog():
     if dialog == win32con.IDYES:
         win32ui.MessageBox("You pressed 'Yes'")
 
-showDialog()
-
-import win32com.client
+#showDialog()
 
 # prints all events from windows event log:
 def winEventLog(): #Windows Management Instrumentation (WMI)
+    import win32com.client
+
     strComputer = "."
     objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
     objSWbemServices = objWMIService.ConnectServer(strComputer,"root\cimv2")
@@ -45,5 +45,25 @@ def winEventLog(): #Windows Management Instrumentation (WMI)
         print ("User: ", objItem.User )
         break
 
+import sys
+import time
+import logging
+from watchdog.observers import Observer
+from watchdog.events import LoggingEventHandler
+from os.path import expanduser #user folder
 
-#winEventLog()
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+    path = expanduser("~")
+    event_handler = LoggingEventHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path, recursive=True)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()

@@ -4,19 +4,21 @@ from datetime import datetime
 from getpass import getuser #user id
 from os.path import expanduser #user folder
 from os import listdir
-from sys import platform #detect running os
 from sys import exit
+from platform import system
 from threading import Thread
 import csv
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-import pythoncom #for win32 thread
-import win32com.client #access running programs, part of pywin32
-from winregistry import WinRegistry as Reg #access registry
-#pywin32 for folder changes api
-import win32file 
-import win32event
-import win32con
+
+if system()=="Windows":
+    import pythoncom #for win32 thread
+    import win32com.client #access running programs, part of pywin32
+    from winregistry import WinRegistry as Reg #access registry
+    #pywin32 for folder changes api
+    import win32file 
+    import win32event
+    import win32con
 
 # monitor file changes
 def watchFolder():
@@ -125,7 +127,7 @@ def findUninstall():
             uninstalls.append(displayName)
     print(uninstalls)
 
-def watchRecentsFolder():
+def watchRecentsFolderWin():
     RECENT_ITEMS_PATH = expanduser("~")+"\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
     change_handle = win32file.FindFirstChangeNotification ( #sets up a handle for watching file changes
     RECENT_ITEMS_PATH, #path to watch
