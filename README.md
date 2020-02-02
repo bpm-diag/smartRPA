@@ -2,15 +2,11 @@
 
 ## Installation and execution:
 
-- Install dependencies
+1. Install dependencies
 ```
 pip3 install -r requirements.txt
 ```
-- Run System logger
+2. Run main logger
 ```
 python3 mainLogger.py
-```
-- Run Office logger
-```
-python3 officeEvents.py excel
 ```

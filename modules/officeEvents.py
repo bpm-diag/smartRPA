@@ -74,6 +74,7 @@ def excelEvents():
         #     print(Target.Value)
         #     print("onchange {}".format(Target))
 
+    pythoncom.CoInitialize() #needed for thread
     e = DispatchWithEvents("Excel.Application", ExcelEvents)
     e.seen_events = {}
     e.Visible=1 #open window 
@@ -110,6 +111,7 @@ def wordEvents():
             self.seen_events["OnQuit"] = None
             # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
 
+    pythoncom.CoInitialize() #needed for thread
     w = DispatchWithEvents("Word.Application", WordEvents)
     w.seen_events = {}
     w.Visible = 1
@@ -143,6 +145,7 @@ def powerpointEvents():
             print(Sld)
             print("{} {} MS-POWERPOINT newSlideAdded".format(datetime.now(),getuser()))
 
+    pythoncom.CoInitialize() #needed for thread
     p = DispatchWithEvents("powerpoint.Application", powerpointEvents)
     p.seen_events = {}
     p.Visible = 1

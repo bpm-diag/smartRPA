@@ -2,17 +2,23 @@
 from tkinter import *
 from tkinter import messagebox
 from platform import system
+from sys import path
+path.append('../') #this way main file is visible from this file
 import mainLogger
+from multiprocessing import Process
 
 class LoggerGUI(Frame):
     def __init__(self, parent):
-        # inizialization
+        
+        # gui inizialization
         Frame.__init__(self, parent)
         self.parent = parent
         self.parent.title('SystemLogger')
         self.parent.geometry('300x430')
 
+        # process inizialization
         self.running = False
+        self.mainProcess = None
 
         #define checkbox variable
         self.systemLoggerFilesFolder = BooleanVar()
@@ -22,15 +28,15 @@ class LoggerGUI(Frame):
         self.officeExcel = BooleanVar()
         self.officeExcel.set(True)
         self.officeWord = BooleanVar()
-        self.officeWord.set(True)
+        self.officeWord.set(False)
         self.officePowerpoint = BooleanVar()
-        self.officePowerpoint.set(True)
+        self.officePowerpoint.set(False)
         self.officeAccess = BooleanVar()
-        self.officeAccess.set(True)
+        self.officeAccess.set(False)
         self.browserChrome = BooleanVar()
-        self.browserChrome.set(True)
+        self.browserChrome.set(False)
         self.browserFirefox = BooleanVar()
-        self.browserFirefox.set(True)
+        self.browserFirefox.set(False)
 
         menu = Menu(self.parent)
         self.parent.config(menu=menu)
@@ -65,7 +71,7 @@ class LoggerGUI(Frame):
             officeAccessCB.config(state=DISABLED)
             Label(parent, text="Office logger is not available on MacOS", font=("Arial", 12), fg="gray" ).pack()
 
-        browserFrame = LabelFrame(parent, text = "Browser logger", padx=10, pady=10)
+        browserFrame = LabelFrame(parent, text = "Browser logger", padx=15, pady=10)
         browserFrame.pack()
         Checkbutton(browserFrame, text="Google Chrome", variable=self.browserChrome).pack(anchor="w")
         Checkbutton(browserFrame, text="Mozilla Firefox", variable=self.browserFirefox).pack(anchor="w")
@@ -73,30 +79,41 @@ class LoggerGUI(Frame):
         self.runButton = Button(parent, text='Start logger', command=self.onclick, padx=5, pady=5)
         self.runButton.pack()
 
-        self.statusLabel = Label(parent, text="",font=("Arial", 14), fg="green", pady=5)
+        self.statusLabel = Label(parent, text="",font=("Arial", 12), fg="green", pady=5)
         self.statusLabel.pack()
 
-
     def onclick(self):
+        
         if not self.running:
+            # set gui parameters
             self.running = True
             self.statusLabel.config(text='Logger running...')
             self.runButton.config(text='Stop logger')
-            mainLogger.startLogger(
-                        self.systemLoggerFilesFolder.get(),
-                        self.systemLoggerPrograms.get(),
-                        self.officeExcel.get(),
-                        self.officeWord.get(),
-                        self.officePowerpoint.get(),
-                        self.officeAccess.get(),
-                        self.browserChrome.get(),
-                        self.browserFirefox.get()
-                        ) 
+            
+            #start main process with the options selected in gui.
+            #main method is started as a process so it can be terminated once the button is clicked
+            #all the methods in the main process are started as daemon threads so they are closed automatically when the main process is closed
+            self.mainProcess=Process(target=mainLogger.startLogger,args=[
+                self.systemLoggerFilesFolder.get(),
+                self.systemLoggerPrograms.get(),
+                self.officeExcel.get(),
+                self.officeWord.get(),
+                self.officePowerpoint.get(),
+                self.officeAccess.get(),
+                self.browserChrome.get(),
+                self.browserFirefox.get()
+            ])
+            self.mainProcess.start()
+
         else:
+            # set gui parameters
             self.running = False
             self.statusLabel.config(text='')
             self.runButton.config(text='Start logger')
-            mainLogger.stopLogger()
+            
+            #stop main process, automatically closing all daemon threads in main process
+            self.mainProcess.terminate()
+            print("Main process terminated, daemon threads closed.")
     
     def aboutMenu(self):
         messagebox.showinfo("About", "Master's Thesis")

@@ -2,11 +2,12 @@
 from sys import exit
 from time import sleep
 from threading import Thread
-import gui
-import systemEvents
-import officeEvents
+from multiprocessing import Process
+import modules.GUI as GUI
+import modules.systemEvents as systemEvents
+import modules.officeEvents as officeEvents
 
-# this method is called when the user presses "start logger" button in gui, and stores the user's preferences as to what to launch
+# this method is called by GUI when the user presses "start logger" button
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
                 officeExcel,
@@ -54,13 +55,13 @@ def startLogger(systemLoggerFilesFolder,
             t7.start()
 
         if officeAccess:
-            pass
+            print("Office not implemented yet.")
 
         if browserChrome:
-            pass
+            print("Browser not implemented yet.")
 
         if browserFirefox:
-            pass
+            print("Browser not implemented yet.")
     
         while 1: #keep main active
             sleep(1)
@@ -69,13 +70,9 @@ def startLogger(systemLoggerFilesFolder,
         print("Closing threads...")
         exit(0)
 
-def stopLogger():
-    print("Closing threads...")
-    exit(0)
-
 if __name__ == "__main__":
     
     # launch gui
-    gui.buildGUI()
+    GUI.buildGUI()
 
 
