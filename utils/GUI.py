@@ -13,8 +13,10 @@ class LoggerGUI(Frame):
         # gui inizialization
         Frame.__init__(self, parent)
         self.parent = parent
+        self.TELEGRAM_BLUE = '#1A222C'
         self.parent.title('SystemLogger')
-        self.parent.geometry('300x450')
+        self.parent.geometry('300x500')
+        self.parent.configure(background=self.TELEGRAM_BLUE)
 
         # process inizialization
         self.running = False
@@ -24,7 +26,7 @@ class LoggerGUI(Frame):
         self.systemLoggerFilesFolder = BooleanVar()
         self.systemLoggerFilesFolder.set(True)
         self.systemLoggerPrograms = BooleanVar()
-        self.systemLoggerPrograms.set(True)
+        self.systemLoggerPrograms.set(False)
         self.officeExcel = BooleanVar()
         self.officeExcel.set(False)
         self.officeWord = BooleanVar()
@@ -44,22 +46,22 @@ class LoggerGUI(Frame):
         fileMenu.add_command(label="About", command=self.aboutMenu)
         menu.add_cascade(label="File", menu=fileMenu)
 
-        Label(parent, text="Select modules to activate",font=("Arial", 14), pady=10).pack()
+        Label(parent, text="Select modules to activate",font=("Arial", 14), pady=10, background=self.TELEGRAM_BLUE, foreground='white').pack()
 
-        systemFrame = LabelFrame(parent, text = "System logger", padx=20, pady=10)
+        systemFrame = LabelFrame(parent, text = "System logger", padx=20, pady=10, background=self.TELEGRAM_BLUE, foreground='white')
         systemFrame.pack()
-        Checkbutton(systemFrame, text="Files/Folders", variable=self.systemLoggerFilesFolder).pack(anchor="w")
-        Checkbutton(systemFrame, text="Programs", variable=self.systemLoggerPrograms).pack(anchor="w")
+        Checkbutton(systemFrame, text="Files/Folders", variable=self.systemLoggerFilesFolder, background=self.TELEGRAM_BLUE, foreground='white').pack(anchor="w")
+        Checkbutton(systemFrame, text="Programs", variable=self.systemLoggerPrograms, background=self.TELEGRAM_BLUE, foreground='white').pack(anchor="w")
 
-        officeFrame = LabelFrame(parent, text = "Office logger", padx=25, pady=10)
+        officeFrame = LabelFrame(parent, text = "Office logger", padx=25, pady=10, background=self.TELEGRAM_BLUE, foreground='white')
         officeFrame.pack()
-        officeExcelCB = Checkbutton(officeFrame, text="Excel", variable=self.officeExcel)
+        officeExcelCB = Checkbutton(officeFrame, text="Excel", variable=self.officeExcel, background=self.TELEGRAM_BLUE, foreground='white')
         officeExcelCB.pack(anchor="w")
-        officeWordCB = Checkbutton(officeFrame, text="Word", variable=self.officeWord)
+        officeWordCB = Checkbutton(officeFrame, text="Word", variable=self.officeWord, background=self.TELEGRAM_BLUE, foreground='white')
         officeWordCB.pack(anchor="w")
-        officePowerpointCB = Checkbutton(officeFrame, text="PowerPoint", variable=self.officePowerpoint)
+        officePowerpointCB = Checkbutton(officeFrame, text="PowerPoint", variable=self.officePowerpoint, background=self.TELEGRAM_BLUE, foreground='white')
         officePowerpointCB.pack(anchor="w")
-        officeAccessCB = Checkbutton(officeFrame, text="Access", variable=self.officeAccess)
+        officeAccessCB = Checkbutton(officeFrame, text="Access", variable=self.officeAccess, background=self.TELEGRAM_BLUE, foreground='white')
         officeAccessCB.pack(anchor="w")
         
         if system() == "Darwin" or system() == "Linux": #disable unsupported components
@@ -69,21 +71,24 @@ class LoggerGUI(Frame):
             officePowerpointCB.config(state=DISABLED)
             self.officeAccess.set(False)
             officeAccessCB.config(state=DISABLED)
-            Label(parent, text="Office logger is not available on MacOS", font=("Arial", 12), fg="gray" ).pack()
+            Label(parent, text="Office logger is not available on MacOS", font=("Arial", 12), fg="gray", background=self.TELEGRAM_BLUE, foreground='white').pack()
 
-        browserFrame = LabelFrame(parent, text = "Browser logger", padx=15, pady=10)
+        browserFrame = LabelFrame(parent, text = "Browser logger", padx=15, pady=10, background=self.TELEGRAM_BLUE, foreground='white')
         browserFrame.pack()
-        Checkbutton(browserFrame, text="Google Chrome", variable=self.browserChrome).pack(anchor="w")
-        Checkbutton(browserFrame, text="Mozilla Firefox", variable=self.browserFirefox).pack(anchor="w")
+        Checkbutton(browserFrame, text="Google Chrome", variable=self.browserChrome, background=self.TELEGRAM_BLUE, foreground='white').pack(anchor="w")
+        Checkbutton(browserFrame, text="Mozilla Firefox", variable=self.browserFirefox, background=self.TELEGRAM_BLUE, foreground='white').pack(anchor="w")
 
-        Label(parent, text="").pack()
+        Label(parent, text="", background=self.TELEGRAM_BLUE, foreground='white').pack()
 
         self.runButton = Button(parent, text='Start logger', command=self.onclick, padx=5, pady=5)
         self.runButton.pack()
 
-        self.statusLabel = Label(parent, text="",font=("Courier", 12), fg="green", pady=5)
+        Label(parent, text="", background=self.TELEGRAM_BLUE, foreground='white').pack()
+
+        self.statusLabel = Label(parent, text="",font=("Courier", 12), fg="green", pady=5, background=self.TELEGRAM_BLUE)
         self.statusLabel.pack()
 
+    # noinspection PyTypeChecker
     def onclick(self):
         
         if not self.running: #start button clicked

@@ -1,12 +1,20 @@
+from os import environ
 from flask import Flask, request, jsonify
-from datetime import datetime
 import csv
-import json
+import logging
 
 SERVER_ADDR = 'http://localhost:4444'
 
 app = Flask(__name__)
+
+#disable flask logging
+#log = logging.getLogger('werkzeug')
+#log.setLevel(logging.ERROR)
+#log.disabled = True
 app.logger.disabled = True
+logging.getLogger('werkzeug').disabled = True
+environ['WERKZEUG_RUN_MAIN'] = 'true'
+
 filename = "" #will be set by mainLogger when program is run
 
 @app.route('/')
@@ -20,15 +28,16 @@ def writeLog():
     #fields = ['timeStamp', 'userID', 'targetApp', 'eventType', 'url', 'content', 'target.workbookName', 'target.sheetName','target.id','target.className','target.tagName', 'target.type', 'target.name', 'target.value', 'target.innerText', 'target.checked', 'target.href', 'target.option', 'target.title', 'target.innerHTML']
     with open(filename, 'a') as out_file:
         f = csv.writer(out_file)
-        # f.writerow(["datetime", "user", "application","event_type","event_src_path","event_dest_path"])
         f.writerow([
                 content.get('datetime'),
                 content.get("user"),
+                content.get("category"),
                 content.get("application"),
                 content.get("event_type"),
                 content.get("event_src_path"),
                 content.get("event_dest_path"),
                 ])
+    #print(f"new line written in {filename}")
     return content
 
 

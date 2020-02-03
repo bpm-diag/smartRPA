@@ -93,3 +93,29 @@ def producer():
         data = e
         producer.send('csv_logs', value=data)
         sleep(5)
+
+import csv
+from datetime import datetime
+import consumerServer
+import errno
+
+def createLogFile():
+    current_directory = os.getcwd()
+    logs_directory = os.path.join(current_directory, 'logs')
+    filename = logs_directory + datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv' #use current timestamp as filename
+    consumerServer.filename = filename  # filename to use in current session until the 'stop' button is pressed. must be set here because the ilename uses the current timestamp and it must remain the same during the whole session
+    #if not os.path.exists(os.path.dirname(filename)):
+    if not os.path.exists(logs_directory):
+        try:
+            os.makedirs(logs_directory)
+            print(f"created folder {logs_directory}")
+        except OSError as exc:  # Guard against race condition
+            print(f"could not create folder {logs_directory}")
+            if exc.errno != errno.EEXIST:
+                raise
+    # create header
+    with open(filename, 'a') as out_file:
+        f = csv.writer(out_file)
+        f.writerow(["datetime", "user", "application", "event_type", "event_src_path", "event_dest_path"])  # header
+
+createLogFile()
