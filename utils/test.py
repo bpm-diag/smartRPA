@@ -45,25 +45,51 @@ def winEventLog(): #Windows Management Instrumentation (WMI)
         print ("User: ", objItem.User )
         break
 
-import sys
-import time
-import logging
-from watchdog.observers import Observer
-from watchdog.events import LoggingEventHandler
-from os.path import expanduser #user folder
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S')
-    path = expanduser("~")
-    event_handler = LoggingEventHandler()
-    observer = Observer()
-    observer.schedule(event_handler, path, recursive=True)
-    observer.start()
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
+
+
+import queue
+import os
+import threading
+
+# q = queue.Queue()
+
+# def producer():
+#     for i in range(100):
+#         QUEUE.put(f'{threading.current_thread().name}-{i}')
+
+
+# def consumer():
+#     with open('out.txt', 'w+') as fp:
+#         while True:
+#             item = q.get()
+#             if item is None:
+#                 break
+#             fp.write(item + os.linesep)
+
+
+# worker = [threading.Thread(target=producer) for _ in range(2)]
+# [i.start() for i in worker]
+
+# master = threading.Thread(target=consumer)
+# master.start()
+
+# [i.join() for i in worker]
+# writer.QUEUE.put(None)
+# master.join()
+
+
+
+
+from kafka import KafkaConsumer,KafkaProducer
+from time import sleep
+
+def producer():
+    producer = KafkaProducer(bootstrap_servers='localhost:9092')
+    producer.send('csv_logs', b'Hello, World!')
+    producer.send('csv_logs', key=b'message-two', value=b'This is Kafka-Python')
+
+    for e in range(1000):
+        data = e
+        producer.send('csv_logs', value=data)
+        sleep(5)

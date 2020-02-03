@@ -81,7 +81,7 @@ class LoggerGUI(Frame):
         self.runButton = Button(parent, text='Start logger', command=self.onclick, padx=5, pady=5)
         self.runButton.pack()
 
-        self.statusLabel = Label(parent, text="",font=("Arial", 12), fg="green", pady=5)
+        self.statusLabel = Label(parent, text="",font=("Courier", 12), fg="green", pady=5)
         self.statusLabel.pack()
 
     def onclick(self):

@@ -4,12 +4,12 @@ from datetime import datetime
 from getpass import getuser #user id
 from os.path import expanduser #user folder
 from os import listdir
-from sys import exit
 from platform import system
-from threading import Thread
-import csv
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
+# from utils import writer
+from requests import post
+from utils import consumerServer
 
 if system()=="Windows":
     import pythoncom #for win32 thread
@@ -24,26 +24,38 @@ if system()=="Windows":
 def watchFolder():
 
     # https://pythonhosted.org/watchdog/api.html#event-handler-classes
-    # https://stackoverflow.com/questions/18599339/python-watchdog-monitoring-file-for-changes
+    # https://stackoverflow.com/a/18599427
     class WatchFilesHandler(RegexMatchingEventHandler):
         def __init__(self):
             super(WatchFilesHandler, self).__init__(ignore_regexes=['^[.]{1}.*', '.*/[.]{1}.*', '.*\\[.]{1}.*']) #ignore hidden files
 
         def on_any_event(self, event):
-            if any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules','.TMP']): #exclude folders
+            if any(s in event.src_path for s in ['AppData','.pylint', '.ini', '.DS_Store', 'node_modules','.TMP','.wine']): #exclude folders
                 return
             else:
                 if event.event_type == "moved": #destination path is available
                     print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
-                    return
+                    data={
+                        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
+                        "user": getuser(),
+                        "application": "OS-System",
+                        "event_type": event.event_type,
+                        "event_src_path": event.src_path,
+                        "event_dest_path": event.dest_path
+                        }
+                    post(consumerServer.SERVER_ADDR, json=data)
+                    # return
                 elif event.event_type == "modified": #avoid spam
                     return
                 else: #created,deleted
                     print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
-
+                    # return
                     
     my_event_handler = WatchFilesHandler()
-    path = expanduser("~") #user home folder
+    if system()=="Windows":
+        path = expanduser("~")
+    else:
+        path = expanduser("~") + "/Desktop" #TODO make path start on home folder
     my_observer = Observer()
     my_observer.schedule(my_event_handler, path, recursive=True)
     my_observer.start()
@@ -56,8 +68,7 @@ def watchFolder():
 
 # Detects programs opened and closed
 def logProcessesWin(): 
-    #https://stackoverflow.com/a/1187338
-    pythoncom.CoInitialize() #needed for thread
+    pythoncom.CoInitialize() #needed for thread http://timgolden.me.uk/pywin32-docs/pythoncom__CoInitialize_meth.html
     strComputer = "."
     objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
     objSWbemServices = objWMIService.ConnectServer(strComputer,"root\cimv2")

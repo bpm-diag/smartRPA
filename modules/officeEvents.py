@@ -5,6 +5,8 @@ from datetime import datetime
 from getpass import getuser #user id
 from string import ascii_uppercase
 from platform import system
+from requests import post
+from utils import consumerServer
 if system()=="Windows":
     from win32com.client import DispatchWithEvents, Dispatch
     import pythoncom

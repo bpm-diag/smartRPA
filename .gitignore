@@ -1,10 +1,15 @@
 /dist/
 /node_modules/
+RPA_UILogger/
+logs/
 *.pyc
+*.csv
 __pycache__/
 .DS_Store
 .vscode
 .idea
+Thumbs.db
+Desktop.ini
 node_modules
 *.py[cod]
 *$py.class
