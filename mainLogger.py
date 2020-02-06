@@ -9,35 +9,37 @@ import os
 import errno
 
 from utils import GUI
+from utils import consumerServer
 from modules import systemEvents
 from modules import officeEvents
-from utils import consumerServer
+from modules import clipboardEvents
 
 # creates new log file with the current timestamp in /logs directory at the root of the project.
 # creates /logs if it does not exist
 def createLogFile():
     current_directory = os.getcwd()
-    logs_directory = os.path.join(current_directory, 'logs/')
-    filename = logs_directory + datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv' #use current timestamp as filename
+    logs_directory = os.path.join(current_directory, 'logs/') #logs are saved in logs/ direcgory
+    filename = logs_directory + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv' #use current timestamp as filename
     consumerServer.filename = filename  # filename to use in current session until the 'stop' button is pressed. must be set here because the ilename uses the current timestamp and it must remain the same during the whole session
     #if not os.path.exists(os.path.dirname(filename)):
     if not os.path.exists(logs_directory):
         try:
             os.makedirs(logs_directory)
-            print(f"created directory {logs_directory}")
+            print(f"Created directory {logs_directory}")
         except OSError as exc:  # Guard against race condition
-            print(f"could not create directory {logs_directory}")
+            print(f"Could not create directory {logs_directory}")
             if exc.errno != errno.EEXIST:
                 raise
     # create header
     with open(filename, 'a') as out_file:
         f = csv.writer(out_file)
-        f.writerow(["datetime", "user", "category", "application", "event_type", "event_src_path", "event_dest_path"])  # header
-
+        # header
+        f.writerow(["timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path", "clipboard_content","browser_url","eventQual","tab_id","title","tab_moved_from_index","tab_moved_to_index","newZoomFactor","oldZoomFactor","tab_pinned","tab_audible","tab_muted","window_ingognito"]) 
 
 #  this method is called by GUI when the user presses "start logger" button
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
+                systemLoggerClipboard,
                 officeExcel,
                 officeWord,
                 officePowerpoint,
@@ -73,6 +75,11 @@ def startLogger(systemLoggerFilesFolder,
             t3.daemon = True
             t3.start()
 
+        if systemLoggerClipboard:
+            t4 = Thread(target=clipboardEvents.logClipboard)
+            t4.daemon = True
+            t4.start()
+
         if officeExcel and windows:
             t5 = Thread(target=officeEvents.excelEvents)
             t5.daemon = True
@@ -89,13 +96,13 @@ def startLogger(systemLoggerFilesFolder,
             t7.start()
 
         if officeAccess and windows:
-            print("Office not implemented yet.")
+            print("Access not implemented yet.")
 
         if browserChrome:
-            print("Browser not implemented yet.")
+            pass
 
         if browserFirefox:
-            print("Browser not implemented yet.")
+            pass
 
         while 1:  # keep main active
             sleep(1)

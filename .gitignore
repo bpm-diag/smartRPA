@@ -2,6 +2,7 @@
 /node_modules/
 RPA_UILogger/
 logs/
+utils/test.py
 *.pyc
 *.csv
 __pycache__/

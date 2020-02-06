@@ -36,10 +36,9 @@ def watchFolder():
                 return
             else:
                 if event.event_type == "moved":  # destination path is available
-                    print(
-                        f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
+                    print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
                     post(consumerServer.SERVER_ADDR, json={
-                        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": "Explorer" if system() == "Windows" else "Finder",
@@ -53,7 +52,7 @@ def watchFolder():
                 else:  # created,deleted
                     print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
                     post(consumerServer.SERVER_ADDR, json={
-                        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": "Explorer" if system() == "Windows" else "Finder",
@@ -123,7 +122,7 @@ def logProcessesWin():
                     path = pathList[0].ExecutablePath if pathList else ""
                     print(f"{datetime.now()} {getuser()} AppOpen {app} {path}")
                     post(consumerServer.SERVER_ADDR, json={
-                        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": app,
@@ -141,7 +140,7 @@ def logProcessesWin():
                     path = pathList[0].ExecutablePath if pathList else ""
                     print(f"{datetime.now()} {getuser()} Appclose {app} {path}")
                     post(consumerServer.SERVER_ADDR, json={
-                        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": app,
@@ -192,7 +191,7 @@ def watchRecentsFolderWin():
                     # print ("Added: ", ", ".join (added))
                     print(f"{datetime.now()} {getuser()} OS-System OpenFile/Folder {added[0][:-4]}")  # remove extension
                     post(consumerServer.SERVER_ADDR, json={
-                        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": "Explorer" if system() == "Windows" else "Finder",
