@@ -2,7 +2,7 @@
 /node_modules/
 RPA_UILogger/
 logs/
-utils/test.py
+stuff_to_delete/
 PythonProgrammingOnWin32.pdf
 latex
 *.pyc
