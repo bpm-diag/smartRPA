@@ -34,7 +34,7 @@ def createLogFile():
     with open(filename, 'a') as out_file:
         f = csv.writer(out_file)
         # header
-        f.writerow(["timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path", "clipboard_content","browser_url","eventQual","tab_id","title","tab_moved_from_index","tab_moved_to_index","newZoomFactor","oldZoomFactor","tab_pinned","tab_audible","tab_muted","window_ingognito"]) 
+        f.writerow(["timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path", "clipboard_content","browser_url","eventQual","id","title","description","tab_moved_from_index","tab_moved_to_index","newZoomFactor","oldZoomFactor","tab_pinned","tab_audible","tab_muted","window_ingognito","file_size"]) 
 
 #  this method is called by GUI when the user presses "start logger" button
 def startLogger(systemLoggerFilesFolder,
@@ -99,10 +99,10 @@ def startLogger(systemLoggerFilesFolder,
             print("Access not implemented yet.")
 
         if browserChrome:
-            pass
+            consumerServer.log_browser = True
 
         if browserFirefox:
-            pass
+            consumerServer.log_browser = True
 
         while 1:  # keep main active
             sleep(1)

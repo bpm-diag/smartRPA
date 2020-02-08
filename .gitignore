@@ -3,6 +3,8 @@
 RPA_UILogger/
 logs/
 utils/test.py
+PythonProgrammingOnWin32.pdf
+latex
 *.pyc
 *.csv
 __pycache__/

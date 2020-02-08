@@ -13,6 +13,7 @@ getLogger('werkzeug').disabled = True
 environ['WERKZEUG_RUN_MAIN'] = 'true'
 
 filename = ""  # will be set by mainLogger when program is run
+log_browser = False
 
 @app.route('/')
 def index():
@@ -28,6 +29,12 @@ def writeLog():
     # 'target.value', 'target.innerText', 'target.checked', 'target.href', 'target.option', 'target.title',
     # 'target.innerHTML']
     print(f"POST received with content: {content}\n")
+
+    # check if user enabled browser logging
+    if (content.get("application")=="Browser" and not log_browser):
+        print("Browser logging disabled by user.")
+        return content
+    
     with open(filename, 'a') as out_file:
         f = writer(out_file)
         f.writerow([
@@ -41,8 +48,9 @@ def writeLog():
             content.get("clipboard_content"),
             content.get("browser_url"),
             content.get("eventQual"),
-            content.get("tab_id"),
+            content.get("id"),
             content.get("title"),
+            content.get("description"),
             content.get("tab_moved_from_index"),
             content.get("tab_moved_to_index"),
             content.get("newZoomFactor"),
@@ -51,8 +59,9 @@ def writeLog():
             content.get("audible"),
             content.get("muted"),
             content.get("window_ingognito"),
+            content.get("file_size"),
         ])
-    # print(f"new line written in {filename}")
+
     return content
 
 # Enable CORS
