@@ -12,7 +12,6 @@
 // https://developer.chrome.com/extensions/windows#event-onCreated
 chrome.bookmarks.onCreated.addListener( (id, bookmark) => {
     console.log("Bookmark created");
-    
     // https://developer.chrome.com/extensions/bookmarks#type-BookmarkTreeNode
     let eventLog = { 
         timestamp: new Date(Date.now()).toISOString().replace('T',' ').slice(0, -1),
@@ -271,21 +270,20 @@ chrome.notifications.onClicked.addListener( (notificationId) => {
 // https://developer.chrome.com/extensions/tabs
 // ********************
 
-var tabTitles = new Map();
-var tabUrls = new Map();
+
+// Every new tab is added to this map so when a tab is closed I can get informations about it
+let previousTabs = new Map();
+
 
 // Fired when a tab is created.
 // https://developer.chrome.com/extensions/tabs#event-onCreated
 chrome.tabs.onCreated.addListener( (tab) => {
     console.log("Tab created")
-    chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
-        try{
-            buildAndSendEventLog("newTab", tabs)
-        } catch(error){
-            console.log("Platform not supported");
-            console.log(error.message);
-        }
-    })
+    try{
+        buildAndSendEventLog("newTab", tab)
+    } catch(error){
+        console.log(error.message);
+    }
 });
 
 
@@ -293,75 +291,57 @@ chrome.tabs.onCreated.addListener( (tab) => {
 // https://developer.chrome.com/extensions/tabs#event-onMoved
 chrome.tabs.onMoved.addListener( (tabId, moveInfo) => {
     console.log("Tab moved")
-    chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
+    chrome.tabs.get(tabId, (tab) => {
         try{
-            buildAndSendEventLog("moveTab", tabs, moveInfo)
+            buildAndSendEventLog("moveTab", tab, moveInfo)
         } catch(error){
-            console.log("Platform not supported");
             console.log(error.message);
         }
-    });
+    })
 });
 
 
 // Fired when a tab is attached to a window; for example, because it was moved between windows.
 // https://developer.chrome.com/extensions/tabs#event-onAttached
-chrome.tabs.onAttached.addListener( (attachInfo) => {
+chrome.tabs.onAttached.addListener( (tabId, attachInfo) => {
     console.log("Tab attached")
-    chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
+    chrome.tabs.get(tabId, (tab) => {
         try{
-            buildAndSendEventLog("attachTab", tabs)
+            buildAndSendEventLog("attachTab", tab, attachInfo)
         } catch(error){
-            console.log("Platform not supported");
             console.log(error.message);
         }
-    });
+    })
 });
 
 
 // Fired when a tab is detached from a window; for example, because it was moved between windows.
 // https://developer.chrome.com/extensions/tabs#event-onDetached
-chrome.tabs.onDetached.addListener( (detachInfo) => {
+chrome.tabs.onDetached.addListener( (tabId, detachInfo) => {
     console.log("Tab detached")
-    chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
+    chrome.tabs.get(tabId, (tab) => {
         try{
-            buildAndSendEventLog("detachTab", tabs)
+            buildAndSendEventLog("detachTab", tab, detachInfo)
         } catch(error){
-            console.log("Platform not supported");
             console.log(error.message);
         }
-    });
+    })
 });
 
 
 // Fires when the active tab in a window changes.
 // https://developer.chrome.com/extensions/tabs#event-onActivated
 chrome.tabs.onActivated.addListener( (activeInfo) => {
-    console.log("Tab activated")
-
+    console.log("Tab activated, selected")
     chrome.tabs.get(activeInfo.tabId, (tab) => {
-        console.log(tab);
         try{
             if (!tab.url.includes("newtab")) {
-                buildAndSendEventLog("selectTab", tab)
+                buildAndSendEventLog("selectTab", tab, activeInfo)
             }
         } catch(error){
-            console.log("Platform not supported");
             console.log(error.message);
         }
     })
-
-    // get active tab https://developer.chrome.com/extensions/tabs#method-query
-    // chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
-    //     try{
-    //         if (!tabs[0].url.includes("newtab")) {
-    //             buildAndSendEventLog("selectTab", tabs)
-    //         }
-    //     } catch(error){
-    //         console.log("Platform not supported");
-    //         console.log(error.message);
-    //     }
-    // });
 });
 
 
@@ -369,34 +349,9 @@ chrome.tabs.onActivated.addListener( (activeInfo) => {
 // https://developer.chrome.com/extensions/tabs#event-onRemoved
 chrome.tabs.onRemoved.addListener( (tabId, removeInfo) => {
     console.log("Tab removed")
-    
-    chrome.tabs.get(tabId, (tab) => {
-        console.log(tab);
-        
-    })
-    
     try{
-        chrome.tabs.query({ 'lastFocusedWindow': true }, (tabs) => {
-            let tabsID = new Array();
-            for(i = 0; i < tabs.length; i++)
-            tabsID.push(tabs[i].id);
-            
-            let originalTabs = Array.from(tabTitles.keys());
-            
-            for(i = 0; i < originalTabs.length; i++){				
-                if(!tabsID.includes(originalTabs[i])){
-                    removedTab = [{
-                        url: tabUrls.get(originalTabs[i]),
-                        title: tabTitles.get(originalTabs[i]),
-                        id: originalTabs[i]
-                    }]
-                    buildAndSendEventLog("closeTab", removedTab)
-                    break;
-                }
-            }
-        })
+        buildAndSendEventLog("closeTab", previousTabs.get(tabId), removeInfo)
     } catch(error){
-        console.log("Platform not supported");
         console.log(error.message);
     }
 });
@@ -406,15 +361,13 @@ chrome.tabs.onRemoved.addListener( (tabId, removeInfo) => {
 // https://developer.chrome.com/extensions/tabs#event-onZoomChange
 chrome.tabs.onZoomChange.addListener( (ZoomChangeInfo) => {
     console.log("Tab zoomed")
-    chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
+    chrome.tabs.get(ZoomChangeInfo.tabId, (tab) => {
         try{
-            console.log(ZoomChangeInfo);
-            buildAndSendEventLog("zoomTab", tabs, ZoomChangeInfo)
+            buildAndSendEventLog("zoomTab", tab, ZoomChangeInfo)
         } catch(error){
-            console.log("Platform not supported");
             console.log(error.message);
         }
-    });
+    })
 });
 
 
@@ -422,22 +375,25 @@ chrome.tabs.onZoomChange.addListener( (ZoomChangeInfo) => {
 // // https://developer.chrome.com/extensions/tabs#event-onUpdated
 chrome.tabs.onUpdated.addListener( (tabId, changeInfo, tab) => {
     console.log("tab updated")
-    chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
-        try{
-            if (changeInfo.pinned != undefined) {
-                buildAndSendEventLog("pinnedTab", tabs, changeInfo)
-            }
-            if (changeInfo.audible != undefined) {
-                buildAndSendEventLog("audibleTab", tabs, changeInfo)
-            }
-            if (changeInfo.mutedInfo != undefined) {
-                buildAndSendEventLog("mutedTab", tabs, changeInfo)
-            }
-        } catch(error){
-            console.log("Platform not supported");
-            console.log(error.message);
+    try{
+        if (changeInfo.pinned != undefined) {
+            if (changeInfo.pinned)
+                buildAndSendEventLog("pinnedTab", tab, changeInfo)
+            else
+                buildAndSendEventLog("unpinnedTab", tab, changeInfo)
         }
-    });
+        if (changeInfo.audible != undefined) {
+            buildAndSendEventLog("audibleTab", tab, changeInfo)
+        }
+        if (changeInfo.mutedInfo != undefined) {
+            if (changeInfo.mutedInfo.muted)
+                buildAndSendEventLog("mutedTab", tab, changeInfo)
+            else
+                buildAndSendEventLog("unmutedTab", tab, changeInfo)
+        }
+    } catch(error){
+        console.log(error.message);
+    }
 })
 
 
@@ -449,7 +405,7 @@ chrome.tabs.onUpdated.addListener( (tabId, changeInfo, tab) => {
 //         try{
 //             buildAndSendEventLog("highlightTab", tabs, highlightInfo)
 //         } catch(error){
-//             console.log("Platform not supported");
+//             
 //             console.log(error.message);
 //         }
 //     });
@@ -468,16 +424,15 @@ chrome.webNavigation.onCommitted.addListener( (details) => {
     console.log("webNavigation commit")
     
     let eventLog = { 
-        timestamp: new Date(Date.now()).toISOString().replace('T',' ').slice(0, -1).slice(0, -1),
+        timestamp: new Date(Date.now()).toISOString().replace('T',' ').slice(0, -1),
         category: "Browser",
         application: getBrowser(),
         event_type: details.transitionType,
         browser_url: details.url,
         eventQual: JSON.stringify(details.transitionQualifiers)
     };
-    
+
     if (details.transitionType != "auto_subframe") { //different from any nested iframes that are automatically loaded by their parent.
-        
         // Cause of the navigation
         // https://developer.chrome.com/extensions/webNavigation#type-TransitionType
         if(eventLog.eventType == "typed" || 
@@ -487,27 +442,10 @@ chrome.webNavigation.onCommitted.addListener( (details) => {
         {
             eventLog.eventType = "navigateTo";			
         }
-
         if(!eventLog.browser_url.includes("newtab") && eventLog.eventType != "link"){
             console.log(eventLog);
             post(eventLog);
         }
-        
-        // update active tabs
-        chrome.tabs.query({'active': true, 'lastFocusedWindow': true }, (tabs) => {
-            try{
-                let tabUrl = tabs[0].url;
-                let tabTitle = tabs[0].title;
-                let tabId = tabs[0].id;
-                tabTitles.set(tabId, tabTitle);
-                tabUrls.set(tabId, tabUrl);
-            }	
-            catch(error){
-                console.log("Platform not supported");
-                console.log(error.message);
-            }			
-        });
-        
     }
 });
 
@@ -572,38 +510,33 @@ chrome.windows.onRemoved.addListener( (windowId) => {
 
 
 // Prepares JSON log and makes POST request to server for tabs events
-function buildAndSendEventLog(eventType, tabs, info){
-    let tabUrl = tabs[0].url;
-    let tabTitle = tabs[0].title;
-    let tabId = tabs[0].id;
+function buildAndSendEventLog(eventType, tab, info){
     
     let eventLog = { 
         timestamp: new Date(Date.now()).toISOString().replace('T',' ').slice(0, -1),
         category: "Browser",
         application: getBrowser(),
         event_type: eventType,
-        browser_url: tabUrl,
-        id: tabId,
-        title: tabTitle
+        browser_url: tab.url,
+        id: tab.id,
+        title: tab.title
     };
     
     if (eventType == "moveTab") {
         eventLog.tab_moved_from_index = info.fromIndex
         eventLog.tab_moved_to_index = info.toIndex
     } else if (eventType == "newTab") {
-        tabTitles.set(tabId, tabTitle);
-        tabUrls.set(tabId, tabUrl);
+        previousTabs.set(tab.id, tab)
     } else if (eventType == "closeTab"){
-        tabUrls.delete(tabId);
-        tabTitles.delete(tabId);
+        previousTabs.delete(tab.id)
     } else if (eventType == "zoomTab"){
         eventLog.newZoomFactor = info.newZoomFactor
         eventLog.oldZoomFactor = info.oldZoomFactor
-    } else if (eventType == "pinnedTab") {
+    } else if (eventType == "pinnedTab" || eventType == "unpinnedTab") {
         eventLog.pinned = info.pinned
     } else if (eventType == "audibleTab") {
         eventLog.audible = info.audible
-    } else if (eventType == "mutedTab") {
+    } else if (eventType == "mutedTab" || eventType == "unmutedTab") {
         eventLog.muted = info.mutedInfo.muted
     }
     
@@ -623,7 +556,7 @@ function post(eventLog) {
             console.log("Request Successful!" + responseData);
         },
         error: function (request, status, error) {
-            console.log("Request Failed! " + JSON.stringify(request) + 'Status ' + status + "Error msg: " + error);
+            console.log("Request Failed!");
         }
     });
 }
