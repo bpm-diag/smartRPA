@@ -4,11 +4,13 @@
     "description": "Log user interactions with the browser",
     "version": "1.0",
     "icons": {
-        "64": "icons/icon.png"
+        "32": "icons/icon-32.png",
+        "128": "icons/icon-128.png"
     },
     "background": {
         "scripts": [
             "background_script.js",
+            "utility_script.js",
             "libs/jquery-3.4.1.min.js"
         ],
         "persistent": false
@@ -19,6 +21,7 @@
             ],
             "js": [
                 "content_script.js",
+                "utility_script.js",
                 "libs/jquery-3.4.1.min.js"
             ]
     }],
@@ -34,7 +37,8 @@
     ],
     "browser_action": {
         "default_icon": {
-            "64": "icons/icon.png"
+            "32": "icons/icon-32.png",
+            "128": "icons/icon-128.png"
         },
         "default_popup": "browserAction/index.html",
         "default_title": "BrowserLogger"

@@ -11,14 +11,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('Server online');
                 $("#server_status").text('Logging server running')
                 $("#server_status").css('color', 'greenyellow');
+                chrome.browserAction.setBadgeText({text: 'ON'});
+                chrome.browserAction.setBadgeBackgroundColor({color: 'green'});
             },
             400: function (response) {
                 console.log('Server offline 400');
                 $("#server_status").text('Logging server not running')
+                chrome.browserAction.setBadgeText({text: 'OFF'});
             },
             0: function (response) {
                 console.log('Server offline 0');
                 $("#server_status").text('Logging server not running')
+                chrome.browserAction.setBadgeText({text: 'OFF'});
             }              
         }
     })

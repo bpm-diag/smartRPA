@@ -4,6 +4,11 @@ body {
     font: small-caps 16px Courier, sans-serif;
 }
 
+div {
+    padding: 15px;
+    outline:dashed;
+}
+
 #server_status {
     color: red;
 }
