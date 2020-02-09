@@ -1,3 +1,9 @@
-h1 {
-  font-style: italic;
+body {
+    background-color: #1A222C;
+    color: white;
+    font: small-caps 16px Courier, sans-serif;
+}
+
+#server_status {
+    color: red;
 }

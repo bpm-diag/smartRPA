@@ -39,9 +39,9 @@ class LoggerGUI(Frame):
         self.officeAccess = BooleanVar()
         self.officeAccess.set(False)
         self.browserChrome = BooleanVar()
-        self.browserChrome.set(False)
+        self.browserChrome.set(True)
         self.browserFirefox = BooleanVar()
-        self.browserFirefox.set(False)
+        self.browserFirefox.set(True)
 
         menu = Menu(self.parent)
         self.parent.config(menu=menu)

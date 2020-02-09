@@ -47,9 +47,10 @@ def startLogger(systemLoggerFilesFolder,
                 browserChrome,
                 browserFirefox):
 
-    windows = (system() == "windows")
+    windows = (system() == "Windows")
+    mac = (system() == "Darwin")
 
-    try:  # create the threads as daemon so they are closed when main ends
+    try:  # create the threads as daemons so they are closed when main ends
 
         # start writer server
         createLogFile()
@@ -70,10 +71,15 @@ def startLogger(systemLoggerFilesFolder,
                 # t4.daemon = True
                 # t4.start()
 
-        if systemLoggerPrograms and windows:
-            t3 = Thread(target=systemEvents.logProcessesWin)
-            t3.daemon = True
-            t3.start()
+        if systemLoggerPrograms:
+            if windows:
+                t3 = Thread(target=systemEvents.logProcessesWin)
+                t3.daemon = True
+                t3.start()
+
+            if mac:
+                #TODO
+                pass
 
         if systemLoggerClipboard:
             t4 = Thread(target=clipboardEvents.logClipboard)

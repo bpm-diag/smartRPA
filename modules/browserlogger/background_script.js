@@ -338,17 +338,30 @@ chrome.tabs.onDetached.addListener( (detachInfo) => {
 // https://developer.chrome.com/extensions/tabs#event-onActivated
 chrome.tabs.onActivated.addListener( (activeInfo) => {
     console.log("Tab activated")
-    // get active tab https://developer.chrome.com/extensions/tabs#method-query
-    chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
+
+    chrome.tabs.get(activeInfo.tabId, (tab) => {
+        console.log(tab);
         try{
-            if (!tabs[0].url.includes("newtab")) {
-                buildAndSendEventLog("selectTab", tabs)
+            if (!tab.url.includes("newtab")) {
+                buildAndSendEventLog("selectTab", tab)
             }
         } catch(error){
             console.log("Platform not supported");
             console.log(error.message);
         }
-    });
+    })
+
+    // get active tab https://developer.chrome.com/extensions/tabs#method-query
+    // chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, (tabs) => {
+    //     try{
+    //         if (!tabs[0].url.includes("newtab")) {
+    //             buildAndSendEventLog("selectTab", tabs)
+    //         }
+    //     } catch(error){
+    //         console.log("Platform not supported");
+    //         console.log(error.message);
+    //     }
+    // });
 });
 
 
@@ -356,6 +369,12 @@ chrome.tabs.onActivated.addListener( (activeInfo) => {
 // https://developer.chrome.com/extensions/tabs#event-onRemoved
 chrome.tabs.onRemoved.addListener( (tabId, removeInfo) => {
     console.log("Tab removed")
+    
+    chrome.tabs.get(tabId, (tab) => {
+        console.log(tab);
+        
+    })
+    
     try{
         chrome.tabs.query({ 'lastFocusedWindow': true }, (tabs) => {
             let tabsID = new Array();
@@ -376,7 +395,7 @@ chrome.tabs.onRemoved.addListener( (tabId, removeInfo) => {
                 }
             }
         })
-    } catch(err){
+    } catch(error){
         console.log("Platform not supported");
         console.log(error.message);
     }
@@ -594,10 +613,6 @@ function buildAndSendEventLog(eventType, tabs, info){
 
 
 function post(eventLog) {
-    // var storage = (localStorage.getItem('checkboxValue') || {}) == 'true';
-    // if (storage === true) {
-    // console.log("Recording Enabled")
-    
     $.ajax({
         type: "POST",
         url: "http://127.0.0.1:4444/",
@@ -611,10 +626,6 @@ function post(eventLog) {
             console.log("Request Failed! " + JSON.stringify(request) + 'Status ' + status + "Error msg: " + error);
         }
     });
-    
-    // } else {
-    //     console.log("Recording Disabled");
-    // }
 }
 
 function getBrowser() {
