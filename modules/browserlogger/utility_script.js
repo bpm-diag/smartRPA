@@ -1,3 +1,7 @@
+// ********************
+// Utilities 
+// ********************
+
 function post(eventLog) {
     $.ajax({
         type: "POST",

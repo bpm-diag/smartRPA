@@ -42,8 +42,5 @@
         },
         "default_popup": "browserAction/index.html",
         "default_title": "BrowserLogger"
-    },
-    "options_ui": {
-        "page": "options/index.html"
     }
 }

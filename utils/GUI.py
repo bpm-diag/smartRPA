@@ -1,11 +1,11 @@
+from multiprocessing import Process
+import mainLogger
 from tkinter import *
 from tkinter import messagebox
 from platform import system
 from sys import path
 
 path.append('../')  # this way main file is visible from this file
-import mainLogger
-from multiprocessing import Process
 
 
 class LoggerGUI(Frame):
@@ -15,8 +15,8 @@ class LoggerGUI(Frame):
         Frame.__init__(self, parent)
         self.parent = parent
         self.TG_BLUE = '#1A222C'
-        self.parent.title('SystemLogger')
-        self.parent.geometry('300x500')
+        self.parent.title('MainLogger')
+        self.parent.geometry('300x520')
         self.parent.configure(background=self.TG_BLUE)
 
         # process inizialization
@@ -49,7 +49,9 @@ class LoggerGUI(Frame):
         fileMenu.add_command(label="About", command=self.aboutMenu)
         menu.add_cascade(label="File", menu=fileMenu)
 
-        Label(parent, text="Select modules to activate", font=("Arial", 14), pady=10, background=self.TG_BLUE,
+        Label(parent, text="MainLogger", font=("Courier", 20), foreground="white", pady=20, background=self.TG_BLUE).pack()
+
+        Label(parent, text="Select modules to activate", font=("Arial", 14), pady=5, background=self.TG_BLUE,
               foreground='white').pack()
 
         systemFrame = LabelFrame(parent, text="System logger", padx=20, pady=10, background=self.TG_BLUE,
@@ -96,12 +98,15 @@ class LoggerGUI(Frame):
         Checkbutton(browserFrame, text="Mozilla Firefox", variable=self.browserFirefox, background=self.TG_BLUE,
                     foreground='white').pack(anchor="w")
 
-        Label(parent, text="", background=self.TG_BLUE, foreground='white').pack()
+        Label(parent, text="", background=self.TG_BLUE,
+              foreground='white').pack()
 
-        self.runButton = Button(parent, text='Start logger', command=self.onclick, padx=5, pady=5)
+        self.runButton = Button(
+            parent, text='Start logger', command=self.onclick, padx=5, pady=5)
         self.runButton.pack()
 
-        self.statusLabel = Label(parent, text="", font=("Courier", 12), fg="green", pady=5, background=self.TG_BLUE)
+        self.statusLabel = Label(parent, text="", font=(
+            "Courier", 12), fg="green", pady=5, background=self.TG_BLUE)
         self.statusLabel.pack()
 
     # noinspection PyTypeChecker
@@ -138,7 +143,8 @@ class LoggerGUI(Frame):
 
             # stop main process, automatically closing all daemon threads in main process
             self.mainProcess.terminate()
-            print("Main process terminated, daemon threads closed, wainting for new input...")
+            print(
+                "Main process terminated, daemon threads closed, wainting for new input...")
 
     def aboutMenu(self):
         messagebox.showinfo("About", "Master's Thesis")

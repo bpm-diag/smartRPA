@@ -5,6 +5,8 @@ logs/
 stuff_to_delete/
 PythonProgrammingOnWin32.pdf
 latex
+test.json
+tree.txt
 *.pyc
 *.csv
 __pycache__/

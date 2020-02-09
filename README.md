@@ -6,8 +6,27 @@
 ```
 pip3 install -r requirements.txt
 ```
-2. Run main logger
+2. Install extension in browser
+
+3. Run main logger
 ```
 python3 mainLogger.py
 ```
 
+
+# Project structure
+
+```
+.
+├── README.md
+├── mainLogger.py
+├── modules
+│   ├── browserlogger
+│   ├── clipboardEvents.py
+│   ├── officeEvents.py
+│   └── systemEvents.py
+├── requirements.txt
+└── utils
+    ├── GUI.py
+    └── consumerServer.py
+```
