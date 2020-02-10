@@ -11,7 +11,8 @@
         "scripts": [
             "background_script.js",
             "utility_script.js",
-            "libs/jquery-3.4.1.min.js"
+            "libs/jquery-3.4.1.min.js",
+            "libs/moment.min.js"
         ],
         "persistent": false
     },
@@ -22,7 +23,8 @@
             "js": [
                 "content_script.js",
                 "utility_script.js",
-                "libs/jquery-3.4.1.min.js"
+                "libs/jquery-3.4.1.min.js",
+                "libs/moment.min.js"
             ]
     }],
     "permissions": [

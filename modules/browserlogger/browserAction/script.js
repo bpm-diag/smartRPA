@@ -8,11 +8,10 @@ document.addEventListener("DOMContentLoaded", function() {
     })
         .done(function(data, textStatus, jqXHR) {
             console.log("HTTP Request Succeeded: " + jqXHR.status);
-
-            if (getBrowser() == "Chrome" && data.log_chrome) {
-                // server running and browser logging enabled by user
-                loggingON();
-            } else if (getBrowser() == "Firefox" && data.log_firefox) {
+            if (
+                (getBrowser() == "Chrome" && data.log_chrome) ||
+                (getBrowser() == "Firefox" && data.log_firefox)
+            ) {
                 // server running and browser logging enabled by user
                 loggingON();
             } else {

@@ -6,7 +6,7 @@
 ```
 pip3 install -r requirements.txt
 ```
-2. Install extension in browser
+2. Install browser extension
 
 3. Run main logger
 ```
@@ -14,7 +14,7 @@ python3 mainLogger.py
 ```
 
 
-# Project structure
+## Project structure
 
 ```
 .
