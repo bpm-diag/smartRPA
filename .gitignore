@@ -7,6 +7,7 @@ PythonProgrammingOnWin32.pdf
 latex
 test.json
 tree.txt
+.web-extension-id
 *.pyc
 *.csv
 __pycache__/

@@ -255,38 +255,56 @@ document.body.ondragstart = e => {
     post(eventLog);
 };
 
+// The cancel event fires when the user indicates a wish to dismiss a <dialog>
+// https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oncancel
+document.body.oncancel = e => {
+    console.log("cancelDialog");
+    let event = e || window.event;
+
+    let eventLog = {
+        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        category: "Browser",
+        application: getBrowser(),
+        event_type: "cancelDialog",
+        browser_url: document.URL,
+    };
+    console.log(JSON.stringify(eventLog));
+    post(eventLog);
+};
+
 // Fired when the element has transitioned into or out of full-screen mode.
 // https://developer.mozilla.org/en-US/docs/Web/API/Element/onfullscreenchange
-// document.body.onfullscreenchange = e => {
-//     console.log("fullscreen");
+document.body.onfullscreenchange = e => {
+    console.log("fullscreen");
     
-//     let event = e || window.event;
-//     let target = event.target;
-//     let isFullscreen = document.fullscreenElement === target;
-//     console.log(target);
-//     console.log(isFullscreen);
+    let event = e || window.event;
+    let target = event.target;
+    let isFullscreen = document.fullscreenElement === target;
+    console.log(target);
+    console.log(isFullscreen);
 
-//     // document.fullscreenElement will point to the element that
-//     // is in fullscreen mode if there is one. If there isn't one,
-//     // the value of the property is null.
-//     if (document.fullscreenElement) {
-//         console.log(
-//             `Element: ${document.fullscreenElement.id} entered full-screen mode.`
-//         );
-//     } else {
-//         console.log("Leaving full-screen mode.");
-//     }
+    // document.fullscreenElement will point to the element that
+    // is in fullscreen mode if there is one. If there isn't one,
+    // the value of the property is null.
+    if (document.fullscreenElement) {
+        console.log(
+            `Element: ${document.fullscreenElement.id} entered full-screen mode.`
+        );
+    } else {
+        console.log("Leaving full-screen mode.");
+    }
 
-//     let eventLog = {
-//         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
-//         category: "Browser",
-//         application: getBrowser(),
-//         event_type: "fullscreen",
-//         browser_url: document.URL
-//     };
-//     console.log(JSON.stringify(eventLog));
-//     post(eventLog);
-// };
+    let eventLog = {
+        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        category: "Browser",
+        application: getBrowser(),
+        event_type: "fullscreen",
+        browser_url: document.URL,
+        id: document.fullscreenElement.id || ""
+    };
+    console.log(JSON.stringify(eventLog));
+    post(eventLog);
+};
 
 
 

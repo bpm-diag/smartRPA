@@ -26,3 +26,34 @@ function getBrowser() {
         return "Chrome";
     }
 }
+
+function log(data){
+    let storage = (localStorage.getItem('checkboxValue') || {}) == 'true';
+}
+
+function loggingON() {
+    $("#server_status").text("Logging server running");
+    $("#server_status").css("color", "greenyellow");
+    chrome.browserAction.setBadgeText({ text: "ON" });
+    chrome.browserAction.setBadgeBackgroundColor({
+        color: "green"
+    });
+}
+
+function loggingONOFF() {
+    $("#server_status").text(
+        `Logging server running but ${getBrowser()} logging disabled`
+    );
+    $("#server_status").css("color", "orange");
+    chrome.browserAction.setBadgeText({ text: "OFF" });
+    chrome.browserAction.setBadgeBackgroundColor({
+        color: "orange"
+    });
+}
+
+function loggingOFF() {
+    console.log("HTTP Request Failed, server offline");
+    $("#server_status").text("Logging server not running");
+    chrome.browserAction.setBadgeText({ text: "OFF" });
+    chrome.browserAction.setBadgeBackgroundColor({ color: "red" });
+}
