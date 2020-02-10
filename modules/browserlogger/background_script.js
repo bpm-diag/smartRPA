@@ -246,20 +246,6 @@ chrome.notifications.onClicked.addListener(notificationId => {
     post(eventLog);
 });
 
-// Print
-chrome.printerProvider.onPrintRequested.addListener(notificationId => {
-    console.log("Print requested");
-    let eventLog = {
-        timestamp: moment().format('YYYY-MM-DD HH:mm:ss:SSS'),
-        category: "Browser",
-        application: getBrowser(),
-        event_type: "printRequested",
-        id: notificationId
-    };
-    console.log(eventLog);
-    post(eventLog);
-})
-
 
 // ********************
 // Tabs events

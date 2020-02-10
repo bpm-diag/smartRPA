@@ -2,6 +2,88 @@
 // https://developer.chrome.com/extensions/content_scripts
 // https://developer.mozilla.org/en-US/docs/Web/API
 
+// ********************
+// HTML elements events
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement
+// ********************
+
+// Paste
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/onpaste
+document.body.onpaste = e => {
+    console.log("paste");
+    let event = e || window.event;
+    let paste = (event.clipboardData || window.clipboardData).getData(
+        "text/plain"
+    );
+    let eventLog = {
+        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        category: "Browser",
+        application: getBrowser(),
+        event_type: "paste",
+        clipboard_content: paste,
+        browser_url: document.URL
+    };
+    console.log(JSON.stringify(eventLog));
+    post(eventLog);
+};
+
+// ********************
+// Window events
+// https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers
+// ********************
+
+// The print event is raised before the print dialog window is opened.
+// https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeprint
+window.onbeforeprint = e => {
+    console.log("print");
+    let event = e || window.event;
+    let eventLog = {
+        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        category: "Browser",
+        application: getBrowser(),
+        event_type: "print",
+        browser_url: document.URL
+    };
+    console.log(JSON.stringify(eventLog));
+    post(eventLog);
+};
+
+// Fired when the fragment identifier of the URL has changed (the part of the URL beginning with and following the # symbol).
+// https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onhashchange
+window.onhashchange = e => {
+    console.log("url hash change");
+
+    let eventLog = {
+        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        category: "Browser",
+        application: getBrowser(),
+        event_type: "urlHashChange",
+        browser_url: document.URL,
+        tag_href: location.hash
+    };
+    console.log(JSON.stringify(eventLog));
+    post(eventLog);
+};
+
+// ********************
+// Global events
+// https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/// ********************
+
+// Context menu (right click)
+// https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oncontextmenu
+document.body.oncontextmenu = e => {
+    console.log("context menu");
+    let eventLog = {
+        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        category: "Browser",
+        application: getBrowser(),
+        event_type: "contextMenu",
+        browser_url: document.URL
+    };
+    console.log(JSON.stringify(eventLog));
+    post(eventLog);
+};
+
 // Click
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onclick
 document.body.onclick = e => {
@@ -12,7 +94,12 @@ document.body.onclick = e => {
     let tag = target.tagName;
     let type = target.type;
     let click_coord = `(${event.screenX}, ${event.screenY})`; // relative to browser
-
+    let url = document.URL
+    let html = target.innerHTML
+    
+    // remove html if clicking on youtube
+    if (url.includes("youtube")) html = ""
+   
     // Set this variable if you want to log clicks on text elements like paragraphs, headers, div, span
     LOG_TEXT_ELEMENTS = false;
     if (
@@ -26,7 +113,9 @@ document.body.onclick = e => {
             tag == "H6" ||
             tag == "P" ||
             tag == "SPAN" ||
-            tag == "CODE")
+            tag == "CODE" ||
+            tag == "YT-FORMATTED-STRING"
+            )
     )
         return 0;
 
@@ -49,13 +138,13 @@ document.body.onclick = e => {
         category: "Browser",
         application: getBrowser(),
         event_type: eventType,
-        browser_url: document.URL,
+        browser_url: url,
         tag_category: tag,
         tag_type: type,
         tag_name: target.name,
         tag_title: target.title,
         tag_value: target.value,
-        tag_html: target.innerHTML,
+        tag_html: html,
         tag_href: target.href || "",
         tag_innerText: target.innerText,
         tag_option: target.option
@@ -69,27 +158,8 @@ document.body.onclick = e => {
     post(eventLog);
 };
 
-// Paste
-// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/onpaste
-document.body.onpaste = e => {
-    console.log("paste");
-    let event = e || window.event;
-    let paste = (event.clipboardData || window.clipboardData).getData(
-        "text/plain"
-    );
-    let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
-        category: "Browser",
-        application: getBrowser(),
-        event_type: "paste",
-        clipboard_content: paste,
-        browser_url: document.URL
-    };
-    console.log(JSON.stringify(eventLog));
-    post(eventLog);
-};
-
 // Selection
+// https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onmouseup
 document.body.onmouseup = e => {
     let selection = window.getSelection().toString();
     if (selection) {
@@ -108,6 +178,7 @@ document.body.onmouseup = e => {
 };
 
 // Submit form
+// https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onsubmit
 document.body.onsubmit = e => {
     console.log("submit");
     let eventLog = {
@@ -115,21 +186,6 @@ document.body.onsubmit = e => {
         category: "Browser",
         application: getBrowser(),
         event_type: "submit",
-        browser_url: document.URL
-    };
-    console.log(JSON.stringify(eventLog));
-    post(eventLog);
-};
-
-// Context menu (right click)
-// https://developer.mozilla.org/en-US/docs/Web/API/Element/contextmenu_event
-document.body.oncontextmenu = e => {
-    console.log("context menu");
-    let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
-        category: "Browser",
-        application: getBrowser(),
-        event_type: "contextMenu",
         browser_url: document.URL
     };
     console.log(JSON.stringify(eventLog));
@@ -166,7 +222,7 @@ document.body.onchange = e => {
     post(eventLog);
 };
 
-// The focus event fires when an element has received focus. 
+// The focus event fires when an element has received focus.
 // https://developer.mozilla.org/en-US/docs/Web/API/Element/focus_event
 document.body.ondblclick = e => {
     console.log("double click");
@@ -199,30 +255,38 @@ document.body.ondragstart = e => {
     post(eventLog);
 };
 
-// too much spam
-// document.body.oninput = e => {
-//     console.log("input");
+// Fired when the element has transitioned into or out of full-screen mode.
+// https://developer.mozilla.org/en-US/docs/Web/API/Element/onfullscreenchange
+// document.body.onfullscreenchange = e => {
+//     console.log("fullscreen");
+    
+//     let event = e || window.event;
+//     let target = event.target;
+//     let isFullscreen = document.fullscreenElement === target;
+//     console.log(target);
+//     console.log(isFullscreen);
+
+//     // document.fullscreenElement will point to the element that
+//     // is in fullscreen mode if there is one. If there isn't one,
+//     // the value of the property is null.
+//     if (document.fullscreenElement) {
+//         console.log(
+//             `Element: ${document.fullscreenElement.id} entered full-screen mode.`
+//         );
+//     } else {
+//         console.log("Leaving full-screen mode.");
+//     }
+
 //     let eventLog = {
 //         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
 //         category: "Browser",
 //         application: getBrowser(),
-//         event_type: "inputField",
+//         event_type: "fullscreen",
 //         browser_url: document.URL
 //     };
 //     console.log(JSON.stringify(eventLog));
 //     post(eventLog);
 // };
 
-// too much spam
-// document.body.onkeypress = (e) => {
-//     console.log("keypress");
-//     let eventLog = {
-//         timestamp: moment().format('YYYY-MM-DD HH:mm:ss:SSS'),
-//         category: "Browser",
-//         application: getBrowser(),
-//         event_type: "keypress",
-//         browser_url: document.URL
-//     };
-//     console.log(JSON.stringify(eventLog));
-//     post(eventLog);
-// };
+
+
