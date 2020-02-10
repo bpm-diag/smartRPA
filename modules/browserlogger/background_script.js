@@ -246,6 +246,21 @@ chrome.notifications.onClicked.addListener(notificationId => {
     post(eventLog);
 });
 
+// Print
+chrome.printerProvider.onPrintRequested.addListener(notificationId => {
+    console.log("Print requested");
+    let eventLog = {
+        timestamp: moment().format('YYYY-MM-DD HH:mm:ss:SSS'),
+        category: "Browser",
+        application: getBrowser(),
+        event_type: "printRequested",
+        id: notificationId
+    };
+    console.log(eventLog);
+    post(eventLog);
+})
+
+
 // ********************
 // Tabs events
 // https://developer.chrome.com/extensions/tabs
@@ -392,7 +407,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // when enter is pressed on address bar. At least part of the document has been received from the server and the browser has decided to switch to the new document.
 // https://developer.chrome.com/extensions/webNavigation#event-onCommitted
 chrome.webNavigation.onCommitted.addListener(details => {
-    console.log("webNavigation commit");
+    // console.log("webNavigation commit");
 
     let eventLog = {
         timestamp: moment().format('YYYY-MM-DD HH:mm:ss:SSS'),
@@ -465,6 +480,7 @@ chrome.windows.onRemoved.addListener(windowId => {
     console.log(eventLog);
     post(eventLog);
 });
+
 
 // Fired when the currently focused window changes. (too much spam)
 // https://developer.chrome.com/extensions/windows#event-onFocusChanged

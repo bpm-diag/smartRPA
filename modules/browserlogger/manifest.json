@@ -34,6 +34,7 @@
         "history",
         "management",
         "notifications",
+        "printerProvider",
         "storage",
         "webNavigation"
     ],
