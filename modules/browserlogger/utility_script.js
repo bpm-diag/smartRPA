@@ -1,5 +1,5 @@
 // ********************
-// Utilities 
+// Utilities
 // ********************
 
 function post(eventLog) {
@@ -7,28 +7,61 @@ function post(eventLog) {
         type: "POST",
         url: "http://127.0.0.1:4444/",
         crossDomain: true,
-        contentType: 'application/json',
+        contentType: "application/json",
         data: JSON.stringify(eventLog),
-        success: function (responseData, status, xhr) {
-            console.log("Request Successful!" + responseData);
+        success: function(responseData, status, xhr) {
+            console.log("Request Successful! ") // + JSON.stringify(responseData));
         },
-        error: function (request, status, error) {
-            console.log("Request Failed!");
+        error: function(request, status, error) {
+            console.log("Request Failed " + error);
         }
     });
 }
 
 function getBrowser() {
     if (typeof chrome !== "undefined") {
-        if (typeof browser !== "undefined") 
-        return "Firefox";
-        else 
-        return "Chrome";
+        if (typeof browser !== "undefined") return "Firefox";
+        else return "Chrome";
     }
 }
 
-function log(data){
-    let storage = (localStorage.getItem('checkboxValue') || {}) == 'true';
+// function log(eventLog) {
+//     let storage = (localStorage.getItem("log_browser") || {}) == "true";
+// }
+
+function sendToBackgroundForPost(eventLog) {
+    chrome.runtime.sendMessage({
+        contentScriptQuery: "postData",
+        data: eventLog
+    });
+}
+
+function checkServerStatus(){
+    $.ajax({
+        url: "http://127.0.0.1:4444/serverstatus",
+        type: "GET",
+        timeout: 1000
+    })
+        .done(function(data, textStatus, jqXHR) {
+            console.log("HTTP Request Succeeded: " + jqXHR.status);
+            if (
+                (getBrowser() == "Chrome" && data.log_chrome) ||
+                (getBrowser() == "Firefox" && data.log_firefox)
+            ) {
+                // server running and browser logging enabled by user
+                loggingON();
+            } else {
+                // server running but browser logging NOT enabled by user
+                loggingONOFF();
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            // server NOT running
+            loggingOFF();
+        })
+        .always(function() {
+            /* ... */
+        });
 }
 
 function loggingON() {

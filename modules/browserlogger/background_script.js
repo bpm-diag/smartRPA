@@ -489,9 +489,15 @@ chrome.windows.onRemoved.addListener(windowId => {
 // https://developer.chrome.com/apps/runtime#event-onInstalled
 chrome.runtime.onInstalled.addListener(() => {
     chrome.browserAction.setBadgeText({ text: "OFF" });
-    chrome.tabs.get(1, tab => {
-        previousTabs.set(tab.id, tab);
-    });
+    try {
+        chrome.tabs.get(1, tab => {
+            if (tab)
+                previousTabs.set(tab.id, tab);
+        });
+    } catch (error) {
+        console.log(error.message);
+    }
+    
 });
 
 // add first tab in map so it can be tracked when closed
@@ -502,6 +508,33 @@ chrome.runtime.onStartup.addListener(() => {
         previousTabs.set(tab.id, tab);
     });
 });
+
+// receive messages from content and send them to server. 
+// It is not possible anymore to do it directly from content due to "security reasons"
+// https://www.chromium.org/Home/chromium-security/extension-content-script-fetches
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {    
+    if (request.contentScriptQuery == "postData") {
+        post(request.data)
+    }
+});
+
+// ********************
+// alarm events
+// https://developer.chrome.com/apps/alarms
+// ********************
+
+// set up an alarm that check server status every minute. 
+// If server is running update extension text and badge to ON, else update to OFF
+// chrome.alarms.create("checkServerStatus", {
+//     delayInMinutes: 1,
+//     periodInMinutes: 1
+// });
+
+// chrome.alarms.onAlarm.addListener(function(alarm) {
+//     if (alarm.name === "checkServerStatus") {
+//         checkServerStatus()
+//     }
+// });
 
 // ********************
 // Utilities

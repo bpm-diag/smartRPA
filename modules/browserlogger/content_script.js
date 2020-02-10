@@ -24,7 +24,7 @@ document.body.onpaste = e => {
         browser_url: document.URL
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // ********************
@@ -45,7 +45,7 @@ window.onbeforeprint = e => {
         browser_url: document.URL
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // Fired when the fragment identifier of the URL has changed (the part of the URL beginning with and following the # symbol).
@@ -62,7 +62,7 @@ window.onhashchange = e => {
         tag_href: location.hash
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // ********************
@@ -81,7 +81,7 @@ document.body.oncontextmenu = e => {
         browser_url: document.URL
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // Click
@@ -94,12 +94,12 @@ document.body.onclick = e => {
     let tag = target.tagName;
     let type = target.type;
     let click_coord = `(${event.screenX}, ${event.screenY})`; // relative to browser
-    let url = document.URL
-    let html = target.innerHTML
-    
+    let url = document.URL;
+    let html = target.innerHTML;
+
     // remove html if clicking on youtube
-    if (url.includes("youtube")) html = ""
-   
+    if (url.includes("youtube")) html = "";
+
     // Set this variable if you want to log clicks on text elements like paragraphs, headers, div, span
     LOG_TEXT_ELEMENTS = false;
     if (
@@ -114,10 +114,14 @@ document.body.onclick = e => {
             tag == "P" ||
             tag == "SPAN" ||
             tag == "CODE" ||
-            tag == "YT-FORMATTED-STRING"
-            )
+            tag == "YT-FORMATTED-STRING" ||
+            tag == "FIELDSET" ||
+            tag == "BODY")
     )
         return 0;
+
+    // already handled by onchange
+    if (tag == "OPTION") return 0;
 
     let eventType = "mouseClick";
     if (tag == "TEXTAREA" || tag == "INPUT") {
@@ -155,7 +159,8 @@ document.body.onclick = e => {
     }
 
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    // sendToBackgroundForPost(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // Selection
@@ -173,7 +178,7 @@ document.body.onmouseup = e => {
             tag_value: selection
         };
         console.log(JSON.stringify(eventLog));
-        post(eventLog);
+        sendToBackgroundForPost(eventLog);
     }
 };
 
@@ -189,7 +194,7 @@ document.body.onsubmit = e => {
         browser_url: document.URL
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // Change, fired for <input>, <select>, and <textarea> elements when an alteration to the element's value is committed by the user
@@ -219,7 +224,7 @@ document.body.onchange = e => {
         tag_value: target.value
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // The focus event fires when an element has received focus.
@@ -234,7 +239,7 @@ document.body.ondblclick = e => {
         browser_url: document.URL
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // The drag event is fired every few hundred milliseconds as an element or text selection is being dragged by the user.
@@ -252,7 +257,7 @@ document.body.ondragstart = e => {
         tag_value: event.dataTransfer.getData("text/plain")
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // The cancel event fires when the user indicates a wish to dismiss a <dialog>
@@ -266,17 +271,17 @@ document.body.oncancel = e => {
         category: "Browser",
         application: getBrowser(),
         event_type: "cancelDialog",
-        browser_url: document.URL,
+        browser_url: document.URL
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
 
 // Fired when the element has transitioned into or out of full-screen mode.
 // https://developer.mozilla.org/en-US/docs/Web/API/Element/onfullscreenchange
 document.body.onfullscreenchange = e => {
     console.log("fullscreen");
-    
+
     let event = e || window.event;
     let target = event.target;
     let isFullscreen = document.fullscreenElement === target;
@@ -303,8 +308,5 @@ document.body.onfullscreenchange = e => {
         id: document.fullscreenElement.id || ""
     };
     console.log(JSON.stringify(eventLog));
-    post(eventLog);
+    sendToBackgroundForPost(eventLog);
 };
-
-
-
