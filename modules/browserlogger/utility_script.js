@@ -86,10 +86,8 @@ function loggingON() {
     $("#server_status").text("Logging server running");
     $("#server_status").css("color", "greenyellow");
     // set extension badge
-    chrome.browserAction.setBadgeText({ text: "ON" });
-    chrome.browserAction.setBadgeBackgroundColor({
-        color: "green"
-    });
+    // chrome.browserAction.setBadgeText({ text: "ON" });
+    // chrome.browserAction.setBadgeBackgroundColor({ color: "green" });
     // save logging status in localstorage
     chrome.storage.local.set({ log_browser: true });
     console.log("logging enabled");
@@ -101,10 +99,8 @@ function loggingONOFF() {
         `Logging server running but ${getBrowser()} logging disabled`
     );
     $("#server_status").css("color", "orange");
-    chrome.browserAction.setBadgeText({ text: "OFF" });
-    chrome.browserAction.setBadgeBackgroundColor({
-        color: "orange"
-    });
+    // chrome.browserAction.setBadgeText({ text: "OFF" });
+    // chrome.browserAction.setBadgeBackgroundColor({ color: "orange" });
     chrome.storage.local.set({ log_browser: false });
     console.log("logging disabled");
 }
@@ -113,8 +109,8 @@ function loggingONOFF() {
 function loggingOFF() {
     console.log("HTTP Request Failed, server offline");
     $("#server_status").text("Logging server not running");
-    chrome.browserAction.setBadgeText({ text: "OFF" });
-    chrome.browserAction.setBadgeBackgroundColor({ color: "red" });
+    // chrome.browserAction.setBadgeText({ text: "OFF" });
+    // chrome.browserAction.setBadgeBackgroundColor({ color: "red" });
     chrome.storage.local.set({ log_browser: false });
     console.log("logging disabled");
 }
