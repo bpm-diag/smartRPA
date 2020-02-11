@@ -5,4 +5,5 @@ watchdog
 requests
 flask
 pyperclip
-xlwings
+pyqt5
+# xlwings

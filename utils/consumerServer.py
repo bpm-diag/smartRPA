@@ -13,10 +13,13 @@ getLogger('werkzeug').disabled = True
 environ['WERKZEUG_RUN_MAIN'] = 'true'
 
 
-filename = ""  # will be set by mainLogger when program is run
+# will be set by mainLogger when program is run
+filename = ""  
 log_chrome = False
 log_firefox = False
-header = ["timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path", "clipboard_content", "browser_url", "eventQual", "id", "title", "description", "tab_moved_from_index", "tab_moved_to_index", "newZoomFactor", "oldZoomFactor", "tab_pinned", "tab_audible", "tab_muted", "window_ingognito", "file_size", "tag_category", "tag_type", "tag_name", "tag_title", "tag_value", "tag_checked", "tag_html", "tag_href", "tag_innerText", "tag_option"]
+
+header = ["timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path", "clipboard_content", "browser_url", "eventQual", "id", "title", "description", "tab_moved_from_index", "tab_moved_to_index",
+          "newZoomFactor", "oldZoomFactor", "tab_pinned", "tab_audible", "tab_muted", "window_ingognito", "file_size", "tag_category", "tag_type", "tag_name", "tag_title", "tag_value", "tag_checked", "tag_html", "tag_href", "tag_innerText", "tag_option"]
 # fields = ['timeStamp', 'userID', 'targetApp', 'eventType', 'url', 'content', 'target.workbookName',
 # 'target.sheetName','target.id','target.className','target.tagName', 'target.type', 'target.name',
 # 'target.value', 'target.innerText', 'target.checked', 'target.href', 'target.option', 'target.title',
@@ -28,7 +31,6 @@ def index():
     return "Server working, send a post with json data."
 
 
-#  https://stackoverflow.com/a/35614301
 @app.route('/', methods=['POST'])
 def writeLog():
     content = request.json

@@ -55,7 +55,7 @@ function checkServerStatus() {
     $.ajax({
         url: "http://127.0.0.1:4444/serverstatus",
         type: "GET",
-        timeout: 1000
+        timeout: 500
     })
         .done(function(data, textStatus, jqXHR) {
             console.log("Logging server running: " + jqXHR.status);

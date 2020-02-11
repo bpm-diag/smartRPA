@@ -27,7 +27,7 @@ Log user interactions with the computer.
 pip3 install -r requirements.txt
 ```
 
-2. **Install browser extension** for _Google Chrome_ (loading the unpacked `browserlogger` directory in `chrome://extensions/`) and _Mozilla Firefox_ (loading the unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` or downloading [`browserlogger.xpi`](https://github.com/marco2012/SystemLogger/tree/master/modules/browserlogger/web-ext-artifacts/browserlogger.xpi))
+2. **Install browser extension** for _Google Chrome_ (loading the unpacked `browserlogger` directory in `chrome://extensions/`) and _Mozilla Firefox_ (loading the unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` or downloading [`browserlogger-1.0.1.xpi`](https://github.com/marco2012/SystemLogger/tree/master/modules/browserlogger/web-ext-artifacts/browserlogger-1.0.1.xpi))
 
 3. **Run main logger**
 
