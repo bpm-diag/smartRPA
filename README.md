@@ -14,7 +14,6 @@
         <img src="https://img.shields.io/badge/Chrome-80-blue?style=flat&labelColor=EDAD00&color=EDAD00&logo=google-chrome&logoColor=white" /></a>
     <a href="#computerlogger" alt="Activity">
         <img src="https://img.shields.io/badge/Firefox-72-blue?style=flat&labelColor=FF7139&color=FF7139&logo=mozilla-firefox&logoColor=white" /></a>
-        <a href="#computerlogger" alt="Activity">
 </p>
 
 Log user interactions with the computer.
@@ -27,7 +26,9 @@ Log user interactions with the computer.
 pip3 install -r requirements.txt
 ```
 
-2. **Install browser extension** for _Google Chrome_ (loading the unpacked `browserlogger` directory in `chrome://extensions/`) and _Mozilla Firefox_ (loading the unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` or downloading [`browserlogger-1.0.1.xpi`](https://github.com/marco2012/SystemLogger/tree/master/modules/browserlogger/web-ext-artifacts/browserlogger-1.0.1.xpi))
+2. **Install browser extension** 
+- _Google Chrome_: load unpacked `browserlogger` directory in `chrome://extensions/`
+- _Mozilla Firefox_: load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` or install [`browserlogger-1.0.1.xpi`](https://github.com/marco2012/SystemLogger/tree/master/modules/browserlogger/web-ext-artifacts/browserlogger-1.0.1.xpi)
 
 3. **Run main logger**
 
