@@ -487,12 +487,16 @@ chrome.windows.onRemoved.addListener(windowId => {
 chrome.runtime.onInstalled.addListener(runtimeStartup);
 chrome.runtime.onStartup.addListener(runtimeStartup);
 function runtimeStartup() {
+    // check if server is running
     checkServerStatus();
+    // save all open tabs in map
     chrome.tabs.query({ windowType: "normal" }, tabs => {
         tabs.forEach(tab => {
             previousTabs.set(tab.id, tab);
         });
     });
+    // use white extension color if browser is in dark mode
+    setupIconColor();
 }
 
 // receive messages from content and send them to server.
@@ -511,17 +515,16 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 // set up an alarm that check server status every minute.
 // If server is running update extension text and badge to ON, else update to OFF
-const alarm_interval = 0.5 //30 seconds
+// const alarm_interval = 0.5; //30 seconds
 // chrome.alarms.create("checkServerStatus", {
 //     delayInMinutes: alarm_interval,
 //     periodInMinutes: alarm_interval
 // });
-
-chrome.alarms.onAlarm.addListener(function(alarm) {
-    if (alarm.name === "checkServerStatus") {
-        checkServerStatus()
-    }
-});
+// chrome.alarms.onAlarm.addListener(function(alarm) {
+//     if (alarm.name === "checkServerStatus") {
+//         checkServerStatus();
+//     }
+// });
 
 // ********************
 // Utilities

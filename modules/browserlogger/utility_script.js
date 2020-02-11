@@ -85,10 +85,7 @@ function loggingON() {
     // set extension page text and color
     $("#server_status").text("Logging server running");
     $("#server_status").css("color", "greenyellow");
-    // set extension badge
-    // chrome.browserAction.setBadgeText({ text: "ON" });
-    // chrome.browserAction.setBadgeBackgroundColor({ color: "green" });
-    // save logging status in localstorage
+    // setExtensionBadge("ON")
     chrome.storage.local.set({ log_browser: true });
     console.log("logging enabled");
 }
@@ -99,8 +96,7 @@ function loggingONOFF() {
         `Logging server running but ${getBrowser()} logging disabled`
     );
     $("#server_status").css("color", "orange");
-    // chrome.browserAction.setBadgeText({ text: "OFF" });
-    // chrome.browserAction.setBadgeBackgroundColor({ color: "orange" });
+    // setExtensionBadge("ONOFF")
     chrome.storage.local.set({ log_browser: false });
     console.log("logging disabled");
 }
@@ -109,8 +105,31 @@ function loggingONOFF() {
 function loggingOFF() {
     console.log("HTTP Request Failed, server offline");
     $("#server_status").text("Logging server not running");
-    // chrome.browserAction.setBadgeText({ text: "OFF" });
-    // chrome.browserAction.setBadgeBackgroundColor({ color: "red" });
+    // setExtensionBadge("OFF")
     chrome.storage.local.set({ log_browser: false });
     console.log("logging disabled");
+}
+
+function setExtensionBadge(status) {
+    chrome.browserAction.setBadgeText({ text: status });
+    if (status == "ON")
+        chrome.browserAction.setBadgeBackgroundColor({ color: "green" });
+    else if (status == "ONOFF")
+        chrome.browserAction.setBadgeBackgroundColor({ color: "orange" });
+    else if (status == "OFF")
+        chrome.browserAction.setBadgeBackgroundColor({ color: "red" });
+}
+
+// if user is using dark mode, change extension icon to white so it is visible in dark toolbar, used by background script
+function setupIconColor(){
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        chrome.browserAction.setIcon({
+            path: {
+                "16": "icons/icon-16-dark.png",
+                "32": "icons/icon-32-dark.png",
+                "48": "icons/icon-48-dark.png",
+                "128": "icons/icon-128-dark.png"
+            }
+        });
+    }
 }
