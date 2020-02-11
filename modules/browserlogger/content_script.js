@@ -10,7 +10,7 @@
 // Paste
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/onpaste
 document.body.onpaste = e => {
-    console.log("paste");
+    // console.log("paste");
     let event = e || window.event;
     let paste = (event.clipboardData || window.clipboardData).getData(
         "text/plain"
@@ -23,7 +23,7 @@ document.body.onpaste = e => {
         clipboard_content: paste,
         browser_url: document.URL
     };
-    console.log(JSON.stringify(eventLog));
+    // // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
@@ -35,7 +35,7 @@ document.body.onpaste = e => {
 // The print event is raised before the print dialog window is opened.
 // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeprint
 window.onbeforeprint = e => {
-    console.log("print");
+    // console.log("print");
     let event = e || window.event;
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
@@ -44,14 +44,14 @@ window.onbeforeprint = e => {
         event_type: "print",
         browser_url: document.URL
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
 // Fired when the fragment identifier of the URL has changed (the part of the URL beginning with and following the # symbol).
 // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onhashchange
 window.onhashchange = e => {
-    console.log("url hash change");
+    // console.log("url hash change");
 
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
@@ -61,7 +61,7 @@ window.onhashchange = e => {
         browser_url: document.URL,
         tag_href: location.hash
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
@@ -72,7 +72,7 @@ window.onhashchange = e => {
 // Context menu (right click)
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oncontextmenu
 document.body.oncontextmenu = e => {
-    console.log("context menu");
+    // console.log("context menu");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -80,14 +80,14 @@ document.body.oncontextmenu = e => {
         event_type: "contextMenu",
         browser_url: document.URL
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
 // Click
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onclick
 document.body.onclick = e => {
-    console.log("click");
+    // console.log("click");
 
     let event = e || window.event;
     let target = event.target;
@@ -158,7 +158,7 @@ document.body.onclick = e => {
         eventLog.tag_checked = target.checked;
     }
 
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     // sendToBackgroundForPost(eventLog);
     sendToBackgroundForPost(eventLog);
 };
@@ -168,7 +168,7 @@ document.body.onclick = e => {
 document.body.onmouseup = e => {
     let selection = window.getSelection().toString();
     if (selection) {
-        console.log("selection mouse up");
+        // console.log("selection mouse up");
         let eventLog = {
             timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
             category: "Browser",
@@ -177,7 +177,7 @@ document.body.onmouseup = e => {
             browser_url: document.URL,
             tag_value: selection
         };
-        console.log(JSON.stringify(eventLog));
+        // console.log(JSON.stringify(eventLog));
         sendToBackgroundForPost(eventLog);
     }
 };
@@ -185,7 +185,7 @@ document.body.onmouseup = e => {
 // Submit form
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onsubmit
 document.body.onsubmit = e => {
-    console.log("submit");
+    // console.log("submit");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -193,14 +193,14 @@ document.body.onsubmit = e => {
         event_type: "submit",
         browser_url: document.URL
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
 // Change, fired for <input>, <select>, and <textarea> elements when an alteration to the element's value is committed by the user
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onchange
 document.body.onchange = e => {
-    console.log("changeField");
+    // console.log("changeField");
 
     let event = e || window.event;
     let target = event.target;
@@ -223,14 +223,14 @@ document.body.onchange = e => {
         tag_name: target.name,
         tag_value: target.value
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
 // The focus event fires when an element has received focus.
 // https://developer.mozilla.org/en-US/docs/Web/API/Element/focus_event
 document.body.ondblclick = e => {
-    console.log("double click");
+    // console.log("double click");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -238,14 +238,14 @@ document.body.ondblclick = e => {
         event_type: "doubleClick",
         browser_url: document.URL
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
 // The drag event is fired every few hundred milliseconds as an element or text selection is being dragged by the user.
 // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API
 document.body.ondragstart = e => {
-    console.log("drag");
+    // console.log("drag");
     let event = e || window.event;
 
     let eventLog = {
@@ -256,14 +256,14 @@ document.body.ondragstart = e => {
         browser_url: document.URL,
         tag_value: event.dataTransfer.getData("text/plain")
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
 // The cancel event fires when the user indicates a wish to dismiss a <dialog>
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oncancel
 document.body.oncancel = e => {
-    console.log("cancelDialog");
+    // console.log("cancelDialog");
     let event = e || window.event;
 
     let eventLog = {
@@ -273,14 +273,14 @@ document.body.oncancel = e => {
         event_type: "cancelDialog",
         browser_url: document.URL
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };
 
 // Fired when the element has transitioned into or out of full-screen mode.
 // https://developer.mozilla.org/en-US/docs/Web/API/Element/onfullscreenchange
 document.body.onfullscreenchange = e => {
-    console.log("fullscreen");
+    // console.log("fullscreen");
 
     let event = e || window.event;
     let target = event.target;
@@ -307,6 +307,6 @@ document.body.onfullscreenchange = e => {
         browser_url: document.URL,
         id: document.fullscreenElement.id || ""
     };
-    console.log(JSON.stringify(eventLog));
+    // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
 };

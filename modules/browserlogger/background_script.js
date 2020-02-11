@@ -9,7 +9,7 @@
 // Fired when a bookmark or folder is created.
 // https://developer.chrome.com/extensions/windows#event-onCreated
 chrome.bookmarks.onCreated.addListener((id, bookmark) => {
-    console.log("Bookmark created");
+    // console.log("Bookmark created");
     // https://developer.chrome.com/extensions/bookmarks#type-BookmarkTreeNode
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
@@ -19,14 +19,14 @@ chrome.bookmarks.onCreated.addListener((id, bookmark) => {
         browser_url: bookmark.url,
         title: bookmark.title
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fired when a bookmark or folder is removed.
 // https://developer.chrome.com/extensions/windows#event-onRemoved
 chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
-    console.log("Bookmark removed");
+    // console.log("Bookmark removed");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -34,14 +34,14 @@ chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
         event_type: "removeBookmark",
         browser_url: removeInfo.node.url
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fired when a bookmark or folder is changed.
 // https://developer.chrome.com/extensions/windows#event-onChanged
 chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
-    console.log("Bookmark changed");
+    // console.log("Bookmark changed");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -50,22 +50,22 @@ chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
         browser_url: changeInfo.url,
         title: changeInfo.title
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fired when a bookmark or folder is moved.
 // https://developer.chrome.com/extensions/windows#event-onMoved
 chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
-    console.log("Bookmark moved");
+    // console.log("Bookmark moved");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
         application: getBrowser(),
         event_type: "moveBookmark"
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // // Fired when a bookmark or folder is moved.
@@ -90,8 +90,7 @@ chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
 // This event fires with the DownloadItem object when a download begins.
 // https://developer.chrome.com/extensions/downloads#event-onCreated
 chrome.downloads.onCreated.addListener(downloadItem => {
-    console.log("Download started");
-    console.log(downloadItem);
+    // console.log("Download started");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -101,14 +100,14 @@ chrome.downloads.onCreated.addListener(downloadItem => {
         title: downloadItem.filename,
         file_size: downloadItem.totalBytes
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fires with the downloadId when a download is erased from history.
 // https://developer.chrome.com/extensions/downloads#event-onErased
 chrome.downloads.onErased.addListener(downloadId => {
-    console.log("Download erased");
+    // console.log("Download erased");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -116,8 +115,8 @@ chrome.downloads.onErased.addListener(downloadId => {
         event_type: "erasedDownload",
         id: downloadId
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // ********************
@@ -146,7 +145,7 @@ chrome.downloads.onErased.addListener(downloadId => {
 // Fired when an app or extension has been installed.
 // https://developer.chrome.com/extensions/management#event-onInstalled
 chrome.management.onInstalled.addListener(info => {
-    console.log("Extension installed");
+    // console.log("Extension installed");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -156,14 +155,14 @@ chrome.management.onInstalled.addListener(info => {
         title: info.name,
         description: info.description
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fired when an app or extension has been uninstalled.
 // https://developer.chrome.com/extensions/management#event-onUninstalled
 chrome.management.onUninstalled.addListener(id => {
-    console.log("Extension uninstalled");
+    // console.log("Extension uninstalled");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -171,14 +170,14 @@ chrome.management.onUninstalled.addListener(id => {
         event_type: "uninstallBrowserExtension",
         id: id
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fired when an app or extension has been enabled.
 // https://developer.chrome.com/extensions/management#event-onEnabled
 chrome.management.onEnabled.addListener(info => {
-    console.log("Extension enabled");
+    // console.log("Extension enabled");
     console.log(info);
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
@@ -189,15 +188,14 @@ chrome.management.onEnabled.addListener(info => {
         title: info.name,
         description: info.description
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fired when an app or extension has been disabled.
 // https://developer.chrome.com/extensions/management#event-onDisabled
 chrome.management.onDisabled.addListener(info => {
-    console.log("Extension disabled");
-    console.log(info);
+    // console.log("Extension disabled");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -207,8 +205,8 @@ chrome.management.onDisabled.addListener(info => {
         title: info.name,
         description: info.description
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // ********************
@@ -219,7 +217,7 @@ chrome.management.onDisabled.addListener(info => {
 // The notification closed, either by the system or by user action.
 // https://developer.chrome.com/extensions/notifications#event-onClosed
 chrome.notifications.onClosed.addListener((notificationId, byUser) => {
-    console.log("Notification closed");
+    // console.log("Notification closed");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -227,14 +225,14 @@ chrome.notifications.onClosed.addListener((notificationId, byUser) => {
         event_type: "closedNotification",
         id: notificationId
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // The user clicked in a non-button area of the notification.
 // https://developer.chrome.com/extensions/notifications#event-onClosed
 chrome.notifications.onClicked.addListener(notificationId => {
-    console.log("Notification clicked");
+    // console.log("Notification clicked");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
@@ -242,8 +240,8 @@ chrome.notifications.onClicked.addListener(notificationId => {
         event_type: "clickedNotification",
         id: notificationId
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // ********************
@@ -257,7 +255,7 @@ let previousTabs = new Map();
 // Fired when a tab is created.
 // https://developer.chrome.com/extensions/tabs#event-onCreated
 chrome.tabs.onCreated.addListener(tab => {
-    console.log("Tab created");
+    // console.log("Tab created");
     try {
         buildAndSendEventLog("newTab", tab);
     } catch (error) {
@@ -268,7 +266,7 @@ chrome.tabs.onCreated.addListener(tab => {
 // Fired when a tab is moved within a window
 // https://developer.chrome.com/extensions/tabs#event-onMoved
 chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
-    console.log("Tab moved");
+    // console.log("Tab moved");
     chrome.tabs.get(tabId, tab => {
         try {
             buildAndSendEventLog("moveTab", tab, moveInfo);
@@ -281,7 +279,7 @@ chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
 // Fired when a tab is attached to a window; for example, because it was moved between windows.
 // https://developer.chrome.com/extensions/tabs#event-onAttached
 chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
-    console.log("Tab attached");
+    // console.log("Tab attached");
     chrome.tabs.get(tabId, tab => {
         try {
             buildAndSendEventLog("attachTab", tab, attachInfo);
@@ -294,7 +292,7 @@ chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
 // Fired when a tab is detached from a window; for example, because it was moved between windows.
 // https://developer.chrome.com/extensions/tabs#event-onDetached
 chrome.tabs.onDetached.addListener((tabId, detachInfo) => {
-    console.log("Tab detached");
+    // console.log("Tab detached");
     chrome.tabs.get(tabId, tab => {
         try {
             buildAndSendEventLog("detachTab", tab, detachInfo);
@@ -307,7 +305,7 @@ chrome.tabs.onDetached.addListener((tabId, detachInfo) => {
 // Fires when the active tab in a window changes.
 // https://developer.chrome.com/extensions/tabs#event-onActivated
 chrome.tabs.onActivated.addListener(activeInfo => {
-    console.log("Tab activated, selected");
+    // console.log("Tab activated, selected");
     chrome.tabs.get(activeInfo.tabId, tab => {
         try {
             if (!tab.url.includes("newtab")) {
@@ -322,8 +320,7 @@ chrome.tabs.onActivated.addListener(activeInfo => {
 // Fired when a tab is closed.
 // https://developer.chrome.com/extensions/tabs#event-onRemoved
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-    console.log("Tab removed");
-
+    // console.log("Tab removed");
     try {
         buildAndSendEventLog("closeTab", previousTabs.get(tabId), removeInfo);
     } catch (error) {
@@ -336,7 +333,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 chrome.tabs.onZoomChange.addListener(ZoomChangeInfo => {
     // Check if zoom factor changes so page actually zoomed, otherwise chrome fires this even when new tab is created or selected
     if (ZoomChangeInfo.oldZoomFactor != ZoomChangeInfo.newZoomFactor) {
-        console.log("Tab zoomed");
+        // console.log("Tab zoomed");
         chrome.tabs.get(ZoomChangeInfo.tabId, tab => {
             try {
                 buildAndSendEventLog("zoomTab", tab, ZoomChangeInfo);
@@ -350,7 +347,7 @@ chrome.tabs.onZoomChange.addListener(ZoomChangeInfo => {
 // Fired when a tab is updated.
 // // https://developer.chrome.com/extensions/tabs#event-onUpdated
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    console.log("tab updated");
+    // console.log("tab updated");
     try {
         if (changeInfo.pinned != undefined) {
             if (changeInfo.pinned)
@@ -422,8 +419,9 @@ chrome.webNavigation.onCommitted.addListener(details => {
             !eventLog.browser_url.includes("newtab") &&
             eventLog.eventType != "link"
         ) {
-            console.log(eventLog);
-            post(eventLog);
+            // console.log(eventLog);
+            // post(eventLog);
+            logAndPost(eventLog);
         }
     }
 });
@@ -436,8 +434,7 @@ chrome.webNavigation.onCommitted.addListener(details => {
 // Fired when a window is created.
 // https://developer.chrome.com/extensions/windows#event-onCreated
 chrome.windows.onCreated.addListener(window => {
-    console.log("Window opened");
-    console.log(previousTabs);
+    // console.log("Window opened");
 
     // https://developer.chrome.com/extensions/windows#type-Window
     let eventLog = {
@@ -448,22 +445,22 @@ chrome.windows.onCreated.addListener(window => {
         window_ingognito: window.incognito,
         title: window.title
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fired when a window is removed (closed).
 // https://developer.chrome.com/extensions/windows#event-onRemoved
 chrome.windows.onRemoved.addListener(windowId => {
-    console.log("Window closed");
+    // console.log("Window closed");
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
         application: getBrowser(),
         event_type: "closeWindow"
     };
-    console.log(eventLog);
-    post(eventLog);
+
+    logAndPost(eventLog);
 });
 
 // Fired when the currently focused window changes. (too much spam)
@@ -485,36 +482,25 @@ chrome.windows.onRemoved.addListener(windowId => {
 // https://developer.chrome.com/apps/runtime
 // ********************
 
-// When the extension is first installed set the badge to OFF
+// check if server is running and add all active tabs in the array of previousTabs (useful for debugging)
 // https://developer.chrome.com/apps/runtime#event-onInstalled
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.browserAction.setBadgeText({ text: "OFF" });
-    try {
-        chrome.tabs.get(1, tab => {
-            if (tab)
-                previousTabs.set(tab.id, tab);
+chrome.runtime.onInstalled.addListener(runtimeStartup);
+chrome.runtime.onStartup.addListener(runtimeStartup);
+function runtimeStartup() {
+    checkServerStatus();
+    chrome.tabs.query({ windowType: "normal" }, tabs => {
+        tabs.forEach(tab => {
+            previousTabs.set(tab.id, tab);
         });
-    } catch (error) {
-        console.log(error.message);
-    }
-    
-});
-
-// add first tab in map so it can be tracked when closed
-// https://developer.chrome.com/apps/runtime#event-onStartup
-chrome.runtime.onStartup.addListener(() => {
-    chrome.browserAction.setBadgeText({ text: "OFF" });
-    chrome.tabs.get(1, tab => {
-        previousTabs.set(tab.id, tab);
     });
-});
+}
 
-// receive messages from content and send them to server. 
-// It is not possible anymore to do it directly from content due to "security reasons"
+// receive messages from content and send them to server.
+// It is not possible anymore to do it directly from content_script due to security reasons
 // https://www.chromium.org/Home/chromium-security/extension-content-script-fetches
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {    
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.contentScriptQuery == "postData") {
-        post(request.data)
+        logAndPost(request.data);
     }
 });
 
@@ -523,18 +509,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 // https://developer.chrome.com/apps/alarms
 // ********************
 
-// set up an alarm that check server status every minute. 
+// set up an alarm that check server status every minute.
 // If server is running update extension text and badge to ON, else update to OFF
+const alarm_interval = 0.5 //30 seconds
 // chrome.alarms.create("checkServerStatus", {
-//     delayInMinutes: 1,
-//     periodInMinutes: 1
+//     delayInMinutes: alarm_interval,
+//     periodInMinutes: alarm_interval
 // });
 
-// chrome.alarms.onAlarm.addListener(function(alarm) {
-//     if (alarm.name === "checkServerStatus") {
-//         checkServerStatus()
-//     }
-// });
+chrome.alarms.onAlarm.addListener(function(alarm) {
+    if (alarm.name === "checkServerStatus") {
+        checkServerStatus()
+    }
+});
 
 // ********************
 // Utilities
@@ -570,6 +557,5 @@ function buildAndSendEventLog(eventType, tab, info) {
         eventLog.muted = info.mutedInfo.muted;
     }
 
-    console.log(eventLog);
-    post(eventLog);
+    logAndPost(eventLog);
 }
