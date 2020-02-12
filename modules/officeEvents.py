@@ -1,4 +1,5 @@
-import time, sys
+import time
+import sys
 import types
 from datetime import datetime
 from getpass import getuser  # user id
@@ -33,7 +34,7 @@ def excelEvents():
                 "category": "MS-OFFICE",
                 "application": "Microsoft Excel",
                 "event_type": "windowActive",
-                #"event_src_path": event.src_path,
+                # "event_src_path": event.src_path,
             })
 
         def OnWindowDeactivate(self, wb, wn):
@@ -46,9 +47,11 @@ def excelEvents():
             # This function is a vo id, so the result ends up in
             # the only ByRef - Cancel.
             if Target is not None or Target != 'None':
-                print("{} {} doubleClickCellWithValue {}".format(datetime.now(), getuser(), Target))
+                print("{} {} doubleClickCellWithValue {}".format(
+                    datetime.now(), getuser(), Target))
             else:
-                print("{} {} doubleClickEmptyCell".format(datetime.now(), getuser()))
+                print("{} {} doubleClickEmptyCell".format(
+                    datetime.now(), getuser()))
             return 1
 
     class WorkbookEvents:
@@ -58,7 +61,8 @@ def excelEvents():
 
         def OnBeforeRightClick(self, Target, Cancel):
             # print ("It's a Worksheet Event")
-            print("{} {} MS-EXCEL workbookRightClick {}".format(datetime.now(), getuser(), Target))
+            print(
+                "{} {} MS-EXCEL workbookRightClick {}".format(datetime.now(), getuser(), Target))
 
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetactivate
         def OnSheetActivate(self, Sh):
@@ -66,7 +70,8 @@ def excelEvents():
 
         #  https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetchange
         def OnSheetChange(self, Sh, Target):
-            d = dict(zip(range(1, 27), ascii_uppercase))  # dictionary to convert numbers in letters
+            # dictionary to convert numbers in letters
+            d = dict(zip(range(1, 27), ascii_uppercase))
             letter = d.get(Target.Column) if d.get(
                 Target.Column) != None else Target.Column  # Target.Column is the columnt number, I want to convert it to letter as shown in excel
             print("{} {} MS-EXCEL editCellSheet {} {}".format(datetime.now(), getuser(), f"{letter}{Target.Row}",
@@ -78,9 +83,11 @@ def excelEvents():
                                                     '')  # value returned is in the format $B$3:$D$3, I remove $ sign
             value = Target.Value if Target.Value != None else ""
             if ':' in cells_selected:  # range of cells selected
-                print(f"{datetime.now()} {getuser()} MS-EXCEL getRange {cells_selected}")
+                print(
+                    f"{datetime.now()} {getuser()} MS-EXCEL getRange {cells_selected}")
             else:  # single cell selected
-                print(f"{datetime.now()} {getuser()} MS-EXCEL getCell {cells_selected} {value}")
+                print(
+                    f"{datetime.now()} {getuser()} MS-EXCEL getCell {cells_selected} {value}")
             # args[0].Range('A1').Value = 'You selected cell ' + str(args[1].Address)
 
         def OnBeforeSave(self, *args):
@@ -104,13 +111,16 @@ def excelEvents():
     print("Book activated", book)
     sheet = e.Worksheets(1)
     sheet = DispatchWithEvents(sheet, WorksheetEvents)
-    print("{} {} workbookFont {}".format(datetime.now(), getuser(), e.StandardFont))
-    print("{} {} workbookFontSize {}".format(datetime.now(), getuser(), e.StandardFontSize))
+    print("{} {} workbookFont {}".format(
+        datetime.now(), getuser(), e.StandardFont))
+    print("{} {} workbookFontSize {}".format(
+        datetime.now(), getuser(), e.StandardFontSize))
 
     runLoop(e)
     # if not runLoop(e):
     #    e.Quit()
-    if not CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]): sys.exit(1)
+    if not CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]):
+        sys.exit(1)
 
 
 def wordEvents():
@@ -144,7 +154,8 @@ def wordEvents():
 
     runLoop(w)
 
-    if not CheckSeenEvents(w, ["OnDocumentChange", "OnWindowActivate"]): sys.exit(1)
+    if not CheckSeenEvents(w, ["OnDocumentChange", "OnWindowActivate"]):
+        sys.exit(1)
 
 
 def powerpointEvents():
@@ -182,7 +193,8 @@ def powerpointEvents():
 
     runLoop(p)
 
-    if not CheckSeenEvents(p, ["OnDocumentChange", "OnWindowActivate"]): sys.exit(1)
+    if not CheckSeenEvents(p, ["OnDocumentChange", "OnWindowActivate"]):
+        sys.exit(1)
 
 
 def outlookEvents():
@@ -210,13 +222,14 @@ def outlookEvents():
             # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
 
         def __init__(self):
-            # First action to do when using the class in the DispatchWithEvents     
+            # First action to do when using the class in the DispatchWithEvents
             inbox = self.Application.GetNamespace("MAPI").GetDefaultFolder(6)
             messages = inbox.Items
             # Check for unread emails when starting the event
             for message in messages:
                 if message.UnRead:
-                    print(message.Subject)  # Or whatever code you wish to execute.
+                    # Or whatever code you wish to execute.
+                    print(message.Subject)
 
         def OnQuit(self):
             # To stop PumpMessages() when Outlook Quit
@@ -243,17 +256,20 @@ def outlookEvents():
     # o.Presentations.Add()
 
     runLoop(o)
-    if not CheckSeenEvents(p, ["OnDocumentChange", "OnWindowActivate"]): sys.exit(1)
+    if not CheckSeenEvents(p, ["OnDocumentChange", "OnWindowActivate"]):
+        sys.exit(1)
 
 
 def runLoop(ob):
     while 1:
         pythoncom.PumpWaitingMessages()  # listen for events
         try:
-            if not ob.Visible:  # Gone invisible - we need to pretend we timed out, so the app is quit.
+            # Gone invisible - we need to pretend we timed out, so the app is quit.
+            if not ob.Visible:
                 print("Application has been closed. Shutting down...")
                 return 0
-        except pythoncom.com_error:  # Excel is busy (eg, editing the cell) - ignore
+        # Excel is busy (eg, editing the cell) - ignore
+        except pythoncom.com_error:
             pass
     return 1
 

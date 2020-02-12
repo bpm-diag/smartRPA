@@ -1,14 +1,18 @@
-from PyQt5.QtCore import QDateTime, Qt
-from PyQt5.QtGui import QFont
+import darkdetect
+from PyQt5.QtCore import QDateTime, Qt, QSize
+from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
                              QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
-                             QPushButton, QSizePolicy, QSpacerItem,
+                             QPushButton, QSizePolicy, QSystemTrayIcon, QSpacerItem,
                              QStyleFactory, QTabWidget, QVBoxLayout, QWidget)
 from multiprocessing import Process
 import mainLogger
-from platform import system
 import sys
 sys.path.append('../')  # this way main file is visible from this file
+from platform import system
+
+WINDOWS = (system() == "Windows")
+MAC = (system() == "Darwin")
 
 
 class WidgetGallery(QDialog):
@@ -16,6 +20,7 @@ class WidgetGallery(QDialog):
         super(WidgetGallery, self).__init__(parent)
         self.originalPalette = QApplication.palette()
         self.setWindowTitle("ComputerLogger")
+        self.setAppIcon()
         self.setStyle()
 
         # create layouts
@@ -34,21 +39,24 @@ class WidgetGallery(QDialog):
         self.mainProcess = None
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
-        self.systemLoggerPrograms = self.systemLoggerPrograms.isChecked()
-        self.systemLoggerClipboard = self.systemLoggerClipboard.isChecked()
-        self.officeExcel = self.officeExcel.isChecked()
-        self.officeWord = self.officeWord.isChecked()
-        self.officePowerpoint = self.officePowerpoint.isChecked()
-        self.officeAccess = self.officeAccess.isChecked()
-        self.browserChrome = self.browserChrome.isChecked()
-        self.browserFirefox = self.browserFirefox.isChecked()
+        self.systemLoggerPrograms = self.systemLoggerProgramsCB.isChecked()
+        self.systemLoggerClipboard = self.systemLoggerClipboardCB.isChecked()
+        self.systemLoggerHotkeys = self.systemLoggerHotkeysCB.isChecked()
+        self.systemLoggerEvents = self.systemLoggerEventsCB.isChecked()
+        self.officeExcel = self.officeExcelCB.isChecked()
+        self.officeWord = self.officeWordCB.isChecked()
+        self.officePowerpoint = self.officePowerpointCB.isChecked()
+        self.officeAccess = self.officeAccessCB.isChecked()
+        self.browserChrome = self.browserChromeCB.isChecked()
+        self.browserFirefox = self.browserFirefoxCB.isChecked()
 
         mainLayout = QGridLayout()
         mainLayout.addLayout(self.topLayout, 0, 0, 1, 2)
-        mainLayout.addWidget(self.topLeftGroupBox, 1, 0)
-        mainLayout.addWidget(self.topRightGroupBox, 1, 1)
-        mainLayout.addWidget(self.bottomLeftTabWidget, 2, 0)
-        # mainLayout.addWidget(self.bottomRightGroupBox, 2, 1)
+        # start from cell (1,0) and expand in 2 rows but remain in 1 column
+        mainLayout.addWidget(self.systemGroupBox, 1, 0, 2, 1)
+        mainLayout.addWidget(self.officeGroupBox, 1, 1)
+        # mainLayout.addWidget(self.browserGroupBox, 2, 0) # bottom left
+        mainLayout.addWidget(self.browserGroupBox, 2, 1)
         mainLayout.addLayout(self.bottomLayout, 3, 0, 1, 2)
         mainLayout.addLayout(self.statusLayout, 4, 0, 1, 2)
         mainLayout.setRowStretch(1, 1)
@@ -58,53 +66,54 @@ class WidgetGallery(QDialog):
         self.setLayout(mainLayout)
 
     def createSystemLoggerGroupBox(self):
-        self.topLeftGroupBox = QGroupBox("System logger")
+        self.systemGroupBox = QGroupBox("System logger")
 
         self.systemLoggerFilesFolderCB = QCheckBox("Files/Folders")
-        self.systemLoggerFilesFolderCB.setChecked(True)
         self.systemLoggerFilesFolderCB.tag = "systemLoggerFilesFolder"
         self.systemLoggerFilesFolderCB.stateChanged.connect(
             self.handleCheckBox)
 
         self.systemLoggerProgramsCB = QCheckBox("Programs")
-        self.systemLoggerProgramsCB.setChecked(True)
         self.systemLoggerProgramsCB.tag = "systemLoggerPrograms"
         self.systemLoggerProgramsCB.stateChanged.connect(self.handleCheckBox)
 
         self.systemLoggerClipboardCB = QCheckBox("Clipboard")
-        self.systemLoggerClipboardCB.setChecked(True)
         self.systemLoggerClipboardCB.tag = "systemLoggerClipboard"
         self.systemLoggerClipboardCB.stateChanged.connect(self.handleCheckBox)
+
+        self.systemLoggerHotkeysCB = QCheckBox("Hotkeys")
+        self.systemLoggerHotkeysCB.tag = "systemLoggerHotkeys"
+        self.systemLoggerHotkeysCB.stateChanged.connect(self.handleCheckBox)
+
+        self.systemLoggerEventsCB = QCheckBox("Events")
+        self.systemLoggerEventsCB.tag = "systemLoggerEvents"
+        self.systemLoggerEventsCB.stateChanged.connect(self.handleCheckBox)
 
         layout = QVBoxLayout()
         layout.addWidget(self.systemLoggerFilesFolderCB)
         layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerClipboardCB)
-        layout.addStretch(1)
+        layout.addWidget(self.systemLoggerHotkeysCB)
+        layout.addWidget(self.systemLoggerEventsCB)
 
-        self.topLeftGroupBox.setLayout(layout)
+        self.systemGroupBox.setLayout(layout)
 
     def createOfficeLoggerGroupBox(self):
-
-        self.topRightGroupBox = QGroupBox("Office logger")
+        self.officeGroupBox = QGroupBox("Office logger")
 
         self.officeExcelCB = QCheckBox("Excel")
-        self.officeExcelCB.setChecked(False)
         self.officeExcelCB.tag = "officeExcel"
         self.officeExcelCB.stateChanged.connect(self.handleCheckBox)
 
         self.officeWordCB = QCheckBox("Word")
-        self.officeWordCB.setChecked(False)
         self.officeWordCB.tag = "officeWord"
         self.officeWordCB.stateChanged.connect(self.handleCheckBox)
 
         self.officePowerpointCB = QCheckBox("PowerPoint")
-        self.officePowerpointCB.setChecked(False)
         self.officePowerpointCB.tag = "officePowerpoint"
         self.officePowerpointCB.stateChanged.connect(self.handleCheckBox)
 
         self.officeAccessCB = QCheckBox("Access")
-        self.officeAccessCB.setChecked(False)
         self.officeAccessCB.tag = "officeAccess"
         self.officeAccessCB.stateChanged.connect(self.handleCheckBox)
 
@@ -115,18 +124,16 @@ class WidgetGallery(QDialog):
         layout.addWidget(self.officeAccessCB)
         layout.addStretch(1)
 
-        self.topRightGroupBox.setLayout(layout)
+        self.officeGroupBox.setLayout(layout)
 
     def createBrowserLoggerGroupBox(self):
-        self.bottomLeftTabWidget = QGroupBox("Browser logger")
+        self.browserGroupBox = QGroupBox("Browser logger")
 
         self.browserChromeCB = QCheckBox("Google Chrome")
-        self.browserChromeCB.setChecked(True)
         self.browserChromeCB.tag = "browserChrome"
         self.browserChromeCB.stateChanged.connect(self.handleCheckBox)
 
         self.browserFirefoxCB = QCheckBox("Mozilla Firefox")
-        self.browserFirefoxCB.setChecked(True)
         self.browserFirefoxCB.tag = "browserFirefox"
         self.browserFirefoxCB.stateChanged.connect(self.handleCheckBox)
 
@@ -135,20 +142,31 @@ class WidgetGallery(QDialog):
         layout.addWidget(self.browserFirefoxCB)
         layout.addStretch(1)
 
-        self.bottomLeftTabWidget.setLayout(layout)
+        self.browserGroupBox.setLayout(layout)
 
     def createStartButton(self):
         self.runButton = QPushButton("Start logger")
         self.runButton.setCheckable(True)
         self.runButton.setChecked(False)
         self.runButton.clicked.connect(self.onButtonClick)
+        self.runButton.toggled.connect(self.systemGroupBox.setDisabled)
+        self.runButton.toggled.connect(self.browserGroupBox.setDisabled)
+        if WINDOWS:
+            self.runButton.toggled.connect(self.officeGroupBox.setDisabled)
 
     def createTopLayout(self):
-        self.topLayout = QVBoxLayout()
+        self.topLayout = QHBoxLayout()
         self.topLayout.addWidget(QLabel("Select modules to activate"))
-        verticalSpacer = QSpacerItem(
-            20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        self.topLayout.addItem(verticalSpacer)
+
+        self.topLayout.addStretch(1)
+        self.checkButton = QPushButton("Enable all")
+        self.checkButton.setCheckable(True)
+        self.checkButton.setChecked(False)
+        self.checkButton.setFlat(True)
+        self.allCBChecked = False
+        self.checkButton.toggled.connect(self.setCheckboxChecked)
+
+        self.topLayout.addWidget(self.checkButton)
 
     def createBottomLayout(self):
         self.bottomLayout = QHBoxLayout()
@@ -157,39 +175,92 @@ class WidgetGallery(QDialog):
         self.bottomLayout.addStretch(1)
 
     def createStatusLayout(self):
-        if system() == 'Windows':
-            MONOSPACE_FONT = 'Lucida Console'
-        elif system() == 'Darwin':
-            MONOSPACE_FONT = 'Monaco'
+        if WINDOWS:
+            monospaceFont = 'Lucida Console'
+            fontSize = 8
+        elif MAC:
+            monospaceFont = 'Monaco'
+            fontSize = 11
         else:
-            MONOSPACE_FONT = 'monospace'
+            monospaceFont = 'monospace'
+            fontSize = 11
         self.statusLayout = QHBoxLayout()
         self.statusLabel = QLabel("")
-        font = QFont(MONOSPACE_FONT, 12, QFont.Normal)
-        font.setFamily("Courier")
-        # font.setItalic(True)
+        font = QFont(monospaceFont, fontSize, QFont.Normal)
         self.statusLabel.setFont(font)
         self.statusLayout.addStretch(1)
         self.statusLayout.addWidget(self.statusLabel)
         self.statusLayout.addStretch(1)
 
     def setStyle(self):
-        if (system() == "Windows"):
+        if WINDOWS:
             QApplication.setStyle(QStyleFactory.create('windowsvista'))
-        elif (system() == "Darwin"):
+        elif MAC:
             QApplication.setStyle(QStyleFactory.create('macintosh'))
         else:
             QApplication.setStyle(QStyleFactory.create('Fusion'))
 
-    def platformCheck(self):
-        # Office logging is not available on macos
-        if system() == "Windows":
-            pass
-        if system() == "Darwin":
-            self.topRightGroupBox.setEnabled(False)
+    def setAppIcon(self):
+        # set app icon with support to dark mode
+        app_icon = QIcon()
+        if darkdetect.isDark():
+            app_icon.addFile('utils/icons/icon-16-dark.png', QSize(16, 16))
+            app_icon.addFile('utils/icons/icon-32-dark.png', QSize(32, 32))
+            app_icon.addFile('utils/icons/icon-48-dark.png', QSize(48, 48))
+            app_icon.addFile('utils/icons/icon-128-dark.png', QSize(128, 128))
+        else:
+            app_icon.addFile('utils/icons/icon-16.png', QSize(16, 16))
+            app_icon.addFile('utils/icons/icon-32.png', QSize(32, 32))
+            app_icon.addFile('utils/icons/icon-48.png', QSize(48, 48))
+            app_icon.addFile('utils/icons/icon-128.png', QSize(128, 128))
+        self.setWindowIcon(app_icon)
 
+    def platformCheck(self):
+
+        if WINDOWS:
+
+            # remove question mark on windows
+            self.setWindowFlags(self.windowFlags() ^
+                                Qt.WindowContextHelpButtonHint)
+
+            # window size
+            self.resize(540, 510)
+
+            # margins
+            self.topLayout.setContentsMargins(0, 0, 0, 20)
+            self.bottomLayout.setContentsMargins(0, 20, 0, 20)
+
+        if MAC:
+            # office is not supported on mac
+            self.officeGroupBox.setEnabled(False)
+
+            # program logger is not supported on mac
             self.systemLoggerProgramsCB.setChecked(False)
             self.systemLoggerProgramsCB.setDisabled(True)
+
+            # window size
+            self.resize(320, 330)
+
+            # margins
+            self.topLayout.setContentsMargins(0, 0, 0, 10)
+            self.bottomLayout.setContentsMargins(0, 0, 0, 0)
+
+    def setCheckboxChecked(self):
+        if not self.allCBChecked:
+            self.allCBChecked = True
+        else:
+            self.allCBChecked = False
+        self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
+        self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
+        self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
+        self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
+        self.systemLoggerEventsCB.setChecked(self.allCBChecked)
+        self.officeExcelCB.setChecked(self.allCBChecked)
+        self.officeWordCB.setChecked(self.allCBChecked)
+        self.officePowerpointCB.setChecked(self.allCBChecked)
+        self.officeAccessCB.setChecked(self.allCBChecked)
+        self.browserChromeCB.setChecked(self.allCBChecked)
+        self.browserFirefoxCB.setChecked(self.allCBChecked)
 
     def handleCheckBox(self, state):
         tag = self.sender().tag
@@ -200,6 +271,10 @@ class WidgetGallery(QDialog):
             self.systemLoggerPrograms = checked
         elif (tag == "systemLoggerClipboard"):
             self.systemLoggerClipboard = checked
+        elif (tag == "systemLoggerHotkeys"):
+            self.systemLoggerHotkeys = checked
+        elif (tag == "systemLoggerEvents"):
+            self.systemLoggerEvents = checked
         elif (tag == "officeExcel"):
             self.officeExcel = checked
         elif (tag == "officeWord"):
@@ -214,6 +289,7 @@ class WidgetGallery(QDialog):
             self.browserFirefox = checked
 
     def onButtonClick(self):
+        print(self.officeExcel)
         if not self.running:  # start button clicked
 
             # set gui parameters
@@ -233,6 +309,8 @@ class WidgetGallery(QDialog):
                 self.systemLoggerFilesFolder,
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
+                self.systemLoggerHotkeys,
+                self.systemLoggerEvents,
                 self.officeExcel,
                 self.officeWord,
                 self.officePowerpoint,
@@ -240,7 +318,7 @@ class WidgetGallery(QDialog):
                 self.browserChrome,
                 self.browserFirefox
             ])
-            self.mainProcess.start()
+            # self.mainProcess.start()
 
             print("Logger started, selected threads activated...")
 
@@ -250,14 +328,14 @@ class WidgetGallery(QDialog):
             self.running = False
 
             self.statusLabel.setText("Logger stopped")
-            self.statusLabel.setStyleSheet('color: black')
+            self.statusLabel.setStyleSheet('color: gray')
             self.statusLabel.update()
 
             self.runButton.setText('Start logger')
             self.runButton.update()
 
             # stop main process, automatically closing all daemon threads in main process
-            self.mainProcess.terminate()
+            # self.mainProcess.terminate()
 
             print(
                 "Main process terminated, daemon threads closed, wainting for new input...")
@@ -265,9 +343,6 @@ class WidgetGallery(QDialog):
 
 def buildGUI():
     app = QApplication(sys.argv)
-    d = QDialog(None, Qt.WindowSystemMenuHint | Qt.WindowTitleHint)
-    # setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint)
     gallery = WidgetGallery()
-    gallery.resize(350, 350)
     gallery.show()
     sys.exit(app.exec_())

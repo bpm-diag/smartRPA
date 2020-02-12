@@ -85,7 +85,7 @@ def logProcessesWin():
     objSWbemServices = objWMIService.ConnectServer(strComputer, "root\cimv2")
 
     programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
-                          "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe"]
+                          "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe", "LocalBridge.exe"]
 
     # create initial set of running processes using Windows Management Instrumentation (WMI)
     colItems = objSWbemServices.ExecQuery(

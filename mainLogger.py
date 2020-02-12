@@ -1,4 +1,4 @@
-# https://docs.microsoft.com/en-us/windows/win32/api/
+# https://docs.microsoft.com/en-us/WINDOWS/win32/api/
 from sys import exit
 from time import sleep
 from platform import system
@@ -45,6 +45,8 @@ def createLogFile():
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
                 systemLoggerClipboard,
+                systemLoggerHotkeys,
+                systemLoggerEvents,
                 officeExcel,
                 officeWord,
                 officePowerpoint,
@@ -52,23 +54,29 @@ def startLogger(systemLoggerFilesFolder,
                 browserChrome,
                 browserFirefox):
 
-    windows = (system() == "Windows")
-    mac = (system() == "Darwin")
+    WINDOWS = (system() == "Windows")
+    MAC = (system() == "Darwin")
 
     try:  # create the threads as daemons so they are closed when main ends
 
-        # start writer server
+        # ************
+        # main logging server
+        # ************
         createLogFile()
         t0 = Thread(target=consumerServer.runServer)
         t0.daemon = True
         t0.start()
+
+        # ************
+        # system logger
+        # ************
 
         if systemLoggerFilesFolder:
             t1 = Thread(target=systemEvents.watchFolder)
             t1.daemon = True
             t1.start()
 
-            if windows:
+            if WINDOWS:
                 t2 = Thread(target=systemEvents.watchRecentsFolderWin)
                 t2.daemon = True
                 t2.start()
@@ -77,12 +85,12 @@ def startLogger(systemLoggerFilesFolder,
                 # t4.start()
 
         if systemLoggerPrograms:
-            if windows:
+            if WINDOWS:
                 t3 = Thread(target=systemEvents.logProcessesWin)
                 t3.daemon = True
                 t3.start()
 
-            if mac:
+            if MAC:
                 # TODO
                 pass
 
@@ -91,23 +99,37 @@ def startLogger(systemLoggerFilesFolder,
             t4.daemon = True
             t4.start()
 
-        if officeExcel and windows:
+        if systemLoggerHotkeys:
+            pass
+
+        if systemLoggerEvents:
+            pass
+
+        # ************
+        # office logger
+        # ************
+
+        if officeExcel and WINDOWS:
             t5 = Thread(target=officeEvents.excelEvents)
             t5.daemon = True
             t5.start()
 
-        if officeWord and windows:
+        if officeWord and WINDOWS:
             t6 = Thread(target=officeEvents.wordEvents)
             t6.daemon = True
             t6.start()
 
-        if officePowerpoint and windows:
+        if officePowerpoint and WINDOWS:
             t7 = Thread(target=officeEvents.powerpointEvents)
             t7.daemon = True
             t7.start()
 
-        if officeAccess and windows:
+        if officeAccess and WINDOWS:
             print("Access not implemented yet.")
+
+        # ************
+        # browser logger
+        # ************
 
         if browserChrome:
             consumerServer.log_chrome = True
