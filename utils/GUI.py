@@ -6,14 +6,14 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
                              QPushButton, QSizePolicy, QSystemTrayIcon, QSpacerItem,
                              QStyleFactory, QTabWidget, QVBoxLayout, QWidget)
 from multiprocessing import Process
-import mainLogger
+from platform import system
 import sys
 sys.path.append('../')  # this way main file is visible from this file
-from platform import system
+import mainLogger
 
 WINDOWS = (system() == "Windows")
 MAC = (system() == "Darwin")
-
+LINUX = (system() == "Linux")
 
 class WidgetGallery(QDialog):
     def __init__(self, parent=None):
@@ -230,7 +230,7 @@ class WidgetGallery(QDialog):
             self.topLayout.setContentsMargins(0, 0, 0, 20)
             self.bottomLayout.setContentsMargins(0, 20, 0, 20)
 
-        if MAC:
+        if MAC or LINUX:
             # office is not supported on mac
             self.officeGroupBox.setEnabled(False)
 
@@ -246,19 +246,24 @@ class WidgetGallery(QDialog):
             self.bottomLayout.setContentsMargins(0, 0, 0, 0)
 
     def setCheckboxChecked(self):
+        
         if not self.allCBChecked:
             self.allCBChecked = True
         else:
             self.allCBChecked = False
+        
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
         self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
         self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
         self.systemLoggerEventsCB.setChecked(self.allCBChecked)
-        self.officeExcelCB.setChecked(self.allCBChecked)
-        self.officeWordCB.setChecked(self.allCBChecked)
-        self.officePowerpointCB.setChecked(self.allCBChecked)
-        self.officeAccessCB.setChecked(self.allCBChecked)
+        
+        if WINDOWS:
+            self.officeExcelCB.setChecked(self.allCBChecked)
+            self.officeWordCB.setChecked(self.allCBChecked)
+            self.officePowerpointCB.setChecked(self.allCBChecked)
+            self.officeAccessCB.setChecked(self.allCBChecked)
+            
         self.browserChromeCB.setChecked(self.allCBChecked)
         self.browserFirefoxCB.setChecked(self.allCBChecked)
 
@@ -318,7 +323,8 @@ class WidgetGallery(QDialog):
                 self.browserChrome,
                 self.browserFirefox
             ])
-            # self.mainProcess.start()
+           
+            self.mainProcess.start()
 
             print("Logger started, selected threads activated...")
 
@@ -335,7 +341,7 @@ class WidgetGallery(QDialog):
             self.runButton.update()
 
             # stop main process, automatically closing all daemon threads in main process
-            # self.mainProcess.terminate()
+            self.mainProcess.terminate()
 
             print(
                 "Main process terminated, daemon threads closed, wainting for new input...")

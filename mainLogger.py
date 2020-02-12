@@ -56,6 +56,7 @@ def startLogger(systemLoggerFilesFolder,
 
     WINDOWS = (system() == "Windows")
     MAC = (system() == "Darwin")
+    LINUX = (system() == "Linux")
 
     try:  # create the threads as daemons so they are closed when main ends
 

@@ -2,6 +2,7 @@ from os import environ
 from flask import Flask, request, jsonify
 from csv import writer
 from logging import getLogger
+from datetime import datetime
 
 SERVER_ADDR = 'http://localhost:4444'
 
@@ -77,6 +78,9 @@ def add_headers(response):
 def runServer():
     print("Consumer server started...")
     app.run(port=4444, debug=False, use_reloader=False)
+
+def currentTimestamp():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
 
 # if __name__ == "__main__":
 #     app.run(port=4444, debug=True, use_reloader=True)

@@ -54,8 +54,12 @@ The project is composed by the following modules:
 ```
 .
 ├── README.md
+├── __pycache__
+│   └── mainLogger.cpython-38.pyc
 ├── mainLogger.py
 ├── modules
+│   ├── __init__.py
+│   ├── __pycache__
 │   ├── browserlogger
 │   ├── clipboardEvents.py
 │   ├── officeEvents.py
@@ -63,5 +67,9 @@ The project is composed by the following modules:
 ├── requirements.txt
 └── utils
     ├── GUI.py
-    └── consumerServer.py
+    ├── GUI_old.py
+    ├── __init__.py
+    ├── __pycache__
+    ├── consumerServer.py
+    └── icons
 ```

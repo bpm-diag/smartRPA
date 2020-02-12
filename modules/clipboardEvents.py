@@ -15,7 +15,7 @@ def logClipboard():
             recent_value = temp_value
             print(f"{datetime.now()} {getuser()} OS-Clipboard copy {recent_value}")
             post(consumerServer.SERVER_ADDR, json={
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3],
                 "user": getuser(),
                 "category": "OS-Clipboard",
                 "application": "Clipboard",

@@ -4,13 +4,18 @@ import types
 from datetime import datetime
 from getpass import getuser  # user id
 from string import ascii_uppercase
+from re import findall
+from os import path
+from shutil import rmtree
 from platform import system
 from requests import post
+sys.path.append('../')  # this way main file is visible from this file
 from utils import consumerServer
 
 if system() == "Windows":
-    from win32com.client import DispatchWithEvents, Dispatch
+    from win32com.client import DispatchWithEvents, Dispatch, DispatchEx
     import pythoncom
+    from win32com import __gen_path__
 
 
 def excelEvents():
@@ -27,14 +32,13 @@ def excelEvents():
             # if type(wb) != types.InstanceType or type(wn) != types.InstanceType:
             #    raise (RuntimeError, "The transformer doesnt appear to have translated this for us!")
             self.seen_events["OnWindowActivate"] = None
-            print("{} {} windowActive".format(datetime.now(), getuser()))
+            print(f"{datetime.now()} {getuser()} windowActive")
             post(consumerServer.SERVER_ADDR, json={
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S%MS"),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3],
                 "user": getuser(),
                 "category": "MS-OFFICE",
                 "application": "Microsoft Excel",
                 "event_type": "windowActive",
-                # "event_src_path": event.src_path,
             })
 
         def OnWindowDeactivate(self, wb, wn):
@@ -102,25 +106,41 @@ def excelEvents():
         #     print(Target.Value)
         #     print("onchange {}".format(Target))
 
-    pythoncom.CoInitialize()  # needed for thread
-    e = DispatchWithEvents("Excel.Application", ExcelEvents)
-    e.seen_events = {}
-    e.Visible = 1  # open window
-    book = e.Workbooks.Add()  # create workbook that contains sheet
-    book = DispatchWithEvents(book, WorkbookEvents)
-    print("Book activated", book)
-    sheet = e.Worksheets(1)
-    sheet = DispatchWithEvents(sheet, WorksheetEvents)
-    print("{} {} workbookFont {}".format(
-        datetime.now(), getuser(), e.StandardFont))
-    print("{} {} workbookFontSize {}".format(
-        datetime.now(), getuser(), e.StandardFontSize))
-
-    runLoop(e)
-    # if not runLoop(e):
-    #    e.Quit()
-    if not CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]):
-        sys.exit(1)
+    try:
+        # pythoncom.CoInitialize()  # needed for thread
+        e = DispatchWithEvents("Excel.Application", ExcelEvents)
+        e.seen_events = {}
+        e.Visible = 1  # open window
+        book = e.Workbooks.Add()  # create workbook that contains sheet
+        # book = DispatchWithEvents(book, WorkbookEvents)
+        # print("Book activated", book)
+        # sheet = e.Worksheets(1)
+        # sheet = DispatchWithEvents(sheet, WorksheetEvents)
+        # print("{} {} workbookFont {}".format(
+        #     datetime.now(), getuser(), e.StandardFont))
+        # print("{} {} workbookFontSize {}".format(
+        #     datetime.now(), getuser(), e.StandardFontSize))
+        runLoop(e)
+        if not CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]):
+            sys.exit(1)
+    except Exception as e:
+        exception = str(e)
+        print(f"Failed to launch Excel: {exception}")
+        # https://stackoverflow.com/q/47608506/1440037
+        if "win32com.gen_py" in exception:
+            # https://stackoverflow.com/a/54422675/1440037
+            # Deleting the gen_py output directory and re-running the script should fix the issue
+            # find the corrupted directory to remove in gen_py path using regex (directory is in the form 'win32com.gen_py.00020813-0000-0000-C000-000000000046x0x1x9)
+            # I should have a string like '00020813-0000-0000-C000-000000000046x0x1x9'
+            dirToRemove = findall(r"'(.*?)'", exception)[0].split('.')[-1]
+            if not dirToRemove:
+                # if regex failed use default folder
+                dirToRemove = '00020813-0000-0000-C000-000000000046x0x1x9'
+            pathToRemove = path.join(__gen_path__, dirToRemove)
+            print(f"Trying to fix the error, deleting {pathToRemove}")
+            rmtree(pathToRemove, ignore_errors=True)
+            if not path.exists(pathToRemove):
+                print("The error should now be fixed, try to execute the program again.")
 
 
 def wordEvents():
@@ -284,8 +304,8 @@ def CheckSeenEvents(o, events):
 
 
 if __name__ == '__main__':
-    print("Launching application...")
     args = sys.argv[1:]
+    print(f"Launching {args[0]}...")
     if "word" in args:
         wordEvents()
     elif "excel" in args:
