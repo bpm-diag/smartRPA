@@ -1,11 +1,10 @@
-# https://docs.microsoft.com/en-us/utils.WINDOWS/win32/api/
+# https://docs.microsoft.com/en-us/WINDOWS/win32/api/
 from sys import exit
 from time import sleep
 from threading import Thread
-
 from utils import GUI
 from utils import consumerServer
-from utils import utils
+from utils.utils import WINDOWS,MAC,LINUX
 from modules import systemEvents
 from modules import officeEvents
 from modules import clipboardEvents
@@ -22,13 +21,12 @@ def startLogger(systemLoggerFilesFolder,
                 officeAccess,
                 browserChrome,
                 browserFirefox):
-
     try:  # create the threads as daemons so they are closed when main ends
 
         # ************
         # main logging server
         # ************
-        utils.createLogFile()
+        consumerServer.createLogFile()
         t0 = Thread(target=consumerServer.runServer)
         t0.daemon = True
         t0.start()
@@ -42,7 +40,7 @@ def startLogger(systemLoggerFilesFolder,
             t1.daemon = True
             t1.start()
 
-            if utils.WINDOWS:
+            if WINDOWS:
                 t2 = Thread(target=systemEvents.watchRecentsFolderWin)
                 t2.daemon = True
                 t2.start()
@@ -51,12 +49,12 @@ def startLogger(systemLoggerFilesFolder,
                 # t4.start()
 
         if systemLoggerPrograms:
-            if utils.WINDOWS:
+            if WINDOWS:
                 t3 = Thread(target=systemEvents.logProcessesWin)
                 t3.daemon = True
                 t3.start()
 
-            if utils.MAC:
+            if MAC:
                 # TODO
                 pass
 
@@ -75,22 +73,22 @@ def startLogger(systemLoggerFilesFolder,
         # office logger
         # ************
 
-        if officeExcel and utils.WINDOWS:
+        if officeExcel and WINDOWS:
             t5 = Thread(target=officeEvents.excelEvents)
             t5.daemon = True
             t5.start()
 
-        if officeWord and utils.WINDOWS:
+        if officeWord and WINDOWS:
             t6 = Thread(target=officeEvents.wordEvents)
             t6.daemon = True
             t6.start()
 
-        if officePowerpoint and utils.WINDOWS:
+        if officePowerpoint and WINDOWS:
             t7 = Thread(target=officeEvents.powerpointEvents)
             t7.daemon = True
             t7.start()
 
-        if officeAccess and utils.WINDOWS:
+        if officeAccess and WINDOWS:
             print("Access not implemented yet.")
 
         # ************

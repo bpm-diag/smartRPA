@@ -1,147 +1,261 @@
 import sys
 sys.path.append('../')  # this way main file is visible from this file
-from datetime import datetime
 from getpass import getuser  # user id
-from string import ascii_uppercase
 from re import findall
 from os import path
 from shutil import rmtree
-from requests import post
+from itertools import chain
 from utils import consumerServer
-from utils import utils
+from utils.utils import timestamp, session, WINDOWS
 
-if utils.WINDOWS:
+if WINDOWS:
     from win32com.client import DispatchWithEvents, Dispatch, DispatchEx
     import pythoncom
     from win32com import __gen_path__
+    import ctypes
 
 
 def excelEvents():
+
+    # This variable controls OnSheetSelectionChange, if True an actions is logged every time a cell is selected. It's
+    # resource expensive, so it's possible to turn it off by setting variable to False
+    LOG_EVERY_CELL = True
+
+    # ************
+    # Application object events
     # https://docs.microsoft.com/en-us/office/vba/api/excel.application(object)
+    # ************
     class ExcelEvents:
         def setApplication(self, application):
             self.application = application
 
+        # return list of active worksheet in workbook
+        def getWorksheets(self, Sh, Wb):
+            if Sh:
+                return list(map(lambda sh: sh.Name, Sh.Parent.Worksheets))
+            elif Wb:
+                return list(map(lambda sh: sh.Name, Wb.Worksheets))
+
         # ************
-        # Workbooks
+        # Window
         # ************
 
-        def OnNewWorkbook(self, wb):
-            self.seen_events["OnNewWorkbook"] = None
-
-            print(
-                f"{utils.timestamp()} {getuser()} newWorkbook workbook: {wb.Name} Worksheet:{wb.ActiveSheet.Name} path: {wb.Path}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
-                "user": getuser(),
-                "category": "MS-OFFICE",
-                "application": "Microsoft Excel",
-                "event_type": "newWorkbook",
-                "workbook": wb.Name,
-                "current_worksheet": wb.ActiveSheet.Name,
-                "worksheets": list(map(lambda sh: sh.Name, wb.Worksheets)),
-                "event_src_path": wb.Path
-            })
-
-        def OnWindowActivate(self, wb, wn):
+        def OnWindowActivate(self, Wb, Wn):
             self.seen_events["OnWindowActivate"] = None
 
-            print(f"{utils.timestamp()} {getuser()} openWindow workbook: {wb.Name} Worksheet:{wb.ActiveSheet.Name} window id:{wn.WindowNumber} path: {wb.Path}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
+            print(f"{timestamp()} {getuser()} openWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
                 "user": getuser(),
-                "category": "MS-OFFICE",
-                "application": "Microsoft Excel",
-                "event_type": "openWindow",
-                "workbook": wb.Name,
-                "current_worksheet": wb.ActiveSheet.Name,
-                "worksheets": list(map(lambda sh: sh.Name, wb.Worksheets)),
-                "id": wn.WindowNumber,
-                "event_src_path": wb.Path
-            })
-
-        def OnWindowDeactivate(self, wb, wn):
-            self.seen_events["OnWindowDeactivate"] = None
-            print(
-                f"{utils.timestamp()} {getuser()} closeWindow workbook: {wb.Name} Worksheet:{wb.ActiveSheet.Name} window id:{wn.WindowNumber} path: {wb.Path}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
-                "user": getuser(),
-                "category": "MS-OFFICE",
-                "application": "Microsoft Excel",
-                "event_type": "closeWindow",
-                "workbook": wb.Name,
-                "current_worksheet": wb.ActiveSheet.Name,
-                "worksheets": list(map(lambda sh: sh.Name, wb.Worksheets)),
-                "id": wn.WindowNumber,
-                "event_src_path": wb.Path
-            })
-
-        def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
-            print(f"{utils.timestamp()} {getuser()} openWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
-                "user": getuser(),
-                "category": "MS-OFFICE",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "openWindow",
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
-                "worksheets": list(map(lambda sh: sh.Name, Wb.Worksheets)),
-                "id": wn.WindowNumber,
-                "event_src_path": wb.Path
+                "worksheets": self.getWorksheets(None, Wb),
+                "id": Wn.WindowNumber,
+                "event_src_path": Wb.Path
+            })
+
+        def OnWindowDeactivate(self, Wb, Wn):
+            self.seen_events["OnWindowDeactivate"] = None
+            print(
+                f"{timestamp()} {getuser()} closeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "closeWindow",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "id": Wn.WindowNumber,
+                "event_src_path": Wb.Path
+            })
+
+        def OnWindowResize(self, Wb, Wn):
+            print(
+                f"{timestamp()} {getuser()} resizeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} size:{Wn.Width}x{Wn.Height} ")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "resizeWindow",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "id": Wn.WindowNumber,
+                "event_src_path": Wb.Path,
+                "window_size": f"{Wn.Width}x{Wn.Height}"
             })
 
         # ************
-        # Worksheets
+        # Workbook
         # ************
 
-        def getWorksheets(self, Sh):
-            return list(map(lambda sh: sh.Name, Sh.Parent.Worksheets))
+        def OnNewWorkbook(self, Wb):
+            self.seen_events["OnNewWorkbook"] = None
+
+            print(
+                f"{timestamp()} {getuser()} newWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "newWorkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path
+            })
+
+        def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
+            print(f"{timestamp()} {getuser()} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path} saveAs dialog {SaveAsUI}")
+            if SaveAsUI: description = "SaveAs dialog box displayed"
+            else: description = "SaveAs dialog box not displayed"
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "saveWorkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path,
+                "description": description
+            })
+
+        def OnWorkbookAddinInstall(self, Wb):
+            print(f"{timestamp()} {getuser()} addinInstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "addinInstalledWorkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path
+            })
+
+        def OnWorkbookAddinUninstall(self, Wb):
+            print(f"{timestamp()} {getuser()} addinUninstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "addinUninstalledWorkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path
+            })
+
+        def OnWorkbookAfterXmlImport(self, Wb, Map, Url, Result):
+            print(f"{timestamp()} {getuser()} XMLImportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "XMLImportWOrkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path
+            })
+
+        def OnWorkbookAfterXmlExport(self, Wb, Map, Url, Result):
+            print(f"{timestamp()} {getuser()} XMLExportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "XMLExportWOrkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path
+            })
+
+        def OnWorkbookBeforePrint(self, Wb, Cancel):
+            print(f"{timestamp()} {getuser()} printWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "printWorkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path
+            })
+
+        def OnWorkbookBeforeClose(self, Wb, Cancel):
+            print(f"{timestamp()} {getuser()} closeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "closeWorkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path
+            })
+
+        # ************
+        # Worksheet
+        # ************
+
+        def filterNoneRangeValues(self, values):
+            # When a range of cells is selected, Target.Value is a Tuple of tuples containing the value of every
+            # selected cell Target.Value = ((None, None, None, None), (None, 'prova', None, None)). I'm
+            # interested only in cells with meaningful value, so I create a single list with all the tuples in
+            # Target.Value (by chaining the tuples using chain.from_iterable(list)) obtaining [None, None, None,
+            # None, None, 'prova', None, None] Now I remove the elements that are None by applying a filter
+            # operator to the previous list
+            if values:
+                return list(filter(lambda s: s is not None, list(chain.from_iterable(list(values)))))
+            else:
+                return ""
 
         def OnSheetActivate(self, Sh):
             # to get the list of active worksheet names, I cycle through the parent which is the workbook
-            print(f"{utils.timestamp()} {getuser()} MS-EXCEL selectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh)}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
+            print(f"{timestamp()} {getuser()} MS-EXCEL selectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
                 "user": getuser(),
-                "category": "MS-OFFICE",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "selectWorksheet",
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
-                "worksheets": self.getWorksheets(Sh),
-                "event_src_path": Sh.Parent.Path
-            })
-
-        def OnSheetDeactivate(self, Sh):
-            self.seen_events["OnSheetDeactivate"] = None
-            print(
-                f"{utils.timestamp()} {getuser()} MS-EXCEL deselectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh)}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
-                "user": getuser(),
-                "category": "MS-OFFICE",
-                "application": "Microsoft Excel",
-                "event_type": "deselectWorksheet",
-                "workbook": Sh.Parent.Name,
-                "current_worksheet": Sh.Name,
-                "worksheets": self.getWorksheets(Sh),
+                "worksheets": self.getWorksheets(Sh, None),
                 "event_src_path": Sh.Parent.Path
             })
 
         def OnSheetBeforeDelete(self, Sh):
             print(
-                f"{utils.timestamp()} {getuser()} MS-EXCEL deleteWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh)}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
+                f"{timestamp()} {getuser()} MS-EXCEL deleteWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
                 "user": getuser(),
-                "category": "MS-OFFICE",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "deleteWorksheet",
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
-                "worksheets": self.getWorksheets(Sh)
+                "worksheets": self.getWorksheets(Sh, None)
             })
 
         def OnSheetBeforeDoubleClick(self, Sh, Target, Cancel):
@@ -151,11 +265,11 @@ def excelEvents():
                 event_type = "doubleClickCellWithValue"
                 value = Target.Value
 
-            print(f"{utils.timestamp()} {getuser()} MS-EXCEL {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
+            print(f"{timestamp()} {getuser()} MS-EXCEL {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
                 "user": getuser(),
-                "category": "MS-OFFICE",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": event_type,
                 "workbook": Sh.Parent.Name,
@@ -170,11 +284,11 @@ def excelEvents():
             if Target.Value: # cell has value
                 event_type = "rightClickCellWithValue"
                 value = Target.Value
-            print(f"{utils.timestamp()} {getuser()} MS-EXCEL {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
+            print(f"{timestamp()} {getuser()} MS-EXCEL {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
                 "user": getuser(),
-                "category": "MS-OFFICE",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": event_type,
                 "workbook": Sh.Parent.Name,
@@ -183,43 +297,140 @@ def excelEvents():
                 "cell_content": value
             })
 
+        def OnSheetCalculate(self, Sh):
+            print(
+                f"{timestamp()} {getuser()} MS-EXCEL sheetCalculate {Sh.Name} {Sh.Parent.Name} ")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "sheetCalculate",
+                "workbook": Sh.Parent.Name,
+                "current_worksheet": Sh.Name,
+            })
+
+        def OnSheetChange(self, Sh, Target):
+            value = self.filterNoneRangeValues(Target.Value)
+            print(
+                f"{timestamp()} {getuser()} MS-EXCEL editCellSheet {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$','')} { value }")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "editCellSheet",
+                "workbook": Sh.Parent.Name,
+                "current_worksheet": Sh.Name,
+                "cell_range": Target.Address.replace('$', ''),
+                "cell_content":  value
+            })
+
+        def OnSheetDeactivate(self, Sh):
+            self.seen_events["OnSheetDeactivate"] = None
+            print(
+                f"{timestamp()} {getuser()} MS-EXCEL deselectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "deselectWorksheet",
+                "workbook": Sh.Parent.Name,
+                "current_worksheet": Sh.Name,
+                "worksheets": self.getWorksheets(Sh, None),
+                "event_src_path": Sh.Parent.Path
+            })
+
+        def OnSheetFollowHyperlink(self, Sh, Target):
+            print(
+                f"{timestamp()} {getuser()} MS-EXCEL followHiperlinkSheet {Sh.Name} {Sh.Parent.Name} {Target.Range.Address.replace('$', '')} {Target.Address}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "followHiperlinkSheet",
+                "workbook": Sh.Parent.Name,
+                "current_worksheet": Sh.Name,
+                "cell_range": Target.Range.Address.replace('$', ''),
+                "browser_url":  Target.Address
+            })
+
+        def OnSheetPivotTableAfterValueChange(self, Sh, TargetPivotTable, TargetRange):
+            print(
+                f"{timestamp()} {getuser()} MS-EXCEL pivotTableValueChangeSheet {Sh.Name} {Sh.Parent.Name} {TargetRange.Address.replace('$', '')} {TargetRange.Value}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "pivotTableValueChangeSheet",
+                "workbook": Sh.Parent.Name,
+                "current_worksheet": Sh.Name,
+                "cell_range": TargetRange.Address.replace('$', ''),
+                "cell_content":  TargetRange.Value if TargetRange.Value else ""
+            })
+
+        def OnSheetSelectionChange(self, Sh, Target):
+            cells_selected = Target.Address.replace('$','')  # value returned is in the format $B$3:$D$3, I remove $ sign
+            event_type = "getCell"
+            value = Target.Value if Target.Value else ""
+            rangeSelected = (':' in cells_selected) # True if the user selected a range of cells
+            # if a range of cells has been selected
+            if rangeSelected:
+                event_type = "getRange"
+                # Returns values of selected cells removing empty cells
+                value = self.filterNoneRangeValues(Target.Value)
+
+            # If LOG_EVERY_CELL is False and a user selects a single cell the event is not logged
+            if rangeSelected or LOG_EVERY_CELL:
+                print(f"{timestamp()} {getuser()} MS-EXCEL {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} {value}")
+                session.post(consumerServer.SERVER_ADDR, json={
+                    "timestamp": timestamp(),
+                    "user": getuser(),
+                    "category": "MicrosoftOffice",
+                    "application": "Microsoft Excel",
+                    "event_type": event_type,
+                    "workbook": Sh.Parent.Name,
+                    "current_worksheet": Sh.Name,
+                    "cell_range": cells_selected,
+                    "cell_content": value
+                })
+
+        def OnSheetTableUpdate(self, Sh, Target):
+            print(f"{timestamp()} {getuser()} MS-EXCEL worksheetTableUpdated {Sh.Name} {Sh.Parent.Name} ")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": getuser(),
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "worksheetTableUpdated",
+                "workbook": Sh.Parent.Name,
+                "current_worksheet": Sh.Name,
+            })
 
     class WorkbookEvents:
 
         # def OnActivate(self):
-        #     print("{} {} workbookActive".format(utils.timestamp(), getuser()))
+        #     print("{} {} workbookActive".format(timestamp(), getuser()))
 
         # def OnBeforeRightClick(self, Target, Cancel):
         #     # print ("It's a Worksheet Event")
         #     print(
-        #         "{} {} MS-EXCEL workbookRightClick {}".format(utils.timestamp(), getuser(), Target))
+        #         "{} {} MS-EXCEL workbookRightClick {}".format(timestamp(), getuser(), Target))
 
         # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetactivate
         # def OnSheetActivate(self, Sh):
-        #     print(f"{utils.timestamp()} {getuser()} MS-EXCEL selectWorksheet {Sh.Name}")
+        #     print(f"{timestamp()} {getuser()} MS-EXCEL selectWorksheet {Sh.Name}")
 
         #  https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetchange
-        def OnSheetChange(self, Sh, Target):
-            # dictionary to convert numbers in letters
-            d = dict(zip(range(1, 27), ascii_uppercase))
-            letter = d.get(Target.Column) if d.get(
-                Target.Column) != None else Target.Column  # Target.Column is the columnt number, I want to convert it to letter as shown in excel
-            print("{} {} MS-EXCEL editCellSheet {} {}".format(utils.timestamp(), getuser(), f"{letter}{Target.Row}", Target.Value))
 
-        # https://docs.microsoft.com/en-us/office/vba/api/excel.workbook.sheetselectionchange
-        def OnSheetSelectionChange(self, Sh, Target):
-            cells_selected = Target.Address.replace('$','')  # value returned is in the format $B$3:$D$3, I remove $ sign
-            value = Target.Value if Target.Value != None else ""
-            if ':' in cells_selected:  # range of cells selected
-                print(
-                    f"{utils.timestamp()} {getuser()} MS-EXCEL getRange {cells_selected}")
-            else:  # single cell selected
-                print(
-                    f"{utils.timestamp()} {getuser()} MS-EXCEL getCell {cells_selected} {value}")
             # args[0].Range('A1').Value = 'You selected cell ' + str(args[1].Address)
 
-        def OnBeforeSave(self, *args):
-            print("{} {} MS-EXCEL workbookSaved".format(utils.timestamp(), getuser()))
+        # def OnBeforeSave(self, *args):
+        #     print("{} {} MS-EXCEL workbookSaved".format(timestamp(), getuser()))
+        pass
 
     class WorksheetEvents:
         def OnActivate(self):
@@ -238,12 +449,12 @@ def excelEvents():
         book = e.Workbooks.Add()  # create workbook that contains sheet
         # book = DispatchWithEvents(book, WorkbookEvents)
         # print("Book activated", book)
-        sheet = e.Worksheets(1)
+        # sheet = e.Worksheets(1)
         # sheet = DispatchWithEvents(sheet, WorksheetEvents)
         # print("{} {} workbookFont {}".format(
-        #     utils.currentTimestamp(), getuser(), e.StandardFont))
+        #     currentTimestamp(), getuser(), e.StandardFont))
         # print("{} {} workbookFontSize {}".format(
-        #     utils.currentTimestamp(), getuser(), e.StandardFontSize))
+        #     currentTimestamp(), getuser(), e.StandardFontSize))
         runLoop(e)
         if not CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]):
             sys.exit(1)
@@ -271,20 +482,20 @@ def wordEvents():
     class WordEvents:
         def OnDocumentChange(self):
             self.seen_events["OnDocumentChange"] = None
-            print("{} {} documentChange".format(utils.timestamp(), getuser()))
+            print("{} {} documentChange".format(timestamp(), getuser()))
 
         # def OnNewDocument(self):
         #     self.seen_events["OnDocumentChange"] = None
-        #     print("{} {} newDocument".format(utils.currentTimestamp(),getuser()))
+        #     print("{} {} newDocument".format(currentTimestamp(),getuser()))
         def OnWindowActivate(self, doc, wn):
             self.seen_events["OnWindowActivate"] = None
-            print("{} {} wordOpened".format(utils.timestamp(), getuser()))
+            print("{} {} wordOpened".format(timestamp(), getuser()))
 
         def OnDocumentBeforeSave(self, *args):
-            print("{} {} documentSaved".format(utils.timestamp(), getuser()))
+            print("{} {} documentSaved".format(timestamp(), getuser()))
 
         def OnDocumentBeforePrint(self, *args):
-            print("{} {} documentPrinted".format(utils.timestamp(), getuser()))
+            print("{} {} documentPrinted".format(timestamp(), getuser()))
 
         def OnQuit(self):
             self.seen_events["OnQuit"] = None
@@ -306,20 +517,20 @@ def powerpointEvents():
     class powerpointEvents:
         def OnDocumentChange(self):
             self.seen_events["OnDocumentChange"] = None
-            print("{} {} documentChange".format(utils.timestamp(), getuser()))
+            print("{} {} documentChange".format(timestamp(), getuser()))
 
         # def OnNewDocument(self):
         #     self.seen_events["OnDocumentChange"] = None
-        #     print("{} {} newDocument".format(utils.currentTimestamp(),getuser()))
+        #     print("{} {} newDocument".format(currentTimestamp(),getuser()))
         def OnWindowActivate(self, doc, wn):
             self.seen_events["OnWindowActivate"] = None
-            print("{} {} powerpointOpened".format(utils.timestamp(), getuser()))
+            print("{} {} powerpointOpened".format(timestamp(), getuser()))
 
         def OnDocumentBeforeSave(self, *args):
-            print("{} {} documentSaved".format(utils.timestamp(), getuser()))
+            print("{} {} documentSaved".format(timestamp(), getuser()))
 
         def OnDocumentBeforePrint(self, *args):
-            print("{} {} documentPrinted".format(utils.timestamp(), getuser()))
+            print("{} {} documentPrinted".format(timestamp(), getuser()))
 
         def OnQuit(self):
             self.seen_events["OnQuit"] = None
@@ -327,7 +538,7 @@ def powerpointEvents():
 
         def OnPresentationNewSlide(self, Sld):
             print(Sld)
-            print("{} {} MS-POWERPOINT newSlideAdded".format(utils.timestamp(), getuser()))
+            print("{} {} MS-POWERPOINT newSlideAdded".format(timestamp(), getuser()))
 
     pythoncom.CoInitialize()  # needed for thread
     p = DispatchWithEvents("powerpoint.Application", powerpointEvents)
@@ -346,20 +557,20 @@ def outlookEvents():
     class outlookEvents:
         def OnDocumentChange(self):
             self.seen_events["OnDocumentChange"] = None
-            print("{} {} documentChange".format(utils.timestamp(), getuser()))
+            print("{} {} documentChange".format(timestamp(), getuser()))
 
         # def OnNewDocument(self):
         #     self.seen_events["OnDocumentChange"] = None
-        #     print("{} {} newDocument".format(utils.currentTimestamp(),getuser()))
+        #     print("{} {} newDocument".format(currentTimestamp(),getuser()))
         def OnWindowActivate(self, doc, wn):
             self.seen_events["OnWindowActivate"] = None
-            print("{} {} outlookOpened".format(utils.timestamp(), getuser()))
+            print("{} {} outlookOpened".format(timestamp(), getuser()))
 
         def OnDocumentBeforeSave(self, *args):
-            print("{} {} documentSaved".format(utils.timestamp(), getuser()))
+            print("{} {} documentSaved".format(timestamp(), getuser()))
 
         def OnDocumentBeforePrint(self, *args):
-            print("{} {} documentPrinted".format(utils.timestamp(), getuser()))
+            print("{} {} documentPrinted".format(timestamp(), getuser()))
 
         def OnQuit(self):
             self.seen_events["OnQuit"] = None
@@ -400,7 +611,7 @@ def outlookEvents():
     # o.Presentations.Add()
 
     runLoop(o)
-    if not CheckSeenEvents(p, ["OnDocumentChange", "OnWindowActivate"]):
+    if not CheckSeenEvents(o, ["OnDocumentChange", "OnWindowActivate"]):
         sys.exit(1)
 
 

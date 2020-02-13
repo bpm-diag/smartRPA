@@ -6,14 +6,13 @@ from datetime import datetime
 from getpass import getuser  # user id
 from os.path import expanduser  # user folder
 from os import listdir
-from platform import system
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-from requests import post
 from utils import consumerServer
 from utils import utils
+from utils.utils import timestamp, session, WINDOWS, MAC, LINUX
 
-if utils.WINDOWS:
+if WINDOWS:
     import pythoncom  # for win32 thread
     import win32com.client  # access running programs, part of pywin32
     from winregistry import WinRegistry as Reg  # access registry
@@ -40,11 +39,11 @@ def watchFolder():
                 if event.event_type == "moved":  # destination path is available
                     print(
                         f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
-                    post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": utils.timestamp(),
+                    session.post(consumerServer.SERVER_ADDR, json={
+                        "timestamp": timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
-                        "application": "Explorer" if utils.WINDOWS else "Finder",
+                        "application": "Explorer" if WINDOWS else "Finder",
                         "event_type": event.event_type,
                         "event_src_path": event.src_path,
                         "event_dest_path": event.dest_path
@@ -55,18 +54,18 @@ def watchFolder():
                 else:  # created,deleted
                     print(
                         f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
-                    post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": utils.timestamp(),
+                    session.post(consumerServer.SERVER_ADDR, json={
+                        "timestamp": timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
-                        "application": "Explorer" if utils.WINDOWS else "Finder",
+                        "application": "Explorer" if WINDOWS else "Finder",
                         "event_type": event.event_type,
                         "event_src_path": event.src_path
                     })
                     # return
 
     my_event_handler = WatchFilesHandler()
-    if utils.WINDOWS:
+    if WINDOWS:
         path = expanduser("~")
     else:
         # TODO make path start on home folder
@@ -129,7 +128,7 @@ def logProcessesWin():
                     path = pathList[0].ExecutablePath if pathList[0].ExecutablePath  else ""
                     print(f"{datetime.now()} {getuser()} AppOpen {app} {path}")
                     post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": utils.timestamp(),
+                        "timestamp": timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": app,
@@ -147,7 +146,7 @@ def logProcessesWin():
                     path = pathList[0].ExecutablePath if pathList[0].ExecutablePath  else ""
                     print(f"{datetime.now()} {getuser()} Appclose {app} {path}")
                     post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": utils.timestamp(),
+                        "timestamp": timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": app,
@@ -206,10 +205,10 @@ def watchRecentsFolderWin():
                     print(
                         f"{datetime.now()} {getuser()} OS-System OpenFile/Folder {added[0][:-4]}")
                     post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": utils.timestamp(),
+                        "timestamp": timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
-                        "application": "Explorer" if utils.WINDOWS else "Finder",
+                        "application": "Explorer" if WINDOWS else "Finder",
                         "event_type": "OpenFile/Folder",
                         "event_src_path": added[0][:-4]
                     })
