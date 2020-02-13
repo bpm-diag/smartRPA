@@ -160,7 +160,7 @@ def buildGUI():
         print("You're running an old version of python. Please download the latest version from http://python.org")
         return -1
     # Fix blurry UI on windows
-    if (system() == "Windows"):
+    if (utils.WINDOWS):
         import ctypes
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
         geometry = '600x900'

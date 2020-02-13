@@ -1,10 +1,12 @@
+from sys import path
+path.append('../')  # this way main file is visible from this file
 import pyperclip
 from time import sleep
 from datetime import datetime
 from getpass import getuser  # user id
 from requests import post
 from utils import consumerServer
-
+from utils import utils
 
 # constantly monitors clipboard for changes
 def logClipboard():
@@ -15,7 +17,7 @@ def logClipboard():
             recent_value = temp_value
             print(f"{datetime.now()} {getuser()} OS-Clipboard copy {recent_value}")
             post(consumerServer.SERVER_ADDR, json={
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3],
+                "timestamp": utils.timestamp(),
                 "user": getuser(),
                 "category": "OS-Clipboard",
                 "application": "Clipboard",

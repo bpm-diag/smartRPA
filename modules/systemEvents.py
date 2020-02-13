@@ -1,4 +1,6 @@
 # https://docs.microsoft.com/en-us/windows/win32/api/
+from sys import path
+path.append('../')  # this way main file is visible from this file
 from time import sleep
 from datetime import datetime
 from getpass import getuser  # user id
@@ -7,11 +9,11 @@ from os import listdir
 from platform import system
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-# from utils import writer
 from requests import post
 from utils import consumerServer
+from utils import utils
 
-if system() == "Windows":
+if utils.WINDOWS:
     import pythoncom  # for win32 thread
     import win32com.client  # access running programs, part of pywin32
     from winregistry import WinRegistry as Reg  # access registry
@@ -36,12 +38,13 @@ def watchFolder():
                 return
             else:
                 if event.event_type == "moved":  # destination path is available
-                    print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
+                    print(
+                        f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
                     post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3],
+                        "timestamp": utils.timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
-                        "application": "Explorer" if system() == "Windows" else "Finder",
+                        "application": "Explorer" if utils.WINDOWS else "Finder",
                         "event_type": event.event_type,
                         "event_src_path": event.src_path,
                         "event_dest_path": event.dest_path
@@ -50,22 +53,24 @@ def watchFolder():
                 elif event.event_type == "modified":  # avoid spam
                     return
                 else:  # created,deleted
-                    print(f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
+                    print(
+                        f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
                     post(consumerServer.SERVER_ADDR, json={
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3],
+                        "timestamp": utils.timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
-                        "application": "Explorer" if system() == "Windows" else "Finder",
+                        "application": "Explorer" if utils.WINDOWS else "Finder",
                         "event_type": event.event_type,
                         "event_src_path": event.src_path
                     })
                     # return
 
     my_event_handler = WatchFilesHandler()
-    if system() == "Windows":
+    if utils.WINDOWS:
         path = expanduser("~")
     else:
-        path = expanduser("~") + "/Desktop"  # TODO make path start on home folder
+        # TODO make path start on home folder
+        path = expanduser("~") + "/Desktop"
     my_observer = Observer()
     my_observer.schedule(my_event_handler, path, recursive=True)
     my_observer.start()
@@ -79,13 +84,13 @@ def watchFolder():
 
 #  Detects programs opened and closed
 def logProcessesWin():
-    pythoncom.CoInitialize()  # needed for thread http://timgolden.me.uk/pywin32-docs/pythoncom__CoInitialize_meth.html
+    # needed for thread http://timgolden.me.uk/pywin32-docs/pythoncom__CoInitialize_meth.html
+    pythoncom.CoInitialize()
     strComputer = "."
     objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
     objSWbemServices = objWMIService.ConnectServer(strComputer, "root\cimv2")
 
-    programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
-                          "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe", "LocalBridge.exe"]
+    programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe", "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe", "LocalBridge.exe", "SearchProtocolHost.exe"]
 
     # create initial set of running processes using Windows Management Instrumentation (WMI)
     colItems = objSWbemServices.ExecQuery(
@@ -97,7 +102,8 @@ def logProcessesWin():
 
     new_programs = set()  # needed later to initialize 'closed' set
     new_programs_len = 0  # needed later to check if 'new_programs' set changes
-    open_programs = []  # maitain set of open programs so I don't have duplicates when logging events
+    # maitain set of open programs so I don't have duplicates when logging events
+    open_programs = []
     while True:
         sleep(1)  # seconds
 
@@ -111,7 +117,8 @@ def logProcessesWin():
 
         new_programs = set(started) - set(
             running)  # check the difference between the new set and the original to find new processes
-        closed_programs = closed - new_programs  # find programs that are not in new_programs set anymore so they have been closed
+        # find programs that are not in new_programs set anymore so they have been closed
+        closed_programs = closed - new_programs
 
         if len(new_programs) != new_programs_len:  # set is changed
             for app in new_programs:
@@ -119,28 +126,28 @@ def logProcessesWin():
                     open_programs.append(app)
                     pathList = list(filter(lambda prog: prog.Name == app,
                                            colItems))  # find the given program in the list of running processes and take its path
-                    path = pathList[0].ExecutablePath if pathList else ""
+                    path = pathList[0].ExecutablePath if pathList[0].ExecutablePath  else ""
                     print(f"{datetime.now()} {getuser()} AppOpen {app} {path}")
                     post(consumerServer.SERVER_ADDR, json={
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3],
+                        "timestamp": utils.timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": app,
                         "event_type": "AppOpen",
                         "event_src_path": path
                     })
-
             new_programs_len = len(new_programs)
+        
         if len(closed_programs):  # set is not empty
             for app in closed_programs:
                 if app in open_programs:
                     open_programs.remove(app)
                     pathList = list(filter(lambda prog: prog.Name == app,
                                            colItems))  # find the given program in the list of running processes and take its path
-                    path = pathList[0].ExecutablePath if pathList else ""
+                    path = pathList[0].ExecutablePath if pathList[0].ExecutablePath  else ""
                     print(f"{datetime.now()} {getuser()} Appclose {app} {path}")
                     post(consumerServer.SERVER_ADDR, json={
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3],
+                        "timestamp": utils.timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
                         "application": app,
@@ -149,6 +156,8 @@ def logProcessesWin():
                     })
 
 # return list of programs uninstalled by user
+
+
 def findUninstall():
     # HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall
     # HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall
@@ -166,7 +175,8 @@ def findUninstall():
 
 
 def watchRecentsFolderWin():
-    RECENT_ITEMS_PATH = expanduser("~") + "\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
+    RECENT_ITEMS_PATH = expanduser(
+        "~") + "\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
     change_handle = win32file.FindFirstChangeNotification(  # sets up a handle for watching file changes
         RECENT_ITEMS_PATH,  # path to watch
         0,  # boolean indicating whether the directories underneath the one specified are to be watched
@@ -177,24 +187,29 @@ def watchRecentsFolderWin():
     #  time out every half a second allowing for keyboard interrupts
     #  to terminate the loop.
     try:
-        old_path_contents = dict([(f, None) for f in listdir(RECENT_ITEMS_PATH)])
+        old_path_contents = dict([(f, None)
+                                  for f in listdir(RECENT_ITEMS_PATH)])
         while 1:
             result = win32event.WaitForSingleObject(change_handle, 500)
             # If the WaitFor... returned because of a notification (as
             #  opposed to timing out or some error) then look for the
             #  changes in the directory contents.
             if result == win32con.WAIT_OBJECT_0:
-                new_path_contents = dict([(f, None) for f in listdir(RECENT_ITEMS_PATH)])
-                added = [f for f in new_path_contents if not f in old_path_contents]
+                new_path_contents = dict([(f, None)
+                                          for f in listdir(RECENT_ITEMS_PATH)])
+                added = [
+                    f for f in new_path_contents if not f in old_path_contents]
                 # deleted = [f for f in old_path_contents if not f in new_path_contents]
                 if added:
                     # print ("Added: ", ", ".join (added))
-                    print(f"{datetime.now()} {getuser()} OS-System OpenFile/Folder {added[0][:-4]}")  # remove extension
+                    # remove extension
+                    print(
+                        f"{datetime.now()} {getuser()} OS-System OpenFile/Folder {added[0][:-4]}")
                     post(consumerServer.SERVER_ADDR, json={
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3],
+                        "timestamp": utils.timestamp(),
                         "user": getuser(),
                         "category": "OS-System",
-                        "application": "Explorer" if system() == "Windows" else "Finder",
+                        "application": "Explorer" if utils.WINDOWS else "Finder",
                         "event_type": "OpenFile/Folder",
                         "event_src_path": added[0][:-4]
                     })
@@ -238,14 +253,15 @@ def GetUserShellFolders():
 
     # Then open the registry key where Windows stores the Shell Folder locations
     try:
-        Key = winreg.OpenKey(Hive, "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
+        Key = winreg.OpenKey(
+            Hive, "Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
     except WindowsError:
         print("Can't open registry key Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders.")
         winreg.CloseKey(Hive)
         return return_dict
 
     # Nothing failed above, so enumerate through all the Shell Folder values and return in a dictionary
-    # This relies on error at end of 
+    # This relies on error at end of
     try:
         # i = 0
         # while 1:
@@ -275,4 +291,5 @@ def printerLogger():
     )
     while 1:
         pj = print_job_watcher()
-        print(f"{datetime.now()} {pj.Owner} OS-System printSubmitted {pj.Name} {pj.TotalPages}")
+        print(
+            f"{datetime.now()} {pj.Owner} OS-System printSubmitted {pj.Name} {pj.TotalPages}")
