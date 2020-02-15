@@ -15,12 +15,15 @@ def startLogger(systemLoggerFilesFolder,
                 systemLoggerClipboard,
                 systemLoggerHotkeys,
                 systemLoggerEvents,
+                officeFilename,
                 officeExcel,
                 officeWord,
                 officePowerpoint,
                 officeAccess,
                 browserChrome,
-                browserFirefox):
+                browserFirefox,
+                browserEdge
+                ):
     try:  # create the threads as daemons so they are closed when main ends
 
         # ************
@@ -100,6 +103,11 @@ def startLogger(systemLoggerFilesFolder,
 
         if browserFirefox:
             consumerServer.LOG_FIREFOX = True
+
+        if browserEdge:
+            consumerServer.LOG_EDGE = True
+
+        print("[mainLogger] Selected threads activated")
 
         while 1:  # keep main active
             sleep(1)

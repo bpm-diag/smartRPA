@@ -2,6 +2,26 @@
 // Utilities
 // ********************
 
+// detect which browser is running the extension
+function getBrowser() {
+    // if (typeof chrome !== "undefined") {
+    //     if (typeof browser !== "undefined") return "Firefox";
+    //     else return "Chrome";
+    // }
+    if (window.navigator.userAgent.indexOf("Firefox") > -1)
+        return "Firefox";
+    else if (window.navigator.userAgent.indexOf("Edge/") > -1)
+        return "Edge";
+    else if (window.navigator.userAgent.indexOf("Edg/") > -1)
+        return "EdgeChromium";
+    else if (window.navigator.userAgent.indexOf("Safari") > -1 && window.navigator.userAgent.indexOf('Chrome') == -1)
+        return "Safari";
+    else if (window.navigator.userAgent.indexOf("MSIE ") > -1 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+        return "InternetExplorer";
+    else if (window.navigator.userAgent.indexOf("Chrome") > -1)
+        return "Chrome";
+}
+
 // post request to server sending logging data
 function post(eventLog) {
     $.ajax({
@@ -17,14 +37,6 @@ function post(eventLog) {
             console.log("Request Failed " + error);
         }
     });
-}
-
-// detect which browser is running the extension
-function getBrowser() {
-    if (typeof chrome !== "undefined") {
-        if (typeof browser !== "undefined") return "Firefox";
-        else return "Chrome";
-    }
 }
 
 // log data only if server is running
@@ -60,8 +72,9 @@ function checkServerStatus() {
         .done(function(data, textStatus, jqXHR) {
             console.log("Logging server running: " + jqXHR.status);
             if (
-                (getBrowser() == "Chrome" && data.log_chrome) ||
-                (getBrowser() == "Firefox" && data.log_firefox)
+                (getBrowser() === "Chrome" && data.log_chrome) ||
+                (getBrowser() === "Firefox" && data.log_firefox) ||
+                (getBrowser().includes("Edge") && data.log_edge)
             ) {
                 // server running and browser logging enabled by user
                 loggingON();

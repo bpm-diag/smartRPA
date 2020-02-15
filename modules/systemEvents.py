@@ -1,5 +1,6 @@
 # https://docs.microsoft.com/en-us/windows/win32/api/
 from sys import path
+
 path.append('../')  # this way main file is visible from this file
 from time import sleep
 from datetime import datetime
@@ -9,8 +10,7 @@ from os import listdir
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from utils import consumerServer
-from utils import utils
-from utils.utils import timestamp, session, WINDOWS, MAC, LINUX
+from utils.utils import timestamp, session, WINDOWS, MAC, LINUX, DESKTOP, HOME_FOLDER
 
 if WINDOWS:
     import pythoncom  # for win32 thread
@@ -38,10 +38,10 @@ def watchFolder():
             else:
                 if event.event_type == "moved":  # destination path is available
                     print(
-                        f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path} {event.dest_path}")
+                        f"{datetime.now()} {USER} OS-System {event.event_type} {event.src_path} {event.dest_path}")
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
-                        "user": getuser(),
+                        "user": USER,
                         "category": "OS-System",
                         "application": "Explorer" if WINDOWS else "Finder",
                         "event_type": event.event_type,
@@ -53,10 +53,10 @@ def watchFolder():
                     return
                 else:  # created,deleted
                     print(
-                        f"{datetime.now()} {getuser()} OS-System {event.event_type} {event.src_path}")
+                        f"{datetime.now()} {USER} OS-System {event.event_type} {event.src_path}")
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
-                        "user": getuser(),
+                        "user": USER,
                         "category": "OS-System",
                         "application": "Explorer" if WINDOWS else "Finder",
                         "event_type": event.event_type,
@@ -65,14 +65,17 @@ def watchFolder():
                     # return
 
     my_event_handler = WatchFilesHandler()
+
     if WINDOWS:
-        path = expanduser("~")
+        path = HOME_FOLDER
     else:
-        # TODO make path start on home folder
-        path = expanduser("~") + "/Desktop"
+        # on osx script does not run recursively on home folder https://github.com/gorakhargosh/watchdog/issues/401
+        path = DESKTOP
+
     my_observer = Observer()
     my_observer.schedule(my_event_handler, path, recursive=True)
     my_observer.start()
+    print("[systemEvents] Files/Folder logging started")
     try:
         while True:
             sleep(1)
@@ -89,7 +92,9 @@ def logProcessesWin():
     objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
     objSWbemServices = objWMIService.ConnectServer(strComputer, "root\cimv2")
 
-    programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe", "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe", "LocalBridge.exe", "SearchProtocolHost.exe"]
+    programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
+                          "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe",
+                          "LocalBridge.exe", "SearchProtocolHost.exe"]
 
     # create initial set of running processes using Windows Management Instrumentation (WMI)
     colItems = objSWbemServices.ExecQuery(
@@ -125,34 +130,35 @@ def logProcessesWin():
                     open_programs.append(app)
                     pathList = list(filter(lambda prog: prog.Name == app,
                                            colItems))  # find the given program in the list of running processes and take its path
-                    path = pathList[0].ExecutablePath if pathList[0].ExecutablePath  else ""
-                    print(f"{datetime.now()} {getuser()} AppOpen {app} {path}")
+                    path = pathList[0].ExecutablePath if pathList[0].ExecutablePath else ""
+                    print(f"{datetime.now()} {USER} AppOpen {app} {path}")
                     post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
-                        "user": getuser(),
+                        "user": USER,
                         "category": "OS-System",
                         "application": app,
                         "event_type": "AppOpen",
                         "event_src_path": path
                     })
             new_programs_len = len(new_programs)
-        
+
         if len(closed_programs):  # set is not empty
             for app in closed_programs:
                 if app in open_programs:
                     open_programs.remove(app)
                     pathList = list(filter(lambda prog: prog.Name == app,
                                            colItems))  # find the given program in the list of running processes and take its path
-                    path = pathList[0].ExecutablePath if pathList[0].ExecutablePath  else ""
-                    print(f"{datetime.now()} {getuser()} Appclose {app} {path}")
+                    path = pathList[0].ExecutablePath if pathList[0].ExecutablePath else ""
+                    print(f"{datetime.now()} {USER} Appclose {app} {path}")
                     post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
-                        "user": getuser(),
+                        "user": USER,
                         "category": "OS-System",
                         "application": app,
                         "event_type": "Appclose",
                         "event_src_path": path
                     })
+
 
 # return list of programs uninstalled by user
 
@@ -203,10 +209,10 @@ def watchRecentsFolderWin():
                     # print ("Added: ", ", ".join (added))
                     # remove extension
                     print(
-                        f"{datetime.now()} {getuser()} OS-System OpenFile/Folder {added[0][:-4]}")
+                        f"{datetime.now()} {USER} OS-System OpenFile/Folder {added[0][:-4]}")
                     post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
-                        "user": getuser(),
+                        "user": USER,
                         "category": "OS-System",
                         "application": "Explorer" if WINDOWS else "Finder",
                         "event_type": "OpenFile/Folder",

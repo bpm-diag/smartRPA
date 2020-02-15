@@ -1,6 +1,7 @@
 {
     "manifest_version": 2,
     "name": "BrowserLogger",
+    "author": "marco2012",
     "description": "Log user interactions with the browser",
     "version": "1.0.1",
     "icons": {

@@ -1,21 +1,21 @@
 import sys
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QFont, QIcon, QTextCursor
+from PyQt5.QtCore import Qt, QSize, QDir
+from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
-                             QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem, QAbstractItemView)
+                             QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
+                             QAbstractItemView, QFileDialog)
 import darkdetect
 from multiprocessing import Process
 from utils.utils import *
 import mainLogger
 
-# Test GUI without starting main server, must be set to False to start main
-UI_DEBUG = False
-
+# Debugging
+# Test the UI without starting main every time
+DISABLE_MAIN = False
 # Shows text area below start button with log information about the execution of the program
 SHOW_STATUS_TEXTEDIT = True
-
 
 class WidgetGallery(QDialog):
     def __init__(self, parent=None):
@@ -39,6 +39,7 @@ class WidgetGallery(QDialog):
         # Variables
         self.running = False
         self.mainProcess = None
+        self.officeFilename = None
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
         self.systemLoggerPrograms = self.systemLoggerProgramsCB.isChecked()
@@ -51,6 +52,7 @@ class WidgetGallery(QDialog):
         self.officeAccess = self.officeAccessCB.isChecked()
         self.browserChrome = self.browserChromeCB.isChecked()
         self.browserFirefox = self.browserFirefoxCB.isChecked()
+        self.browserEdge = self.browserEdgeCB.isChecked()
 
         mainLayout = QGridLayout()
         mainLayout.addLayout(self.topLayout, 0, 0, 1, 2)
@@ -129,7 +131,7 @@ class WidgetGallery(QDialog):
         layout.addWidget(self.officeExcelCB)
         layout.addWidget(self.officeWordCB)
         layout.addWidget(self.officePowerpointCB)
-        layout.addWidget(self.officeAccessCB)
+        # layout.addWidget(self.officeAccessCB)
         layout.addStretch(1)
 
         self.officeGroupBox.setLayout(layout)
@@ -146,9 +148,14 @@ class WidgetGallery(QDialog):
         self.browserFirefoxCB.tag = "browserFirefox"
         self.browserFirefoxCB.stateChanged.connect(self.handleCheckBox)
 
+        self.browserEdgeCB = QCheckBox("Microsoft Edge")
+        self.browserEdgeCB.tag = "browserEdge"
+        self.browserEdgeCB.stateChanged.connect(self.handleCheckBox)
+
         layout = QVBoxLayout()
         layout.addWidget(self.browserChromeCB)
         layout.addWidget(self.browserFirefoxCB)
+        layout.addWidget(self.browserEdgeCB)
         layout.addStretch(1)
 
         self.browserGroupBox.setLayout(layout)
@@ -197,23 +204,12 @@ class WidgetGallery(QDialog):
 
         self.statusLayout = QVBoxLayout()
 
-        # self.statusLabel = QLabel("")
-
-        font = QFont(monospaceFont, fontSize, QFont.Normal)
-
-        # self.statusLabel.setFont(font)
-
-        # self.statusLayout.addStretch(1)
-        # self.statusLayout.addWidget(self.statusLabel)
-        # self.statusLayout.addStretch(1)
-
-        self.statusTextEdit = QListWidget()
-        self.statusTextEdit.setFont(font)
-        self.statusTextEdit.setSelectionMode(QAbstractItemView.NoSelection)
+        self.statusListWidget = QListWidget()
+        self.statusListWidget.setFont(QFont(monospaceFont, fontSize, QFont.Normal))
+        self.statusListWidget.setSelectionMode(QAbstractItemView.NoSelection)
 
         if SHOW_STATUS_TEXTEDIT:
-            self.statusLayout.addWidget(self.statusTextEdit)
-
+            self.statusLayout.addWidget(self.statusListWidget)
 
     def setStyle(self):
         if WINDOWS:
@@ -249,12 +245,14 @@ class WidgetGallery(QDialog):
 
     # set appropriate values based on platform
     def platformCheck(self):
+
         if WINDOWS:
             # window size
-            self.resize(520, 480)
+            self.resize(600, 560)
             # margins
             self.topLayout.setContentsMargins(0, 0, 0, 20)
             self.bottomLayout.setContentsMargins(0, 20, 0, 20)
+
             # disable checkbox if corresponding program is not installed in system
             if not OFFICE:
                 self.officeGroupBox.setEnabled(False)
@@ -267,6 +265,8 @@ class WidgetGallery(QDialog):
                 self.officePowerpoint = False
                 self.officeAccess = False
 
+            self.statusListWidget.setStyleSheet("QListWidget{background: #F0F0F0;}")
+
         elif MAC or LINUX:
             # office is not supported on mac
             self.officeGroupBox.setEnabled(False)
@@ -275,12 +275,20 @@ class WidgetGallery(QDialog):
             self.systemLoggerProgramsCB.setChecked(False)
             self.systemLoggerProgramsCB.setDisabled(True)
 
+            self.browserEdgeCB.setDisabled(True)
+
             # window size
             self.resize(360, 420)
 
             # margins
             self.topLayout.setContentsMargins(0, 0, 0, 10)
             self.bottomLayout.setContentsMargins(0, 0, 0, 0)
+
+            # if darkdetect.isLight():
+            #     self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
+            # else:
+            #     self.statusListWidget.setStyleSheet("QListWidget{background: #3A3B3B;}")
+            self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
 
         if not CHROME:
             self.browserChromeCB.setEnabled(False)
@@ -295,10 +303,18 @@ class WidgetGallery(QDialog):
         self.compatibilityCheckMessage()
 
     def compatibilityCheckMessage(self):
+        self.statusListWidget.clear()
         if MAC:
-            self.statusTextEdit.addItem(QListWidgetItem("- Office module not available on MacOS"))
-        if (WINDOWS and not OFFICE) or not CHROME or not FIREFOX:
-            self.statusTextEdit.addItem(QListWidgetItem("- Some modules disabled, programs not installed"))
+            self.statusListWidget.addItem(QListWidgetItem("- Office, Edge modules not available on MacOS"))
+        if WINDOWS and not OFFICE:
+            self.statusListWidget.addItem(QListWidgetItem("- Office disabled because not installed"))
+        if WINDOWS and not EDGE:
+            self.statusListWidget.addItem(QListWidgetItem("- Edge disabled because not installed"))
+        if not CHROME:
+            self.statusListWidget.addItem(QListWidgetItem("- Chrome disabled because not installed"))
+        if not FIREFOX:
+            self.statusListWidget.addItem(QListWidgetItem("- Firefox disabled because not installed"))
+
 
     # triggered by "enable all" button on top of the UI
     # in some cases the checkbox should be enabled only if the program is installed in the system
@@ -332,6 +348,8 @@ class WidgetGallery(QDialog):
             self.browserChromeCB.setChecked(self.allCBChecked)
         if FIREFOX:
             self.browserFirefoxCB.setChecked(self.allCBChecked)
+        if EDGE:
+            self.browserEdgeCB.setChecked(self.allCBChecked)
 
     # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
@@ -359,71 +377,109 @@ class WidgetGallery(QDialog):
             self.browserChrome = checked
         elif (tag == "browserFirefox"):
             self.browserFirefox = checked
+        elif (tag == "browserEdge"):
+            self.browserEdge = checked
+
+    # Create a dialog to select a file and return its path
+    def getFilenameDialog(self, customDialog=True, title="Open",hiddenItems=False, isFolder=False, forOpen=True, directory='',
+                       filter_format=''):
+
+        options = QFileDialog.Options()
+        if customDialog:
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.DontUseCustomDirectoryIcons
+
+        dialog = QFileDialog()
+        dialog.setOptions(options)
+        dialog.setWindowTitle(title)
+
+        if hiddenItems:
+            dialog.setFilter(dialog.filter() | QDir.Hidden)
+
+        # Files or folders
+        if isFolder:
+            dialog.setFileMode(QFileDialog.DirectoryOnly)
+        else:
+            dialog.setFileMode(QFileDialog.AnyFile)
+
+        # Opening or saving
+        if forOpen:
+            dialog.setAcceptMode(QFileDialog.AcceptOpen)
+        else:
+            dialog.setAcceptMode(QFileDialog.AcceptSave)
+
+        # Set format
+        if filter_format != '' and isFolder is False:
+            # dialog.setDefaultSuffix(filter_format)
+            dialog.setNameFilters([filter_format])
+
+        # starting directory
+        if directory != '':
+            dialog.setDirectory(str(directory))
+        else:
+            dialog.setDirectory(DESKTOP)
+
+        if dialog.exec_() == QDialog.Accepted:
+            path = dialog.selectedFiles()[0]  # returns a list
+            return path
+        else:
+            return ''
 
     # Called when start button is clicked by user
     def onButtonClick(self):
 
-        if not self.running:  # start button clicked
-
+        # start button clicked
+        if not self.running:
             # set gui parameters
             self.running = True
 
-            # self.statusLabel.setText('Logger running')
-            # self.statusLabel.setStyleSheet('color: green')
-            # self.statusLabel.update()
-            # item.setFont(self.font)
-            self.statusTextEdit.clear()
+            # self.statusListWidget.clear()
             self.compatibilityCheckMessage()
-            # self.statusTextEdit.addItem(QListWidgetItem("- Activating selected modules in threads"))
-            self.statusTextEdit.addItem(QListWidgetItem("- Logging server running, recording logs..."))
+            self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
 
             self.runButton.setText('Stop logger')
             self.runButton.update()
 
-            # start main process with the options selected in gui. It handles all other methods
-            # main method is started as a process so it can be terminated once the button is clicked
-            # all the methods in the main process are started as daemon threads so they are closed automatically when the main process is closed
+            # start main process with the options selected in gui. It handles all other methods main method is
+            # started as a process so it can be terminated once the button is clicked all the methods in the main
+            # process are started as daemon threads so they are closed automatically when the main process is closed
             self.mainProcess = Process(target=mainLogger.startLogger, args=(
                 self.systemLoggerFilesFolder,
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
                 self.systemLoggerHotkeys,
                 self.systemLoggerEvents,
+                self.officeFilename,
                 self.officeExcel,
                 self.officeWord,
                 self.officePowerpoint,
                 self.officeAccess,
                 self.browserChrome,
-                self.browserFirefox
+                self.browserFirefox,
+                self.browserEdge,
             ))
 
-            if not UI_DEBUG:
+            if not DISABLE_MAIN:
                 self.mainProcess.start()
 
-            print("Logger started, selected threads activated...")
+            print("[GUI] Logger started")
 
-        else:  # stop button clicked
-
+        # stop button clicked
+        else:
             # set gui parameters
             self.running = False
 
-            # self.statusLabel.setText("Logger stopped")
-            # self.statusLabel.setStyleSheet('color: gray')
-            # self.statusLabel.update()
-            # self.statusTextEdit.appendPlainText("- Logger stopped")
-            # self.statusTextEdit.appendPlainText("- Threads stopped")
-            # self.statusTextEdit.update()
-            self.statusTextEdit.addItem(QListWidgetItem(f"- Logger stopped."))
+            self.compatibilityCheckMessage()
+            self.statusListWidget.addItem(QListWidgetItem(f"- Logger stopped."))
 
             self.runButton.setText('Start logger')
             self.runButton.update()
 
             # stop main process, automatically closing all daemon threads in main process
-            if not UI_DEBUG:
+            if not DISABLE_MAIN:
                 self.mainProcess.terminate()
 
-            print(
-                "Main process terminated, daemon threads closed, wainting for new input...")
+            print("[GUI] Main process terminated, daemon threads closed, wainting for new input...")
 
 
 def buildGUI():

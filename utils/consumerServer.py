@@ -5,6 +5,7 @@ from logging import getLogger
 import errno
 import os
 from datetime import datetime
+from utils.utils import USER
 
 PORT = 4444
 SERVER_ADDR = f'http://localhost:{PORT}'
@@ -20,15 +21,18 @@ environ['WERKZEUG_RUN_MAIN'] = 'true'
 filename = ""
 LOG_CHROME = False
 LOG_FIREFOX = False
+LOG_EDGE = False
 
 # Header to use for the csv logging file, written by main when file is first created
-HEADER = ["timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path",
-          "clipboard_content",
-          "workbook", "current_worksheet", "worksheets", "sheets", "cell_content", "cell_range", "window_size",
-          "browser_url", "eventQual", "id", "title", "description", "tab_moved_from_index", "tab_moved_to_index",
-          "newZoomFactor", "oldZoomFactor", "tab_pinned", "tab_audible", "tab_muted", "window_ingognito", "file_size",
-          "tag_category", "tag_type", "tag_name", "tag_title", "tag_value", "tag_checked", "tag_html", "tag_href",
-          "tag_innerText", "tag_option"]
+HEADER = [
+    "timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path", "clipboard_content",
+    "workbook", "current_worksheet", "worksheets", "sheets", "cell_content", "cell_range", "window_size",
+    "slides", "effect",
+    "id", "title", "description", "browser_url", "eventQual", "tab_moved_from_index", "tab_moved_to_index",
+    "newZoomFactor", "oldZoomFactor", "tab_pinned", "tab_audible", "tab_muted", "window_ingognito", "file_size",
+    "tag_category", "tag_type", "tag_name", "tag_title", "tag_value", "tag_checked", "tag_html", "tag_href",
+    "tag_innerText", "tag_option"
+]
 
 # fields = ['timeStamp', 'userID', 'targetApp', 'eventType', 'url', 'content', 'target.workbookName',
 # 'target.sheetName','target.id','target.className','target.tagName', 'target.type', 'target.name',
@@ -55,7 +59,14 @@ def writeLog():
         return content
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
-    row = list(map(lambda col: content.get(col), HEADER))
+    # row = list(map(lambda col: content.get(col), HEADER))
+    # row = [content.get(col) for col in HEADER]
+    row = list()
+    for col in HEADER:
+        # add current user to browser logs (because browser extension can't determine current user for security reasons)
+        if not content.get("user"):
+            content["user"] = USER
+        row.append(content.get(col))
 
     with open(filename, 'a', newline='') as out_file:
         f = writer(out_file)
@@ -70,7 +81,7 @@ def writeLog():
 # get server status, for browser extension
 @app.route('/serverstatus', methods=['GET'])
 def getServerStatus():
-    return jsonify(log_chrome=LOG_CHROME, log_firefox=LOG_FIREFOX)
+    return jsonify(log_chrome=LOG_CHROME, log_firefox=LOG_FIREFOX, log_edge=LOG_EDGE)
 
 
 # Enable CORS, for browser extension
@@ -88,8 +99,7 @@ def createLogFile():
     current_directory = os.getcwd()
     # logs are saved in logs/ direcgory
     logs_directory = os.path.join(current_directory, 'logs/')
-    filenameWithTimestamp = logs_directory + datetime.now().strftime(
-        "%Y-%m-%d_%H-%M-%S") + '.csv'  # use current timestamp as filename
+    filenameWithTimestamp = logs_directory + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'  # use current timestamp as filename
     filename = filenameWithTimestamp  # filename to use in current session until the 'stop' button is pressed. must be set here because the ilename uses the current timestamp and it must remain the same during the whole session
     if not os.path.exists(logs_directory):
         try:
@@ -114,7 +124,7 @@ def isPortInUse(port):
 def runServer():
     # createLogFile()
     if not isPortInUse(PORT):
-        print("Logging server started...")
+        print("[Server] Logging server started...")
         app.run(port=PORT, debug=False, use_reloader=False)
     else:
         print(f"Could not start logging server, port {PORT} is already in use.")
