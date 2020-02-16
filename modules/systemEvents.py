@@ -1,16 +1,15 @@
 # https://docs.microsoft.com/en-us/windows/win32/api/
 from sys import path
 
+import keyboard
+
 path.append('../')  # this way main file is visible from this file
 from time import sleep
-from datetime import datetime
-from getpass import getuser  # user id
-from os.path import expanduser  # user folder
 from os import listdir
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from utils import consumerServer
-from utils.utils import timestamp, session, WINDOWS, MAC, LINUX, DESKTOP, HOME_FOLDER
+from utils.utils import *
 
 if WINDOWS:
     import pythoncom  # for win32 thread
@@ -86,6 +85,7 @@ def watchFolder():
 
 #  Detects programs opened and closed
 def logProcessesWin():
+    print("[systemEvents] Processes logging started")
     # needed for thread http://timgolden.me.uk/pywin32-docs/pythoncom__CoInitialize_meth.html
     pythoncom.CoInitialize()
     strComputer = "."
@@ -132,7 +132,7 @@ def logProcessesWin():
                                            colItems))  # find the given program in the list of running processes and take its path
                     path = pathList[0].ExecutablePath if pathList[0].ExecutablePath else ""
                     print(f"{datetime.now()} {USER} AppOpen {app} {path}")
-                    post(consumerServer.SERVER_ADDR, json={
+                    session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
                         "user": USER,
                         "category": "OS-System",
@@ -150,7 +150,7 @@ def logProcessesWin():
                                            colItems))  # find the given program in the list of running processes and take its path
                     path = pathList[0].ExecutablePath if pathList[0].ExecutablePath else ""
                     print(f"{datetime.now()} {USER} Appclose {app} {path}")
-                    post(consumerServer.SERVER_ADDR, json={
+                    session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
                         "user": USER,
                         "category": "OS-System",
@@ -161,8 +161,6 @@ def logProcessesWin():
 
 
 # return list of programs uninstalled by user
-
-
 def findUninstall():
     # HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall
     # HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall
@@ -180,6 +178,7 @@ def findUninstall():
 
 
 def watchRecentsFolderWin():
+    print("[systemEvents] Recent files/folders logging started")
     RECENT_ITEMS_PATH = expanduser(
         "~") + "\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
     change_handle = win32file.FindFirstChangeNotification(  # sets up a handle for watching file changes
@@ -210,7 +209,7 @@ def watchRecentsFolderWin():
                     # remove extension
                     print(
                         f"{datetime.now()} {USER} OS-System OpenFile/Folder {added[0][:-4]}")
-                    post(consumerServer.SERVER_ADDR, json={
+                    session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
                         "user": USER,
                         "category": "OS-System",
@@ -226,21 +225,86 @@ def watchRecentsFolderWin():
 
 
 def detectSelectedFilesInExplorer():
+    print("[systemEvents] detectSelectedFiles logging started")
     # look in the makepy output for IE for the 'CLSIDToClassMap' dictionary, and find the entry for 'ShellWindows'
     clsid = '{9BA05972-F6A8-11CF-A442-00A0C90A8F39}'
     ShellWindows = win32com.client.Dispatch(clsid)
-
     # a busy state can be detected:
     # while ShellWindows[0].Busy == False:
     # go in for-loop here
+    selected = []
+    while 1:
+        try:
+            for i in range(ShellWindows.Count):
+                # explorerPath = ShellWindows[i].LocationURL
+                selectedItems = ShellWindows[i].Document.SelectedItems()
+                if selectedItems.Count < 1:
+                    selected.clear()
+                    continue
+                for j in range(selectedItems.Count):
+                    path = selectedItems.Item(j).Path
+                    if path not in selected:
+                        selected.append(path)
+                        print(f"{datetime.now()} {USER} OS-System fileSelected {path}")
+                        session.post(consumerServer.SERVER_ADDR, json={
+                            "timestamp": timestamp(),
+                            "user": USER,
+                            "category": "OS-System",
+                            "application": "Explorer",
+                            "event_type": "fileSelected",
+                            "event_src_path": path
+                        })
+        except Exception:
+            pass
+        time.sleep(0.5)
 
-    for i in range(ShellWindows.Count):
-        print(ShellWindows[i].LocationURL)
-        for j in range(ShellWindows[i].Document.SelectedItems().Count):
-            path = ShellWindows[i].Document.SelectedItems().Item(j).Path
-            print(f"Selected {path} in Windows Explorer")
 
-    # Be careful: Internet Explorer uses also the same CLSID. You should implement a detection!
+def logHotkeys():
+    print("[systemEvents] Hotkey logging started...")
+
+    # https://www.hongkiat.com/blog/100-keyboard-shortcuts-windows/
+    keys_to_detect = {
+        'alt+d': 'Select address bar',
+        'alt+F4': 'Close item',
+        'alt+space+n': 'Minimise window',
+        'alt+space+x': 'Maximise window',
+        'ctrl+a': 'Select all',
+        'ctrl+c': 'Copy',
+        'ctrl+e': 'Select search box',
+        'ctrl+f': 'Find',
+        'ctrl+h': 'Find and replace',
+        'ctrl+n': 'New',
+        'ctrl+r': 'Refresh',
+        'ctrl+s': 'Save',
+        'ctrl+v': 'Paste',
+        'ctrl+w': 'Close window',
+        'ctrl+x': 'Cut',
+        'ctrl+y': 'Undo',
+        'ctrl+z': 'Redo',
+        'ctrl+shift+t': 'Reopen closed tab',
+        'win+tab': 'Cycle through apps',
+        'F2': 'Rename',
+    }
+
+    def handleHotkey(hotkey):
+        meaning = keys_to_detect.get(hotkey)
+        print(f"{datetime.now()} {USER} OS-System pressHotkey {hotkey.upper()} {meaning}")
+        session.post(consumerServer.SERVER_ADDR, json={
+            "timestamp": timestamp(),
+            "user": USER,
+            "category": "OS-System",
+            "application": "Keyboard",
+            "event_type": "pressHotkey",
+            "title": hotkey.upper(),
+            "description": meaning
+        })
+
+    for key in keys_to_detect.keys():
+        keyboard.add_hotkey(key, handleHotkey, args=[key])
+
+    keyboard.wait()
+
+
 
 
 def GetUserShellFolders():
@@ -286,6 +350,7 @@ def GetUserShellFolders():
 
 # This script watches for activity at the installed printers and writes a logfile. It shows how much a user has printed on wich printer (works also with network printers).
 def printerLogger():
+    print("[systemEvents] Printer logging started")
     import wmi
     c = wmi.WMI()
 

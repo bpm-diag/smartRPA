@@ -19,7 +19,7 @@ def startLogger(systemLoggerFilesFolder,
                 officeExcel,
                 officeWord,
                 officePowerpoint,
-                officeAccess,
+                officeOutlook,
                 browserChrome,
                 browserFirefox,
                 browserEdge
@@ -47,27 +47,30 @@ def startLogger(systemLoggerFilesFolder,
                 t2 = Thread(target=systemEvents.watchRecentsFolderWin)
                 t2.daemon = True
                 t2.start()
+
+                # maybe it consumes too much memory
+                t9 = Thread(target=systemEvents.detectSelectedFilesInExplorer)
+                t9.daemon = True
+                t9.start()
+
                 # t4=Thread(target=printerLogger)
                 # t4.daemon = True
                 # t4.start()
 
-        if systemLoggerPrograms:
-            if WINDOWS:
+        if systemLoggerPrograms and WINDOWS:
                 t3 = Thread(target=systemEvents.logProcessesWin)
                 t3.daemon = True
                 t3.start()
-
-            if MAC:
-                # TODO
-                pass
 
         if systemLoggerClipboard:
             t4 = Thread(target=clipboardEvents.logClipboard)
             t4.daemon = True
             t4.start()
 
-        if systemLoggerHotkeys:
-            pass
+        if systemLoggerHotkeys and WINDOWS:
+            t10 = Thread(target=systemEvents.logHotkeys)
+            t10.daemon = True
+            t10.start()
 
         if systemLoggerEvents:
             pass
@@ -91,8 +94,10 @@ def startLogger(systemLoggerFilesFolder,
             t7.daemon = True
             t7.start()
 
-        if officeAccess and WINDOWS:
-            print("Access not implemented yet.")
+        if officeOutlook and WINDOWS:
+            t8 = Thread(target=officeEvents.outlookEvents)
+            t8.daemon = True
+            t8.start()
 
         # ************
         # browser logger

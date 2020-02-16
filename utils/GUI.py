@@ -5,7 +5,7 @@ from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
-                             QAbstractItemView, QFileDialog)
+                             QAbstractItemView, QFileDialog, QRadioButton)
 import darkdetect
 from multiprocessing import Process
 from utils.utils import *
@@ -13,7 +13,7 @@ import mainLogger
 
 # Debugging
 # Test the UI without starting main every time
-DISABLE_MAIN = False
+DISABLE_MAIN = True
 # Shows text area below start button with log information about the execution of the program
 SHOW_STATUS_TEXTEDIT = True
 
@@ -49,7 +49,7 @@ class WidgetGallery(QDialog):
         self.officeExcel = self.officeExcelCB.isChecked()
         self.officeWord = self.officeWordCB.isChecked()
         self.officePowerpoint = self.officePowerpointCB.isChecked()
-        self.officeAccess = self.officeAccessCB.isChecked()
+        self.officeOutlook = self.officeOutlookCB.isChecked()
         self.browserChrome = self.browserChromeCB.isChecked()
         self.browserFirefox = self.browserFirefoxCB.isChecked()
         self.browserEdge = self.browserEdgeCB.isChecked()
@@ -108,31 +108,57 @@ class WidgetGallery(QDialog):
         self.systemGroupBox.setLayout(layout)
 
     def createOfficeLoggerGroupBox(self):
+
         self.officeGroupBox = QGroupBox("Office logger")
         self.officeGroupBox.setToolTip("Log all activities in Office applications \nlike opening, closing, editing documents and more")
 
+        hboxExcel = QHBoxLayout()
         self.officeExcelCB = QCheckBox("Excel")
         self.officeExcelCB.tag = "officeExcel"
         self.officeExcelCB.stateChanged.connect(self.handleCheckBox)
+        self.officeExcelNewRB = QRadioButton("New File")
+        self.officeExcelNewRB.setChecked(True)
+        self.officeExcelNewRB.setAutoExclusive(True)
+        self.officeExcelOpenRB = QRadioButton("Open File")
+        self.officeExcelOpenRB.setAutoExclusive(True)
+        hboxExcel.addWidget(self.officeExcelCB)
+        hboxExcel.addWidget(self.officeExcelNewRB)
+        hboxExcel.addWidget(self.officeExcelOpenRB)
 
+        hboxWord = QHBoxLayout()
         self.officeWordCB = QCheckBox("Word")
         self.officeWordCB.tag = "officeWord"
         self.officeWordCB.stateChanged.connect(self.handleCheckBox)
+        self.officeWordNewRB = QRadioButton("New File")
+        self.officeWordNewRB.setChecked(True)
+        self.officeWordOpenRB = QRadioButton("Open File")
+        hboxWord.addWidget(self.officeWordCB)
+        hboxWord.addWidget(self.officeWordNewRB)
+        hboxWord.addWidget(self.officeWordOpenRB)
 
+        hboxPowerpoint = QHBoxLayout()
         self.officePowerpointCB = QCheckBox("PowerPoint")
         self.officePowerpointCB.tag = "officePowerpoint"
         self.officePowerpointCB.stateChanged.connect(self.handleCheckBox)
+        self.officePowerpointNewRB = QRadioButton("New File")
+        self.officePowerpointNewRB.setChecked(True)
+        self.officePowerpointOpenRB = QRadioButton("Open File")
+        hboxPowerpoint.addWidget(self.officePowerpointCB)
+        hboxPowerpoint.addWidget(self.officePowerpointNewRB)
+        hboxPowerpoint.addWidget(self.officePowerpointOpenRB)
 
-        self.officeAccessCB = QCheckBox("Access")
-        self.officeAccessCB.tag = "officeAccess"
-        self.officeAccessCB.stateChanged.connect(self.handleCheckBox)
+        self.officeOutlookCB = QCheckBox("Outlook")
+        self.officeOutlookCB.tag = "officeOutlook"
+        self.officeOutlookCB.stateChanged.connect(self.handleCheckBox)
 
         layout = QVBoxLayout()
         layout.addWidget(self.officeExcelCB)
         layout.addWidget(self.officeWordCB)
         layout.addWidget(self.officePowerpointCB)
-        # layout.addWidget(self.officeAccessCB)
-        layout.addStretch(1)
+        # layout.addLayout(hboxExcel)
+        # layout.addLayout(hboxWord)
+        # layout.addLayout(hboxPowerpoint)
+        layout.addWidget(self.officeOutlookCB)
 
         self.officeGroupBox.setLayout(layout)
 
@@ -259,23 +285,23 @@ class WidgetGallery(QDialog):
                 self.officeExcelCB.setChecked(False)
                 self.officeWordCB.setChecked(False)
                 self.officePowerpointCB.setChecked(False)
-                self.officeAccessCB.setChecked(False)
+                self.officeOutlookCB.setChecked(False)
                 self.officeExcel = False
                 self.officeWord = False
                 self.officePowerpoint = False
-                self.officeAccess = False
+                self.officeOutlook = False
 
             self.statusListWidget.setStyleSheet("QListWidget{background: #F0F0F0;}")
 
         elif MAC or LINUX:
-            # office is not supported on mac
-            self.officeGroupBox.setEnabled(False)
+
+            if not DISABLE_MAIN:
+                # office is not supported on mac
+                self.officeGroupBox.setEnabled(False)
 
             # program logger is not supported on mac
             self.systemLoggerProgramsCB.setChecked(False)
             self.systemLoggerProgramsCB.setDisabled(True)
-
-            self.browserEdgeCB.setDisabled(True)
 
             # window size
             self.resize(360, 420)
@@ -297,23 +323,28 @@ class WidgetGallery(QDialog):
 
         if not FIREFOX:
             self.browserFirefoxCB.setEnabled(False)
-            self.browserChromeCB.setChecked(False)
+            self.browserFirefoxCB.setChecked(False)
             self.browserFirefox = False
+
+        if not EDGE:
+            self.browserEdgeCB.setEnabled(False)
+            self.browserEdgeCB.setChecked(False)
+            self.browserEdge = False
 
         self.compatibilityCheckMessage()
 
     def compatibilityCheckMessage(self):
         self.statusListWidget.clear()
         if MAC:
-            self.statusListWidget.addItem(QListWidgetItem("- Office, Edge modules not available on MacOS"))
+            self.statusListWidget.addItem(QListWidgetItem("- Office module not available on MacOS"))
         if WINDOWS and not OFFICE:
             self.statusListWidget.addItem(QListWidgetItem("- Office disabled because not installed"))
-        if WINDOWS and not EDGE:
-            self.statusListWidget.addItem(QListWidgetItem("- Edge disabled because not installed"))
         if not CHROME:
             self.statusListWidget.addItem(QListWidgetItem("- Chrome disabled because not installed"))
         if not FIREFOX:
             self.statusListWidget.addItem(QListWidgetItem("- Firefox disabled because not installed"))
+        if not EDGE:
+            self.statusListWidget.addItem(QListWidgetItem("- Edge disabled because not installed"))
 
 
     # triggered by "enable all" button on top of the UI
@@ -341,7 +372,7 @@ class WidgetGallery(QDialog):
             self.officeExcelCB.setChecked(self.allCBChecked)
             self.officeWordCB.setChecked(self.allCBChecked)
             self.officePowerpointCB.setChecked(self.allCBChecked)
-            self.officeAccessCB.setChecked(self.allCBChecked)
+            self.officeOutlookCB.setChecked(self.allCBChecked)
 
         # browser checkboxes
         if CHROME:
@@ -371,8 +402,8 @@ class WidgetGallery(QDialog):
             self.officeWord = checked
         elif (tag == "officePowerpoint"):
             self.officePowerpoint = checked
-        elif (tag == "officeAccess"):
-            self.officeAccess = checked
+        elif (tag == "officeOutlook"):
+            self.officeOutlook = checked
         elif (tag == "browserChrome"):
             self.browserChrome = checked
         elif (tag == "browserFirefox"):
@@ -453,7 +484,7 @@ class WidgetGallery(QDialog):
                 self.officeExcel,
                 self.officeWord,
                 self.officePowerpoint,
-                self.officeAccess,
+                self.officeOutlook,
                 self.browserChrome,
                 self.browserFirefox,
                 self.browserEdge,

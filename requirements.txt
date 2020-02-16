@@ -8,4 +8,4 @@ flask
 pyperclip
 pyqt5
 darkdetect
-# xlwings
+keyboard

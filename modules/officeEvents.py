@@ -1008,29 +1008,11 @@ def powerpointEvents(filename=None):
 def outlookEvents():
     # https://stackoverflow.com/questions/49695160/how-to-continuously-monitor-a-new-mail-in-outlook-and-unread-mails-of-a-specific
     class outlookEvents:
-        def OnDocumentChange(self):
-            self.seen_events["OnDocumentChange"] = None
-            print("{} {} documentChange".format(timestamp(), getuser()))
-
-        # def OnNewDocument(self):
-        #     self.seen_events["OnDocumentChange"] = None
-        #     print("{} {} newDocument".format(currentTimestamp(),getuser()))
-        def OnWindowActivate(self, doc, wn):
-            self.seen_events["OnWindowActivate"] = None
-            print("{} {} outlookOpened".format(timestamp(), getuser()))
-
-        def OnDocumentBeforeSave(self, *args):
-            print("{} {} documentSaved".format(timestamp(), getuser()))
-
-        def OnDocumentBeforePrint(self, *args):
-            print("{} {} documentPrinted".format(timestamp(), getuser()))
-
-        def OnQuit(self):
-            self.seen_events["OnQuit"] = None
-            # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
 
         def __init__(self):
+            self.seen_events = None
             # First action to do when using the class in the DispatchWithEvents
+            # 6 is the inbox folder https://docs.microsoft.com/en-us/office/vba/api/outlook.oldefaultfolders
             inbox = self.Application.GetNamespace("MAPI").GetDefaultFolder(6)
             messages = inbox.Items
             # Check for unread emails when starting the event
@@ -1039,34 +1021,96 @@ def outlookEvents():
                     # Or whatever code you wish to execute.
                     print(message.Subject)
 
+        def OnStartup(self):
+            print(f"{timestamp()} {USER} Outlook startupOutlook")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MSOffice",
+                "application": "Microsoft Outlook",
+                "event_type": "startupOutlook",
+            })
+
         def OnQuit(self):
+            self.seen_events["OnQuit"] = None
+            print(f"{timestamp()} {USER} Outlook quitOutlook")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MSOffice",
+                "application": "Microsoft Outlook",
+                "event_type": "quitOutlook",
+            })
+            # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
             # To stop PumpMessages() when Outlook Quit
-            # Note: Not sure it works when disconnecting!!
-            ctypes.windll.user32.PostQuitMessage(0)
+            #     # Note: Not sure it works when disconnecting!!
+            #     ctypes.windll.user32.PostQuitMessage(0)
 
         def OnNewMailEx(self, receivedItemsIDs):
+            print(f"{timestamp()} {USER} Outlook receiveMail")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MSOffice",
+                "application": "Microsoft Outlook",
+                "event_type": "receiveMail",
+            })
             # RecrivedItemIDs is a collection of mail IDs separated by a ",".
             # You know, sometimes more than 1 mail is received at the same moment.
             for ID in receivedItemsIDs.split(","):
                 mail = self.Session.GetItemFromID(ID)
                 subject = mail.Subject
                 print(subject)
-                try:
-                    command = re.search(r"%(.*?)%", subject).group(1)
-                    print(command)  # Or whatever code you wish to execute.
-                except:
-                    pass
 
-    o = DispatchWithEvents("outlook.Application", outlookEvents)
-    o.seen_events = {}
-    o.Visible = 1
-    inbox = o.GetNamespace("MAPI").GetDefaultFolder(6)
-    # o.Presentations.Add()
 
-    runLoop(o)
-    if not CheckSeenEvents(o, ["OnDocumentChange", "OnWindowActivate"]):
-        sys.exit(1)
+        def OnItemSend(self, Item, Cancel):
+            print(Item)
+            print(f"{timestamp()} {USER} Outlook sendMail")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MSOffice",
+                "application": "Microsoft Outlook",
+                "event_type": "sendMail",
+            })
 
+        def OnMAPILogonComplete(self):
+            print(f"{timestamp()} {USER} Outlook logonComplete")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MSOffice",
+                "application": "Microsoft Outlook",
+                "event_type": "logonComplete",
+            })
+
+        def OnReminder(self, Item):
+            print(f"{timestamp()} {USER} Outlook newReminder")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MSOffice",
+                "application": "Microsoft Outlook",
+                "event_type": "newReminder",
+            })
+
+    try:
+        # needed for thread
+        # pythoncom.CoInitialize()
+
+        # start new instance of outlook
+        e = DispatchWithEvents("outlook.Application", outlookEvents)
+        #inbox = e.GetNamespace("MAPI").GetDefaultFolder(6)
+
+        e.Presentations.Add()
+
+        runLoop(e)
+        print("[officeEvents] Outlook logging started")
+        if not CheckSeenEvents(e, ["OnNewPresentation", "OnWindowActivate"]):
+            sys.exit(1)
+
+    except Exception as e:
+        print(e)
 
 def runLoop(ob):
     while 1:
