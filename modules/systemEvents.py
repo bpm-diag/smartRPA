@@ -2,6 +2,7 @@
 from sys import path
 
 import keyboard
+import pyperclip
 
 path.append('../')  # this way main file is visible from this file
 from time import sleep
@@ -128,9 +129,11 @@ def logProcessesWin():
             for app in new_programs:
                 if app not in open_programs:
                     open_programs.append(app)
-                    pathList = list(filter(lambda prog: prog.Name == app,
-                                           colItems))  # find the given program in the list of running processes and take its path
-                    path = pathList[0].ExecutablePath if pathList[0].ExecutablePath else ""
+                    pathList = list(filter(lambda prog: prog.Name == app, colItems))  # find the given program in the list of running processes and take its path
+                    if pathList:
+                        path = pathList[0].ExecutablePath
+                    else:
+                        continue
                     print(f"{datetime.now()} {USER} AppOpen {app} {path}")
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
@@ -148,7 +151,11 @@ def logProcessesWin():
                     open_programs.remove(app)
                     pathList = list(filter(lambda prog: prog.Name == app,
                                            colItems))  # find the given program in the list of running processes and take its path
-                    path = pathList[0].ExecutablePath if pathList[0].ExecutablePath else ""
+                    # path = pathList[0].ExecutablePath if pathList[0].ExecutablePath else ""
+                    if pathList:
+                        path = pathList[0].ExecutablePath
+                    else:
+                        continue
                     print(f"{datetime.now()} {USER} Appclose {app} {path}")
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
@@ -226,6 +233,7 @@ def watchRecentsFolderWin():
 
 def detectSelectedFilesInExplorer():
     print("[systemEvents] detectSelectedFiles logging started")
+    pythoncom.CoInitialize()
     # look in the makepy output for IE for the 'CLSIDToClassMap' dictionary, and find the entry for 'ShellWindows'
     clsid = '{9BA05972-F6A8-11CF-A442-00A0C90A8F39}'
     ShellWindows = win32com.client.Dispatch(clsid)
@@ -256,7 +264,7 @@ def detectSelectedFilesInExplorer():
                         })
         except Exception:
             pass
-        time.sleep(0.5)
+        sleep(0.5)
 
 
 def logHotkeys():
@@ -269,13 +277,14 @@ def logHotkeys():
         'alt+space+n': 'Minimise window',
         'alt+space+x': 'Maximise window',
         'ctrl+a': 'Select all',
-        'ctrl+c': 'Copy',
+        # 'ctrl+c': 'Copy',
         'ctrl+e': 'Select search box',
         'ctrl+f': 'Find',
         'ctrl+h': 'Find and replace',
         'ctrl+n': 'New',
         'ctrl+r': 'Refresh',
         'ctrl+s': 'Save',
+        'ctrl+p': 'Print',
         'ctrl+v': 'Paste',
         'ctrl+w': 'Close window',
         'ctrl+x': 'Cut',
@@ -288,15 +297,24 @@ def logHotkeys():
 
     def handleHotkey(hotkey):
         meaning = keys_to_detect.get(hotkey)
-        print(f"{datetime.now()} {USER} OS-System pressHotkey {hotkey.upper()} {meaning}")
+        event_type = "pressHotkey"
+        clipboard_content = ""
+        application = "Keyboard"
+        # handle paste
+        if hotkey == "ctrl+v":
+            event_type = "Paste"
+            clipboard_content = pyperclip.paste()
+            application = "Clipboard"
+        print(f"{datetime.now()} {USER} OS-System {event_type} {hotkey.upper()} {meaning} {clipboard_content}")
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),
             "user": USER,
             "category": "OS-System",
-            "application": "Keyboard",
-            "event_type": "pressHotkey",
+            "application": application,
+            "event_type": event_type,
             "title": hotkey.upper(),
-            "description": meaning
+            "description": meaning,
+            "clipboard_content": clipboard_content
         })
 
     for key in keys_to_detect.keys():
@@ -305,6 +323,56 @@ def logHotkeys():
     keyboard.wait()
 
 
+def logUSBDrives():
+    def _queryWinDrives():
+        strComputer = "."
+        objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
+        objSWbemServices = objWMIService.ConnectServer(strComputer, "root\cimv2")
+
+        # 1. Win32_DiskDrive
+        colItems = objSWbemServices.ExecQuery("SELECT * FROM Win32_DiskDrive WHERE InterfaceType = \"USB\"")
+        if len(colItems) > 0:
+            DiskDrive_DeviceID = colItems[0].DeviceID.replace('\\', '').replace('.', '')
+            DiskDrive_Caption = colItems[0].Caption
+
+            # 2. Win32_DiskDriveToDiskPartition
+            colItems = objSWbemServices.ExecQuery("SELECT * from Win32_DiskDriveToDiskPartition")
+            for objItem in colItems:
+                if DiskDrive_DeviceID in str(objItem.Antecedent):
+                    DiskPartition_DeviceID = objItem.Dependent.split('=')[1].replace('"', '')
+
+            # 3. Win32_LogicalDiskToPartition
+            colItems = objSWbemServices.ExecQuery("SELECT * from Win32_LogicalDiskToPartition")
+            for objItem in colItems:
+                if DiskPartition_DeviceID in str(objItem.Antecedent):
+                    LogicalDisk_DeviceID = objItem.Dependent.split('=')[1].replace('"', '')
+                    return LogicalDisk_DeviceID, DiskDrive_Caption
+        else:
+            return None, None
+
+    print("[systemEvents] USB drives logging started...")
+    drive_list = dict()
+    while 1:
+        LogicalDisk_DeviceID, DiskDrive_Caption = _queryWinDrives()
+        if LogicalDisk_DeviceID and DiskDrive_Caption:
+            id = LogicalDisk_DeviceID[:-1]
+            if id not in drive_list.keys():
+                drive_list[id] = DiskDrive_Caption
+                print(f"{datetime.now()} {USER} OS-System insertUSB {id} {DiskDrive_Caption}")
+                session.post(consumerServer.SERVER_ADDR, json={
+                    "timestamp": timestamp(),
+                    "user": USER,
+                    "category": "OS-System",
+                    "application": "Explorer",
+                    "event_type": "insertUSB",
+                    "id": id,
+                    "title": DiskDrive_Caption,
+                })
+        else:
+            # there are no usb drive at this time, or they have been removed, so clear dictionary
+            drive_list.clear()
+
+        sleep(10)
 
 
 def GetUserShellFolders():

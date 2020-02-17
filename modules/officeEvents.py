@@ -419,7 +419,7 @@ def excelEvents(filename=None):
             })
 
         def OnSheetChange(self, Sh, Target):
-            value = self.filterNoneRangeValues(Target.Value)
+            value = self.filterNoneRangeValues(Target.Value) if type(Target.Value) != float else Target.Value
             print(
                 f"{timestamp()} {USER} MS-EXCEL editCellSheet {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
             session.post(SERVER_ADDR, json={
@@ -985,7 +985,7 @@ def powerpointEvents(filename=None):
 
     try:
         # needed for thread
-        # pythoncom.CoInitialize()
+        pythoncom.CoInitialize()
 
         # start new instance of Excel
         e = DispatchWithEvents("powerpoint.Application", powerpointEvents)
@@ -1096,7 +1096,7 @@ def outlookEvents():
 
     try:
         # needed for thread
-        # pythoncom.CoInitialize()
+        pythoncom.CoInitialize()
 
         # start new instance of outlook
         e = DispatchWithEvents("outlook.Application", outlookEvents)

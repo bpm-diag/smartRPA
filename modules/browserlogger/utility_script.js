@@ -12,8 +12,10 @@ function getBrowser() {
         return "Firefox";
     else if (window.navigator.userAgent.indexOf("Edge/") > -1)
         return "Edge";
-    else if (window.navigator.userAgent.indexOf("Edg/") > -1)
-        return "EdgeChromium";
+    else if (window.navigator.userAgent.indexOf("Edg/") > -1) //new edge based on chromium
+        return "Edge";
+    else if (window.navigator.userAgent.indexOf("OPR") > -1 || window.navigator.userAgent.indexOf("Opera") > -1)
+        return ("Opera")
     else if (window.navigator.userAgent.indexOf("Safari") > -1 && window.navigator.userAgent.indexOf('Chrome') == -1)
         return "Safari";
     else if (window.navigator.userAgent.indexOf("MSIE ") > -1 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
@@ -74,7 +76,8 @@ function checkServerStatus() {
             if (
                 (getBrowser() === "Chrome" && data.log_chrome) ||
                 (getBrowser() === "Firefox" && data.log_firefox) ||
-                (getBrowser().includes("Edge") && data.log_edge)
+                (getBrowser() === "Edge" && data.log_edge) ||
+                (getBrowser() === "Opera" && data.log_opera)
             ) {
                 // server running and browser logging enabled by user
                 loggingON();

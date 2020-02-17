@@ -22,6 +22,7 @@ filename = ""
 LOG_CHROME = False
 LOG_FIREFOX = False
 LOG_EDGE = False
+LOG_OPERA = False
 
 # Header to use for the csv logging file, written by main when file is first created
 HEADER = [
@@ -81,7 +82,7 @@ def writeLog():
 # get server status, for browser extension
 @app.route('/serverstatus', methods=['GET'])
 def getServerStatus():
-    return jsonify(log_chrome=LOG_CHROME, log_firefox=LOG_FIREFOX, log_edge=LOG_EDGE)
+    return jsonify(log_chrome=LOG_CHROME, log_firefox=LOG_FIREFOX, log_edge=LOG_EDGE, log_opera=LOG_OPERA)
 
 
 # Enable CORS, for browser extension

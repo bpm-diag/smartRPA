@@ -32,11 +32,12 @@ pip3 install -r requirements.txt
 
 2. **Install browser extension** 
 
-The browser extension supports 3 major browsers [(80% market share combined)](https://gs.statcounter.com/browser-market-share/desktop/).
+The browser extension supports 4 major browsers [(80% market share combined)](https://gs.statcounter.com/browser-market-share/desktop/).
 
 - [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 - [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` or install [`browserlogger-1.0.2.xpi`](https://github.com/marco2012/SystemLogger/tree/master/modules/browserlogger/web-ext-artifacts/browserlogger-1.0.2.xpi)
 - [_Microsoft Edge_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
+- [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
 3. **Run main logger**
 

@@ -14,6 +14,7 @@ def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
                 systemLoggerClipboard,
                 systemLoggerHotkeys,
+                systemLoggerUSB,
                 systemLoggerEvents,
                 officeFilename,
                 officeExcel,
@@ -22,7 +23,8 @@ def startLogger(systemLoggerFilesFolder,
                 officeOutlook,
                 browserChrome,
                 browserFirefox,
-                browserEdge
+                browserEdge,
+                browserOpera,
                 ):
     try:  # create the threads as daemons so they are closed when main ends
 
@@ -72,6 +74,11 @@ def startLogger(systemLoggerFilesFolder,
             t10.daemon = True
             t10.start()
 
+        if systemLoggerUSB and WINDOWS:
+            t11 = Thread(target=systemEvents.logUSBDrives)
+            t11.daemon = True
+            t11.start()
+
         if systemLoggerEvents:
             pass
 
@@ -111,6 +118,9 @@ def startLogger(systemLoggerFilesFolder,
 
         if browserEdge:
             consumerServer.LOG_EDGE = True
+
+        if browserOpera:
+            consumerServer.LOG_OPERA = True
 
         print("[mainLogger] Selected threads activated")
 

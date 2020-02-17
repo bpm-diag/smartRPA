@@ -13,7 +13,7 @@ import mainLogger
 
 # Debugging
 # Test the UI without starting main every time
-DISABLE_MAIN = True
+DISABLE_MAIN = False
 # Shows text area below start button with log information about the execution of the program
 SHOW_STATUS_TEXTEDIT = True
 
@@ -53,6 +53,7 @@ class WidgetGallery(QDialog):
         self.browserChrome = self.browserChromeCB.isChecked()
         self.browserFirefox = self.browserFirefoxCB.isChecked()
         self.browserEdge = self.browserEdgeCB.isChecked()
+        self.browserOpera = self.browserOperaCB.isChecked()
 
         mainLayout = QGridLayout()
         mainLayout.addLayout(self.topLayout, 0, 0, 1, 2)
@@ -78,20 +79,25 @@ class WidgetGallery(QDialog):
             self.handleCheckBox)
         self.systemLoggerFilesFolderCB.setToolTip("Log edits on files and folder like create, modify, delete and more")
 
-        self.systemLoggerProgramsCB = QCheckBox("Programs")
-        self.systemLoggerProgramsCB.tag = "systemLoggerPrograms"
-        self.systemLoggerProgramsCB.stateChanged.connect(self.handleCheckBox)
-        self.systemLoggerProgramsCB.setToolTip("Log opening and closing of programs")
-
         self.systemLoggerClipboardCB = QCheckBox("Clipboard")
         self.systemLoggerClipboardCB.tag = "systemLoggerClipboard"
         self.systemLoggerClipboardCB.stateChanged.connect(self.handleCheckBox)
         self.systemLoggerClipboardCB.setToolTip("Log clipboard copy")
 
+        self.systemLoggerProgramsCB = QCheckBox("Programs")
+        self.systemLoggerProgramsCB.tag = "systemLoggerPrograms"
+        self.systemLoggerProgramsCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerProgramsCB.setToolTip("Log opening and closing of programs")
+
         self.systemLoggerHotkeysCB = QCheckBox("Hotkeys")
         self.systemLoggerHotkeysCB.tag = "systemLoggerHotkeys"
         self.systemLoggerHotkeysCB.stateChanged.connect(self.handleCheckBox)
         self.systemLoggerHotkeysCB.setToolTip("Log system-wide hotkeys")
+
+        self.systemLoggerUSBCB = QCheckBox("USB Drives")
+        self.systemLoggerUSBCB.tag = "systemLoggerUSB"
+        self.systemLoggerUSBCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerUSBCB.setToolTip("Log usb drive")
 
         self.systemLoggerEventsCB = QCheckBox("Events")
         self.systemLoggerEventsCB.tag = "systemLoggerEvents"
@@ -100,9 +106,10 @@ class WidgetGallery(QDialog):
 
         layout = QVBoxLayout()
         layout.addWidget(self.systemLoggerFilesFolderCB)
-        layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerClipboardCB)
+        layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerHotkeysCB)
+        layout.addWidget(self.systemLoggerUSBCB)
         layout.addWidget(self.systemLoggerEventsCB)
 
         self.systemGroupBox.setLayout(layout)
@@ -178,10 +185,15 @@ class WidgetGallery(QDialog):
         self.browserEdgeCB.tag = "browserEdge"
         self.browserEdgeCB.stateChanged.connect(self.handleCheckBox)
 
+        self.browserOperaCB = QCheckBox("Opera")
+        self.browserOperaCB.tag = "browserOpera"
+        self.browserOperaCB.stateChanged.connect(self.handleCheckBox)
+
         layout = QVBoxLayout()
         layout.addWidget(self.browserChromeCB)
         layout.addWidget(self.browserFirefoxCB)
         layout.addWidget(self.browserEdgeCB)
+        layout.addWidget(self.browserOperaCB)
         layout.addStretch(1)
 
         self.browserGroupBox.setLayout(layout)
@@ -302,6 +314,12 @@ class WidgetGallery(QDialog):
             # program logger is not supported on mac
             self.systemLoggerProgramsCB.setChecked(False)
             self.systemLoggerProgramsCB.setDisabled(True)
+            self.systemLoggerHotkeysCB.setChecked(False)
+            self.systemLoggerHotkeysCB.setDisabled(True)
+            self.systemLoggerUSBCB.setChecked(False)
+            self.systemLoggerUSBCB.setDisabled(True)
+            self.systemLoggerEventsCB.setChecked(False)
+            self.systemLoggerEventsCB.setDisabled(True)
 
             # window size
             self.resize(360, 420)
@@ -331,6 +349,11 @@ class WidgetGallery(QDialog):
             self.browserEdgeCB.setChecked(False)
             self.browserEdge = False
 
+        if not OPERA:
+            self.browserOperaCB.setEnabled(False)
+            self.browserOperaCB.setChecked(False)
+            self.browserOpera = False
+
         self.compatibilityCheckMessage()
 
     def compatibilityCheckMessage(self):
@@ -345,6 +368,8 @@ class WidgetGallery(QDialog):
             self.statusListWidget.addItem(QListWidgetItem("- Firefox disabled because not installed"))
         if not EDGE:
             self.statusListWidget.addItem(QListWidgetItem("- Edge disabled because not installed"))
+        if not OPERA:
+            self.statusListWidget.addItem(QListWidgetItem("- Opera disabled because not installed"))
 
 
     # triggered by "enable all" button on top of the UI
@@ -362,10 +387,14 @@ class WidgetGallery(QDialog):
 
         # System checkboxes
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
-        self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
-        self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
-        self.systemLoggerEventsCB.setChecked(self.allCBChecked)
+
+
+        if WINDOWS:
+            self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
+            self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
+            self.systemLoggerUSBCB.setChecked(self.allCBChecked)
+            self.systemLoggerEventsCB.setChecked(self.allCBChecked)
 
         # office checkboxes
         if WINDOWS and OFFICE:
@@ -381,6 +410,8 @@ class WidgetGallery(QDialog):
             self.browserFirefoxCB.setChecked(self.allCBChecked)
         if EDGE:
             self.browserEdgeCB.setChecked(self.allCBChecked)
+        if OPERA:
+            self.browserOperaCB.setChecked(self.allCBChecked)
 
     # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
@@ -394,6 +425,8 @@ class WidgetGallery(QDialog):
             self.systemLoggerClipboard = checked
         elif (tag == "systemLoggerHotkeys"):
             self.systemLoggerHotkeys = checked
+        elif (tag == "systemLoggerUSB"):
+            self.systemLoggerUSB = checked
         elif (tag == "systemLoggerEvents"):
             self.systemLoggerEvents = checked
         elif (tag == "officeExcel"):
@@ -410,6 +443,8 @@ class WidgetGallery(QDialog):
             self.browserFirefox = checked
         elif (tag == "browserEdge"):
             self.browserEdge = checked
+        elif (tag == "browserOpera"):
+            self.browserOpera = checked
 
     # Create a dialog to select a file and return its path
     def getFilenameDialog(self, customDialog=True, title="Open",hiddenItems=False, isFolder=False, forOpen=True, directory='',
@@ -479,6 +514,7 @@ class WidgetGallery(QDialog):
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
                 self.systemLoggerHotkeys,
+                self.systemLoggerUSB,
                 self.systemLoggerEvents,
                 self.officeFilename,
                 self.officeExcel,
@@ -488,6 +524,7 @@ class WidgetGallery(QDialog):
                 self.browserChrome,
                 self.browserFirefox,
                 self.browserEdge,
+                self.browserOpera,
             ))
 
             if not DISABLE_MAIN:

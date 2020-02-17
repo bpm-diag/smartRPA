@@ -61,16 +61,19 @@ if WINDOWS:
     CHROME = isInstalledWin('chrome')
     FIREFOX = isInstalledWin('firefox')
     EDGE = isInstalledWin('edge')
+    OPERA = isInstalledWin('opera')
 elif MAC:
     OFFICE = False
     CHROME = isInstalledMac('chrome')
     FIREFOX = isInstalledMac('firefox')
     EDGE = isInstalledMac('edge')
+    OPERA = isInstalledMac('opera')
 else:
     OFFICE = False
     CHROME = True
     FIREFOX = True
     EDGE = False
+    OPERA = False
 
 #  return current timestamp in the format '2020-02-12 17:11:14:465'
 def timestamp():
