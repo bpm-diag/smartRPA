@@ -1,6 +1,7 @@
 pywin32; platform_system == "Windows"
 winregistry; platform_system == "Windows"
 WMI; platform_system == "Windows"
+applescript; platform_system == "Darwin"
 watchdog
 requests
 requests-futures

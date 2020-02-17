@@ -21,6 +21,8 @@ if WINDOWS:
     import win32event
     import win32con
 
+if MAC:
+    import applescript
 
 #  monitor file changes
 def watchFolder():
@@ -83,10 +85,9 @@ def watchFolder():
         my_observer.stop()
         my_observer.join()
 
-
 #  Detects programs opened and closed
 def logProcessesWin():
-    print("[systemEvents] Processes logging started")
+    print("[systemEvents] WIN Processes logging started")
     # needed for thread http://timgolden.me.uk/pywin32-docs/pythoncom__CoInitialize_meth.html
     pythoncom.CoInitialize()
     strComputer = "."
@@ -119,9 +120,7 @@ def logProcessesWin():
                 started.append(objItem.Name)
 
         closed = new_programs
-
-        new_programs = set(started) - set(
-            running)  # check the difference between the new set and the original to find new processes
+        new_programs = set(started) - set(running)  # check the difference between the new set and the original to find new processes
         # find programs that are not in new_programs set anymore so they have been closed
         closed_programs = closed - new_programs
 
@@ -166,51 +165,32 @@ def logProcessesWin():
                         "event_src_path": path
                     })
 
-
-# return list of programs uninstalled by user
-def findUninstall():
-    # HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall
-    # HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall
-    reg = Reg()  # https://github.com/shpaker/winregistry#usage
-    path = r'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall'
-    keys = reg.read_key(path)['keys']
-    uninstalls = []
-    for k in keys:
-        values = reg.read_key(path + '\\' + k)['values']
-        dn = list(filter(lambda x: x['value'] == 'DisplayName', values))
-        if len(dn):
-            displayName = dn[0].get('data')
-            uninstalls.append(displayName)
-    print(uninstalls)
-
-
+# logs recently opened files and folders
 def watchRecentsFolderWin():
     print("[systemEvents] Recent files/folders logging started")
+
     RECENT_ITEMS_PATH = expanduser(
         "~") + "\\AppData\\Roaming\\Microsoft\\Windows\\Recent"
     change_handle = win32file.FindFirstChangeNotification(  # sets up a handle for watching file changes
         RECENT_ITEMS_PATH,  # path to watch
         0,  # boolean indicating whether the directories underneath the one specified are to be watched
         win32con.FILE_NOTIFY_CHANGE_FILE_NAME
-        # list of flags as to what kind of changes to watch for https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstchangenotificationa#parameters
+        # list of flags as to what kind of changes to watch for
+        # https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstchangenotificationa#parameters
     )
-    # Loop forever, listing any file changes. The WaitFor... will
-    #  time out every half a second allowing for keyboard interrupts
-    #  to terminate the loop.
+    # Loop forever, listing any file changes. The WaitFor... will time out every half a second allowing for keyboard
+    # interrupts to terminate the loop.
     try:
-        old_path_contents = dict([(f, None)
-                                  for f in listdir(RECENT_ITEMS_PATH)])
+        old_path_contents = dict([(f, None) for f in listdir(RECENT_ITEMS_PATH)])
         while 1:
             result = win32event.WaitForSingleObject(change_handle, 500)
             # If the WaitFor... returned because of a notification (as
             #  opposed to timing out or some error) then look for the
             #  changes in the directory contents.
             if result == win32con.WAIT_OBJECT_0:
-                new_path_contents = dict([(f, None)
-                                          for f in listdir(RECENT_ITEMS_PATH)])
-                added = [
-                    f for f in new_path_contents if not f in old_path_contents]
-                # deleted = [f for f in old_path_contents if not f in new_path_contents]
+                new_path_contents = dict([(f, None)for f in listdir(RECENT_ITEMS_PATH)])
+                added = [f for f in new_path_contents if not f in old_path_contents]
+                deleted = [f for f in old_path_contents if not f in new_path_contents]
                 if added:
                     # print ("Added: ", ", ".join (added))
                     # remove extension
@@ -224,13 +204,14 @@ def watchRecentsFolderWin():
                         "event_type": "OpenFile/Folder",
                         "event_src_path": added[0][:-4]
                     })
-                # if deleted: print ("Deleted: ", ", ".join (deleted))
+                # if deleted:
+                #     print ("Deleted: ", ", ".join (deleted))
                 old_path_contents = new_path_contents
                 win32file.FindNextChangeNotification(change_handle)
     finally:
         win32file.FindCloseChangeNotification(change_handle)
 
-
+# logs currently selected files in windows explorer
 def detectSelectedFilesInExplorer():
     print("[systemEvents] detectSelectedFiles logging started")
     pythoncom.CoInitialize()
@@ -239,34 +220,37 @@ def detectSelectedFilesInExplorer():
     ShellWindows = win32com.client.Dispatch(clsid)
     # a busy state can be detected:
     # while ShellWindows[0].Busy == False:
-    # go in for-loop here
-    selected = []
+    selected = dict()
     while 1:
         try:
             for i in range(ShellWindows.Count):
+                # add key to dictionary
+                if not selected.get(i):
+                    selected[i] = []
                 # explorerPath = ShellWindows[i].LocationURL
                 selectedItems = ShellWindows[i].Document.SelectedItems()
                 if selectedItems.Count < 1:
-                    selected.clear()
+                    selected.pop(i)
                     continue
-                for j in range(selectedItems.Count):
-                    path = selectedItems.Item(j).Path
-                    if path not in selected:
-                        selected.append(path)
-                        print(f"{datetime.now()} {USER} OS-System fileSelected {path}")
-                        session.post(consumerServer.SERVER_ADDR, json={
-                            "timestamp": timestamp(),
-                            "user": USER,
-                            "category": "OS-System",
-                            "application": "Explorer",
-                            "event_type": "fileSelected",
-                            "event_src_path": path
-                        })
-        except Exception:
-            pass
+                else:
+                    for j in range(selectedItems.Count):
+                        path = selectedItems.Item(j).Path
+                        if path != [] and path not in selected.get(i):
+                            selected[i].append(path)
+                            print(f"{datetime.now()} {USER} OS-System fileSelected {path}")
+                            session.post(consumerServer.SERVER_ADDR, json={
+                                "timestamp": timestamp(),
+                                "user": USER,
+                                "category": "OS-System",
+                                "application": "Explorer",
+                                "event_type": "fileSelected",
+                                "event_src_path": path
+                            })
+        except Exception as e:
+            print(e)
         sleep(0.5)
 
-
+# logs hotkeys
 def logHotkeys():
     print("[systemEvents] Hotkey logging started...")
 
@@ -293,6 +277,7 @@ def logHotkeys():
         'ctrl+shift+t': 'Reopen closed tab',
         'win+tab': 'Cycle through apps',
         'F2': 'Rename',
+        'F5': 'Refresh',
     }
 
     def handleHotkey(hotkey):
@@ -322,7 +307,7 @@ def logHotkeys():
 
     keyboard.wait()
 
-
+# logs insertion and removal of usb drives
 def logUSBDrives():
     def _queryWinDrives():
         strComputer = "."
@@ -354,6 +339,7 @@ def logUSBDrives():
     drive_list = dict()
     while 1:
         LogicalDisk_DeviceID, DiskDrive_Caption = _queryWinDrives()
+        # if there is at least one usb drive insterted
         if LogicalDisk_DeviceID and DiskDrive_Caption:
             id = LogicalDisk_DeviceID[:-1]
             if id not in drive_list.keys():
@@ -369,11 +355,70 @@ def logUSBDrives():
                     "title": DiskDrive_Caption,
                 })
         else:
-            # there are no usb drive at this time, or they have been removed, so clear dictionary
             drive_list.clear()
 
         sleep(10)
 
+def logProcessesMac():
+    print("[systemEvents] MAC Processes logging started")
+    running = applescript.tell.app("System Events", "name of every process where background only is false").out.split(',')
+    new_programs = set()  # needed later to initialize 'closed' set
+    new_programs_len = 0
+    open_programs = []
+    while 1:
+        started = applescript.tell.app("System Events","name of every process where background only is false").out.split(',')
+        closed = new_programs
+        new_programs = set(started) - set(running)
+        closed_programs = closed - new_programs
+        if len(new_programs) != new_programs_len:  # set is changed
+            for app in new_programs:
+                if app not in open_programs:
+                    open_programs.append(app)
+                    print(f"{datetime.now()} {USER} AppOpen {app.strip()}")
+                    session.post(consumerServer.SERVER_ADDR, json={
+                        "timestamp": timestamp(),
+                        "user": USER,
+                        "category": "OS-System",
+                        "application": app.strip(),
+                        "event_type": "AppOpen",
+                        "event_src_path": f"/Applications/{app.strip()}"
+                    })
+            new_programs_len = len(new_programs)
+
+        if len(closed_programs):  # set is not empty
+            for app in closed_programs:
+                if app in open_programs:
+                    open_programs.remove(app)
+                    print(f"{datetime.now()} {USER} Appclose {app.strip()}")
+                    session.post(consumerServer.SERVER_ADDR, json={
+                        "timestamp": timestamp(),
+                        "user": USER,
+                        "category": "OS-System",
+                        "application": app.strip(),
+                        "event_type": "Appclose",
+                        "event_src_path": f"/Applications/{app.strip()}"
+                    })
+
+        sleep(2)
+
+
+# not started by main
+
+# return list of programs uninstalled by user
+def findUninstall():
+    # HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall
+    # HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall
+    reg = Reg()  # https://github.com/shpaker/winregistry#usage
+    path = r'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall'
+    keys = reg.read_key(path)['keys']
+    uninstalls = []
+    for k in keys:
+        values = reg.read_key(path + '\\' + k)['values']
+        dn = list(filter(lambda x: x['value'] == 'DisplayName', values))
+        if len(dn):
+            displayName = dn[0].get('data')
+            uninstalls.append(displayName)
+    print(uninstalls)
 
 def GetUserShellFolders():
     # Routine to grab all the Windows Shell Folder locations from the registry.  If successful, returns dictionary
@@ -415,8 +460,8 @@ def GetUserShellFolders():
         winreg.CloseKey(Hive)
         return {}
 
-
-# This script watches for activity at the installed printers and writes a logfile. It shows how much a user has printed on wich printer (works also with network printers).
+# This script watches for activity at the installed printers and writes a logfile. It shows how much a user has
+# printed on wich printer (works also with network printers).
 def printerLogger():
     print("[systemEvents] Printer logging started")
     import wmi

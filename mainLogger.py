@@ -1,9 +1,14 @@
 # https://docs.microsoft.com/en-us/WINDOWS/win32/api/
 from sys import exit
 from time import sleep
+import errno
+import os
+from csv import writer
+from datetime import datetime
 from threading import Thread
 from utils import GUI
 from utils import consumerServer
+from utils.consumerServer import HEADER
 from utils.utils import WINDOWS,MAC,LINUX
 from modules import systemEvents
 from modules import officeEvents
@@ -31,7 +36,7 @@ def startLogger(systemLoggerFilesFolder,
         # ************
         # main logging server
         # ************
-        consumerServer.createLogFile()
+        createLogFile()
         t0 = Thread(target=consumerServer.runServer)
         t0.daemon = True
         t0.start()
@@ -59,10 +64,15 @@ def startLogger(systemLoggerFilesFolder,
                 # t4.daemon = True
                 # t4.start()
 
-        if systemLoggerPrograms and WINDOWS:
+        if systemLoggerPrograms:
+            if WINDOWS:
                 t3 = Thread(target=systemEvents.logProcessesWin)
                 t3.daemon = True
                 t3.start()
+            if MAC:
+                t12 = Thread(target=systemEvents.logProcessesMac)
+                t12.daemon = True
+                t12.start()
 
         if systemLoggerClipboard:
             t4 = Thread(target=clipboardEvents.logClipboard)
@@ -125,11 +135,34 @@ def startLogger(systemLoggerFilesFolder,
         print("[mainLogger] Selected threads activated")
 
         while 1:  # keep main active
-            sleep(1)
+            # sleep(1)
+            pass
 
     except (KeyboardInterrupt, SystemExit):
         print("Closing threads and exiting...")
         exit(0)
+
+
+# used by main, creates new log file with the current timestamp in /logs directory at the root of the project.
+def createLogFile():
+    current_directory = os.getcwd()
+    # logs are saved in logs/ direcgory
+    logs_directory = os.path.join(current_directory, 'logs/')
+    filenameWithTimestamp = logs_directory + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'  # use current timestamp as filename
+    consumerServer.filename = filenameWithTimestamp  # filename to use in current session until the 'stop' button is pressed. must be set here because the ilename uses the current timestamp and it must remain the same during the whole session
+    if not os.path.exists(logs_directory):
+        try:
+            os.makedirs(logs_directory)
+            print(f"Created directory {logs_directory}")
+        except OSError as exc:  # Guard against race condition
+            print(f"Could not create directory {logs_directory}")
+            if exc.errno != errno.EEXIST:
+                raise
+
+    # create HEADER
+    with open(consumerServer.filename, 'a', newline='') as out_file:
+        f = writer(out_file)
+        f.writerow(HEADER)
 
 
 if __name__ == "__main__":

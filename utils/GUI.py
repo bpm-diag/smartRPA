@@ -45,6 +45,7 @@ class WidgetGallery(QDialog):
         self.systemLoggerPrograms = self.systemLoggerProgramsCB.isChecked()
         self.systemLoggerClipboard = self.systemLoggerClipboardCB.isChecked()
         self.systemLoggerHotkeys = self.systemLoggerHotkeysCB.isChecked()
+        self.systemLoggerUSB = self.systemLoggerHotkeysCB.isChecked()
         self.systemLoggerEvents = self.systemLoggerEventsCB.isChecked()
         self.officeExcel = self.officeExcelCB.isChecked()
         self.officeWord = self.officeWordCB.isChecked()
@@ -110,7 +111,7 @@ class WidgetGallery(QDialog):
         layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerHotkeysCB)
         layout.addWidget(self.systemLoggerUSBCB)
-        layout.addWidget(self.systemLoggerEventsCB)
+        #layout.addWidget(self.systemLoggerEventsCB)
 
         self.systemGroupBox.setLayout(layout)
 
@@ -312,8 +313,6 @@ class WidgetGallery(QDialog):
                 self.officeGroupBox.setEnabled(False)
 
             # program logger is not supported on mac
-            self.systemLoggerProgramsCB.setChecked(False)
-            self.systemLoggerProgramsCB.setDisabled(True)
             self.systemLoggerHotkeysCB.setChecked(False)
             self.systemLoggerHotkeysCB.setDisabled(True)
             self.systemLoggerUSBCB.setChecked(False)
@@ -388,10 +387,9 @@ class WidgetGallery(QDialog):
         # System checkboxes
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
-
+        self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
 
         if WINDOWS:
-            self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
             self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
             self.systemLoggerUSBCB.setChecked(self.allCBChecked)
             self.systemLoggerEventsCB.setChecked(self.allCBChecked)

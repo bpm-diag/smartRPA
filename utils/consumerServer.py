@@ -2,9 +2,6 @@ from os import environ
 from flask import Flask, request, jsonify
 from csv import writer
 from logging import getLogger
-import errno
-import os
-from datetime import datetime
 from utils.utils import USER
 
 PORT = 4444
@@ -13,9 +10,9 @@ SERVER_ADDR = f'http://localhost:{PORT}'
 app = Flask(__name__)
 
 # disable server log
-app.logger.disabled = True
-getLogger('werkzeug').disabled = True
-environ['WERKZEUG_RUN_MAIN'] = 'true'
+# app.logger.disabled = True
+# getLogger('werkzeug').disabled = True
+# environ['WERKZEUG_RUN_MAIN'] = 'true'
 
 # will be set by mainLogger when program is run
 filename = ""
@@ -94,27 +91,6 @@ def add_headers(response):
                          'Content-Type,Authorization')
     return response
 
-
-# used by main, creates new log file with the current timestamp in /logs directory at the root of the project.
-def createLogFile():
-    current_directory = os.getcwd()
-    # logs are saved in logs/ direcgory
-    logs_directory = os.path.join(current_directory, 'logs/')
-    filenameWithTimestamp = logs_directory + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'  # use current timestamp as filename
-    filename = filenameWithTimestamp  # filename to use in current session until the 'stop' button is pressed. must be set here because the ilename uses the current timestamp and it must remain the same during the whole session
-    if not os.path.exists(logs_directory):
-        try:
-            os.makedirs(logs_directory)
-            print(f"Created directory {logs_directory}")
-        except OSError as exc:  # Guard against race condition
-            print(f"Could not create directory {logs_directory}")
-            if exc.errno != errno.EEXIST:
-                raise
-
-    # create HEADER
-    with open(filename, 'a', newline='') as out_file:
-        f = writer(out_file)
-        f.writerow(HEADER)
 
 # check if port is available to start server
 def isPortInUse(port):
