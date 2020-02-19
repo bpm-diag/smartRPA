@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/gui.PNG" width="500" /> 
+  <img src="docs/gui.png" width="500" /> 
 </p>
 
 ## Installation and execution:
