@@ -64,7 +64,7 @@ The project is composed by the following modules:
 -   [x] Office logger
 -   [x] Clipboard logger
 
-A complete list of features for each module is available in [`features.pdf`](https://github.com/marco2012/SystemLogger/blob/master/docs/features.pdf)
+A complete list of features for each module is available in [`features.pdf`](https://github.com/marco2012/SystemLogger/blob/master/docs/Features.pdf)
 
 ## Project structure
 
