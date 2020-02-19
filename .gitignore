@@ -5,8 +5,8 @@ logs/
 stuff_to_delete/
 PythonProgrammingOnWin32.pdf
 latex
-test.json
-tree.txt
+/paper
+/modules/excelAddinMac/
 .web-extension-id
 *.pyc
 *.csv

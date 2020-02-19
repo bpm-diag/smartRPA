@@ -1,3 +1,8 @@
+# ****************************** #
+# Old GUI
+# Old user interface built with Tkinter. Does not scale well on windows, does not provide native UI
+# ****************************** #
+
 from multiprocessing import Process
 import mainLogger
 from tkinter import *

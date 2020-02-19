@@ -1,6 +1,10 @@
-# https://docs.microsoft.com/en-us/WINDOWS/win32/api/
+# ****************************** #
+# Main logger
+# Handles all the threads of the application
+# ****************************** #
+
+import multiprocessing
 from sys import exit
-from time import sleep
 import errno
 import os
 from csv import writer
@@ -31,7 +35,8 @@ def startLogger(systemLoggerFilesFolder,
                 browserEdge,
                 browserOpera,
                 ):
-    try:  # create the threads as daemons so they are closed when main ends
+    try:
+        # create the threads as daemons so they are closed when main ends
 
         # ************
         # main logging server
@@ -59,10 +64,6 @@ def startLogger(systemLoggerFilesFolder,
                 t9 = Thread(target=systemEvents.detectSelectedFilesInExplorer)
                 t9.daemon = True
                 t9.start()
-
-                # t4=Thread(target=printerLogger)
-                # t4.daemon = True
-                # t4.start()
 
         if systemLoggerPrograms:
             if WINDOWS:
@@ -100,6 +101,11 @@ def startLogger(systemLoggerFilesFolder,
             t5 = Thread(target=officeEvents.excelEvents)
             t5.daemon = True
             t5.start()
+
+        if officeExcel and MAC:
+            t13 = Thread(target=officeEvents.excelEventsMacServer)
+            t13.daemon = True
+            t13.start()
 
         if officeWord and WINDOWS:
             t6 = Thread(target=officeEvents.wordEvents)
@@ -148,8 +154,11 @@ def createLogFile():
     current_directory = os.getcwd()
     # logs are saved in logs/ direcgory
     logs_directory = os.path.join(current_directory, 'logs/')
-    filenameWithTimestamp = logs_directory + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'  # use current timestamp as filename
-    consumerServer.filename = filenameWithTimestamp  # filename to use in current session until the 'stop' button is pressed. must be set here because the ilename uses the current timestamp and it must remain the same during the whole session
+    # use current timestamp as filename
+    filenameWithTimestamp = logs_directory + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
+    # filename to use in current session until the 'stop' button is pressed. must be set here because the filename
+    # uses the current timestamp and it must remain the same during the whole session
+    consumerServer.filename = filenameWithTimestamp
     if not os.path.exists(logs_directory):
         try:
             os.makedirs(logs_directory)

@@ -1,3 +1,8 @@
+# ****************************** #
+# CSV logging Server
+# Receives events from all the threads and writes them in a single csv file
+# ****************************** #
+
 from sys import path
 path.append('../')  # this way main file is visible from this file
 import pyperclip

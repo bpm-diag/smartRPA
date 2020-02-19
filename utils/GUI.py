@@ -1,4 +1,10 @@
+# ****************************** #
+# GUI
+# Build native user interface and start main logger
+# ****************************** #
+
 import sys
+
 sys.path.append('../')  # this way main file is visible from this file
 from PyQt5.QtCore import Qt, QSize, QDir
 from PyQt5.QtGui import QFont, QIcon
@@ -11,11 +17,6 @@ from multiprocessing import Process
 from utils.utils import *
 import mainLogger
 
-# Debugging
-# Test the UI without starting main every time
-DISABLE_MAIN = False
-# Shows text area below start button with log information about the execution of the program
-SHOW_STATUS_TEXTEDIT = True
 
 class WidgetGallery(QDialog):
     def __init__(self, parent=None):
@@ -36,10 +37,11 @@ class WidgetGallery(QDialog):
 
         self.platformCheck()
 
-        # Variables
+        #  Variables
         self.running = False
         self.mainProcess = None
         self.officeFilename = None
+
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
         self.systemLoggerPrograms = self.systemLoggerProgramsCB.isChecked()
@@ -98,7 +100,7 @@ class WidgetGallery(QDialog):
         self.systemLoggerUSBCB = QCheckBox("USB Drives")
         self.systemLoggerUSBCB.tag = "systemLoggerUSB"
         self.systemLoggerUSBCB.stateChanged.connect(self.handleCheckBox)
-        self.systemLoggerUSBCB.setToolTip("Log usb drive")
+        self.systemLoggerUSBCB.setToolTip("Log insertion and removal of usb drives")
 
         self.systemLoggerEventsCB = QCheckBox("Events")
         self.systemLoggerEventsCB.tag = "systemLoggerEvents"
@@ -111,14 +113,15 @@ class WidgetGallery(QDialog):
         layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerHotkeysCB)
         layout.addWidget(self.systemLoggerUSBCB)
-        #layout.addWidget(self.systemLoggerEventsCB)
+        # layout.addWidget(self.systemLoggerEventsCB)
 
         self.systemGroupBox.setLayout(layout)
 
     def createOfficeLoggerGroupBox(self):
 
         self.officeGroupBox = QGroupBox("Office logger")
-        self.officeGroupBox.setToolTip("Log all activities in Office applications \nlike opening, closing, editing documents and more")
+        self.officeGroupBox.setToolTip(
+            "Log all activities in Office applications \nlike opening, closing, editing documents and more")
 
         hboxExcel = QHBoxLayout()
         self.officeExcelCB = QCheckBox("Excel")
@@ -163,6 +166,7 @@ class WidgetGallery(QDialog):
         layout.addWidget(self.officeExcelCB)
         layout.addWidget(self.officeWordCB)
         layout.addWidget(self.officePowerpointCB)
+        # if hbox is added to layout the user can select an existing file to open when starting office logging
         # layout.addLayout(hboxExcel)
         # layout.addLayout(hboxWord)
         # layout.addLayout(hboxPowerpoint)
@@ -172,7 +176,8 @@ class WidgetGallery(QDialog):
 
     def createBrowserLoggerGroupBox(self):
         self.browserGroupBox = QGroupBox("Browser logger")
-        self.browserGroupBox.setToolTip("Log all browser events in the window (like opening, closing tabs, printing, etc) \nand in the page (like clicking, zooming, pasting, etc)")
+        self.browserGroupBox.setToolTip(
+            "Log all browser events in the window (like opening, closing tabs, printing, etc) \nand in the page (like clicking, zooming, pasting, etc)")
 
         self.browserChromeCB = QCheckBox("Google Chrome")
         self.browserChromeCB.tag = "browserChrome"
@@ -195,7 +200,6 @@ class WidgetGallery(QDialog):
         layout.addWidget(self.browserFirefoxCB)
         layout.addWidget(self.browserEdgeCB)
         layout.addWidget(self.browserOperaCB)
-        layout.addStretch(1)
 
         self.browserGroupBox.setLayout(layout)
 
@@ -207,8 +211,8 @@ class WidgetGallery(QDialog):
         self.runButton.toggled.connect(self.systemGroupBox.setDisabled)
         self.runButton.toggled.connect(self.browserGroupBox.setDisabled)
         self.runButton.toggled.connect(self.checkButton.setDisabled)
-        if WINDOWS:
-            self.runButton.toggled.connect(self.officeGroupBox.setDisabled)
+        # if WINDOWS:
+        self.runButton.toggled.connect(self.officeGroupBox.setDisabled)
 
     def createTopLayout(self):
         self.topLayout = QHBoxLayout()
@@ -247,9 +251,9 @@ class WidgetGallery(QDialog):
         self.statusListWidget.setFont(QFont(monospaceFont, fontSize, QFont.Normal))
         self.statusListWidget.setSelectionMode(QAbstractItemView.NoSelection)
 
-        if SHOW_STATUS_TEXTEDIT:
-            self.statusLayout.addWidget(self.statusListWidget)
+        self.statusLayout.addWidget(self.statusListWidget)
 
+    # display native GUI for each OS
     def setStyle(self):
         if WINDOWS:
             QApplication.setStyle(QStyleFactory.create('windowsvista'))
@@ -308,9 +312,10 @@ class WidgetGallery(QDialog):
 
         elif MAC or LINUX:
 
-            if not DISABLE_MAIN:
-                # office is not supported on mac
-                self.officeGroupBox.setEnabled(False)
+            self.officeGroupBox.setDisabled(True)
+            # if not OFFICE:
+            #     self.officeExcelCB.setChecked(False)
+            #     self.officeExcel = False
 
             # program logger is not supported on mac
             self.systemLoggerHotkeysCB.setChecked(False)
@@ -319,6 +324,10 @@ class WidgetGallery(QDialog):
             self.systemLoggerUSBCB.setDisabled(True)
             self.systemLoggerEventsCB.setChecked(False)
             self.systemLoggerEventsCB.setDisabled(True)
+
+            self.officeWordCB.setDisabled(True)
+            self.officePowerpointCB.setDisabled(True)
+            self.officeOutlookCB.setDisabled(True)
 
             # window size
             self.resize(360, 420)
@@ -370,7 +379,6 @@ class WidgetGallery(QDialog):
         if not OPERA:
             self.statusListWidget.addItem(QListWidgetItem("- Opera disabled because not installed"))
 
-
     # triggered by "enable all" button on top of the UI
     # in some cases the checkbox should be enabled only if the program is installed in the system
     def setCheckboxChecked(self):
@@ -388,6 +396,7 @@ class WidgetGallery(QDialog):
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
         self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
+        self.officeExcelCB.setChecked(self.allCBChecked)
 
         if WINDOWS:
             self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
@@ -396,7 +405,6 @@ class WidgetGallery(QDialog):
 
         # office checkboxes
         if WINDOWS and OFFICE:
-            self.officeExcelCB.setChecked(self.allCBChecked)
             self.officeWordCB.setChecked(self.allCBChecked)
             self.officePowerpointCB.setChecked(self.allCBChecked)
             self.officeOutlookCB.setChecked(self.allCBChecked)
@@ -445,8 +453,10 @@ class WidgetGallery(QDialog):
             self.browserOpera = checked
 
     # Create a dialog to select a file and return its path
-    def getFilenameDialog(self, customDialog=True, title="Open",hiddenItems=False, isFolder=False, forOpen=True, directory='',
-                       filter_format=''):
+    # Used if the user wants to select an existing file for logging excel
+    def getFilenameDialog(self, customDialog=True, title="Open", hiddenItems=False, isFolder=False, forOpen=True,
+                          directory='',
+                          filter_format=''):
 
         options = QFileDialog.Options()
         if customDialog:
@@ -525,8 +535,7 @@ class WidgetGallery(QDialog):
                 self.browserOpera,
             ))
 
-            if not DISABLE_MAIN:
-                self.mainProcess.start()
+            self.mainProcess.start()
 
             print("[GUI] Logger started")
 
@@ -542,8 +551,11 @@ class WidgetGallery(QDialog):
             self.runButton.update()
 
             # stop main process, automatically closing all daemon threads in main process
-            if not DISABLE_MAIN:
-                self.mainProcess.terminate()
+            self.mainProcess.terminate()
+
+            # kill node server when closing python server, otherwise port remains occupied
+            if MAC and self.officeExcel:
+                os.system("pkill -f node")
 
             print("[GUI] Main process terminated, daemon threads closed, wainting for new input...")
 

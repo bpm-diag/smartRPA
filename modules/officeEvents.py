@@ -1,20 +1,27 @@
+# ****************************** #
+# Office logger
+# Manages Excel, Word, Powerpoint, Outlook events
+# ****************************** #
+
 import sys
 sys.path.append('../')  # this way main file is visible from this file
-from getpass import getuser  # user id
 from re import findall
-from os import path
+from os import path, system
 from shutil import rmtree
 from itertools import chain
-from utils.utils import timestamp, session, WINDOWS, print_members, USER
+from utils.utils import timestamp, session, WINDOWS, USER
 from utils.consumerServer import SERVER_ADDR
 
 if WINDOWS:
-    from win32com.client import DispatchWithEvents, Dispatch, DispatchEx
+    from win32com.client import DispatchWithEvents
     import pythoncom
     from win32com import __gen_path__
     import ctypes
 
+MAC_EXCEL_ADDIN_PATH = "modules/excelAddinMac/"
 
+
+# Takes filename as input if user wants to open existing file
 def excelEvents(filename=None):
     # This variable controls OnSheetSelectionChange, if True an actions is logged every time a cell is selected. It's
     # resource expensive, so it's possible to turn it off by setting variable to False
@@ -526,8 +533,6 @@ def excelEvents(filename=None):
 
         # start new instance of Excel
         e = DispatchWithEvents("Excel.Application", ExcelEvents)
-        # e.seen_events = {}
-        e.Visible = 1  # open window
 
         if filename:
             # open existing workbook
@@ -535,8 +540,6 @@ def excelEvents(filename=None):
         else:
             # create new empty workbook that contains worksheet
             e.Workbooks.Add()
-
-        # sheet = e.Worksheets(1)
 
         runLoop(e)
         print("[officeEvents] Excel logging started")
@@ -591,29 +594,29 @@ def wordEvents(filename=None):
             })
 
         def OnWindowDeactivate(self, Doc, Wn):
-                self.seen_events["OnWindowDeactivate"] = None
-                self.seen_events["OnWindowActivate"] = None
-                print(
-                    f"{timestamp()} {USER} deactivateWindow")
-                session.post(SERVER_ADDR, json={
-                    "timestamp": timestamp(),
-                    "user": USER,
-                    "category": "MSOffice",
-                    "application": "Microsoft Word",
-                    "event_type": "deactivateWindow",
-                })
+            self.seen_events["OnWindowDeactivate"] = None
+            self.seen_events["OnWindowActivate"] = None
+            print(
+                f"{timestamp()} {USER} deactivateWindow")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MSOffice",
+                "application": "Microsoft Word",
+                "event_type": "deactivateWindow",
+            })
 
         def OnWindowBeforeDoubleClick(self, Sel, Cancel):
             # https://docs.microsoft.com/en-us/office/vba/api/word.selection#properties
-                print(
-                    f"{timestamp()} {USER} doubleClickWindow")
-                session.post(SERVER_ADDR, json={
-                    "timestamp": timestamp(),
-                    "user": USER,
-                    "category": "MSOffice",
-                    "application": "Microsoft Word",
-                    "event_type": "doubleClickWindow",
-                })
+            print(
+                f"{timestamp()} {USER} doubleClickWindow")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MSOffice",
+                "application": "Microsoft Word",
+                "event_type": "doubleClickWindow",
+            })
 
         def OnWindowBeforeRightClick(self, Sel, Cancel):
             print(f"{timestamp()} {USER} rightClickWindow")
@@ -907,7 +910,8 @@ def powerpointEvents(filename=None):
                 "application": "Microsoft Powerpoint",
                 "event_type": "slideshowBegin",
                 "title": Wn.SlideShowName,
-                "description": Wn.State, # https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview.state
+                "description": Wn.State,
+                # https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview.state
                 "newZoomFactor": Wn.Zoom,
                 "slides": Wn.Slide.Name
             })
@@ -982,7 +986,6 @@ def powerpointEvents(filename=None):
                 "event_type": "SlideSelectionChanged",
             })
 
-
     try:
         # needed for thread
         pythoncom.CoInitialize()
@@ -1004,6 +1007,7 @@ def powerpointEvents(filename=None):
 
     except Exception as e:
         print(e)
+
 
 def outlookEvents():
     # https://stackoverflow.com/questions/49695160/how-to-continuously-monitor-a-new-mail-in-outlook-and-unread-mails-of-a-specific
@@ -1062,7 +1066,6 @@ def outlookEvents():
                 subject = mail.Subject
                 print(subject)
 
-
         def OnItemSend(self, Item, Cancel):
             print(Item)
             print(f"{timestamp()} {USER} Outlook sendMail")
@@ -1100,7 +1103,6 @@ def outlookEvents():
 
         # start new instance of outlook
         e = DispatchWithEvents("outlook.Application", outlookEvents)
-        #inbox = e.GetNamespace("MAPI").GetDefaultFolder(6)
 
         e.Presentations.Add()
 
@@ -1111,6 +1113,7 @@ def outlookEvents():
 
     except Exception as e:
         print(e)
+
 
 def runLoop(ob):
     while 1:
@@ -1133,6 +1136,12 @@ def CheckSeenEvents(o, events):
             print("ERROR: Expected event did not trigger", e)
             rc = 0
     return rc
+
+
+def excelEventsMacServer():
+    print("[officeEvents] Excel on Mac logging started")
+    # run node server and hide node server output
+    system(f"cd {MAC_EXCEL_ADDIN_PATH} && npm run dev-server >/dev/null 2>&1")
 
 
 # used for debug

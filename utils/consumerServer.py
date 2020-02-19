@@ -1,18 +1,24 @@
+# ****************************** #
+# CSV logging Server
+# Receives events from all the threads and writes them in a single csv file
+# ****************************** #
+
 from os import environ
 from flask import Flask, request, jsonify
 from csv import writer
 from logging import getLogger
 from utils.utils import USER
 
+# server port
 PORT = 4444
 SERVER_ADDR = f'http://localhost:{PORT}'
 
 app = Flask(__name__)
 
 # disable server log
-# app.logger.disabled = True
-# getLogger('werkzeug').disabled = True
-# environ['WERKZEUG_RUN_MAIN'] = 'true'
+app.logger.disabled = True
+getLogger('werkzeug').disabled = True
+environ['WERKZEUG_RUN_MAIN'] = 'true'
 
 # will be set by mainLogger when program is run
 filename = ""
@@ -23,7 +29,8 @@ LOG_OPERA = False
 
 # Header to use for the csv logging file, written by main when file is first created
 HEADER = [
-    "timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path", "clipboard_content",
+    "timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path",
+    "clipboard_content",
     "workbook", "current_worksheet", "worksheets", "sheets", "cell_content", "cell_range", "window_size",
     "slides", "effect",
     "id", "title", "description", "browser_url", "eventQual", "tab_moved_from_index", "tab_moved_to_index",
@@ -32,10 +39,6 @@ HEADER = [
     "tag_innerText", "tag_option"
 ]
 
-# fields = ['timeStamp', 'userID', 'targetApp', 'eventType', 'url', 'content', 'target.workbookName',
-# 'target.sheetName','target.id','target.className','target.tagName', 'target.type', 'target.name',
-# 'target.value', 'target.innerText', 'target.checked', 'target.href', 'target.option', 'target.title',
-# 'target.innerHTML']
 
 @app.route('/')
 def index():
@@ -58,7 +61,6 @@ def writeLog():
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))
-    # row = [content.get(col) for col in HEADER]
     row = list()
     for col in HEADER:
         # add current user to browser logs (because browser extension can't determine current user for security reasons)
@@ -83,12 +85,11 @@ def getServerStatus():
 
 
 # Enable CORS, for browser extension
-#  https://stackoverflow.com/a/35306327
+# https://stackoverflow.com/a/35306327
 @app.after_request
 def add_headers(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers',
-                         'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     return response
 
 
@@ -98,13 +99,14 @@ def isPortInUse(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 
+# start server thread, run by mainLogger
 def runServer():
-    # createLogFile()
     if not isPortInUse(PORT):
         print("[Server] Logging server started...")
         app.run(port=PORT, debug=False, use_reloader=False)
     else:
         print(f"Could not start logging server, port {PORT} is already in use.")
+
 
 if __name__ == "__main__":
     app.run(port=PORT, debug=True, use_reloader=True)

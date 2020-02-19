@@ -1,10 +1,13 @@
+# ****************************** #
+# System events
+# Files/Folders, Clipboard, programs, hotkeys, usb
 # https://docs.microsoft.com/en-us/windows/win32/api/
-from sys import path
+# ****************************** #
 
+from sys import path
+path.append('../')  # this way main file is visible from this file
 import keyboard
 import pyperclip
-
-path.append('../')  # this way main file is visible from this file
 from time import sleep
 from os import listdir
 from watchdog.observers import Observer
@@ -24,10 +27,10 @@ if WINDOWS:
 if MAC:
     import applescript
 
-#  monitor file changes
+
+#  monitor file/folder changes
 def watchFolder():
     #  https://pythonhosted.org/watchdog/api.html#event-handler-classes
-    # https://stackoverflow.com/a/18599427
     class WatchFilesHandler(RegexMatchingEventHandler):
         def __init__(self):
             super(WatchFilesHandler, self).__init__(
@@ -85,7 +88,8 @@ def watchFolder():
         my_observer.stop()
         my_observer.join()
 
-#  Detects programs opened and closed
+
+#  detects programs opened and closed
 def logProcessesWin():
     print("[systemEvents] WIN Processes logging started")
     # needed for thread http://timgolden.me.uk/pywin32-docs/pythoncom__CoInitialize_meth.html
@@ -120,7 +124,8 @@ def logProcessesWin():
                 started.append(objItem.Name)
 
         closed = new_programs
-        new_programs = set(started) - set(running)  # check the difference between the new set and the original to find new processes
+        new_programs = set(started) - set(
+            running)  # check the difference between the new set and the original to find new processes
         # find programs that are not in new_programs set anymore so they have been closed
         closed_programs = closed - new_programs
 
@@ -128,7 +133,8 @@ def logProcessesWin():
             for app in new_programs:
                 if app not in open_programs:
                     open_programs.append(app)
-                    pathList = list(filter(lambda prog: prog.Name == app, colItems))  # find the given program in the list of running processes and take its path
+                    pathList = list(filter(lambda prog: prog.Name == app,
+                                           colItems))  # find the given program in the list of running processes and take its path
                     if pathList:
                         path = pathList[0].ExecutablePath
                     else:
@@ -150,7 +156,6 @@ def logProcessesWin():
                     open_programs.remove(app)
                     pathList = list(filter(lambda prog: prog.Name == app,
                                            colItems))  # find the given program in the list of running processes and take its path
-                    # path = pathList[0].ExecutablePath if pathList[0].ExecutablePath else ""
                     if pathList:
                         path = pathList[0].ExecutablePath
                     else:
@@ -164,6 +169,7 @@ def logProcessesWin():
                         "event_type": "Appclose",
                         "event_src_path": path
                     })
+
 
 # logs recently opened files and folders
 def watchRecentsFolderWin():
@@ -188,12 +194,11 @@ def watchRecentsFolderWin():
             #  opposed to timing out or some error) then look for the
             #  changes in the directory contents.
             if result == win32con.WAIT_OBJECT_0:
-                new_path_contents = dict([(f, None)for f in listdir(RECENT_ITEMS_PATH)])
+                new_path_contents = dict([(f, None) for f in listdir(RECENT_ITEMS_PATH)])
                 added = [f for f in new_path_contents if not f in old_path_contents]
                 deleted = [f for f in old_path_contents if not f in new_path_contents]
                 if added:
-                    # print ("Added: ", ", ".join (added))
-                    # remove extension
+                    # [:-4] to remove extension
                     print(
                         f"{datetime.now()} {USER} OS-System OpenFile/Folder {added[0][:-4]}")
                     session.post(consumerServer.SERVER_ADDR, json={
@@ -205,21 +210,23 @@ def watchRecentsFolderWin():
                         "event_src_path": added[0][:-4]
                     })
                 # if deleted:
-                #     print ("Deleted: ", ", ".join (deleted))
+                #     print ("Deleted")
                 old_path_contents = new_path_contents
                 win32file.FindNextChangeNotification(change_handle)
     finally:
         win32file.FindCloseChangeNotification(change_handle)
 
+
 # logs currently selected files in windows explorer
 def detectSelectedFilesInExplorer():
     print("[systemEvents] detectSelectedFiles logging started")
+    # used for threads
     pythoncom.CoInitialize()
     # look in the makepy output for IE for the 'CLSIDToClassMap' dictionary, and find the entry for 'ShellWindows'
     clsid = '{9BA05972-F6A8-11CF-A442-00A0C90A8F39}'
     ShellWindows = win32com.client.Dispatch(clsid)
-    # a busy state can be detected:
-    # while ShellWindows[0].Busy == False:
+    # contains selected files. Used dictionary instead of list because I have to keep track of selected files for
+    # each window in explorer, so the dictionary key is the window id and the value is a list of all selected files
     selected = dict()
     while 1:
         try:
@@ -249,6 +256,7 @@ def detectSelectedFilesInExplorer():
         except Exception as e:
             print(e)
         sleep(0.5)
+
 
 # logs hotkeys
 def logHotkeys():
@@ -307,9 +315,11 @@ def logHotkeys():
 
     keyboard.wait()
 
+
 # logs insertion and removal of usb drives
 def logUSBDrives():
     def _queryWinDrives():
+        pythoncom.CoInitialize()
         strComputer = "."
         objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
         objSWbemServices = objWMIService.ConnectServer(strComputer, "root\cimv2")
@@ -359,14 +369,18 @@ def logUSBDrives():
 
         sleep(10)
 
+
+# detects programs opened and closed on mac
 def logProcessesMac():
     print("[systemEvents] MAC Processes logging started")
-    running = applescript.tell.app("System Events", "name of every process where background only is false").out.split(',')
+    running = applescript.tell.app("System Events", "name of every process where background only is false").out.split(
+        ',')
     new_programs = set()  # needed later to initialize 'closed' set
     new_programs_len = 0
     open_programs = []
     while 1:
-        started = applescript.tell.app("System Events","name of every process where background only is false").out.split(',')
+        started = applescript.tell.app("System Events",
+                                       "name of every process where background only is false").out.split(',')
         closed = new_programs
         new_programs = set(started) - set(running)
         closed_programs = closed - new_programs
@@ -374,14 +388,14 @@ def logProcessesMac():
             for app in new_programs:
                 if app not in open_programs:
                     open_programs.append(app)
-                    print(f"{datetime.now()} {USER} AppOpen {app.strip()}")
+                    print(f"{datetime.now()} {USER} AppOpen {app.strip()}.app")
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
                         "user": USER,
                         "category": "OS-System",
                         "application": app.strip(),
                         "event_type": "AppOpen",
-                        "event_src_path": f"/Applications/{app.strip()}"
+                        "event_src_path": f"/Applications/{app.strip()}.app"
                     })
             new_programs_len = len(new_programs)
 
@@ -402,7 +416,8 @@ def logProcessesMac():
         sleep(2)
 
 
-# not started by main
+# not included by main
+
 
 # return list of programs uninstalled by user
 def findUninstall():
@@ -419,6 +434,7 @@ def findUninstall():
             displayName = dn[0].get('data')
             uninstalls.append(displayName)
     print(uninstalls)
+
 
 def GetUserShellFolders():
     # Routine to grab all the Windows Shell Folder locations from the registry.  If successful, returns dictionary
@@ -459,6 +475,7 @@ def GetUserShellFolders():
         winreg.CloseKey(Key)
         winreg.CloseKey(Hive)
         return {}
+
 
 # This script watches for activity at the installed printers and writes a logfile. It shows how much a user has
 # printed on wich printer (works also with network printers).
