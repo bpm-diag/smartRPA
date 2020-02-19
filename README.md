@@ -24,7 +24,9 @@
         <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a>
 </p>
 
-
+<p align="center">
+  <img src="docs/gui.PNG" width="500" /> 
+</p>
 
 ## Installation and execution:
 
