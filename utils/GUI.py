@@ -312,10 +312,9 @@ class WidgetGallery(QDialog):
 
         elif MAC or LINUX:
 
-            self.officeGroupBox.setDisabled(True)
-            # if not OFFICE:
-            #     self.officeExcelCB.setChecked(False)
-            #     self.officeExcel = False
+            if not OFFICE:
+                self.officeExcelCB.setChecked(False)
+                self.officeExcel = False
 
             # program logger is not supported on mac
             self.systemLoggerHotkeysCB.setChecked(False)

@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/gui.png" width="80%" /> 
+  <img src="docs/gui.jpg" width="80%" /> 
 </p>
 
 ## Installation and execution:
@@ -45,7 +45,17 @@ The browser extension supports 4 major browsers (<a href="https://gs.statcounter
 - [_New Microsoft Edge_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
 - [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
-3. **Run main logger**
+3. **Install Excel Addin (MacOS Only)**
+The excel addin is required to enable logging only on MacOS. [`NodeJS`](https://nodejs.org/en/download/) must be installed. 
+```
+cd modules/excelAddinMac 
+npm install 
+npm start
+```
+
+Once installed, choose the `Home` tab in Excel, and then choose the `Show Taskpane` button in the ribbon to open the add-in task pane.
+
+4. **Run main logger**
 
 ```
 python3 mainLogger.py

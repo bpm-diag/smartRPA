@@ -6,7 +6,6 @@ stuff_to_delete/
 PythonProgrammingOnWin32.pdf
 latex
 /paper
-/modules/excelAddinMac/
 .web-extension-id
 *.pyc
 *.csv
