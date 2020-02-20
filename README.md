@@ -82,18 +82,16 @@ A complete list of features for each module is available in [`features.pdf`](htt
 .
 ├── README.md
 ├── docs
-│   └── Features.pdf
 ├── mainLogger.py
 ├── modules
 │   ├── browserlogger
 │   ├── clipboardEvents.py
+│   ├── excelAddinMac
 │   ├── officeEvents.py
 │   └── systemEvents.py
 ├── requirements.txt
 └── utils
     ├── GUI.py
     ├── consumerServer.py
-    ├── icons
-    ├── removeEmptyLogs.py
     └── utils.py
 ```
