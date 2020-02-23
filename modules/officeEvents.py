@@ -62,7 +62,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "openWindow",
                 "workbook": Wb.Name,
@@ -79,7 +79,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "closeWindow",
                 "workbook": Wb.Name,
@@ -95,7 +95,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "resizeWindow",
                 "workbook": Wb.Name,
@@ -118,7 +118,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "newWorkbook",
                 "workbook": Wb.Name,
@@ -133,7 +133,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "openWorkbook",
                 "workbook": Wb.Name,
@@ -152,7 +152,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "saveWorkbook",
                 "workbook": Wb.Name,
@@ -168,7 +168,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "addinInstalledWorkbook",
                 "workbook": Wb.Name,
@@ -183,7 +183,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "addinUninstalledWorkbook",
                 "workbook": Wb.Name,
@@ -198,7 +198,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "XMLImportWOrkbook",
                 "workbook": Wb.Name,
@@ -213,7 +213,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "XMLExportWOrkbook",
                 "workbook": Wb.Name,
@@ -228,7 +228,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "printWorkbook",
                 "workbook": Wb.Name,
@@ -243,7 +243,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "closeWorkbook",
                 "workbook": Wb.Name,
@@ -258,7 +258,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "activateWorkbook",
                 "workbook": Wb.Name,
@@ -273,7 +273,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "deactivateWorkbook",
                 "workbook": Wb.Name,
@@ -288,7 +288,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "modelChangeWorkbook",
                 "workbook": Wb.Name,
@@ -303,7 +303,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "newChartWorkbook",
                 "workbook": Wb.Name,
@@ -319,7 +319,7 @@ def excelEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "afterCalculate",
             })
@@ -344,11 +344,11 @@ def excelEvents(filename=None):
         def OnSheetActivate(self, Sh):
             # to get the list of active worksheet names, I cycle through the parent which is the workbook
             print(
-                f"{timestamp()} {USER} MS-EXCEL selectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+                f"{timestamp()} {USER} Microsoft Excel selectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "selectWorksheet",
                 "workbook": Sh.Parent.Name,
@@ -359,11 +359,11 @@ def excelEvents(filename=None):
 
         def OnSheetBeforeDelete(self, Sh):
             print(
-                f"{timestamp()} {USER} MS-EXCEL deleteWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+                f"{timestamp()} {USER} Microsoft Excel deleteWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "deleteWorksheet",
                 "workbook": Sh.Parent.Name,
@@ -379,11 +379,11 @@ def excelEvents(filename=None):
                 value = Target.Value
 
             print(
-                f"{timestamp()} {USER} MS-EXCEL {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+                f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": event_type,
                 "workbook": Sh.Parent.Name,
@@ -399,11 +399,11 @@ def excelEvents(filename=None):
                 event_type = "rightClickCellWithValue"
                 value = Target.Value
             print(
-                f"{timestamp()} {USER} MS-EXCEL {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+                f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": event_type,
                 "workbook": Sh.Parent.Name,
@@ -414,11 +414,11 @@ def excelEvents(filename=None):
 
         def OnSheetCalculate(self, Sh):
             print(
-                f"{timestamp()} {USER} MS-EXCEL sheetCalculate {Sh.Name} {Sh.Parent.Name} ")
+                f"{timestamp()} {USER} Microsoft Excel sheetCalculate {Sh.Name} {Sh.Parent.Name} ")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "sheetCalculate",
                 "workbook": Sh.Parent.Name,
@@ -428,11 +428,11 @@ def excelEvents(filename=None):
         def OnSheetChange(self, Sh, Target):
             value = self.filterNoneRangeValues(Target.Value) if type(Target.Value) != float else Target.Value
             print(
-                f"{timestamp()} {USER} MS-EXCEL editCellSheet {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+                f"{timestamp()} {USER} Microsoft Excel editCellSheet {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "editCellSheet",
                 "workbook": Sh.Parent.Name,
@@ -444,11 +444,11 @@ def excelEvents(filename=None):
         def OnSheetDeactivate(self, Sh):
             self.seen_events["OnSheetDeactivate"] = None
             print(
-                f"{timestamp()} {USER} MS-EXCEL deselectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+                f"{timestamp()} {USER} Microsoft Excel deselectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "deselectWorksheet",
                 "workbook": Sh.Parent.Name,
@@ -459,11 +459,11 @@ def excelEvents(filename=None):
 
         def OnSheetFollowHyperlink(self, Sh, Target):
             print(
-                f"{timestamp()} {USER} MS-EXCEL followHiperlinkSheet {Sh.Name} {Sh.Parent.Name} {Target.Range.Address.replace('$', '')} {Target.Address}")
+                f"{timestamp()} {USER} Microsoft Excel followHiperlinkSheet {Sh.Name} {Sh.Parent.Name} {Target.Range.Address.replace('$', '')} {Target.Address}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "followHiperlinkSheet",
                 "workbook": Sh.Parent.Name,
@@ -474,11 +474,11 @@ def excelEvents(filename=None):
 
         def OnSheetPivotTableAfterValueChange(self, Sh, TargetPivotTable, TargetRange):
             print(
-                f"{timestamp()} {USER} MS-EXCEL pivotTableValueChangeSheet {Sh.Name} {Sh.Parent.Name} {TargetRange.Address.replace('$', '')} {TargetRange.Value}")
+                f"{timestamp()} {USER} Microsoft Excel pivotTableValueChangeSheet {Sh.Name} {Sh.Parent.Name} {TargetRange.Address.replace('$', '')} {TargetRange.Value}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "pivotTableValueChangeSheet",
                 "workbook": Sh.Parent.Name,
@@ -502,11 +502,11 @@ def excelEvents(filename=None):
             # If LOG_EVERY_CELL is False and a user selects a single cell the event is not logged
             if rangeSelected or LOG_EVERY_CELL:
                 print(
-                    f"{timestamp()} {USER} MS-EXCEL {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} {value}")
+                    f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} {value}")
                 session.post(SERVER_ADDR, json={
                     "timestamp": timestamp(),
                     "user": USER,
-                    "category": "MSOffice",
+                    "category": "MicrosoftOffice",
                     "application": "Microsoft Excel",
                     "event_type": event_type,
                     "workbook": Sh.Parent.Name,
@@ -516,11 +516,11 @@ def excelEvents(filename=None):
                 })
 
         def OnSheetTableUpdate(self, Sh, Target):
-            print(f"{timestamp()} {USER} MS-EXCEL worksheetTableUpdated {Sh.Name} {Sh.Parent.Name} ")
+            print(f"{timestamp()} {USER} Microsoft Excel worksheetTableUpdated {Sh.Name} {Sh.Parent.Name} ")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "worksheetTableUpdated",
                 "workbook": Sh.Parent.Name,
@@ -566,6 +566,12 @@ def excelEvents(filename=None):
                 print("The error should now be fixed, try to execute the program again.")
 
 
+def excelEventsMacServer():
+    print("[officeEvents] Excel on Mac logging started")
+    # run node server and hide node server output
+    system(f"cd {MAC_EXCEL_ADDIN_PATH} && npm run dev-server >/dev/null 2>&1")
+
+
 def wordEvents(filename=None):
     # ************
     # Application object events
@@ -588,7 +594,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "activateWindow",
             })
@@ -601,7 +607,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "deactivateWindow",
             })
@@ -613,7 +619,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "doubleClickWindow",
             })
@@ -623,7 +629,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "rightClickWindow",
             })
@@ -634,7 +640,7 @@ def wordEvents(filename=None):
         #     session.post(SERVER_ADDR, json={
         #         "timestamp": timestamp(),
         #         "user": USER,
-        #         "category": "MSOffice",
+        #         "category": "MicrosoftOffice",
         #         "application": "Microsoft Word",
         #         "event_type": "selectionChangeWindow",
         #     })
@@ -649,7 +655,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "newDocument",
             })
@@ -659,7 +665,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "openDocument",
             })
@@ -670,7 +676,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "changeDocument",
             })
@@ -680,7 +686,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "saveDocument",
             })
@@ -690,7 +696,7 @@ def wordEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "printDocument",
             })
@@ -760,7 +766,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "activateWindow",
                 "title": Pres.Name,
@@ -772,7 +778,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "activateWindow",
                 "title": Pres.Name,
@@ -786,7 +792,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "rightClickPresentation",
             })
@@ -798,7 +804,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "doubleClickPresentation",
             })
@@ -813,7 +819,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "newPresentation",
                 "title": Pres.Name,
@@ -826,7 +832,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "newPresentation",
                 "title": Sld.Name,
@@ -839,7 +845,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "closePresentation",
                 "title": Pres.Name,
@@ -853,7 +859,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "savePresentation",
                 "title": Pres.Name,
@@ -867,7 +873,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "openPresentation",
                 "title": Pres.Name,
@@ -881,7 +887,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "shapeSizeChangePresentation",
                 "description": shp.Type
@@ -892,7 +898,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "openPresentation",
                 "title": Pres.Name,
@@ -906,7 +912,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "slideshowBegin",
                 "title": Wn.SlideShowName,
@@ -921,7 +927,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "nextSlideshow",
                 "title": Wn.SlideShowName,
@@ -937,7 +943,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "clickNextSlideshow",
                 "title": Wn.SlideShowName,
@@ -953,7 +959,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "previousSlideshow",
                 "title": Wn.SlideShowName,
@@ -968,7 +974,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "slideshowEnd",
                 "title": Pres.Name,
@@ -981,7 +987,7 @@ def powerpointEvents(filename=None):
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "SlideSelectionChanged",
             })
@@ -1030,7 +1036,7 @@ def outlookEvents():
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "startupOutlook",
             })
@@ -1041,7 +1047,7 @@ def outlookEvents():
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "quitOutlook",
             })
@@ -1055,7 +1061,7 @@ def outlookEvents():
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "receiveMail",
             })
@@ -1072,7 +1078,7 @@ def outlookEvents():
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "sendMail",
             })
@@ -1082,7 +1088,7 @@ def outlookEvents():
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "logonComplete",
             })
@@ -1092,7 +1098,7 @@ def outlookEvents():
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
-                "category": "MSOffice",
+                "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "newReminder",
             })
@@ -1136,12 +1142,6 @@ def CheckSeenEvents(o, events):
             print("ERROR: Expected event did not trigger", e)
             rc = 0
     return rc
-
-
-def excelEventsMacServer():
-    print("[officeEvents] Excel on Mac logging started")
-    # run node server and hide node server output
-    system(f"cd {MAC_EXCEL_ADDIN_PATH} && npm run dev-server >/dev/null 2>&1")
 
 
 # used for debug

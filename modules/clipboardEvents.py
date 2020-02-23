@@ -7,24 +7,23 @@ from sys import path
 path.append('../')  # this way main file is visible from this file
 import pyperclip
 from time import sleep
-from datetime import datetime
-from getpass import getuser  # user id
-from requests import post
 from utils import consumerServer
-from utils import utils
+from utils.utils import *
+
 
 # constantly monitors clipboard for changes
+# detects 'copy' event. 'paste' event is detected by systemEvents.handleHotkey
 def logClipboard():
-    recent_value = ""
+    recent_value = pyperclip.paste()
     while 1:
         temp_value = pyperclip.paste()
         if temp_value != recent_value:
             recent_value = temp_value
-            print(f"{datetime.now()} {getuser()} OS-Clipboard copy {recent_value}")
-            post(consumerServer.SERVER_ADDR, json={
-                "timestamp": utils.timestamp(),
-                "user": getuser(),
-                "category": "OS-Clipboard",
+            print(f"{timestamp()} {USER} Clipboard copy {recent_value}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "Clipboard",
                 "application": "Clipboard",
                 "event_type": "copy",
                 "clipboard_content": recent_value

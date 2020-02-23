@@ -8,6 +8,7 @@ from sys import exit
 import errno
 import os
 from csv import writer
+from time import sleep
 from datetime import datetime
 from threading import Thread
 from utils import GUI
@@ -51,19 +52,24 @@ def startLogger(systemLoggerFilesFolder,
         # ************
 
         if systemLoggerFilesFolder:
-            t1 = Thread(target=systemEvents.watchFolder)
-            t1.daemon = True
-            t1.start()
 
             if WINDOWS:
-                t2 = Thread(target=systemEvents.watchRecentsFolderWin)
+
+                t1 = Thread(target=systemEvents.watchFolder)
+                t1.daemon = True
+                t1.start()
+
+                t2 = Thread(target=systemEvents.watchRecentsFilesWin)
                 t2.daemon = True
                 t2.start()
 
-                # maybe it consumes too much memory
                 t9 = Thread(target=systemEvents.detectSelectedFilesInExplorer)
                 t9.daemon = True
                 t9.start()
+
+                t14 = Thread(target=systemEvents.printerLogger)
+                t14.daemon = True
+                t14.start()
 
         if systemLoggerPrograms:
             if WINDOWS:
@@ -138,11 +144,13 @@ def startLogger(systemLoggerFilesFolder,
         if browserOpera:
             consumerServer.LOG_OPERA = True
 
+        print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
+        print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
         print("[mainLogger] Selected threads activated")
 
-        while 1:  # keep main active
-            # sleep(1)
-            pass
+        # keep main active
+        while 1:
+            sleep(1)
 
     except (KeyboardInterrupt, SystemExit):
         print("Closing threads and exiting...")

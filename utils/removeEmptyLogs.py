@@ -1,8 +1,10 @@
 import glob
 import os
+import sys
+
 
 # Remove log files with less than N lines
-def removeEmptyLogs(N=3):
+def removeEmptyLogs(N=10):
     count = 0
     for file in glob.glob('../logs/*.csv'):
         try:
@@ -11,9 +13,13 @@ def removeEmptyLogs(N=3):
                 print(f"Removing {file}")
                 os.remove(file)
                 count += 1
-            # open(file, 'w').writelines(lines[3:])
-        except Exception as e:
+        except Exception:
             continue
     print(f"Removed {count} files")
 
-removeEmptyLogs()
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        removeEmptyLogs(int(sys.argv[1]))
+    else:
+        print("USAGE: python3 removeEmptyLogs.py N - files with less than N lines are removed")

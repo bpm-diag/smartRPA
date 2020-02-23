@@ -7,6 +7,7 @@ from os import environ
 from flask import Flask, request, jsonify
 from csv import writer
 from logging import getLogger
+# import stringcase
 from utils.utils import USER
 
 # server port
@@ -42,7 +43,7 @@ HEADER = [
 
 @app.route('/')
 def index():
-    return "Server working, send a post with json data."
+    return "Server working, send post with json data."
 
 
 @app.route('/', methods=['POST'])
@@ -52,20 +53,26 @@ def writeLog():
     print(f"\nPOST received with content: {content}\n")
 
     # check if user enabled browser logging
-    if content.get("application") == "Chrome" and not LOG_CHROME:
-        print("Chrome logging disabled by user.")
-        return content
-    if content.get("application") == "Firefox" and not LOG_FIREFOX:
-        print("Firefox logging disabled by user.")
+    application = content.get("application")
+    if (application == "Chrome" and not LOG_CHROME) or \
+            (application == "Firefox" and not LOG_FIREFOX) or \
+            (application == "Edge" and not LOG_EDGE) or \
+            (application == "Opera" and not LOG_OPERA):
+        print(f"{application} logging disabled by user.")
         return content
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))
     row = list()
+
     for col in HEADER:
         # add current user to browser logs (because browser extension can't determine current user for security reasons)
         if not content.get("user"):
             content["user"] = USER
+
+        # convert events to camelCase (already done by browser extension)
+        # content["event_type"] = stringcase.camelcase(content["event_type"])
+
         row.append(content.get(col))
 
     with open(filename, 'a', newline='') as out_file:
@@ -98,6 +105,7 @@ def isPortInUse(port):
     import socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
+
 
 # start server thread, run by mainLogger
 def runServer():

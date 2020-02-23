@@ -154,7 +154,7 @@ document.body.onclick = e => {
         tag_option: target.option
     };
 
-    if (type == "checkbox" || type == "radio") {
+    if (type === "checkbox" || type === "radio") {
         eventLog.tag_checked = target.checked;
     }
 

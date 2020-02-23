@@ -332,7 +332,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 // https://developer.chrome.com/extensions/tabs#event-onZoomChange
 chrome.tabs.onZoomChange.addListener(ZoomChangeInfo => {
     // Check if zoom factor changes so page actually zoomed, otherwise chrome fires this even when new tab is created or selected
-    if (ZoomChangeInfo.oldZoomFactor != ZoomChangeInfo.newZoomFactor) {
+    if (ZoomChangeInfo.oldZoomFactor !== ZoomChangeInfo.newZoomFactor) {
         // console.log("Tab zoomed");
         chrome.tabs.get(ZoomChangeInfo.tabId, tab => {
             try {
@@ -349,18 +349,20 @@ chrome.tabs.onZoomChange.addListener(ZoomChangeInfo => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     // console.log("tab updated");
     try {
-        if (changeInfo.pinned != undefined) {
+        if (changeInfo.pinned !== undefined) {
             if (changeInfo.pinned)
                 buildAndSendEventLog("pinnedTab", tab, changeInfo);
-            else buildAndSendEventLog("unpinnedTab", tab, changeInfo);
+            else
+                buildAndSendEventLog("unpinnedTab", tab, changeInfo);
         }
-        if (changeInfo.audible != undefined) {
+        if (changeInfo.audible !== undefined) {
             buildAndSendEventLog("audibleTab", tab, changeInfo);
         }
-        if (changeInfo.mutedInfo != undefined) {
+        if (changeInfo.mutedInfo !== undefined) {
             if (changeInfo.mutedInfo.muted)
                 buildAndSendEventLog("mutedTab", tab, changeInfo);
-            else buildAndSendEventLog("unmutedTab", tab, changeInfo);
+            else
+                buildAndSendEventLog("unmutedTab", tab, changeInfo);
         }
     } catch (error) {
         console.log(error.message);
@@ -397,32 +399,31 @@ chrome.webNavigation.onCommitted.addListener(details => {
         application: getBrowser(),
         event_type: details.transitionType,
         browser_url: details.url,
-        eventQual: JSON.stringify(details.transitionQualifiers).replace(
-            /[\\\[\]']+/g,
-            ""
-        )
     };
 
-    if (details.transitionType != "auto_subframe") {
-        //different from any nested iframes that are automatically loaded by their parent.
-        // Cause of the navigation
-        // https://developer.chrome.com/extensions/webNavigation#type-TransitionType
+    // convert each transition qualifier to camelCase
+    let eventQual = details.transitionQualifiers.map(x => toCamelCase(x));
+    eventLog.eventQual = JSON.stringify(eventQual);
+
+    // Cause of the navigation different from any nested iframes that are automatically loaded by their parent.
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webNavigation/TransitionType
+    if (details.transitionType !== "auto_subframe") {
         if (
-            eventLog.eventType == "typed" ||
-            eventLog.eventType == "generated" ||
-            eventLog.eventType == "auto_bookmark" ||
+            eventLog.eventType === "typed" ||
+            eventLog.eventType === "generated" ||
+            eventLog.eventType === "auto_bookmark" ||
             eventLog.eventQual.includes("forward_back")
         ) {
             eventLog.eventType = "navigateTo";
         }
+        eventLog.event_type = toCamelCase(eventLog.event_type);
         if (
             !eventLog.browser_url.includes("newtab") &&
-            eventLog.eventType != "link"
+            eventLog.eventType !== "link"
         ) {
-            // console.log(eventLog);
-            // post(eventLog);
             logAndPost(eventLog);
         }
+
     }
 });
 

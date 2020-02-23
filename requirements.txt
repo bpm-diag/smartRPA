@@ -1,12 +1,17 @@
-pywin32; platform_system == "Windows"
-winregistry; platform_system == "Windows"
-WMI; platform_system == "Windows"
-applescript; platform_system == "Darwin"
-watchdog
-requests
-requests-futures
-flask
-pyperclip
-pyqt5
-darkdetect
-keyboard
+# Common dependencies
+pyperclip==1.7.0
+keyboard==0.13.4
+requests_futures==1.0.0
+Flask==1.1.1
+darkdetect==0.1.1
+psutil==5.6.7
+PyQt5==5.14.1
+# watchdog==0.9.0
+watchdog==0.10.2
+# stringcase==1.2.0
+# Windows specific dependencies
+pywin32==227; platform_system == "Windows"
+pylnk3==0.3.0; platform_system == "Windows"
+WMI==1.4.9; platform_system == "Windows"
+# MacOS specific dependencies
+applescript==2019.4.13; platform_system == "Darwin"

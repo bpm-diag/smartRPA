@@ -6,16 +6,17 @@
 import sys
 
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QDir
+from PyQt5.QtCore import Qt, QSize, QDir, QTimer
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
-                             QAbstractItemView, QFileDialog, QRadioButton)
+                             QAbstractItemView, QFileDialog, QRadioButton, QProgressBar)
 import darkdetect
 from multiprocessing import Process
 from utils.utils import *
 import mainLogger
+from time import sleep
 
 
 class WidgetGallery(QDialog):
@@ -109,8 +110,8 @@ class WidgetGallery(QDialog):
 
         layout = QVBoxLayout()
         layout.addWidget(self.systemLoggerFilesFolderCB)
-        layout.addWidget(self.systemLoggerClipboardCB)
         layout.addWidget(self.systemLoggerProgramsCB)
+        layout.addWidget(self.systemLoggerClipboardCB)
         layout.addWidget(self.systemLoggerHotkeysCB)
         layout.addWidget(self.systemLoggerUSBCB)
         # layout.addWidget(self.systemLoggerEventsCB)
@@ -253,6 +254,20 @@ class WidgetGallery(QDialog):
 
         self.statusLayout.addWidget(self.statusListWidget)
 
+    def createProgressBar(self):
+        self.progressBar = QProgressBar()
+        self.progressBar.setRange(0, 10000)
+        self.progressBar.setValue(0)
+
+        timer = QTimer(self)
+        timer.timeout.connect(self.advanceProgressBar)
+        timer.start(1000)
+
+    def advanceProgressBar(self):
+        curVal = self.progressBar.value()
+        maxVal = self.progressBar.maximum()
+        self.progressBar.setValue(curVal + (maxVal - curVal) / 100)
+
     # display native GUI for each OS
     def setStyle(self):
         if WINDOWS:
@@ -317,6 +332,9 @@ class WidgetGallery(QDialog):
                 self.officeExcel = False
 
             # program logger is not supported on mac
+            self.systemLoggerFilesFolderCB.setChecked(False)
+            self.systemLoggerFilesFolderCB.setDisabled(True)
+
             self.systemLoggerHotkeysCB.setChecked(False)
             self.systemLoggerHotkeysCB.setDisabled(True)
             self.systemLoggerUSBCB.setChecked(False)
@@ -368,15 +386,15 @@ class WidgetGallery(QDialog):
         if MAC:
             self.statusListWidget.addItem(QListWidgetItem("- Office module not available on MacOS"))
         if WINDOWS and not OFFICE:
-            self.statusListWidget.addItem(QListWidgetItem("- Office disabled because not installed"))
+            self.statusListWidget.addItem(QListWidgetItem("- Office not installed"))
         if not CHROME:
-            self.statusListWidget.addItem(QListWidgetItem("- Chrome disabled because not installed"))
+            self.statusListWidget.addItem(QListWidgetItem("- Chrome not installed"))
         if not FIREFOX:
-            self.statusListWidget.addItem(QListWidgetItem("- Firefox disabled because not installed"))
+            self.statusListWidget.addItem(QListWidgetItem("- Firefox not installed"))
         if not EDGE:
-            self.statusListWidget.addItem(QListWidgetItem("- Edge disabled because not installed"))
+            self.statusListWidget.addItem(QListWidgetItem("- Edge (chromium) not installed"))
         if not OPERA:
-            self.statusListWidget.addItem(QListWidgetItem("- Opera disabled because not installed"))
+            self.statusListWidget.addItem(QListWidgetItem("- Opera not installed"))
 
     # triggered by "enable all" button on top of the UI
     # in some cases the checkbox should be enabled only if the program is installed in the system
@@ -392,12 +410,12 @@ class WidgetGallery(QDialog):
             self.checkButton.update()
 
         # System checkboxes
-        self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
         self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
         self.officeExcelCB.setChecked(self.allCBChecked)
 
         if WINDOWS:
+            self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
             self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
             self.systemLoggerUSBCB.setChecked(self.allCBChecked)
             self.systemLoggerEventsCB.setChecked(self.allCBChecked)
@@ -508,7 +526,6 @@ class WidgetGallery(QDialog):
 
             # self.statusListWidget.clear()
             self.compatibilityCheckMessage()
-            self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
 
             self.runButton.setText('Stop logger')
             self.runButton.update()
@@ -537,6 +554,8 @@ class WidgetGallery(QDialog):
             self.mainProcess.start()
 
             print("[GUI] Logger started")
+
+            self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
 
         # stop button clicked
         else:

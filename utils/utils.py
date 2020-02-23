@@ -10,17 +10,18 @@ import os
 
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
+
 session = FuturesSession()
 
 #  boolean constants to detect current OS
 from platform import system
+
 WINDOWS = (system() == "Windows")
 MAC = (system() == "Darwin")
 LINUX = (system() == "Linux")
 
 if WINDOWS:
     import winreg
-
 
 HOME_FOLDER = expanduser("~")
 DESKTOP = HOME_FOLDER + "/Desktop"
@@ -32,13 +33,12 @@ USER = getuser()
 def timestamp():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
 
-
 # detect if program (both 32bit and 64bit) is installed checking windows registry
 def isInstalledWin(programName):
-
     def _getInstalledProgramsWin(hive, flag):
         registry = winreg.ConnectRegistry(None, hive)
-        registry_key = winreg.OpenKey(registry, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", 0, winreg.KEY_READ | flag)
+        registry_key = winreg.OpenKey(registry, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", 0,
+                                      winreg.KEY_READ | flag)
         registry_subkeys_number = winreg.QueryInfoKey(registry_key)[0]
         software_list = []
         for i in range(registry_subkeys_number):
@@ -77,7 +77,7 @@ if WINDOWS:
     EDGE = isInstalledWin('edge')
     OPERA = isInstalledWin('opera')
 elif MAC:
-    OFFICE = isInstalledMac('excel')
+    OFFICE = isInstalledMac('excel')  # on MacOS only excel events can be logged through an addin
     CHROME = isInstalledMac('chrome')
     FIREFOX = isInstalledMac('firefox')
     EDGE = isInstalledMac('edge')
@@ -88,4 +88,3 @@ else:
     FIREFOX = isInstalledLinux('firefox')
     EDGE = False
     OPERA = isInstalledLinux('opera')
-

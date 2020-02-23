@@ -2,27 +2,36 @@
 // Utilities
 // ********************
 
+function userAgent(string){
+    return window.navigator.userAgent.indexOf(string) > -1;
+}
+
 // detect which browser is running the extension
 function getBrowser() {
-    // if (typeof chrome !== "undefined") {
-    //     if (typeof browser !== "undefined") return "Firefox";
-    //     else return "Chrome";
-    // }
-    if (window.navigator.userAgent.indexOf("Firefox") > -1)
+    if (userAgent("Firefox"))
         return "Firefox";
-    else if (window.navigator.userAgent.indexOf("Edge/") > -1)
+    else if (userAgent("Edge/") || userAgent("Edg/")) //Edg/ is the new edge based on chromium
         return "Edge";
-    else if (window.navigator.userAgent.indexOf("Edg/") > -1) //new edge based on chromium
-        return "Edge";
-    else if (window.navigator.userAgent.indexOf("OPR") > -1 || window.navigator.userAgent.indexOf("Opera") > -1)
-        return ("Opera")
-    else if (window.navigator.userAgent.indexOf("Safari") > -1 && window.navigator.userAgent.indexOf('Chrome') == -1)
+    else if (userAgent("OPR") || userAgent("Opera"))
+        return ("Opera");
+    else if (userAgent("Safari") && window.navigator.userAgent.indexOf('Chrome') === -1)
         return "Safari";
-    else if (window.navigator.userAgent.indexOf("MSIE ") > -1 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+    else if (userAgent("MSIE ") || !!navigator.userAgent.match(/Trident.*rv\:11\./))
         return "InternetExplorer";
-    else if (window.navigator.userAgent.indexOf("Chrome") > -1)
+    else if (userAgent("Chrome"))
         return "Chrome";
 }
+
+// convert snake_case string to camelCase
+const toCamelCase = (s) => {
+    if (typeof s === 'string' || s instanceof String){
+          return s.replace(/([-_][a-z])/ig, ($1) => {
+            return $1.toUpperCase()
+              .replace('-', '')
+              .replace('_', '');
+          });
+    } else return s;
+};
 
 // post request to server sending logging data
 function post(eventLog) {
@@ -128,11 +137,11 @@ function loggingOFF() {
 
 function setExtensionBadge(status) {
     chrome.browserAction.setBadgeText({ text: status });
-    if (status == "ON")
+    if (status === "ON")
         chrome.browserAction.setBadgeBackgroundColor({ color: "green" });
-    else if (status == "ONOFF")
+    else if (status === "ONOFF")
         chrome.browserAction.setBadgeBackgroundColor({ color: "orange" });
-    else if (status == "OFF")
+    else if (status === "OFF")
         chrome.browserAction.setBadgeBackgroundColor({ color: "red" });
 }
 
