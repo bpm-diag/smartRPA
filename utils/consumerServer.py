@@ -7,7 +7,6 @@ from os import environ
 from flask import Flask, request, jsonify
 from csv import writer
 from logging import getLogger
-# import stringcase
 from utils.utils import USER
 
 # server port

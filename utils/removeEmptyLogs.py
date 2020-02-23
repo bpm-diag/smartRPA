@@ -1,3 +1,8 @@
+# ****************************** #
+# remove empy logs
+# Not used by any module, just a command line utility to remove logs with less than N lines.
+# ****************************** #
+
 import glob
 import os
 import sys

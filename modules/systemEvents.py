@@ -10,6 +10,8 @@ import keyboard
 import pyperclip
 from time import sleep
 import os
+from threading import Thread
+from queue import Queue
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from utils import consumerServer
@@ -90,88 +92,6 @@ def watchFolder():
 
 
 # detects programs opened and closed
-# does not work with threads
-def logProcessesWinOld():
-    print("[systemEvents] WIN Processes logging started")
-
-    # needed for thread http://timgolden.me.uk/pywin32-docs/pythoncom__CoInitialize_meth.html
-    pythoncom.CoInitialize()
-    strComputer = "."
-    objWMIService = win32com.client.Dispatch("WbemScripting.SWbemLocator")
-    objSWbemServices = objWMIService.ConnectServer(strComputer, "root\cimv2")
-
-    programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
-                          "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe",
-                          "LocalBridge.exe", "SearchProtocolHost.exe", "SearchFilterHost.exe"]
-
-    # create initial set of running processes using Windows Management Instrumentation (WMI)
-    colItems = objSWbemServices.ExecQuery("Select * from Win32_Process")  # access windows sql database of currently running process (also used by task manager) https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-process
-    running = []  # set of running programs
-    for objItem in colItems:
-        if objItem.Name not in running and objItem.Name not in programs_to_ignore:
-            running.append(objItem.Name)
-
-    new_programs = set()  # needed later to initialize 'closed' set
-    new_programs_len = 0  # needed later to check if 'new_programs' set changes
-    # maintain set of open programs so I don't have duplicates when logging events
-    open_programs = []
-    while True:
-        print("here")
-        started = []  # set of programs started after the script is executed
-        colItems = objSWbemServices.ExecQuery("Select * from Win32_Process")
-        for objItem in colItems:
-            if objItem.Name not in started and objItem.Name not in programs_to_ignore:
-                started.append(objItem.Name)
-
-        closed = new_programs
-        new_programs = set(started) - set(running)  # check the difference between the new set and the original to find new processes
-        # find programs that are not in new_programs set anymore so they have been closed
-        closed_programs = closed - new_programs
-
-        print(f"NEW={new_programs}")
-
-        if len(new_programs) != new_programs_len:  # set is changed
-            for app in new_programs:
-                if app not in open_programs:
-                    open_programs.append(app)
-                    pathList = list(filter(lambda prog: prog.Name == app, colItems))  # find the given program in the list of running processes and take its path
-                    path = ""
-                    if pathList:
-                        path = pathList[0].ExecutablePath
-                    print(f"{timestamp()} {USER} programOpen {app} {path}")
-                    session.post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": timestamp(),
-                        "user": USER,
-                        "category": "OperatingSystem",
-                        "application": app,
-                        "event_type": "programOpen",
-                        "event_src_path": path
-                    })
-            new_programs_len = len(new_programs)
-
-        if len(closed_programs):  # set is not empty
-            for app in closed_programs:
-                if app in open_programs:
-                    open_programs.remove(app)
-                    # find the given program in the list of running processes and take its path
-                    pathList = list(filter(lambda prog: prog.Name == app, colItems))
-                    path = ""
-                    if pathList:
-                        path = pathList[0].ExecutablePath
-                    print(f"{timestamp()} {USER} programClose {app} {path}")
-                    session.post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": timestamp(),
-                        "user": USER,
-                        "category": "OperatingSystem",
-                        "application": app,
-                        "event_type": "programClose",
-                        "event_src_path": path
-                    })
-
-        sleep(0.5)  # seconds
-
-
-# detects programs opened and closed
 def logProcessesWin():
     print("[systemEvents] WIN Processes logging started")
 
@@ -224,62 +144,100 @@ def logProcessesWin():
 
 # logs recently opened files and folders
 def watchRecentsFilesWin():
-    print("[systemEvents] Recent files logging started")
 
+    ACTIONS = {
+        1: "Created",
+        2: "Deleted",
+        3: "Updated",
+        4: "Renamed to something",
+        5: "Renamed from something"
+    }
+
+    def _watch_path(path_to_watch, include_subdirectories=False):
+        FILE_LIST_DIRECTORY = 0x0001
+        hDir = win32file.CreateFile(
+            path_to_watch,
+            FILE_LIST_DIRECTORY,
+            win32con.FILE_SHARE_READ | win32con.FILE_SHARE_WRITE,
+            None,
+            win32con.OPEN_EXISTING,
+            win32con.FILE_FLAG_BACKUP_SEMANTICS,
+            None
+        )
+        while 1:
+            results = win32file.ReadDirectoryChangesW(
+                hDir,
+                1024,
+                include_subdirectories,
+                win32con.FILE_NOTIFY_CHANGE_FILE_NAME |
+                win32con.FILE_NOTIFY_CHANGE_DIR_NAME |
+                win32con.FILE_NOTIFY_CHANGE_ATTRIBUTES |
+                win32con.FILE_NOTIFY_CHANGE_SIZE |
+                win32con.FILE_NOTIFY_CHANGE_LAST_WRITE |
+                win32con.FILE_NOTIFY_CHANGE_SECURITY,
+                None,
+                None
+            )
+            for action, file in results:
+                full_filename = os.path.join(path_to_watch, file)
+                if not os.path.exists(full_filename):
+                    file_type = "<deleted>"
+                elif os.path.isdir(full_filename):
+                    file_type = 'folder'
+                else:
+                    file_type = 'file'
+                yield (file_type, full_filename, ACTIONS.get(action, "Unknown"))
+
+    class Watcher(Thread):
+
+        def __init__(self, path_to_watch, results_queue, **kwds):
+            Thread.__init__(self, **kwds)
+            self.setDaemon(True)
+            self.path_to_watch = path_to_watch
+            self.results_queue = results_queue
+            self.start()
+
+        def run(self):
+            for result in _watch_path(self.path_to_watch):
+                self.results_queue.put(result)
+
+    files_changed = Queue()
     RECENT_ITEMS_PATH = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
+    Watcher(RECENT_ITEMS_PATH, files_changed)
 
-    change_handle = win32file.FindFirstChangeNotification(  # sets up a handle for watching file changes
-        RECENT_ITEMS_PATH,  # path to watch
-        0,  # boolean indicating whether the directories underneath the one specified are to be watched
-        win32con.FILE_NOTIFY_CHANGE_FILE_NAME
-        # list of flags as to what kind of changes to watch for
-        # https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstchangenotificationa#parameters
-    )
-    # Loop forever, listing any file changes. The WaitFor... will time out every half a second allowing for keyboard
-    # interrupts to terminate the loop.
-    old_path_contents = dict([(f, None) for f in os.listdir(RECENT_ITEMS_PATH)])
+    print("[systemEvents] Recent files/folders logging started")
+
     while 1:
         try:
-            result = win32event.WaitForSingleObject(change_handle, 500)
-            # If the WaitFor... returned because of a notification (as
-            #  opposed to timing out or some error) then look for the
-            #  changes in the directory contents.
-            if result == win32con.WAIT_OBJECT_0:
-                new_path_contents = dict([(f, None) for f in os.listdir(RECENT_ITEMS_PATH)])
-                added = [f for f in new_path_contents if f not in old_path_contents]
-                deleted = [f for f in old_path_contents if f not in new_path_contents]
-                # if there is a new file in the recents folder
-                if added:
-                    file = added[0]
-                    # windows recents folders contains links to recent files, i want to get the original path of the
-                    # file
-                    lnk_target = pylnk3.parse(os.path.join(RECENT_ITEMS_PATH, file)).path
-                    file_extension = os.path.splitext(lnk_target)[1]
-                    if file_extension:
-                        eventType = "openFile"
-                    else:
-                        eventType = "openFolder"
-                    print(f"{timestamp()} {USER} OperatingSystem {eventType} {lnk_target}")
-                    session.post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": timestamp(),
-                        "user": USER,
-                        "category": "OperatingSystem",
-                        "application": "Finder" if MAC else "Explorer",
-                        "event_type": eventType,
-                        "event_src_path": lnk_target
-                    })
-                # if deleted:
-                #     print ("Deleted")
-                old_path_contents = new_path_contents
-                win32file.FindNextChangeNotification(change_handle)
-        except Exception as e:
-            continue
-    win32file.FindCloseChangeNotification(change_handle)
+            file_type, filename, action = files_changed.get_nowait()
+
+            if action == "Created":
+                lnk_target = pylnk3.parse(filename).path
+                file_extension = os.path.splitext(lnk_target)[1]
+                if file_extension:
+                    eventType = "openFile"
+                else:
+                    eventType = "openFolder"
+
+                print(f"{timestamp()} {USER} OperatingSystem {eventType} {lnk_target}")
+                session.post(consumerServer.SERVER_ADDR, json={
+                    "timestamp": timestamp(),
+                    "user": USER,
+                    "category": "OperatingSystem",
+                    "application": "Finder" if MAC else "Explorer",
+                    "event_type": eventType,
+                    "event_src_path": lnk_target
+                })
+
+        except Exception:
+            pass
+
+        sleep(1)
 
 
 # logs currently selected files in windows explorer
-def detectSelectedFilesInExplorer():
-    print("[systemEvents] detectSelectedFiles logging started")
+def detectSelectionWindowsExplorer():
+    print("[systemEvents] detectSelectionWindowsExplorer logging started")
     # used for threads
     pythoncom.CoInitialize()
     # look in the makepy output for IE for the 'CLSIDToClassMap' dictionary, and find the entry for 'ShellWindows'
@@ -304,19 +262,24 @@ def detectSelectedFilesInExplorer():
                         path = selectedItems.Item(j).Path
                         if path != [] and path not in selected.get(i):
                             selected[i].append(path)
-                            print(f"{timestamp()} {USER} OperatingSystem itemSelected {path}")
+                            # file_extension = os.path.splitext(path)[1]
+                            if os.path.isfile(path):
+                                eventType = "selectedFile"
+                            else:
+                                eventType = "selectedFolder"
+                            print(f"{timestamp()} {USER} OperatingSystem {eventType} {path}")
                             session.post(consumerServer.SERVER_ADDR, json={
                                 "timestamp": timestamp(),
                                 "user": USER,
                                 "category": "OperatingSystem",
                                 "application": "Explorer",
-                                "event_type": "itemSelected",
+                                "event_type": eventType,
                                 "event_src_path": path
                             })
         except Exception as e:
             # print(e)
             continue
-        sleep(1.2)
+        sleep(0.8)
 
 
 # logs hotkeys
@@ -517,5 +480,4 @@ def printerLogger():
             "title": pj.Name
         })
 
-if __name__ == '__main__':
-    watchFolder()
+

@@ -63,7 +63,7 @@ def startLogger(systemLoggerFilesFolder,
                 t2.daemon = True
                 t2.start()
 
-                t9 = Thread(target=systemEvents.detectSelectedFilesInExplorer)
+                t9 = Thread(target=systemEvents.detectSelectionWindowsExplorer)
                 t9.daemon = True
                 t9.start()
 
@@ -145,8 +145,8 @@ def startLogger(systemLoggerFilesFolder,
             consumerServer.LOG_OPERA = True
 
         print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
-        print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
-        print("[mainLogger] Selected threads activated")
+        # print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
+        print(f"[mainLogger] Selected threads activated, logging to {consumerServer.filename}")
 
         # keep main active
         while 1:
