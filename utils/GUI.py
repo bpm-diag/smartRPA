@@ -4,19 +4,56 @@
 # ****************************** #
 
 import sys
+from threading import Thread
 
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QDir, QTimer
+from PyQt5.QtCore import Qt, QSize, QDir, QRect, QPoint
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
-                             QAbstractItemView, QFileDialog, QRadioButton, QProgressBar)
+                             QAbstractItemView, QFileDialog, QRadioButton, QProgressBar, QMessageBox)
 import darkdetect
 from multiprocessing import Process
 from utils.utils import *
 import mainLogger
 from time import sleep
+
+
+# Display a message box with progress bar to indicate that a task is running
+class ProgressMessageBox(QMessageBox):
+
+    def __init__(self, *__args):
+        QMessageBox.__init__(self)
+        self.timeout = 0
+        self.autoclose = False
+        self.currentTime = 0
+
+    def showEvent(self, QShowEvent):
+        self.currentTime = 0
+        if self.autoclose:
+            self.startTimer(1000)
+
+    def timerEvent(self, *args, **kwargs):
+        self.currentTime += 1
+        if self.currentTime >= self.timeout:
+            self.done(0)
+
+    @staticmethod
+    def showWithTimeout(timeoutSeconds, message, title, parent):
+        w = ProgressMessageBox()
+        w.autoclose = True
+        w.timeout = timeoutSeconds
+        w.setText(message)
+        w.setWindowTitle(title)
+        w.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        w.move(parent.frameGeometry().center() - QRect(QPoint(), w.sizeHint()).center()) # center message box over parent
+        progress = QProgressBar()
+        progress.setMinimum(0)
+        progress.setMaximum(0)
+        l = w.layout()
+        l.addWidget(progress, l.rowCount(), 0, 1, l.columnCount(), Qt.AlignCenter)
+        w.exec_()
 
 
 class WidgetGallery(QDialog):
@@ -254,20 +291,6 @@ class WidgetGallery(QDialog):
 
         self.statusLayout.addWidget(self.statusListWidget)
 
-    def createProgressBar(self):
-        self.progressBar = QProgressBar()
-        self.progressBar.setRange(0, 10000)
-        self.progressBar.setValue(0)
-
-        timer = QTimer(self)
-        timer.timeout.connect(self.advanceProgressBar)
-        timer.start(1000)
-
-    def advanceProgressBar(self):
-        curVal = self.progressBar.value()
-        maxVal = self.progressBar.maximum()
-        self.progressBar.setValue(curVal + (maxVal - curVal) / 100)
-
     # display native GUI for each OS
     def setStyle(self):
         if WINDOWS:
@@ -332,8 +355,8 @@ class WidgetGallery(QDialog):
                 self.officeExcel = False
 
             # program logger is not supported on mac
-            self.systemLoggerFilesFolderCB.setChecked(False)
-            self.systemLoggerFilesFolderCB.setDisabled(True)
+            # self.systemLoggerFilesFolderCB.setChecked(False)
+            # self.systemLoggerFilesFolderCB.setDisabled(True)
 
             self.systemLoggerHotkeysCB.setChecked(False)
             self.systemLoggerHotkeysCB.setDisabled(True)
@@ -413,9 +436,9 @@ class WidgetGallery(QDialog):
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
         self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
         self.officeExcelCB.setChecked(self.allCBChecked)
+        self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
 
         if WINDOWS:
-            self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
             self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
             self.systemLoggerUSBCB.setChecked(self.allCBChecked)
             self.systemLoggerEventsCB.setChecked(self.allCBChecked)
@@ -516,6 +539,7 @@ class WidgetGallery(QDialog):
         else:
             return ''
 
+
     # Called when start button is clicked by user
     def onButtonClick(self):
 
@@ -562,6 +586,9 @@ class WidgetGallery(QDialog):
             # set gui parameters
             self.running = False
 
+            # this delay allows the server to finish writing logs in queue
+            ProgressMessageBox.showWithTimeout(1, "Stopping logging server...", "Stopping...", self)
+
             self.compatibilityCheckMessage()
             self.statusListWidget.addItem(QListWidgetItem(f"- Logger stopped."))
 
@@ -575,7 +602,7 @@ class WidgetGallery(QDialog):
             if MAC and self.officeExcel:
                 os.system("pkill -f node")
 
-            print("[GUI] Main process terminated, daemon threads closed, wainting for new input...")
+            print("[GUI] Main process terminated, daemon threads closed, waiting for new input...")
 
 
 def buildGUI():

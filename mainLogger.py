@@ -54,7 +54,6 @@ def startLogger(systemLoggerFilesFolder,
         if systemLoggerFilesFolder:
 
             if WINDOWS:
-
                 t1 = Thread(target=systemEvents.watchFolder)
                 t1.daemon = True
                 t1.start()
@@ -71,12 +70,17 @@ def startLogger(systemLoggerFilesFolder,
                 t14.daemon = True
                 t14.start()
 
+            elif MAC:
+                t15 = Thread(target=systemEvents.watchFolderMac)
+                t15.daemon = True
+                t15.start()
+
         if systemLoggerPrograms:
             if WINDOWS:
                 t3 = Thread(target=systemEvents.logProcessesWin)
                 t3.daemon = True
                 t3.start()
-            if MAC:
+            elif MAC:
                 t12 = Thread(target=systemEvents.logProcessesMac)
                 t12.daemon = True
                 t12.start()

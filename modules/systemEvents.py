@@ -5,6 +5,7 @@
 # ****************************** #
 
 from sys import path
+
 path.append('../')  # this way main file is visible from this file
 import keyboard
 import pyperclip
@@ -14,6 +15,7 @@ from threading import Thread
 from queue import Queue
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
+import fsevents
 from utils import consumerServer
 from utils.utils import *
 import psutil
@@ -71,16 +73,10 @@ def watchFolder():
                         "event_src_path": event.src_path
                     })
 
-    if WINDOWS:
-        path = HOME_FOLDER
-        print("[systemEvents] Files/Folder logging started")
-    else:
-        # on osx script does not run recursively on home folder https://github.com/gorakhargosh/watchdog/issues/401
-        path = DESKTOP
-        print("[systemEvents] Files/Folder logging started on Desktop")
+    print("[systemEvents] Files/Folder logging started")
 
     my_observer = Observer()
-    my_observer.schedule(WatchFilesHandler(), path, recursive=True)
+    my_observer.schedule(WatchFilesHandler(), DESKTOP, recursive=True)
     my_observer.start()
 
     try:
@@ -89,6 +85,103 @@ def watchFolder():
     except KeyboardInterrupt:
         my_observer.stop()
         my_observer.join()
+
+
+def watchFolderMac():
+    from _fsevents import (
+        loop,
+        stop,
+        schedule,
+        unschedule,
+        CF_POLLIN,
+        CF_POLLOUT,
+        FS_IGNORESELF,
+        FS_FILEEVENTS,
+        FS_ITEMCREATED,
+        FS_ITEMREMOVED,
+        FS_ITEMINODEMETAMOD,
+        FS_ITEMRENAMED,
+        FS_ITEMMODIFIED,
+        FS_ITEMFINDERINFOMOD,
+        FS_ITEMCHANGEOWNER,
+        FS_ITEMXATTRMOD,
+        FS_ITEMISFILE,
+        FS_ITEMISDIR,
+        FS_ITEMISSYMLINK,
+        FS_EVENTIDSINCENOW,
+        FS_FLAGEVENTIDSWRAPPED,
+        FS_FLAGNONE,
+        FS_FLAGHISTORYDONE,
+        FS_FLAGROOTCHANGED,
+        FS_FLAGKERNELDROPPED,
+        FS_FLAGUNMOUNT,
+        FS_FLAGMOUNT,
+        FS_FLAGUSERDROPPED,
+        FS_FLAGMUSTSCANSUBDIRS,
+        FS_CFLAGFILEEVENTS,
+        FS_CFLAGNONE,
+        FS_CFLAGIGNORESELF,
+        FS_CFLAGUSECFTYPES,
+        FS_CFLAGNODEFER,
+        FS_CFLAGWATCHROOT,
+    )
+
+    stringmap = {
+        FS_FLAGMUSTSCANSUBDIRS: 'MustScanSubDirs',
+        FS_FLAGUSERDROPPED: 'UserDropped',
+        FS_FLAGKERNELDROPPED: 'KernelDropped',
+        FS_FLAGEVENTIDSWRAPPED: 'EventIDsWrapped',
+        FS_FLAGHISTORYDONE: 'HistoryDone',
+        FS_FLAGROOTCHANGED: 'RootChanged',
+        FS_FLAGMOUNT: 'Mount',
+        FS_FLAGUNMOUNT: 'Unmount',
+
+        # Flags when creating the stream.
+        FS_ITEMCREATED: 'ItemCreated',
+        FS_ITEMREMOVED: 'ItemRemoved',
+        FS_ITEMINODEMETAMOD: 'ItemInodeMetaMod',
+        FS_ITEMRENAMED: 'ItemRenamed',
+        FS_ITEMMODIFIED: 'ItemModified',
+        FS_ITEMFINDERINFOMOD: 'ItemFinderInfoMod',
+        FS_ITEMCHANGEOWNER: 'ItemChangedOwner',
+        FS_ITEMXATTRMOD: 'ItemXAttrMod',
+        FS_ITEMISFILE: 'ItemIsFile',
+        FS_ITEMISDIR: 'ItemIsDir',
+        FS_ITEMISSYMLINK: 'ItemIsSymlink'
+    }
+
+    def _maskToString(mask):
+        vals = []
+        for k, s in list(stringmap.items()):
+            if mask & k:
+                vals.append(s)
+        return vals
+
+    # I need to save events already logged for each path otherwise the callback is called in loop after an event
+    logged = dict()
+
+    def callback(file_event):
+        path = file_event.name
+        event_type = _maskToString(file_event.mask)[0]
+        # insert key in dictionary the first time
+        if path not in logged.keys(): logged[path] = []
+        if event_type != "UserDropped" and event_type not in logged.get(path):
+            logged[path].append(event_type)
+            print(f"{timestamp()} {USER} OperatingSystem {event_type} {file_event.name}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "OperatingSystem",
+                "application": "Finder" if MAC else "Explorer",
+                "event_type": event_type,
+                "event_src_path": file_event.name
+            })
+
+    print("[systemEvents] Files/Folder logging on Desktop started")
+    observer = fsevents.Observer()
+    stream = fsevents.Stream(callback, DESKTOP, file_events=True)
+    observer.start()
+    observer.schedule(stream)
 
 
 # detects programs opened and closed
@@ -110,7 +203,7 @@ def logProcessesWin():
 
     new_programs = set()  # needed later to initialize 'closed' set
     new_programs_len = 0  # needed later to check if 'new_programs' set changes
-    open_programs = [] # maintain set of open programs so I don't have duplicates when logging events
+    open_programs = []  # maintain set of open programs so I don't have duplicates when logging events
     programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
                           "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe",
                           "LocalBridge.exe", "SearchProtocolHost.exe", "SearchFilterHost.exe", "splwow64.exe"]
@@ -144,7 +237,6 @@ def logProcessesWin():
 
 # logs recently opened files and folders
 def watchRecentsFilesWin():
-
     ACTIONS = {
         1: "Created",
         2: "Deleted",
@@ -479,5 +571,3 @@ def printerLogger():
             "event_type": "printSubmitted",
             "title": pj.Name
         })
-
-
