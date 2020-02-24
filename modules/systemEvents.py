@@ -76,7 +76,7 @@ def watchFolder():
     print("[systemEvents] Files/Folder logging started")
 
     my_observer = Observer()
-    my_observer.schedule(WatchFilesHandler(), DESKTOP, recursive=True)
+    my_observer.schedule(WatchFilesHandler(), HOME_FOLDER, recursive=True)
     my_observer.start()
 
     try:
@@ -135,7 +135,6 @@ def watchFolderMac():
         FS_FLAGROOTCHANGED: 'RootChanged',
         FS_FLAGMOUNT: 'Mount',
         FS_FLAGUNMOUNT: 'Unmount',
-
         # Flags when creating the stream.
         FS_ITEMCREATED: 'ItemCreated',
         FS_ITEMREMOVED: 'ItemRemoved',
@@ -163,10 +162,14 @@ def watchFolderMac():
     def callback(file_event):
         path = file_event.name
         event_type = _maskToString(file_event.mask)[0]
-        # insert key in dictionary the first time
-        if path not in logged.keys(): logged[path] = []
+        # this callback is called endlessly by the stream but I want to log the event only once. To fix this I create
+        # a dictionary with the file_path as key and the event_type occurred as value. In this way I log an event for
+        # the same path only once. Every time, the event type for a specific path is updated. The dictionary is like
+        # {'/Users/marco/Desktop/test.txt': 'ItemCreated'}
+        # insert key and value in dictionary the first time if doesn't exist
+        if path not in logged.keys(): logged[path] = ""
         if event_type != "UserDropped" and event_type not in logged.get(path):
-            logged[path].append(event_type)
+            logged[path] = event_type
             print(f"{timestamp()} {USER} OperatingSystem {event_type} {file_event.name}")
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": timestamp(),
@@ -177,9 +180,14 @@ def watchFolderMac():
                 "event_src_path": file_event.name
             })
 
-    print("[systemEvents] Files/Folder logging on Desktop started")
+    print("[systemEvents] Files/Folder logging started")
     observer = fsevents.Observer()
-    stream = fsevents.Stream(callback, DESKTOP, file_events=True)
+    # Streams can observe any number of paths so I have to pass each path manually. In windows version I just pass
+    # the HOME directory and it recursively observes all other folders but this does not work on macOS. Moreover the
+    # home directory itself can't be observed.
+    stream = fsevents.Stream(callback,
+                             DESKTOP, DOCUMENTS, DOWNLOADS,
+                             file_events=True)
     observer.start()
     observer.schedule(stream)
 
@@ -294,8 +302,7 @@ def watchRecentsFilesWin():
                 self.results_queue.put(result)
 
     files_changed = Queue()
-    RECENT_ITEMS_PATH = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
-    Watcher(RECENT_ITEMS_PATH, files_changed)
+    Watcher(RECENT_ITEMS_PATH_WIN, files_changed)
 
     print("[systemEvents] Recent files/folders logging started")
 

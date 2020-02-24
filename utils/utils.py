@@ -4,18 +4,15 @@
 # ****************************** #
 
 from getpass import getuser
-from os.path import expanduser
 from datetime import datetime
 import os
 
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
-
 session = FuturesSession()
 
 #  boolean constants to detect current OS
 from platform import system
-
 WINDOWS = (system() == "Windows")
 MAC = (system() == "Darwin")
 LINUX = (system() == "Linux")
@@ -23,15 +20,18 @@ LINUX = (system() == "Linux")
 if WINDOWS:
     import winreg
 
-HOME_FOLDER = expanduser("~")
-DESKTOP = HOME_FOLDER + "/Desktop"
 USER = getuser()
-
+HOME_FOLDER = os.path.expanduser("~")
+RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
+DESKTOP = os.path.join(HOME_FOLDER, "Desktop")
+DOCUMENTS = os.path.join(HOME_FOLDER, "Documents")
+DOWNLOADS = os.path.join(HOME_FOLDER, "Downloads")
 
 # return current timestamp in the format '2020-02-12 17:11:14:465'
 # used by multiple modules
 def timestamp():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
+
 
 # detect if program (both 32bit and 64bit) is installed checking windows registry
 def isInstalledWin(programName):
