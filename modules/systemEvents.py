@@ -33,7 +33,7 @@ if MAC:
     import applescript
 
 
-#  monitor file/folder changes
+#  monitor file/folder changes on windows
 def watchFolder():
     #  https://pythonhosted.org/watchdog/api.html#event-handler-classes
     class WatchFilesHandler(RegexMatchingEventHandler):
@@ -87,6 +87,7 @@ def watchFolder():
         my_observer.join()
 
 
+#  monitor file/folder changes on mac
 def watchFolderMac():
     from _fsevents import (
         loop,

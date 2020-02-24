@@ -65,7 +65,7 @@ def writeLog():
     row = list()
 
     for col in HEADER:
-        # add current user to browser logs (because browser extension can't determine current user for security reasons)
+        # add current user to browser logs (because browser extension can't determine current user)
         if not content.get("user"):
             content["user"] = USER
 
