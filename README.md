@@ -25,13 +25,13 @@
 
 ## Installation and execution:
 
-1. **Install dependencies**
+#### 1. **Install dependencies**
 
 ```
 pip3 install -r requirements.txt
 ```
 
-2. **Install browser extension** 
+#### 2. **Install browser extension** 
 
 The browser extension supports 4 major browsers (<a href="https://gs.statcounter.com/browser-market-share/desktop/" target="_blank">80% market share combined</a>).
 
@@ -40,7 +40,7 @@ The browser extension supports 4 major browsers (<a href="https://gs.statcounter
 - [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
 - [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
-3. **Install Excel Addin (MacOS Only)**
+#### 3. **Install Excel Addin (MacOS Only)**
 The excel addin is required to enable logging only on MacOS. [`NodeJS`](https://nodejs.org/en/download/) must be installed. 
 ```
 cd modules/excelAddinMac 
@@ -50,7 +50,7 @@ npm start
 
 Once installed, choose the `Home` tab in Excel, and then choose the `Show Taskpane` button in the ribbon to open the add-in task pane.
 
-4. **Run main logger**
+#### 4. **Run main logger**
 
 ```
 python3 mainLogger.py
