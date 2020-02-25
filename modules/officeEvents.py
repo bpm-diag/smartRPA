@@ -141,6 +141,21 @@ def excelEvents(filename=None):
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path
             })
+            
+        def OnWorkbookNewSheet(self, Wb, Sh):
+            print(
+                f"{timestamp()} {USER} addWorksheet workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
+                "event_type": "addWorksheet",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "event_src_path": Wb.Path
+            })
 
         def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
             print(
@@ -488,8 +503,9 @@ def excelEvents(filename=None):
             })
 
         def OnSheetSelectionChange(self, Sh, Target):
-            cells_selected = Target.Address.replace('$',
-                                                    '')  # value returned is in the format $B$3:$D$3, I remove $ sign
+            # value returned is in the format $B$3:$D$3, I remove $ sign
+            cells_selected = Target.Address.replace('$','')
+            cell_range_number = f"{Target.Row}, {Target.Column}"
             event_type = "getCell"
             value = Target.Value if Target.Value else ""
             rangeSelected = (':' in cells_selected)  # True if the user selected a range of cells
@@ -502,7 +518,7 @@ def excelEvents(filename=None):
             # If LOG_EVERY_CELL is False and a user selects a single cell the event is not logged
             if rangeSelected or LOG_EVERY_CELL:
                 print(
-                    f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} {value}")
+                    f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} (cell_range_number) {value}")
                 session.post(SERVER_ADDR, json={
                     "timestamp": timestamp(),
                     "user": USER,
@@ -512,6 +528,7 @@ def excelEvents(filename=None):
                     "workbook": Sh.Parent.Name,
                     "current_worksheet": Sh.Name,
                     "cell_range": cells_selected,
+                    "cell_range_number": cell_range_number,
                     "cell_content": value
                 })
 

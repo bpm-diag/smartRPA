@@ -20,14 +20,14 @@
     <a href="#computerlogger" alt="Activity">
         <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a> <br/><br/>
   <img width="80%" src="docs/gui.jpg"/> 
-    
+
 </p>
 
 ## Installation and execution:
 
 #### 1. **Install dependencies**
 
-```
+```bash
 pip3 install -r requirements.txt
 ```
 
@@ -41,8 +41,8 @@ The browser extension supports 4 major browsers (<a href="https://gs.statcounter
 - [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
 #### 3. **Install Excel Addin (MacOS Only)**
-The excel addin is required to enable logging only on MacOS. [`NodeJS`](https://nodejs.org/en/download/) must be installed. 
-```
+The excel addin is required to enable logging <u>only on MacOS</u>. [`NodeJS`](https://nodejs.org/en/download/) must be installed to run this addin. 
+```bash
 cd modules/excelAddinMac 
 npm install 
 npm start
@@ -52,7 +52,7 @@ Once installed, choose the `Home` tab in Excel, and then choose the `Show Taskpa
 
 #### 4. **Run main logger**
 
-```
+```bash
 python3 mainLogger.py
 ```
 

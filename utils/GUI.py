@@ -4,8 +4,6 @@
 # ****************************** #
 
 import sys
-from threading import Thread
-
 sys.path.append('../')  # this way main file is visible from this file
 from PyQt5.QtCore import Qt, QSize, QDir, QRect, QPoint
 from PyQt5.QtGui import QFont, QIcon
@@ -17,6 +15,7 @@ import darkdetect
 from multiprocessing import Process
 from utils.utils import *
 import mainLogger
+from utils.consumerServer import filename
 from time import sleep
 
 
@@ -79,6 +78,7 @@ class WidgetGallery(QDialog):
         self.running = False
         self.mainProcess = None
         self.officeFilename = None
+        self.filename = None
 
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
@@ -589,11 +589,13 @@ class WidgetGallery(QDialog):
             # this delay allows the server to finish writing logs in queue
             ProgressMessageBox.showWithTimeout(1, "Stopping logging server...", "Stopping...", self)
 
-            self.compatibilityCheckMessage()
-            self.statusListWidget.addItem(QListWidgetItem(f"- Logger stopped."))
-
             self.runButton.setText('Start logger')
             self.runButton.update()
+
+            self.filename = filename
+            self.compatibilityCheckMessage()
+            self.statusListWidget.addItem(QListWidgetItem(f"- Logger stopped."))
+            self.statusListWidget.addItem(QListWidgetItem(f"- Log saved as {self.filename}"))
 
             # stop main process, automatically closing all daemon threads in main process
             self.mainProcess.terminate()

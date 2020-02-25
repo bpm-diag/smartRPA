@@ -15,7 +15,6 @@ from threading import Thread
 from queue import Queue
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-import fsevents
 from utils import consumerServer
 from utils.utils import *
 import psutil
@@ -31,7 +30,7 @@ if WINDOWS:
 
 if MAC:
     import applescript
-
+    import fsevents
 
 #  monitor file/folder changes on windows
 def watchFolder():
