@@ -159,7 +159,7 @@ def excelEvents(filename=None):
 
         def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
             print(
-                f"{timestamp()} {USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path} saveAs dialog {SaveAsUI}")
+                f"{timestamp()} {USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} saveAs dialog {SaveAsUI}")
             if SaveAsUI:
                 description = "SaveAs dialog box displayed"
             else:
@@ -169,12 +169,27 @@ def excelEvents(filename=None):
                 "user": USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
+                "event_type": "beforeSaveWorkbook",
+                "workbook": Wb.Name,
+                "current_worksheet": Wb.ActiveSheet.Name,
+                "worksheets": self.getWorksheets(None, Wb),
+                "description": description
+            })
+
+        def OnWorkbookAfterSave(self, Wb, Success):
+            savedPath = path.join(Wb.Path, Wb.Name)
+            print(
+                f"{timestamp()} {USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {savedPath}")
+            session.post(SERVER_ADDR, json={
+                "timestamp": timestamp(),
+                "user": USER,
+                "category": "MicrosoftOffice",
+                "application": "Microsoft Excel",
                 "event_type": "saveWorkbook",
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": Wb.Path,
-                "description": description
+                "event_src_path": savedPath
             })
 
         def OnWorkbookAddinInstall(self, Wb):
@@ -351,8 +366,9 @@ def excelEvents(filename=None):
             # None, None, 'prova', None, None] Now I remove the elements that are None by applying a filter
             # operator to the previous list
             if values:
+                # If entire column/row is selected, I consider only the first 10.000 to save memory
                 # return list(filter(lambda s: s is not None, list(chain.from_iterable(list(values)))))
-                return [s for s in list(chain.from_iterable(list(values))) if s is not None]
+                return [s for s in list(chain.from_iterable(list(values[:8000]))) if s is not None and type(s) is not float]
             else:
                 return ""
 
@@ -441,18 +457,42 @@ def excelEvents(filename=None):
             })
 
         def OnSheetChange(self, Sh, Target):
-            value = self.filterNoneRangeValues(Target.Value) if type(Target.Value) != float else Target.Value
+            # if entire row/column is selected, get only the first 8000 occurrences to save space
+            value = self.filterNoneRangeValues(Target.Value)
+            cell_range_number = f"{Target.Column},{Target.Row}"
+            entireColAddres = Target.EntireColumn.Address
+            entireRowAddres = Target.EntireRow.Address
+            cellAddress = Target.Address
+            event_type = "editCellSheet"
+            cell_range = cellAddress.replace('$', '')
+
+            # can't detect if insertion or removal
+            # # row inserted/deleted
+            # if not cellAddress == entireColAddres:
+            #     event_type = "deleteRow"
+            #     cell_range_number = f"{Target.Row},{Target.Row}"
+            # # column inserted/deleted
+            # elif not cellAddress == entireRowAddres:
+            #     event_type = "deleteColumn"
+            #     cell_range_number = f"{Target.Column},{Target.Column}"
+
+            # filterNoneRangeValues returns a list but if user selected a single cell I get a list of letters like
+            # ['p', 'y', 't', 'h', 'o', 'n'] so if there is no ':' in selection i join the list to get the word back
+            if not ':' in cell_range:
+                value = ''.join(value)
+
             print(
-                f"{timestamp()} {USER} Microsoft Excel editCellSheet {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+                f"{timestamp()} {USER} Microsoft Excel editCellSheet {Sh.Name} {Sh.Parent.Name} {cell_range} ({cell_range_number}) {value}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
-                "event_type": "editCellSheet",
+                "event_type": event_type,
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
-                "cell_range": Target.Address.replace('$', ''),
+                "cell_range": cell_range,
+                "cell_range_number": cell_range_number,
                 "cell_content": value
             })
 
@@ -505,7 +545,7 @@ def excelEvents(filename=None):
         def OnSheetSelectionChange(self, Sh, Target):
             # value returned is in the format $B$3:$D$3, I remove $ sign
             cells_selected = Target.Address.replace('$','')
-            cell_range_number = f"{Target.Row}, {Target.Column}"
+            cell_range_number = f"{Target.Column},{Target.Row}"
             event_type = "getCell"
             value = Target.Value if Target.Value else ""
             rangeSelected = (':' in cells_selected)  # True if the user selected a range of cells
@@ -518,7 +558,7 @@ def excelEvents(filename=None):
             # If LOG_EVERY_CELL is False and a user selects a single cell the event is not logged
             if rangeSelected or LOG_EVERY_CELL:
                 print(
-                    f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} (cell_range_number) {value}")
+                    f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} ({cell_range_number}) {value}")
                 session.post(SERVER_ADDR, json={
                     "timestamp": timestamp(),
                     "user": USER,

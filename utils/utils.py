@@ -2,17 +2,26 @@
 # Utils
 # Global utils used by the modules, provides information about current OS, installed applications and folders
 # ****************************** #
-
+import csv
+import errno
 from getpass import getuser
 from datetime import datetime
 import os
-
+from threading import Thread
+from platform import system
+import utils.config
+import utils.consumerServer
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
+
 session = FuturesSession()
 
-#  boolean constants to detect current OS
-from platform import system
+
+# ************
+# Constants
+# ************
+
+
 WINDOWS = (system() == "Windows")
 MAC = (system() == "Darwin")
 LINUX = (system() == "Linux")
@@ -27,10 +36,72 @@ DESKTOP = os.path.join(HOME_FOLDER, "Desktop")
 DOCUMENTS = os.path.join(HOME_FOLDER, "Documents")
 DOWNLOADS = os.path.join(HOME_FOLDER, "Downloads")
 
+
+# ************
+# Functions
+# ************
+
+
 # return current timestamp in the format '2020-02-12 17:11:14:465'
 # used by multiple modules
 def timestamp():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
+
+
+# Create directory with the given path if it does not exist
+def createDirectory(path):
+    if not os.path.exists(path):
+        try:
+            os.makedirs(path)
+            print(f"[UTILS] Created directory {path}")
+        except OSError as exc:  # Guard against race condition
+            print(f"[UTILS] Could not create directory {path}")
+            if exc.errno != errno.EEXIST:
+                raise
+
+
+# used by main, creates new log file with the current timestamp in /logs directory at the root of the project.
+def createLogFile():
+    # filename to use in current session until the 'stop' button is pressed. must be set here because the filename
+    # uses the current timestamp and it must remain the same during the whole session
+    current_directory = utils.config.MyConfig.get_instance().main_directory
+    logs = os.path.join(current_directory, 'logs')
+    createDirectory(logs)
+    filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
+    utils.config.MyConfig.get_instance().filename = os.path.join(logs, filename)
+    # create HEADER
+    with open(utils.config.MyConfig.get_instance().filename, 'a', newline='') as out_file:
+        f = csv.writer(out_file)
+        f.writerow(utils.consumerServer.HEADER)
+
+
+# ************
+# Class
+# ************
+
+
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self._kwargs = kwargs
+        self._args = args
+        self._target = target
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args,
+                                        **self._kwargs)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
+
+
+# ************
+# Detect installed programs
+# ************
 
 
 # detect if program (both 32bit and 64bit) is installed checking windows registry

@@ -5,9 +5,10 @@
 
 from os import environ
 from flask import Flask, request, jsonify
-from csv import writer
+import csv
 from logging import getLogger
-from utils.utils import USER
+import utils.config
+import utils.utils
 
 # server port
 PORT = 4444
@@ -20,12 +21,6 @@ app.logger.disabled = True
 getLogger('werkzeug').disabled = True
 environ['WERKZEUG_RUN_MAIN'] = 'true'
 
-# will be set by mainLogger when program is run
-filename = ""
-LOG_CHROME = False
-LOG_FIREFOX = False
-LOG_EDGE = False
-LOG_OPERA = False
 
 # Header to use for the csv logging file, written by main when file is first created
 HEADER = [
@@ -52,11 +47,12 @@ def writeLog():
     print(f"\nPOST received with content: {content}\n")
 
     # check if user enabled browser logging
+    config = utils.config.MyConfig.get_instance()
     application = content.get("application")
-    if (application == "Chrome" and not LOG_CHROME) or \
-            (application == "Firefox" and not LOG_FIREFOX) or \
-            (application == "Edge" and not LOG_EDGE) or \
-            (application == "Opera" and not LOG_OPERA):
+    if (application == "Chrome" and not config.log_chrome) or \
+            (application == "Firefox" and not config.log_firefox) or \
+            (application == "Edge" and not config.log_edge) or \
+            (application == "Opera" and not config.log_opera):
         print(f"{application} logging disabled by user.")
         return content
 
@@ -67,15 +63,15 @@ def writeLog():
     for col in HEADER:
         # add current user to browser logs (because browser extension can't determine current user)
         if not content.get("user"):
-            content["user"] = USER
+            content["user"] = utils.utils.USER
 
         # convert events to camelCase (already done by browser extension)
         # content["event_type"] = stringcase.camelcase(content["event_type"])
 
         row.append(content.get(col))
 
-    with open(filename, 'a', newline='') as out_file:
-        f = writer(out_file)
+    with open(utils.config.MyConfig.get_instance().filename, 'a', newline='') as out_file:
+        f = csv.writer(out_file)
         f.writerow(row)
 
     # empty the list for next use
@@ -87,7 +83,11 @@ def writeLog():
 # get server status, for browser extension
 @app.route('/serverstatus', methods=['GET'])
 def getServerStatus():
-    return jsonify(log_chrome=LOG_CHROME, log_firefox=LOG_FIREFOX, log_edge=LOG_EDGE, log_opera=LOG_OPERA)
+    config = utils.config.MyConfig.get_instance()
+    return jsonify(log_chrome=config.log_chrome,
+                   log_firefox=config.log_firefox,
+                   log_edge=config.log_edge,
+                   log_opera=config.log_opera)
 
 
 # Enable CORS, for browser extension

@@ -5,7 +5,6 @@
 # ****************************** #
 
 from sys import path
-
 path.append('../')  # this way main file is visible from this file
 import keyboard
 import pyperclip

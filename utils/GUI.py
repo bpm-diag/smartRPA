@@ -4,56 +4,20 @@
 # ****************************** #
 
 import sys
+from threading import Thread
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QDir, QRect, QPoint
+from PyQt5.QtCore import Qt, QSize, QDir, QRect, QPoint, QTimer
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
-                             QAbstractItemView, QFileDialog, QRadioButton, QProgressBar, QMessageBox)
+                             QAbstractItemView, QFileDialog, QRadioButton, QProgressDialog)
 import darkdetect
 from multiprocessing import Process
 from utils.utils import *
 import mainLogger
-from utils.consumerServer import filename
-from time import sleep
-
-
-# Display a message box with progress bar to indicate that a task is running
-class ProgressMessageBox(QMessageBox):
-
-    def __init__(self, *__args):
-        QMessageBox.__init__(self)
-        self.timeout = 0
-        self.autoclose = False
-        self.currentTime = 0
-
-    def showEvent(self, QShowEvent):
-        self.currentTime = 0
-        if self.autoclose:
-            self.startTimer(1000)
-
-    def timerEvent(self, *args, **kwargs):
-        self.currentTime += 1
-        if self.currentTime >= self.timeout:
-            self.done(0)
-
-    @staticmethod
-    def showWithTimeout(timeoutSeconds, message, title, parent):
-        w = ProgressMessageBox()
-        w.autoclose = True
-        w.timeout = timeoutSeconds
-        w.setText(message)
-        w.setWindowTitle(title)
-        w.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
-        w.move(parent.frameGeometry().center() - QRect(QPoint(), w.sizeHint()).center()) # center message box over parent
-        progress = QProgressBar()
-        progress.setMinimum(0)
-        progress.setMaximum(0)
-        l = w.layout()
-        l.addWidget(progress, l.rowCount(), 0, 1, l.columnCount(), Qt.AlignCenter)
-        w.exec_()
-
+import utils.config
+import utils.generateRPAScript
 
 class WidgetGallery(QDialog):
     def __init__(self, parent=None):
@@ -78,7 +42,6 @@ class WidgetGallery(QDialog):
         self.running = False
         self.mainProcess = None
         self.officeFilename = None
-        self.filename = None
 
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
@@ -291,6 +254,25 @@ class WidgetGallery(QDialog):
 
         self.statusLayout.addWidget(self.statusListWidget)
 
+    def createProgressDialog(self, title, message, timeout):
+        flags = Qt.WindowTitleHint | Qt.Dialog | Qt.WindowMaximizeButtonHint | Qt.CustomizeWindowHint
+        self.progress_dialog = QProgressDialog(message, None, 0, 0, self, flags)
+        self.progress_dialog.setWindowModality(Qt.WindowModal)
+        self.progress_dialog.setWindowTitle(title)
+        if WINDOWS:
+            self.progress_dialog.resize(470, 100)
+        else:
+            self.progress_dialog.resize(260, 100)
+        self.progress_dialog.show()
+        self.timer = QTimer(self)
+        self.timer.start(timeout)
+        self.timer.timeout.connect(self.cancelProgressDialog)
+
+    def cancelProgressDialog(self):
+        self.progress_dialog.done(0)
+        self.timer.stop()
+        self.timer.deleteLater()
+
     # display native GUI for each OS
     def setStyle(self):
         if WINDOWS:
@@ -329,7 +311,7 @@ class WidgetGallery(QDialog):
 
         if WINDOWS:
             # window size
-            self.resize(600, 560)
+            self.resize(640, 600)
             # margins
             self.topLayout.setContentsMargins(0, 0, 0, 20)
             self.bottomLayout.setContentsMargins(0, 20, 0, 20)
@@ -492,6 +474,21 @@ class WidgetGallery(QDialog):
         elif (tag == "browserOpera"):
             self.browserOpera = checked
 
+    def handleRPA(self, filename):
+        # generate RPA actions from log file just saved.
+        t0 = ThreadWithReturnValue(target=utils.generateRPAScript.generateRPAScript, args=[filename])
+        t0.start()
+        # this custom made thread return values when joined
+        excel_path, system_path, browser_path = t0.join()
+        if excel_path:
+            self.statusListWidget.addItem(QListWidgetItem(f"- RPA generated as {os.path.basename(excel_path)}"))
+        if system_path:
+            self.statusListWidget.addItem(QListWidgetItem(f"- RPA generated as {os.path.basename(system_path)}"))
+        if browser_path:
+            self.statusListWidget.addItem(QListWidgetItem(f"- RPA generated as {os.path.basename(browser_path)}"))
+        else:
+            self.statusListWidget.addItem(QListWidgetItem(f"- RPA actions not available"))
+
     # Create a dialog to select a file and return its path
     # Used if the user wants to select an existing file for logging excel
     def getFilenameDialog(self, customDialog=True, title="Open", hiddenItems=False, isFolder=False, forOpen=True,
@@ -540,6 +537,7 @@ class WidgetGallery(QDialog):
             return ''
 
 
+
     # Called when start button is clicked by user
     def onButtonClick(self):
 
@@ -548,7 +546,7 @@ class WidgetGallery(QDialog):
             # set gui parameters
             self.running = True
 
-            # self.statusListWidget.clear()
+            self.statusListWidget.clear()
             self.compatibilityCheckMessage()
 
             self.runButton.setText('Stop logger')
@@ -577,28 +575,33 @@ class WidgetGallery(QDialog):
 
             self.mainProcess.start()
 
-            print("[GUI] Logger started")
+            # self.createProgressDialog("Starting...", "Starting server...", 1000)
 
             self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
+
+            print("[GUI] Logger started")
 
         # stop button clicked
         else:
             # set gui parameters
             self.running = False
 
-            # this delay allows the server to finish writing logs in queue
-            ProgressMessageBox.showWithTimeout(1, "Stopping logging server...", "Stopping...", self)
+            self.createProgressDialog("Stopping...", "Stopping server...", 1000)
 
             self.runButton.setText('Start logger')
             self.runButton.update()
 
-            self.filename = filename
             self.compatibilityCheckMessage()
             self.statusListWidget.addItem(QListWidgetItem(f"- Logger stopped."))
-            self.statusListWidget.addItem(QListWidgetItem(f"- Log saved as {self.filename}"))
 
             # stop main process, automatically closing all daemon threads in main process
             self.mainProcess.terminate()
+
+            filename = utils.config.MyConfig.get_instance().filename
+            self.statusListWidget.addItem(QListWidgetItem(f"- Log saved as {os.path.basename(filename)}"))
+
+            # once log file is created, RPA actions are automatically generated for each category
+            self.handleRPA(filename)
 
             # kill node server when closing python server, otherwise port remains occupied
             if MAC and self.officeExcel:

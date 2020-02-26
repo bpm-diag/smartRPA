@@ -3,18 +3,15 @@
 # Handles all the threads of the application
 # ****************************** #
 
-import multiprocessing
-from sys import exit
-import errno
 import os
-from csv import writer
-from time import sleep
-from datetime import datetime
+import sys
+import time
 from threading import Thread
-from utils import GUI
-from utils import consumerServer
-from utils.consumerServer import HEADER
-from utils.utils import WINDOWS,MAC,LINUX
+from utils.utils import WINDOWS, MAC, LINUX
+import utils.GUI
+import utils.config
+import utils.consumerServer
+import utils.utils
 from modules import systemEvents
 from modules import officeEvents
 from modules import clipboardEvents
@@ -39,11 +36,15 @@ def startLogger(systemLoggerFilesFolder,
     try:
         # create the threads as daemons so they are closed when main ends
 
+        # set main directory in config
+        config = utils.config.MyConfig.get_instance()
+        config.main_directory = os.getcwd()
+
         # ************
         # main logging server
         # ************
-        createLogFile()
-        t0 = Thread(target=consumerServer.runServer)
+        utils.utils.createLogFile()
+        t0 = Thread(target=utils.consumerServer.runServer)
         t0.daemon = True
         t0.start()
 
@@ -137,55 +138,30 @@ def startLogger(systemLoggerFilesFolder,
         # ************
 
         if browserChrome:
-            consumerServer.LOG_CHROME = True
+            config.log_chrome = True
 
         if browserFirefox:
-            consumerServer.LOG_FIREFOX = True
+            config.log_firefox = True
 
         if browserEdge:
-            consumerServer.LOG_EDGE = True
+            config.log_edge = True
 
         if browserOpera:
-            consumerServer.LOG_OPERA = True
+            config.log_opera = True
 
         print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
         # print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
-        print(f"[mainLogger] Selected threads activated, logging to {consumerServer.filename}")
+        print(f"[mainLogger] Selected threads activated, logging to {utils.config.MyConfig.get_instance().filename}")
 
         # keep main active
         while 1:
-            sleep(1)
+            time.sleep(1)  # important: use sleep(1) and not pass
 
     except (KeyboardInterrupt, SystemExit):
         print("Closing threads and exiting...")
-        exit(0)
-
-
-# used by main, creates new log file with the current timestamp in /logs directory at the root of the project.
-def createLogFile():
-    current_directory = os.getcwd()
-    # logs are saved in logs/ direcgory
-    logs_directory = os.path.join(current_directory, 'logs/')
-    # use current timestamp as filename
-    filenameWithTimestamp = logs_directory + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
-    # filename to use in current session until the 'stop' button is pressed. must be set here because the filename
-    # uses the current timestamp and it must remain the same during the whole session
-    consumerServer.filename = filenameWithTimestamp
-    if not os.path.exists(logs_directory):
-        try:
-            os.makedirs(logs_directory)
-            print(f"Created directory {logs_directory}")
-        except OSError as exc:  # Guard against race condition
-            print(f"Could not create directory {logs_directory}")
-            if exc.errno != errno.EEXIST:
-                raise
-
-    # create HEADER
-    with open(consumerServer.filename, 'a', newline='') as out_file:
-        f = writer(out_file)
-        f.writerow(HEADER)
+        sys.exit(0)
 
 
 if __name__ == "__main__":
     #  launch gui
-    GUI.buildGUI()
+    utils.GUI.buildGUI()
