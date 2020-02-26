@@ -28,10 +28,12 @@ LINUX = (system() == "Linux")
 
 if WINDOWS:
     import winreg
+    from win32com.shell import shell, shellcon
+    RECENT_ITEMS_PATH_WIN = shell.SHGetFolderPath(0, shellcon.CSIDL_RECENT, None, 0)
+    # RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
 
 USER = getuser()
 HOME_FOLDER = os.path.expanduser("~")
-RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
 DESKTOP = os.path.join(HOME_FOLDER, "Desktop")
 DOCUMENTS = os.path.join(HOME_FOLDER, "Documents")
 DOWNLOADS = os.path.join(HOME_FOLDER, "Downloads")

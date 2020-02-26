@@ -479,13 +479,9 @@ class WidgetGallery(QDialog):
         t0 = ThreadWithReturnValue(target=utils.generateRPAScript.generateRPAScript, args=[filename])
         t0.start()
         # this custom made thread return values when joined
-        excel_path, system_path, browser_path = t0.join()
-        if excel_path:
-            self.statusListWidget.addItem(QListWidgetItem(f"- RPA generated as {os.path.basename(excel_path)}"))
-        if system_path:
-            self.statusListWidget.addItem(QListWidgetItem(f"- RPA generated as {os.path.basename(system_path)}"))
-        if browser_path:
-            self.statusListWidget.addItem(QListWidgetItem(f"- RPA generated as {os.path.basename(browser_path)}"))
+        created = t0.join()
+        if created:
+            self.statusListWidget.addItem(QListWidgetItem(f"- RPA generated in /RPA"))
         else:
             self.statusListWidget.addItem(QListWidgetItem(f"- RPA actions not available"))
 

@@ -108,15 +108,64 @@ def generateSystemRPA(csv_file_path, df, RPA_filepath):
             e = row['event_type']
             cb = row['clipboard_content']
             path = row['event_src_path']
+            dest_path = row['event_dest_path']
             if e == "copy" or e == "cut":
                 script.write(f"Setting clipboard text\n")
                 script.write(f"set_to_clipboard('{cb}')\n")
             elif e == "openFile":
                 if os.path.exists(path):
-                    script.write(f"Opening file r'{path}'\n")
+                    script.write(f"print(Opening file r'{path}')\n")
                     script.write(f"open_file(r'{path}')\n")
                 else:
-                    script.write(f"Could not find r'{path}'\n")
+                    script.write(f"print(Could not find r'{path}')\n")
+            elif e == "openFolder" and os.path.exists(path):
+                script.write(f"print(Opening folder r'{path}')\n")
+                script.write(f"show_folder(r'{path}')\n")
+                pass
+            elif e == "programOpen":
+                script.write(f"print(Opening r'{path}')\n")
+                script.write(f"run(r'{path}')\n")
+            elif e == "programClose":
+                script.write(f"print(Closing r'{path}')\n")
+                script.write(f"kill_process(r'{path}')\n")
+            elif e == "created":
+                # check if i have a file (with extension)
+                if os.path.splitext(path)[1]:
+                    script.write(f"print(Creating file r'{path}')\n")
+                    script.write(f"open(r'{path}', w)\n")
+                # otherwise assume it's a directory
+                else:
+                    script.write(f"print(Creating directory r'{path}')\n")
+                    script.write(f"create_folder(r'{path}')\n")
+            elif e == "deleted":
+                # check if i have a file (with extension)
+                if os.path.splitext(path)[1]:
+                    script.write(f"print(Removing file r'{path}')\n")
+                    script.write(f"if file_exists(r'{path}'): remove_file(r'{path}')\n")
+                # otherwise assume it's a directory
+                else:
+                    script.write(f"print(Removing directory r'{path}')\n")
+                    script.write(f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
+            elif e == "moved":
+                # check if file has been renamed, so source and dest path are the same
+                if os.path.dirname(path) == os.path.dirname(dest_path):
+                    # file
+                    if os.path.splitext(path)[1]:
+                        script.write(f"print(Renaming file r'{path}' to r'{dest_path}')\n")
+                        script.write(f"if file_exists(r'{path}'): rename_file(r'{path}', new_name='{os.path.basename(dest_path)}')\n")
+                    # directory
+                    else:
+                        script.write(f"print(Renaming directory r'{path}')\n")
+                        script.write(f"if folder_exists(r'{path}'): rename_folder(r'{path}, new_name='{os.path.basename(dest_path)}')\n")
+                # else file has been moved to a different folder
+                else:
+                    if os.path.splitext(path)[1]:
+                        script.write(f"print(Moving file r'{path}')\n")
+                        script.write(f"if file_exists(r'{path}'): move_file(r'{path}', r'{dest_path}')\n")
+                    # otherwise assume it's a directory
+                    else:
+                        script.write(f"print(Moving directory r'{path}')\n")
+                        script.write(f"if folder_exists(r'{path}'): move_folder(r'{path}', r'{dest_path}')\n")
 
 # Generate browser RPA python script TODO
 def generateBrowserRPA(csv_file_path, df, RPA_filepath):
@@ -129,29 +178,43 @@ def generateBrowserRPA(csv_file_path, df, RPA_filepath):
 
 # file called by GUI when main script terminates and csv log file is created.
 def generateRPAScript(csv_file_path):
-
     # check if given csv log file exists
     if not os.path.exists(csv_file_path):
         print(f"[RPA] Can't find specified csv_file_path {csv_file_path}")
-        return None, None, None
+        return False
     else:
         dataframe = pandas.read_csv(csv_file_path)
         excel_df = dataframe[(dataframe['application'] == "Microsoft Excel")]
-        system_df = dataframe[(dataframe['category'] == "OperatingSystem") | (dataframe['category'] == "Clipboard")]
+        system_df = dataframe[(dataframe['category'] == "OperatingSystem") & (dataframe['category'] == "Clipboard")]
         browser_df = dataframe[(dataframe['application'] == "Chrome")]
 
-    # check if opened csv files contains data related to microsoft excel or system
-    if excel_df.empty and system_df.empty:
-        print("[RPA] Can't generate RPA actions")
-        return None, None, None
-    else:
-        excel_RPA_filepath = createRPAFile(csv_file_path, "excel")
-        system_RPA_filepath = createRPAFile(csv_file_path, "system")
-        browser_RPA_filepath = createRPAFile(csv_file_path, "browser")
+        # df = {
+        #         'excel': excel_df,
+        #         'system': system_df,
+        #         'browser': browser_df
+        #         }
+        # for i in df:
+        #     if not df[i].empty:
+        #         df_filepath = createRPAFile(csv_file_path, i)
+        #         if i == 'excel':
+        #             generateExcelRPA(csv_file_path, df[i], df_filepath)
+        #         elif i == 'system':
+        #             generateSystemRPA(csv_file_path, df[i], df_filepath)
+        #         elif i == 'browser':
+        #             generateBrowserRPA(csv_file_path, df[i], df_filepath)
+        #         print(f"[RPA] Generated scripts: {df_filepath}")
 
-        generateExcelRPA(csv_file_path, excel_df, excel_RPA_filepath)
-        generateSystemRPA(csv_file_path, system_df, system_RPA_filepath)
-        generateBrowserRPA(csv_file_path, system_df, browser_RPA_filepath)
+        if not excel_df.empty: # TODO add macOS support
+            excel_RPA_filepath = createRPAFile(csv_file_path, "excel")
+            generateExcelRPA(csv_file_path, excel_df, excel_RPA_filepath)
+            print(f"[RPA] Generated scripts: {excel_RPA_filepath}")
+        if not system_df.empty:
+            system_RPA_filepath = createRPAFile(csv_file_path, "system")
+            generateSystemRPA(csv_file_path, system_df, system_RPA_filepath)
+            print(f"[RPA] Generated scripts: {system_RPA_filepath}")
+        if not browser_df.empty:
+            browser_RPA_filepath = createRPAFile(csv_file_path, "browser")
+            generateBrowserRPA(csv_file_path, system_df, browser_RPA_filepath)
+            print(f"[RPA] Generated scripts: {browser_RPA_filepath}")
 
-        print(f"[RPA] Generated scripts: {excel_RPA_filepath, system_RPA_filepath}")
-        return excel_RPA_filepath, system_RPA_filepath, None
+        return True
