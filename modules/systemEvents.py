@@ -17,6 +17,8 @@ from watchdog.events import RegexMatchingEventHandler
 from utils import consumerServer
 from utils.utils import *
 import psutil
+from psutil import AccessDenied
+
 
 if WINDOWS:
     import pythoncom  # for win32 thread
@@ -155,7 +157,7 @@ def watchFolderMac():
                 vals.append(s)
         return vals
 
-    # I need to save events already logged for each path otherwise the callback is called in loop after an event
+    # I need to save events already logged for each path otherwise the callback is called in loop after every event
     logged = dict()
 
     def callback(file_event):
@@ -169,6 +171,7 @@ def watchFolderMac():
         if path not in logged.keys(): logged[path] = ""
         if event_type != "UserDropped" and event_type not in logged.get(path):
             logged[path] = event_type
+            # file_extension = os.path.splitext(path)[1]
             print(f"{timestamp()} {USER} OperatingSystem {event_type} {file_event.name}")
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": timestamp(),
@@ -196,7 +199,10 @@ def logProcessesWin():
     print("[systemEvents] WIN Processes logging started")
 
     def _logProcessData(app, event):
-        exe = [p.exe() for p in psutil.process_iter() if p.name() == app]
+        try:
+            exe = [p.exe() for p in psutil.process_iter() if p.name() == app]
+        except (PermissionError, AccessDenied):
+            exe = []
         path = exe[0] if exe else ""
         print(f"{timestamp()} {USER} {event} {app} {path}")
         session.post(consumerServer.SERVER_ADDR, json={
@@ -213,7 +219,8 @@ def logProcessesWin():
     open_programs = []  # maintain set of open programs so I don't have duplicates when logging events
     programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
                           "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe",
-                          "LocalBridge.exe", "SearchProtocolHost.exe", "SearchFilterHost.exe", "splwow64.exe"]
+                          "LocalBridge.exe", "SearchProtocolHost.exe", "SearchFilterHost.exe", "splwow64.exe",
+                          "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe"]
 
     running = [p.name() for p in psutil.process_iter() if p.name() not in programs_to_ignore]
 

@@ -542,6 +542,8 @@ class WidgetGallery(QDialog):
             # set gui parameters
             self.running = True
 
+            self.createProgressDialog("Starting...", "Starting server...", 1200)
+
             self.statusListWidget.clear()
             self.compatibilityCheckMessage()
 
@@ -570,8 +572,6 @@ class WidgetGallery(QDialog):
             ))
 
             self.mainProcess.start()
-
-            # self.createProgressDialog("Starting...", "Starting server...", 1000)
 
             self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
 

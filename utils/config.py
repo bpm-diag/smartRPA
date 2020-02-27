@@ -14,6 +14,7 @@ class MyConfig(PreferredConfig):
     main_directory = StringOption('main_directory')
     # path of the current log file being written. It must be saved here because I need this reference when main
     # terminates to generate RPA log and to write messages to GUI
+    # filename is like /Users/marco/Desktop/ComputerLogger/logs/2020-02-25_23-21-57.csv (I should rename the variable)
     filename = StringOption('filename')
     # used by server to check which browser should be logged
     log_chrome = BooleanOption('log_chrome', default=False)
