@@ -151,7 +151,7 @@ def startLogger(systemLoggerFilesFolder,
 
         print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
         # print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
-        print(f"[mainLogger] Selected threads activated, logging to {utils.config.MyConfig.get_instance().filename}")
+        print(f"[mainLogger] Selected threads activated, logging to {utils.config.MyConfig.get_instance().log_filepath}")
 
         # keep main active
         while 1:

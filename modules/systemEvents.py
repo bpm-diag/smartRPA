@@ -17,8 +17,8 @@ from watchdog.events import RegexMatchingEventHandler
 from utils import consumerServer
 from utils.utils import *
 import psutil
-from psutil import AccessDenied
-
+import pynput
+mouse = pynput.mouse.Controller()
 
 if WINDOWS:
     import pythoncom  # for win32 thread
@@ -32,6 +32,9 @@ if WINDOWS:
 if MAC:
     import applescript
     import fsevents
+
+
+
 
 #  monitor file/folder changes on windows
 def watchFolder():
@@ -56,7 +59,8 @@ def watchFolder():
                         "application": "Finder" if MAC else "Explorer",
                         "event_type": event.event_type,
                         "event_src_path": event.src_path,
-                        "event_dest_path": event.dest_path
+                        "event_dest_path": event.dest_path,
+                        "mouse_coord": mouse.position
                     })
                     # return
                 elif event.event_type == "modified":  # avoid spam
@@ -70,7 +74,8 @@ def watchFolder():
                         "category": "OperatingSystem",
                         "application": "Finder" if MAC else "Explorer",
                         "event_type": event.event_type,
-                        "event_src_path": event.src_path
+                        "event_src_path": event.src_path,
+                        "mouse_coord": mouse.position
                     })
 
     print("[systemEvents] Files/Folder logging started")
@@ -89,6 +94,7 @@ def watchFolder():
 
 #  monitor file/folder changes on mac
 def watchFolderMac():
+
     from _fsevents import (
         loop,
         stop,
@@ -159,7 +165,6 @@ def watchFolderMac():
 
     # I need to save events already logged for each path otherwise the callback is called in loop after every event
     logged = dict()
-
     def callback(file_event):
         path = file_event.name
         event_type = _maskToString(file_event.mask)[0]
@@ -179,7 +184,8 @@ def watchFolderMac():
                 "category": "OperatingSystem",
                 "application": "Finder" if MAC else "Explorer",
                 "event_type": event_type,
-                "event_src_path": file_event.name
+                "event_src_path": file_event.name,
+                "mouse_coord": mouse.position
             })
 
     print("[systemEvents] Files/Folder logging started")
@@ -201,7 +207,7 @@ def logProcessesWin():
     def _logProcessData(app, event):
         try:
             exe = [p.exe() for p in psutil.process_iter() if p.name() == app]
-        except (PermissionError, AccessDenied):
+        except (PermissionError, psutil.AccessDenied):
             exe = []
         path = exe[0] if exe else ""
         print(f"{timestamp()} {USER} {event} {app} {path}")
@@ -211,7 +217,8 @@ def logProcessesWin():
             "category": "OperatingSystem",
             "application": app,
             "event_type": event,
-            "event_src_path": path
+            "event_src_path": path,
+            "mouse_coord": mouse.position
         })
 
     new_programs = set()  # needed later to initialize 'closed' set
@@ -331,7 +338,8 @@ def watchRecentsFilesWin():
                     "category": "OperatingSystem",
                     "application": "Finder" if MAC else "Explorer",
                     "event_type": eventType,
-                    "event_src_path": lnk_target
+                    "event_src_path": lnk_target,
+                    "mouse_coord": mouse.position
                 })
 
         except Exception:
@@ -379,7 +387,8 @@ def detectSelectionWindowsExplorer():
                                 "category": "OperatingSystem",
                                 "application": "Explorer",
                                 "event_type": eventType,
-                                "event_src_path": path
+                                "event_src_path": path,
+                                "mouse_coord": mouse.position
                             })
         except Exception as e:
             # print(e)
@@ -453,7 +462,8 @@ def logHotkeys():
             "event_type": event_type,
             "title": hotkey.upper(),
             "description": meaning,
-            "clipboard_content": clipboard_content
+            "clipboard_content": clipboard_content,
+            "mouse_coord": mouse.position
         })
 
     for key in keys_to_detect.keys():
@@ -541,7 +551,8 @@ def logProcessesMac():
                         "category": "OperatingSystem",
                         "application": app.strip(),
                         "event_type": "programOpen",
-                        "event_src_path": f"/Applications/{app.strip()}.app"
+                        "event_src_path": f"/Applications/{app.strip()}.app",
+                        "mouse_coord": mouse.position
                     })
             new_programs_len = len(new_programs)
 
@@ -556,7 +567,8 @@ def logProcessesMac():
                         "category": "OperatingSystem",
                         "application": app.strip(),
                         "event_type": "programClose",
-                        "event_src_path": f"/Applications/{app.strip()}"
+                        "event_src_path": f"/Applications/{app.strip()}",
+                        "mouse_coord": mouse.position
                     })
 
         sleep(2)

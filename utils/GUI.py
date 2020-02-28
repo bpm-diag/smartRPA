@@ -5,6 +5,7 @@
 
 import sys
 from threading import Thread
+
 sys.path.append('../')  # this way main file is visible from this file
 from PyQt5.QtCore import Qt, QSize, QDir, QRect, QPoint, QTimer
 from PyQt5.QtGui import QFont, QIcon
@@ -18,6 +19,7 @@ from utils.utils import *
 import mainLogger
 import utils.config
 import utils.generateRPAScript
+
 
 class WidgetGallery(QDialog):
     def __init__(self, parent=None):
@@ -474,19 +476,17 @@ class WidgetGallery(QDialog):
         elif (tag == "browserOpera"):
             self.browserOpera = checked
 
-    def handleRPA(self, filename):
+    def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
-        t0 = ThreadWithReturnValue(target=utils.generateRPAScript.generateRPAScript, args=[filename])
+        t0 = ThreadWithReturnValue(target=utils.generateRPAScript.generateRPAScript, args=[log_filepath])
         t0.start()
-        # this custom made thread return values when joined
-        created = t0.join()
-        if created:
-            self.statusListWidget.addItem(QListWidgetItem(f"- RPA generated in /RPA"))
-        else:
-            self.statusListWidget.addItem(QListWidgetItem(f"- RPA actions not available"))
+        # this custom made thread class return values when joined
+        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}" if t0.join() else "- RPA actions not available"
+        self.statusListWidget.addItem(QListWidgetItem(msg))
 
     # Create a dialog to select a file and return its path
     # Used if the user wants to select an existing file for logging excel
+    # (not implemented in gui)
     def getFilenameDialog(self, customDialog=True, title="Open", hiddenItems=False, isFolder=False, forOpen=True,
                           directory='',
                           filter_format=''):
@@ -532,8 +532,6 @@ class WidgetGallery(QDialog):
         else:
             return ''
 
-
-
     # Called when start button is clicked by user
     def onButtonClick(self):
 
@@ -542,7 +540,7 @@ class WidgetGallery(QDialog):
             # set gui parameters
             self.running = True
 
-            self.createProgressDialog("Starting...", "Starting server...", 1200)
+            self.createProgressDialog("Starting...", "Starting server...", 1500)
 
             self.statusListWidget.clear()
             self.compatibilityCheckMessage()
@@ -593,11 +591,11 @@ class WidgetGallery(QDialog):
             # stop main process, automatically closing all daemon threads in main process
             self.mainProcess.terminate()
 
-            filename = utils.config.MyConfig.get_instance().filename
-            self.statusListWidget.addItem(QListWidgetItem(f"- Log saved as {os.path.basename(filename)}"))
+            log_filepath = utils.config.MyConfig.get_instance().log_filepath
+            self.statusListWidget.addItem(QListWidgetItem(f"- Log saved as {os.path.basename(log_filepath)}"))
 
             # once log file is created, RPA actions are automatically generated for each category
-            self.handleRPA(filename)
+            self.handleRPA(log_filepath)
 
             # kill node server when closing python server, otherwise port remains occupied
             if MAC and self.officeExcel:

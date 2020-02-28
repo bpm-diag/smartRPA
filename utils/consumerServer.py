@@ -25,7 +25,7 @@ environ['WERKZEUG_RUN_MAIN'] = 'true'
 # Header to use for the csv logging file, written by main when file is first created
 HEADER = [
     "timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path",
-    "clipboard_content",
+    "clipboard_content", "mouse_coord",
     "workbook", "current_worksheet", "worksheets", "sheets", "cell_content", "cell_range", "cell_range_number", "window_size",
     "slides", "effect",
     "id", "title", "description", "browser_url", "eventQual", "tab_moved_from_index", "tab_moved_to_index",
@@ -70,7 +70,7 @@ def writeLog():
 
         row.append(content.get(col))
 
-    with open(utils.config.MyConfig.get_instance().filename, 'a', newline='') as out_file:
+    with open(utils.config.MyConfig.get_instance().log_filepath, 'a', newline='') as out_file:
         f = csv.writer(out_file)
         f.writerow(row)
 

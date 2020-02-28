@@ -11,6 +11,7 @@ from shutil import rmtree
 from itertools import chain
 from utils.utils import timestamp, session, WINDOWS, USER
 from utils.consumerServer import SERVER_ADDR
+from pynput import mouse
 
 if WINDOWS:
     from win32com.client import DispatchWithEvents
@@ -22,7 +23,7 @@ MAC_EXCEL_ADDIN_PATH = "modules/excelAddinMac/"
 
 
 # Takes filename as input if user wants to open existing file
-def excelEvents(filename=None):
+def excelEvents(filepath=None):
     # This variable controls OnSheetSelectionChange, if True an actions is logged every time a cell is selected. It's
     # resource expensive, so it's possible to turn it off by setting variable to False
     LOG_EVERY_CELL = True
@@ -35,6 +36,7 @@ def excelEvents(filename=None):
         def __init__(self):
             self.seen_events = {}
             self.Visible = 1
+            self.mouse = mouse.Controller()
 
         def setApplication(self, application):
             self.application = application
@@ -154,7 +156,8 @@ def excelEvents(filename=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": Wb.Path
+                "event_src_path": Wb.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
@@ -173,7 +176,8 @@ def excelEvents(filename=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "description": description
+                "description": description,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWorkbookAfterSave(self, Wb, Success):
@@ -189,7 +193,8 @@ def excelEvents(filename=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": savedPath
+                "event_src_path": savedPath,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWorkbookAddinInstall(self, Wb):
@@ -264,7 +269,8 @@ def excelEvents(filename=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": Wb.Path
+                "event_src_path": Wb.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWorkbookBeforeClose(self, Wb, Cancel):
@@ -279,7 +285,8 @@ def excelEvents(filename=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": Wb.Path
+                "event_src_path": Wb.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWorkbookActivate(self, Wb):
@@ -294,7 +301,8 @@ def excelEvents(filename=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": Wb.Path
+                "event_src_path": Wb.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWorkbookDeactivate(self, Wb):
@@ -309,7 +317,8 @@ def excelEvents(filename=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": Wb.Path
+                "event_src_path": Wb.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWorkbookModelChange(self, Wb, Changes):
@@ -385,7 +394,8 @@ def excelEvents(filename=None):
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
                 "worksheets": self.getWorksheets(Sh, None),
-                "event_src_path": Sh.Parent.Path
+                "event_src_path": Sh.Parent.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnSheetBeforeDelete(self, Sh):
@@ -399,8 +409,9 @@ def excelEvents(filename=None):
                 "event_type": "deleteWorksheet",
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
-                "worksheets": self.getWorksheets(Sh, None)
-            })
+                "worksheets": self.getWorksheets(Sh, None),
+                "mouse_coord": self.mouse.position
+            }),
 
         def OnSheetBeforeDoubleClick(self, Sh, Target, Cancel):
             event_type = "doubleClickEmptyCell"
@@ -420,7 +431,8 @@ def excelEvents(filename=None):
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Address.replace('$', ''),
-                "cell_content": value
+                "cell_content": value,
+                "mouse_coord": self.mouse.position
             })
 
         def OnSheetBeforeRightClick(self, Sh, Target, Cancel):
@@ -440,7 +452,8 @@ def excelEvents(filename=None):
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Address.replace('$', ''),
-                "cell_content": value
+                "cell_content": value,
+                "mouse_coord": self.mouse.position
             })
 
         def OnSheetCalculate(self, Sh):
@@ -454,6 +467,7 @@ def excelEvents(filename=None):
                 "event_type": "sheetCalculate",
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
+                "mouse_coord": self.mouse.position
             })
 
         def OnSheetChange(self, Sh, Target):
@@ -493,7 +507,8 @@ def excelEvents(filename=None):
                 "current_worksheet": Sh.Name,
                 "cell_range": cell_range,
                 "cell_range_number": cell_range_number,
-                "cell_content": value
+                "cell_content": value,
+                "mouse_coord": self.mouse.position
             })
 
         def OnSheetDeactivate(self, Sh):
@@ -509,7 +524,8 @@ def excelEvents(filename=None):
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
                 "worksheets": self.getWorksheets(Sh, None),
-                "event_src_path": Sh.Parent.Path
+                "event_src_path": Sh.Parent.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnSheetFollowHyperlink(self, Sh, Target):
@@ -524,7 +540,8 @@ def excelEvents(filename=None):
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Range.Address.replace('$', ''),
-                "browser_url": Target.Address
+                "browser_url": Target.Address,
+                "mouse_coord": self.mouse.position
             })
 
         def OnSheetPivotTableAfterValueChange(self, Sh, TargetPivotTable, TargetRange):
@@ -569,7 +586,8 @@ def excelEvents(filename=None):
                     "current_worksheet": Sh.Name,
                     "cell_range": cells_selected,
                     "cell_range_number": cell_range_number,
-                    "cell_content": value
+                    "cell_content": value,
+                    "mouse_coord": self.mouse.position
                 })
 
         def OnSheetTableUpdate(self, Sh, Target):
@@ -591,9 +609,9 @@ def excelEvents(filename=None):
         # start new instance of Excel
         e = DispatchWithEvents("Excel.Application", ExcelEvents)
 
-        if filename:
+        if filepath:
             # open existing workbook
-            e.Workbooks.Open(filename)
+            e.Workbooks.Open(filepath)
         else:
             # create new empty workbook that contains worksheet
             e.Workbooks.Add()

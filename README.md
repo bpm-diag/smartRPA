@@ -1,6 +1,6 @@
 <p align="center">
 <img width="100%" src="docs/readme-header.png"><br/><br/>
-    <a href="https://www.python.org/" alt="Activity">
+    <a href="https://www.python.org/downloads/release/python-381/" alt="Activity">
         <img src="https://img.shields.io/badge/Python-3.8-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
     <a href="#computerlogger" alt="Activity">
         <img src="https://img.shields.io/badge/Javascript-6-blue?style=flat&labelColor=F7DF1E&color=F7DF1E&logo=javascript&logoColor=white" /></a>
@@ -20,6 +20,7 @@
     <a href="#computerlogger" alt="Activity">
         <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a> <br/><br/>
   <img width="80%" src="docs/gui.jpg"/> 
+
 
 </p>
 
@@ -69,7 +70,7 @@ https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
 
 *Robotic Process Automation* scripts are automatically generated for each log in `/RPA` directory
 
-The following additional dependency is required for RPA and must be installed with
+The following additional dependency is required for RPA:
 
 ```bash
 pip3 install -U automagica
@@ -96,7 +97,7 @@ The project is composed by the following modules:
 -   [x] Office logger
 -   [x] Clipboard logger
 
-A complete list of features for each module is available in [`features.pdf`](
+A complete list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
 
 ## Project structure
 

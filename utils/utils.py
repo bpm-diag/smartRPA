@@ -70,12 +70,16 @@ def createLogFile():
     logs = os.path.join(current_directory, 'logs')
     createDirectory(logs)
     filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
-    utils.config.MyConfig.get_instance().filename = os.path.join(logs, filename)
+    utils.config.MyConfig.get_instance().log_filepath = os.path.join(logs, filename)
     # create HEADER
-    with open(utils.config.MyConfig.get_instance().filename, 'a', newline='') as out_file:
+    with open(utils.config.MyConfig.get_instance().log_filepath, 'a', newline='') as out_file:
         f = csv.writer(out_file)
         f.writerow(utils.consumerServer.HEADER)
 
+
+# returns filename of a given path without extension, like 2020-02-25_23-21-57
+def getFilename(path):
+    return os.path.splitext(os.path.basename(path))[0]
 
 # ************
 # Class
