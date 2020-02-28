@@ -32,7 +32,7 @@
 pip3 install -r requirements.txt
 ```
 
-For RPA you must also install `automagica` [(details here)](https://github.com/marco2012/ComputerLogger#RPA)
+For RPA you must also manually install `automagica` [(details here)](https://github.com/marco2012/ComputerLogger#RPA)
 ```bash
 pip3 install -U automagica
 ```
@@ -66,7 +66,7 @@ The resulting log csv file will be in `/logs` directory.
 
 https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
 
-## RPA
+## RPA
 
 *Robotic Process Automation* scripts are automatically generated for each log in `/RPA` directory
 
