@@ -2,32 +2,20 @@
 # Generate RPA script
 # Automatically generate RPA script from csv log file. Called by
 # GUI when main process is terminated and csv is available.
+# https://automagica.readthedocs.io/activities.html
 # ******************************
 
 import sys
-from threading import Thread
-
 sys.path.append('../')  # this way main file is visible from this file
 import pandas
 import os
-from multiprocessing import Process
-import utils.utils
 import utils.config
+import utils
 from pynput import mouse
-
-# try:
-#     from graphviz import Digraph
-# except ImportError as e:
-#     if utils.WINDOWS:
-#         print("Please install graphviz from 'https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi'")
-#         sys.exit()
-#     elif utils.MAC:
-#         print("Please install graphviz with 'brew install graphviz'")
-#         sys.exit()
 
 
 # Adds import statements to generated python file
-def createHeader(csv_file_path):
+def createHeader(csv_file_path, browser=False):
     return f"""# This file was auto generated based on {csv_file_path}
 import sys, os
 try:
@@ -45,7 +33,7 @@ def createRPAFile(csv_file_path, RPA_type):
     # csv_filename is like 2020-02-25_23-21-57
     csv_filename = utils.utils.getFilename(csv_file_path)
     # RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA
-    RPA_directory = os.path.join(utils.config.MyConfig.get_instance().main_directory, 'RPA', csv_filename)
+    RPA_directory = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_filename)
     utils.utils.createDirectory(RPA_directory)
     # RPA_filename is like 2020-02-25_23-21-57_RPA.py
     RPA_filename = csv_filename + RPA_type
@@ -56,7 +44,6 @@ def createRPAFile(csv_file_path, RPA_type):
 
 # Generate excel RPA python script
 def generateExcelRPA(csv_file_path, dataframe):
-    # df = dataframe[(dataframe['application'] == "Microsoft Excel") | (dataframe['category'] == "Clipboard")]
     df = dataframe.query(' application=="Microsoft Excel" | category=="Clipboard" ')
     if df.empty: return False
     RPA_filepath = createRPAFile(csv_file_path, "_ExcelRPA.py")
@@ -77,7 +64,10 @@ def generateExcelRPA(csv_file_path, dataframe):
             value = row['cell_content']
             cell_range = row['cell_range']
             range_number = row['cell_range_number']
-            path = row['event_src_path']
+            # assign path if not null
+            path = ""
+            if not pandas.isna(row['event_src_path']):
+                path = row['event_src_path']
             mouse_coord = row['mouse_coord']
             cb = row['clipboard_content']
 
@@ -148,44 +138,26 @@ def generateExcelRPA(csv_file_path, dataframe):
 
 # Generate system RPA python script
 def generateSystemRPA(csv_file_path, dataframe):
-    # df = dataframe[(dataframe['category'] == "OperatingSystem") | (dataframe['category'] == "Clipboard")]
     df = dataframe.query(' category=="OperatingSystem" | category=="Clipboard" ')
     if df.empty: return False
     print(f"[RPA] Generating System RPA")
     RPA_filepath = createRPAFile(csv_file_path, "_SystemRPA.py")
-
-    # import itertools
-    # csv_filename = utils.getFilename(csv_file_path)
-    # dot = Digraph(filename=csv_filename)
-    # dot.attr('node', shape='doublecircle')
-    # dot.node('start')
-    # dot.node('end')
-    # dot.attr('node', shape='circle')
-    # events = list()
-    # for index, row in df.iterrows():
-    #     e = row['event_type']
-    #     events.append(e)
-    #     dot.node(e)
-    # def pairwise(iterable):
-    #     a, b = itertools.tee(iterable)
-    #     next(b, None)
-    #     return zip(a, b)
-    # dot.edge('start', events[0])
-    # for c, n in pairwise(events):
-    #     dot.edge(c, n)
-    # dot.edge(events[-1], 'end')
-    # dot.render(os.path.join(os.path.dirname(RPA_filepath), csv_filename), view=True)
-
     with open(RPA_filepath, 'w') as script:
         script.write(createHeader(csv_file_path))
         for index, row in df.iterrows():
             e = row['event_type']
             cb = row['clipboard_content']
             app = row['application']
-            path = row['event_src_path']
-            dest_path = row['event_dest_path']
-            item_name = path.replace('\\', r'\\') if type(path) == str else path
-            item_name_dest = path.replace('\\', r'\\') if type(path) == str else path
+            # assign path if not null
+            path = ""
+            dest_path = ""
+            if not pandas.isna(row['event_src_path']):
+                path = row['event_src_path']
+            if not pandas.isna(row['event_dest_path']):
+                dest_path = row['event_dest_path']
+            item_name = path.replace('\\', r'\\')
+            item_name_dest = path.replace('\\', r'\\')
+
             if e not in ["selectedFile", "selectedFolder"]: script.write(f"# {row['timestamp']} {e}\n")
             if (e == "copy" or e == "cut") and not pandas.isna(cb):
                 script.write(f"print('Setting clipboard text')\n")
@@ -206,7 +178,7 @@ def generateSystemRPA(csv_file_path, dataframe):
             elif e == "programClose" and os.path.exists(path):
                 script.write(f"print('Closing {app}')\n")
                 script.write(f"if file_exists(r'{path}'): kill_process(r'{path}')\n")
-            elif e == "created" and not pandas.isna(path):
+            elif e == "created" and path:
                 # check if i have a file (with extension)
                 if os.path.splitext(path)[1]:
                     script.write(f"print('Creating file {item_name}')\n")
@@ -224,7 +196,7 @@ def generateSystemRPA(csv_file_path, dataframe):
                 else:
                     script.write(f"print('Removing directory {item_name}')\n")
                     script.write(f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
-            elif e == "moved" and not pandas.isna(path):
+            elif e == "moved" and path:
                 # check if file has been renamed, so source and dest path are the same
                 if os.path.dirname(path) == os.path.dirname(dest_path):
                     # file
@@ -259,12 +231,28 @@ def generateSystemRPA(csv_file_path, dataframe):
 
 # Generate browser RPA python script
 def generateBrowserRPA(csv_file_path, dataframe):
-    # df = dataframe[(dataframe['application'] == "Chrome") | (dataframe['category'] == "Clipboard")]
-    df = dataframe.query(' application=="Chrome" | category=="Clipboard" ')
+    df = dataframe.query(' category=="Browser" | category=="Clipboard" ')
     if df.empty: return False
     print(f"[RPA] Generating Browser RPA")
-    RPA_filepath = createRPAFile(csv_file_path, "_SystemRPA.py")
-    return False # TODO
+    RPA_filepath = createRPAFile(csv_file_path, "_BrowserRPA.py")
+    with open(RPA_filepath, 'w') as script:
+        script.write(createHeader(csv_file_path))
+        for index, row in df.iterrows():
+            e = row['event_type']
+            cb = row['clipboard_content']
+            app = row['application']
+            # assign path if not null
+            path = ""
+            if not pandas.isna(row['event_src_path']):
+                path = row['event_src_path']
+            dest_path = row['event_dest_path']
+            if (e == "copy" or e == "cut") and not pandas.isna(cb):
+                script.write(f"print('Setting clipboard text')\n")
+                script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            elif e == "newWorkbook":
+                script.write(f"print('Opening Browser...')\n")
+                script.write("driver = webdriver.Firefox()\n")
+    return True
 
 
 # file called by GUI when main script terminates and csv log file is created.
@@ -277,5 +265,5 @@ def generateRPAScript(csv_file_path):
         dataframe = pandas.read_csv(csv_file_path)
         generateExcelRPA(csv_file_path, dataframe)
         generateSystemRPA(csv_file_path, dataframe)
-        generateBrowserRPA(csv_file_path, dataframe)
+        # generateBrowserRPA(csv_file_path, dataframe)
         return True

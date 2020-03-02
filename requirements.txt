@@ -10,6 +10,7 @@ watchdog==0.10.2
 pandas==1.0.0
 nativeconfig==3.4.0
 pynput==1.6.7
+# selenium==3.7.0
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"
 pylnk3==0.3.0; platform_system == "Windows"

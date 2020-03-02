@@ -34,8 +34,6 @@ if MAC:
     import fsevents
 
 
-
-
 #  monitor file/folder changes on windows
 def watchFolder():
     #  https://pythonhosted.org/watchdog/api.html#event-handler-classes

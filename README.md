@@ -32,7 +32,7 @@
 pip3 install -r requirements.txt
 ```
 
-For RPA you must also manually install `automagica` [(details here)](https://github.com/marco2012/ComputerLogger#RPA)
+For RPA you must also install `automagica` [(details here)](https://github.com/marco2012/ComputerLogger#RPA)
 ```bash
 pip3 install -U automagica
 ```
@@ -85,6 +85,8 @@ set LIB=C:\Program Files (x86)\OpenSSL-Win32\lib;%LIB%
 set INCLUDE=C:\Program Files (x86)\OpenSSL-Win32\include;%INCLUDE%
 pip3 install -U automagica
 ```
+
+
 
 ## Modules
 

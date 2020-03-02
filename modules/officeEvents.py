@@ -6,11 +6,12 @@
 import sys
 sys.path.append('../')  # this way main file is visible from this file
 from re import findall
-from os import path, system
+import os
 from shutil import rmtree
 from itertools import chain
-from utils.utils import timestamp, session, WINDOWS, USER
+from utils.utils import timestamp, session, WINDOWS, USER, MAIN_DIRECTORY
 from utils.consumerServer import SERVER_ADDR
+import utils.config
 from pynput import mouse
 
 if WINDOWS:
@@ -18,8 +19,6 @@ if WINDOWS:
     import pythoncom
     from win32com import __gen_path__
     import ctypes
-
-MAC_EXCEL_ADDIN_PATH = "modules/excelAddinMac/"
 
 
 # Takes filename as input if user wants to open existing file
@@ -181,7 +180,7 @@ def excelEvents(filepath=None):
             })
 
         def OnWorkbookAfterSave(self, Wb, Success):
-            savedPath = path.join(Wb.Path, Wb.Name)
+            savedPath = os.path.join(Wb.Path, Wb.Name)
             print(
                 f"{timestamp()} {USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {savedPath}")
             session.post(SERVER_ADDR, json={
@@ -634,17 +633,18 @@ def excelEvents(filepath=None):
             if not dirToRemove:
                 # if regex failed use default folder
                 dirToRemove = '00020813-0000-0000-C000-000000000046x0x1x9'
-            pathToRemove = path.join(__gen_path__, dirToRemove)
+            pathToRemove = os.path.join(__gen_path__, dirToRemove)
             print(f"Trying to fix the error, deleting {pathToRemove}")
             rmtree(pathToRemove, ignore_errors=True)
-            if not path.exists(pathToRemove):
+            if not os.path.exists(pathToRemove):
                 print("The error should now be fixed, try to execute the program again.")
 
 
+# run node server hiding node server output
 def excelEventsMacServer():
     print("[officeEvents] Excel on Mac logging started")
-    # run node server and hide node server output
-    system(f"cd {MAC_EXCEL_ADDIN_PATH} && npm run dev-server >/dev/null 2>&1")
+    macExcelAddinPath = os.path.join(MAIN_DIRECTORY, 'modules', 'excelAddinMac')
+    os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1")
 
 
 def wordEvents(filename=None):

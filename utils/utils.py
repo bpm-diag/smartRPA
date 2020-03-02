@@ -13,6 +13,7 @@ import utils.config
 import utils.consumerServer
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
+import plistlib
 
 session = FuturesSession()
 
@@ -37,6 +38,7 @@ HOME_FOLDER = os.path.expanduser("~")
 DESKTOP = os.path.join(HOME_FOLDER, "Desktop")
 DOCUMENTS = os.path.join(HOME_FOLDER, "Documents")
 DOWNLOADS = os.path.join(HOME_FOLDER, "Downloads")
+MAIN_DIRECTORY = utils.config.MyConfig.get_instance().main_directory  # main file path
 
 
 # ************
@@ -80,6 +82,18 @@ def createLogFile():
 # returns filename of a given path without extension, like 2020-02-25_23-21-57
 def getFilename(path):
     return os.path.splitext(os.path.basename(path))[0]
+
+
+# return current chrome version, used to detect selenium driver
+def getChromeVersionMac():
+    if os.path.exists("/Applications/Google Chrome.app"):
+        plistloc = "/Applications/Google Chrome.app/Contents/Info.plist"
+        pl = plistlib.readPlist(plistloc)
+        pver = pl["CFBundleShortVersionString"]
+        return pver
+    else:
+        return None
+
 
 # ************
 # Class
