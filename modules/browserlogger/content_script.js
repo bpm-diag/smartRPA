@@ -73,12 +73,16 @@ window.onhashchange = e => {
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/oncontextmenu
 document.body.oncontextmenu = e => {
     // console.log("context menu");
+    let event = e || window.event;
+    let target = event.target;
+
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
         application: getBrowser(),
         event_type: "contextMenu",
-        browser_url: document.URL
+        browser_url: document.URL,
+        xpath: getXPath(target)
     };
     // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
@@ -93,17 +97,17 @@ document.body.onclick = e => {
     let target = event.target;
     let tag = target.tagName;
     let type = target.type;
-    let click_coord = `(${event.screenX}, ${event.screenY})`; // relative to browser
+    let click_coord = `${event.screenX},${event.screenY}`; // relative to browser
     let url = document.URL;
     let html = target.innerHTML;
 
     // remove html if clicking on youtube
     if (url.includes("youtube")) html = "";
 
-    // Set this variable if you want to log clicks on text elements like paragraphs, headers, div, span
-    LOG_TEXT_ELEMENTS = false;
+    // Set this variable to true if you want to log clicks on text elements like paragraphs, headers, div, span
+    const LOG_TEXT_ELEMENTS = false;
     if (
-        !LOG_TEXT_ELEMENTS &&
+        LOG_TEXT_ELEMENTS &&
         (tag == "DIV" ||
             tag == "H1" ||
             tag == "H2" ||
@@ -143,6 +147,8 @@ document.body.onclick = e => {
         application: getBrowser(),
         event_type: eventType,
         browser_url: url,
+        mouse_coord: click_coord,
+        id: target.id,
         tag_category: tag,
         tag_type: type,
         tag_name: target.name,
@@ -151,7 +157,8 @@ document.body.onclick = e => {
         tag_html: html,
         tag_href: target.href || "",
         tag_innerText: target.innerText,
-        tag_option: target.option
+        tag_option: target.option,
+        xpath: getXPath(target)
     };
 
     if (type === "checkbox" || type === "radio") {
@@ -186,12 +193,17 @@ document.body.onmouseup = e => {
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onsubmit
 document.body.onsubmit = e => {
     // console.log("submit");
+
+    let event = e || window.event;
+    let target = event.target;
+
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
         application: getBrowser(),
         event_type: "submit",
-        browser_url: document.URL
+        browser_url: document.URL,
+        xpath: getXPath(target)
     };
     // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
@@ -220,10 +232,12 @@ document.body.onchange = e => {
         browser_url: document.URL,
         tag_category: tag,
         tag_type: type,
+        id: target.id,
         tag_name: target.name,
-        tag_value: target.value
+        tag_value: target.value,
+        xpath: getXPath(target)
     };
-    // console.log(JSON.stringify(eventLog));
+
     sendToBackgroundForPost(eventLog);
 };
 
@@ -231,12 +245,16 @@ document.body.onchange = e => {
 // https://developer.mozilla.org/en-US/docs/Web/API/Element/focus_event
 document.body.ondblclick = e => {
     // console.log("double click");
+    let event = e || window.event;
+    let target = event.target;
+
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
         category: "Browser",
         application: getBrowser(),
         event_type: "doubleClick",
-        browser_url: document.URL
+        browser_url: document.URL,
+        xpath: getXPath(target)
     };
     // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
@@ -247,6 +265,7 @@ document.body.ondblclick = e => {
 document.body.ondragstart = e => {
     // console.log("drag");
     let event = e || window.event;
+    let target = event.target;
 
     let eventLog = {
         timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
@@ -254,7 +273,8 @@ document.body.ondragstart = e => {
         application: getBrowser(),
         event_type: "dragElement",
         browser_url: document.URL,
-        tag_value: event.dataTransfer.getData("text/plain")
+        tag_value: event.dataTransfer.getData("text/plain"),
+        xpath: getXPath(target)
     };
     // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);

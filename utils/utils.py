@@ -7,14 +7,14 @@ import errno
 from getpass import getuser
 from datetime import datetime
 import os
+import plistlib
+import importlib
 from threading import Thread
 from platform import system
 import utils.config
 import utils.consumerServer
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
-import plistlib
-
 session = FuturesSession()
 
 
@@ -94,6 +94,26 @@ def getChromeVersionMac():
     else:
         return None
 
+
+# return python module install location
+def getPythonModuleLocation(module_name):
+    module = importlib.util.find_spec(module_name)
+    if module:
+        return module.submodule_search_locations[0]
+
+# return chromedriver path from automagica module used by selenium
+    def getChromedriverPath():
+        automagica_path = utils.utils.getPythonModuleLocation('automagica')
+        chromedriver_relative = ""
+        if WINDOWS:
+            chromedriver_relative = "bin/win32/chromedriver.exe"
+        elif MAC:
+            chromedriver_relative = "bin/mac64/chromedriver"
+        elif LINUX:
+            chromedriver_relative = "bin/linux64/chromedriver"
+        chromedriver = os.path.join(automagica_path, chromedriver_relative)
+        # if MAC: os.chmod(chromedriver, 755)
+        return chromedriver
 
 # ************
 # Class

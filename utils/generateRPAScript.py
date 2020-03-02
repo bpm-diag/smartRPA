@@ -11,11 +11,12 @@ import pandas
 import os
 import utils.config
 import utils
+from utils.utils import CHROME, WINDOWS, LINUX, MAC
 from pynput import mouse
 
 
 # Adds import statements to generated python file
-def createHeader(csv_file_path, browser=False):
+def createHeader(csv_file_path):
     return f"""# This file was auto generated based on {csv_file_path}
 import sys, os
 try:
@@ -24,7 +25,7 @@ except ImportError as e:
     print("Please install 'automagica' module running 'pip3 install -U automagica'")
     print("If you get openssl error check here https://github.com/marco2012/ComputerLogger#RPA")
     sys.exit()
-    \n"""
+\n"""
 
 
 # Create and return rpa directory and file for each specific RPA
@@ -225,33 +226,94 @@ def generateSystemRPA(csv_file_path, dataframe):
                     script.write(f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}')\n")
                 elif len(hotkey_param) == 3:
                     script.write(f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
-
     return True
 
 
 # Generate browser RPA python script
 def generateBrowserRPA(csv_file_path, dataframe):
     df = dataframe.query(' category=="Browser" | category=="Clipboard" ')
-    if df.empty: return False
+    if df.empty:
+        return False
+    # chrome browser must be installed
+    if not CHROME:
+        print(f"[RPA] Google Chrome must be installed to generate RPA script.")
+        return False
+
     print(f"[RPA] Generating Browser RPA")
     RPA_filepath = createRPAFile(csv_file_path, "_BrowserRPA.py")
     with open(RPA_filepath, 'w') as script:
         script.write(createHeader(csv_file_path))
+        script.write("""try:
+    from selenium.common.exceptions import WebDriverException
+    from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.common.action_chains import ActionChains
+    from selenium.webdriver.support.ui import Select
+    print("Opening Chrome...")
+    browser = Chrome(incognito=False, focus_window=True)
+    browser.get('about:blank') 
+except WebDriverException as e:
+    print(e)
+    print("If you get 'Permission denied' you did not set the correct permissions, run 'setup.py' first.")
+    sys.exit()
+\n""")
         for index, row in df.iterrows():
+
             e = row['event_type']
             cb = row['clipboard_content']
-            app = row['application']
-            # assign path if not null
-            path = ""
-            if not pandas.isna(row['event_src_path']):
-                path = row['event_src_path']
-            dest_path = row['event_dest_path']
+            url = "about:blank"
+            if not pandas.isna(row['browser_url']):
+                url = row['browser_url']
+            id = ""
+            if not pandas.isna(row['id']):
+                id = row['id']
+            xpath = ""
+            if not pandas.isna(row['xpath']):
+                xpath = row['xpath']
+            value = row['tag_value']
+
+            script.write(f"# {row['timestamp']} {e}\n")
             if (e == "copy" or e == "cut") and not pandas.isna(cb):
                 script.write(f"print('Setting clipboard text')\n")
                 script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
-            elif e == "newWorkbook":
-                script.write(f"print('Opening Browser...')\n")
-                script.write("driver = webdriver.Firefox()\n")
+            # elif e == "newWindow":
+            #     script.write(f"print('Opening new window')\n")
+            #     # TODO
+            elif e == "newTab":
+                script.write(f"print('Opening new tab')\n")
+                new_tab = f'window.open("{url}");'
+                script.write(f"browser.execute_script('{new_tab}')\n")
+            elif e == "selectTab":
+                script.write(f"print('Selecting tab')\n")
+                script.write(f"browser.switch_to.window(browser.window_handles[{id}])\n")
+            elif e == "closeTab":
+                script.write(f"print('Closing tab')\n")
+                script.write(f"browser.close()\n")
+            elif e == "reload":
+                script.write(f"print('Reloading page')\n")
+                script.write(f"browser.refresh()\n")
+            elif e == "clickLink" or e == "link" or e == "typed":
+                script.write(f"print('Load link')\n")
+                script.write(f"browser.get('{url}')\n")
+            elif e == "changeField":
+                if row['tag_category'] == "SELECT":
+                    tag_value = row['tag_value']
+                    script.write(f"print('Selecting text')\n")
+                    script.write(f"Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}'))\n")
+                else:
+                    script.write(f"print('Inserting text')\n")
+                    script.write(f"browser.find_element_by_xpath('{xpath}').send_keys('{value}')\n")
+            elif e == "clickButton" or e == "clickRadioButton" or e == "mouseClick":
+                script.write(f"print('Clicking button')\n")
+                script.write(f"browser.find_element_by_xpath('{xpath}').click()\n")
+            elif e == "doubleClick":
+                script.write(f"print('Double click')\n")
+                script.write(f"ActionChains(driver).double_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
+            elif e == "contextMenu":
+                script.write(f"print('Double click')\n")
+                script.write(f"ActionChains(driver).context_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
+            elif e == "selectText":
+                pass
+
     return True
 
 
@@ -265,5 +327,5 @@ def generateRPAScript(csv_file_path):
         dataframe = pandas.read_csv(csv_file_path)
         generateExcelRPA(csv_file_path, dataframe)
         generateSystemRPA(csv_file_path, dataframe)
-        # generateBrowserRPA(csv_file_path, dataframe)
+        generateBrowserRPA(csv_file_path, dataframe)
         return True

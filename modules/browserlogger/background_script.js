@@ -539,7 +539,7 @@ function buildAndSendEventLog(eventType, tab, info) {
         application: getBrowser(),
         event_type: eventType,
         browser_url: tab.url || tab.pendingUrl,
-        id: tab.id,
+        id: tab.index,
         title: tab.title
     };
 

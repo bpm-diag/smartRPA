@@ -28,13 +28,22 @@
 
 #### 1. **Install dependencies**
 
+Install project dependencies
+
 ```bash
 pip3 install -r requirements.txt
 ```
 
-For RPA you must also install `automagica` [(details here)](https://github.com/marco2012/ComputerLogger#RPA)
+Install RPA dependencies
+
 ```bash
 pip3 install -U automagica
+```
+
+Set correct permissions
+
+```bash
+python3 setup.py
 ```
 
 #### 2. **Install browser extension** 
@@ -42,9 +51,14 @@ pip3 install -U automagica
 The browser extension supports 4 major browsers (<a href="https://gs.statcounter.com/browser-market-share/desktop/" target="_blank">80% market share combined</a>).
 
 - [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
+
 - [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` or install [`browserlogger-1.0.3.xpi`](https://github.com/marco2012/ComputerLogger/tree/master/modules/browserlogger/web-ext-artifacts/browserlogger-1.0.3.xpi)
+
 - [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
+
 - [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
+
+Once main logger is running, you must click on the browser extension to enable it.
 
 #### 3. **Install Excel Addin (MacOS Only)**
 The excel addin is required to enable logging <u>only on MacOS</u>. [`NodeJS`](https://nodejs.org/en/download/) must be installed to run this addin. 
@@ -64,8 +78,6 @@ python3 mainLogger.py
 
 The resulting log csv file will be in `/logs` directory.
 
-https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
-
 ## RPA
 
 *Robotic Process Automation* scripts are automatically generated for each log in `/RPA` directory
@@ -75,18 +87,20 @@ The following additional dependency is required for RPA:
 ```bash
 pip3 install -U automagica
 ```
-On Windows, if you get the error  `Cannot open include file: 'openssl/opensslv.h': No such file or directory` 
+It has not been added to `requirements.txt` because it could generate errors during install so it's better to install it manually.
 
-1. Install [Win32 OpenSSL v1.1.1d (32bit)](https://slproweb.com/download/Win32OpenSSL-1_1_1d.exe).
-2. Open CMD as Admin and type:
+- On Windows, if you get the error  `Cannot open include file: 'openssl/opensslv.h': No such file or directory` 
 
-```bash
-set LIB=C:\Program Files (x86)\OpenSSL-Win32\lib;%LIB%
-set INCLUDE=C:\Program Files (x86)\OpenSSL-Win32\include;%INCLUDE%
-pip3 install -U automagica
-```
+	1. Install [Win32 OpenSSL v1.1.1d (32bit)](https://slproweb.com/download/Win32OpenSSL-1_1_1d.exe).
+	2. Open CMD as Admin and type:
 
+  ```bash
+  set LIB=C:\Program Files (x86)\OpenSSL-Win32\lib;%LIB%
+  set INCLUDE=C:\Program Files (x86)\OpenSSL-Win32\include;%INCLUDE%
+  pip3 install -U automagica
+  ```
 
+- For browser automation, [Google Chrome](https://www.google.com/chrome/) must be installed.
 
 ## Modules
 
@@ -98,6 +112,7 @@ The project is composed by the following modules:
 -   [x] Browser logger
 -   [x] Office logger
 -   [x] Clipboard logger
+-   [x] RPA module
 
 A complete list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
 
