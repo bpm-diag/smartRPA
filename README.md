@@ -52,7 +52,7 @@ The browser extension supports 4 major browsers (<a href="https://gs.statcounter
 
 - [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 
-- [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` or install [`browserlogger-1.0.3.xpi`](https://github.com/marco2012/ComputerLogger/tree/master/modules/browserlogger/web-ext-artifacts/browserlogger-1.0.3.xpi)
+- [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` 
 
 - [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
 

@@ -13,6 +13,7 @@ from threading import Thread
 from platform import system
 import utils.config
 import utils.consumerServer
+import pandas as pd
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
 session = FuturesSession()
@@ -95,25 +96,33 @@ def getChromeVersionMac():
         return None
 
 
+def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
+    # combine all files in the list
+    combined_csv = pd.concat([pd.read_csv(f) for f in list_of_csv_to_combine])
+    # export to csv
+    combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
+
+
 # return python module install location
 def getPythonModuleLocation(module_name):
     module = importlib.util.find_spec(module_name)
     if module:
         return module.submodule_search_locations[0]
 
+
 # return chromedriver path from automagica module used by selenium
-    def getChromedriverPath():
-        automagica_path = utils.utils.getPythonModuleLocation('automagica')
-        chromedriver_relative = ""
-        if WINDOWS:
-            chromedriver_relative = "bin/win32/chromedriver.exe"
-        elif MAC:
-            chromedriver_relative = "bin/mac64/chromedriver"
-        elif LINUX:
-            chromedriver_relative = "bin/linux64/chromedriver"
-        chromedriver = os.path.join(automagica_path, chromedriver_relative)
-        # if MAC: os.chmod(chromedriver, 755)
-        return chromedriver
+def getChromedriverPath():
+    automagica_path = utils.utils.getPythonModuleLocation('automagica')
+    chromedriver_relative = ""
+    if WINDOWS:
+        chromedriver_relative = "bin/win32/chromedriver.exe"
+    elif MAC:
+        chromedriver_relative = "bin/mac64/chromedriver"
+    elif LINUX:
+        chromedriver_relative = "bin/linux64/chromedriver"
+    chromedriver = os.path.join(automagica_path, chromedriver_relative)
+    # if MAC: os.chmod(chromedriver, 755)
+    return chromedriver
 
 
 # ************
