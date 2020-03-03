@@ -580,7 +580,7 @@ class WidgetGallery(QDialog):
             # set gui parameters
             self.running = False
 
-            self.createProgressDialog("Stopping...", "Stopping server...", 1000)
+            self.createProgressDialog("Stopping...", "Stopping server...", 1200)
 
             self.runButton.setText('Start logger')
             self.runButton.update()

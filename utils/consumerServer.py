@@ -112,7 +112,7 @@ def runServer():
         print("[Server] Logging server started...")
         app.run(port=PORT, debug=False, use_reloader=False)
     else:
-        print(f"Could not start logging server, port {PORT} is already in use.")
+        print(f"[Server] Could not start logging server, port {PORT} is already in use.")
 
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ from pynput import mouse
 def createHeader(csv_file_path):
     return f"""# This file was auto generated based on {csv_file_path}
 import sys, os
+from time import sleep
 try:
     from automagica import *
 except ImportError as e:
@@ -244,10 +245,13 @@ def generateBrowserRPA(csv_file_path, dataframe):
     with open(RPA_filepath, 'w') as script:
         script.write(createHeader(csv_file_path))
         script.write("""try:
-    from selenium.common.exceptions import WebDriverException
+    from selenium.common.exceptions import *
     from selenium.webdriver.common.keys import Keys
     from selenium.webdriver.common.action_chains import ActionChains
     from selenium.webdriver.support.ui import Select
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions
+    from selenium.webdriver.common.by import By
     print("Opening Chrome...")
     browser = Chrome(incognito=False, focus_window=True)
     browser.get('about:blank') 
@@ -272,6 +276,10 @@ except WebDriverException as e:
             value = row['tag_value']
 
             script.write(f"# {row['timestamp']} {e}\n")
+
+            if e not in ["newWindow", "closeWindow", "typed", "submit", "formSubmit"]:
+                script.write(f"sleep(0.8)\n")
+
             if (e == "copy" or e == "cut") and not pandas.isna(cb):
                 script.write(f"print('Setting clipboard text')\n")
                 script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
@@ -280,20 +288,24 @@ except WebDriverException as e:
             #     # TODO
             elif e == "newTab":
                 script.write(f"print('Opening new tab')\n")
-                new_tab = f'window.open("{url}");'
+                new_tab = f'window.open("''");'
                 script.write(f"browser.execute_script('{new_tab}')\n")
             elif e == "selectTab":
-                script.write(f"print('Selecting tab')\n")
-                script.write(f"browser.switch_to.window(browser.window_handles[{id}])\n")
+                script.write(f"print('Selecting tab {id}')\n")
+                script.write(f"""
+if {id} <= len(browser.window_handles):
+    browser.switch_to.window(browser.window_handles[{id}])\n
+""")
             elif e == "closeTab":
                 script.write(f"print('Closing tab')\n")
                 script.write(f"browser.close()\n")
             elif e == "reload":
                 script.write(f"print('Reloading page')\n")
                 script.write(f"browser.refresh()\n")
-            elif e == "clickLink" or e == "link" or e == "typed":
-                script.write(f"print('Load link')\n")
+            elif (e == "clickLink" or e == "link" or e == "typed") and ('chrome-extension' not in url):
+                script.write(f"print('Loading link {url}')\n")
                 script.write(f"browser.get('{url}')\n")
+                script.write(f"WebDriverWait(browser, 5).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))\n")
             elif e == "changeField":
                 if row['tag_category'] == "SELECT":
                     tag_value = row['tag_value']
@@ -304,15 +316,34 @@ except WebDriverException as e:
                     script.write(f"browser.find_element_by_xpath('{xpath}').send_keys('{value}')\n")
             elif e == "clickButton" or e == "clickRadioButton" or e == "mouseClick":
                 script.write(f"print('Clicking button')\n")
-                script.write(f"browser.find_element_by_xpath('{xpath}').click()\n")
-            elif e == "doubleClick":
+                script.write(f"""try:
+    browser.find_element_by_xpath('{xpath}').click()
+except NoSuchElementException:
+    pass
+""")
+            elif e == "doubleClick" and xpath != '':
                 script.write(f"print('Double click')\n")
-                script.write(f"ActionChains(driver).double_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
-            elif e == "contextMenu":
-                script.write(f"print('Double click')\n")
-                script.write(f"ActionChains(driver).context_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
+                script.write(f"ActionChains(browser).double_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
+            elif e == "contextMenu" and xpath != '':
+                script.write(f"print('Context menu')\n")
+                script.write(f"ActionChains(browser).context_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
             elif e == "selectText":
                 pass
+            elif e == "zoomTab":
+                # newZoomFactor is like 1.2 so I convert it to percentage
+                newZoom = int(float(row['newZoomFactor']) * 100)
+                script.write(f"print('Zooming page to {newZoom}%')\n")
+                script.write("browser.execute_script({}'{}%'{})\n".format('"document.body.style.zoom=', newZoom, '"'))
+            # elif e == "submit":
+            #     script.write(f"print('Submitting button')\n")
+            #     script.write(f"browser.find_element_by_xpath('{xpath}').submit()\n")
+            elif e == "mouse": #TODO
+                mouse_coord = row['mouse_coord']
+                script.write(f"print('Mouse click')\n")
+                script.write(f"actions = ActionChains(browser)\n")
+                script.write(f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
+                script.write(f"actions.moveByOffset({mouse_coord})\n")
+                script.write(f"actions.click().build().perform()\n")
 
     return True
 

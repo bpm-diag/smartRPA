@@ -14,6 +14,7 @@ from utils.utils import *
 # constantly monitors clipboard for changes
 # detects 'copy' event. 'paste' event is detected by systemEvents.handleHotkey
 def logClipboard():
+    print("[Clipboard] Clipboard logging started...")
     recent_value = pyperclip.paste()
     while 1:
         temp_value = pyperclip.paste()

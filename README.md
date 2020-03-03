@@ -40,7 +40,7 @@ Install RPA dependencies
 pip3 install -U automagica
 ```
 
-Set correct permissions
+Set correct permissions if you're on MacOS
 
 ```bash
 python3 setup.py

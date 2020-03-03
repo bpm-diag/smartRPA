@@ -154,9 +154,9 @@ document.body.onclick = e => {
         tag_name: target.name,
         tag_title: target.title,
         tag_value: target.value,
-        tag_html: html,
+        tag_html: html.substring(0,50), //take only the first 50 characters otherwise it's too long
         tag_href: target.href || "",
-        tag_innerText: target.innerText,
+        tag_innerText: target.innerText.substring(0,50), //take only the first 30 characters otherwise it's too long
         tag_option: target.option,
         xpath: getXPath(target)
     };
@@ -173,6 +173,9 @@ document.body.onclick = e => {
 // Selection
 // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onmouseup
 document.body.onmouseup = e => {
+    let event = e || window.event;
+    let target = event.target;
+    let click_coord = `${event.screenX},${event.screenY}`; // relative to browser
     let selection = window.getSelection().toString();
     if (selection) {
         // console.log("selection mouse up");
@@ -182,7 +185,9 @@ document.body.onmouseup = e => {
             application: getBrowser(),
             event_type: "selectText",
             browser_url: document.URL,
-            tag_value: selection
+            mouse_coord: click_coord,
+            tag_value: selection,
+            xpath: getXPath(target)
         };
         // console.log(JSON.stringify(eventLog));
         sendToBackgroundForPost(eventLog);
