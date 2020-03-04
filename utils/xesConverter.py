@@ -14,12 +14,11 @@ from xml.etree.ElementTree import Element
 
 class CSV2XES:
 
-    def __init__(self, csv_filepath, xes_filepath, csv_separator=',',
+    def __init__(self, csv_filepath, xes_filepath,
                  events_header="event_type", timestamp_header="timestamp", timestamp_format="%Y-%m-%d %H:%M:%S:%f",
                  attributes_to_consider=[]):
 
         self.csv_filepath = csv_filepath
-        self.csv_separator = csv_separator
         self.xes_filepath = xes_filepath
         self.timestamp_header = timestamp_header
         self.timestamp_format = timestamp_format
@@ -50,7 +49,8 @@ class CSV2XES:
             # handle timestamp
             if column_header == self.timestamp_header:
                 try:
-                    attribute = XFactory.create_attribute_timestamp("time:timestamp", datetime.strptime(value, self.timestamp_format))
+                    attribute = XFactory.create_attribute_timestamp("time:timestamp",
+                                                                    datetime.strptime(value, self.timestamp_format))
                 except ValueError:
                     continue
             # handle event
@@ -88,7 +88,6 @@ class CSV2XES:
                 event = self.__convert_line_in_event(row)
                 trace.append(event)
                 log.append(trace)
-
 
         # Save log in xes format
         with open(self.xes_filepath, "w") as file:
@@ -146,12 +145,12 @@ class CSV2XES:
         for i, trace in enumerate(root.findall("trace")):
             try:
                 trace.insert(0, Element(
-                        'string', {
-                            'key': 'concept:name',
-                            'value': timestamp_list[i]
-                        }
-                    )
+                    'string', {
+                        'key': 'concept:name',
+                        'value': timestamp_list[i]
+                    }
                 )
+                             )
             except IndexError:
                 continue
 

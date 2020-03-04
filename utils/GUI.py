@@ -4,9 +4,8 @@
 # ****************************** #
 
 import sys
-from threading import Thread
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QDir, QRect, QPoint, QTimer
+from PyQt5.QtCore import Qt, QSize, QDir, QTimer
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
@@ -21,6 +20,7 @@ import utils.generateRPAScript
 import utils.xesConverter
 import utils.process_mining
 import utils.utils
+
 
 class WidgetGallery(QDialog):
     def __init__(self, parent=None):
@@ -46,7 +46,7 @@ class WidgetGallery(QDialog):
         self.mainProcess = None
         self.officeFilename = None
         self.runCount = 0
-        self.totalNumberOfRun = 2 #TODO set with ui preferences
+        self.totalNumberOfRun = 2  # TODO set with ui preferences
         self.csv_to_join = list()
 
         # Boolean variables that save the state of each checkbox
@@ -502,13 +502,15 @@ class WidgetGallery(QDialog):
             # get csv filename from path, without extension
             csv_name = getFilename(csv_filepath)
             combined_csv_filepath = os.path.join(MAIN_DIRECTORY, 'RPA', csv_name, csv_name + '_combined.csv')
-            xes_filepath = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_name.strip('_combined'), csv_name + '.xes')
+            xes_filepath = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_name.strip('_combined'),
+                                        csv_name + '.xes')
             # if merging csv is succesful
             if combineMultipleCsv(self.csv_to_join, combined_csv_filepath):
                 # convert merged csv to xes
                 utils.xesConverter.CSV2XES(combined_csv_filepath,
                                            xes_filepath,
-                                           attributes_to_consider=["category", "application", "event_src_path", "event_dest_path", "clipboard_content"]
+                                           attributes_to_consider=["category", "application", "event_src_path",
+                                                                   "event_dest_path", "clipboard_content"]
                                            ).run()
                 # generate process mining from xes
                 pm = utils.process_mining.ProcessMining(xes_filepath)
@@ -519,7 +521,6 @@ class WidgetGallery(QDialog):
             self.csv_to_join.clear()
 
             self.statusListWidget.addItem(QListWidgetItem("- XES file generated"))
-
 
     # Create a dialog to select a file and return its path
     # Used if the user wants to select an existing file for logging excel
