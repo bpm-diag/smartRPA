@@ -5,7 +5,6 @@
 
 import sys
 from threading import Thread
-
 sys.path.append('../')  # this way main file is visible from this file
 from PyQt5.QtCore import Qt, QSize, QDir, QRect, QPoint, QTimer
 from PyQt5.QtGui import QFont, QIcon
@@ -19,7 +18,8 @@ from utils.utils import *
 import mainLogger
 import utils.config
 import utils.generateRPAScript
-
+import utils.xesConverter
+import utils.process_mining
 
 class WidgetGallery(QDialog):
     def __init__(self, parent=None):
@@ -44,6 +44,9 @@ class WidgetGallery(QDialog):
         self.running = False
         self.mainProcess = None
         self.officeFilename = None
+        self.runCount = 0
+        self.totalNumberOfRun = 2 #TODO set with ui preferences
+        self.csv_to_join = list()
 
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
@@ -484,6 +487,38 @@ class WidgetGallery(QDialog):
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}" if t0.join() else "- RPA actions not available"
         self.statusListWidget.addItem(QListWidgetItem(msg))
 
+    # Combine multiple csv into one once totalNumberOfRun (defined by user in ui) is reached and generate single xes
+    # file
+    def handleRunCount(self, log_filepath):
+        # after each run append generated csv log to list, when totalNumberOfRun is reached, the csv in this list will
+        # be merged into one
+        self.csv_to_join.append(log_filepath)
+        if self.runCount >= self.totalNumberOfRun:
+            # use as name the last csv added to the list (used for naming RPA folder, merged csv and xes file)
+            csv_filepath = self.csv_to_join[-1]
+            # get csv filename from path, without extension
+            csv_name = getFilename(csv_filepath)
+            combined_csv_filepath = os.path.join(MAIN_DIRECTORY, 'RPA', csv_name, csv_name + '_combined.csv')
+            xes_filepath = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_name.strip('_combined'), csv_name + '.xes')
+            # if merging csv is succesful
+            if combineMultipleCsv(self.csv_to_join, combined_csv_filepath):
+                # convert merged csv to xes
+                utils.xesConverter.CSV2XES(combined_csv_filepath,
+                                           xes_filepath,
+                                           attributes_to_consider=["category", "application", "event_src_path", "event_dest_path", "clipboard_content"]
+                                           ).csvToXes()
+                # generate process mining from xes
+                pm = utils.process_mining.ProcessMining(xes_filepath)
+                pm.create_alpha_miner()
+                pm.create_heuristics_miner()
+                pm.create_dfg()
+            # reset
+            self.runCount = 0
+            self.csv_to_join.clear()
+
+            self.statusListWidget.addItem(QListWidgetItem("- XES file generated"))
+
+
     # Create a dialog to select a file and return its path
     # Used if the user wants to select an existing file for logging excel
     # (not implemented in gui)
@@ -548,6 +583,10 @@ class WidgetGallery(QDialog):
             self.runButton.setText('Stop logger')
             self.runButton.update()
 
+            # used to count the numebr of time 'start button' is pressed in order to group event logs and generate
+            # xes file
+            self.runCount += 1
+
             # start main process with the options selected in gui. It handles all other methods main method is
             # started as a process so it can be terminated once the button is clicked all the methods in the main
             # process are started as daemon threads so they are closed automatically when the main process is closed
@@ -596,6 +635,8 @@ class WidgetGallery(QDialog):
 
             # once log file is created, RPA actions are automatically generated for each category
             self.handleRPA(log_filepath)
+            # generate xes file from combined csv
+            self.handleRunCount(log_filepath)
 
             # kill node server when closing python server, otherwise port remains occupied
             if MAC and self.officeExcel:

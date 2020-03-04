@@ -80,9 +80,14 @@ def createLogFile():
         f.writerow(utils.consumerServer.HEADER)
 
 
-# returns filename of a given path without extension, like 2020-02-25_23-21-57
+# return filename of a given path without extension, like 2020-02-25_23-21-57
 def getFilename(path):
     return os.path.splitext(os.path.basename(path))[0]
+
+
+# return file extension of a given path like .csv
+def getFileExtension(path):
+    return os.path.splitext(os.path.basename(path))[1]
 
 
 # return current chrome version, used to detect selenium driver
@@ -97,11 +102,16 @@ def getChromeVersionMac():
 
 
 def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
-    # combine all files in the list
-    combined_csv = pd.concat([pd.read_csv(f) for f in list_of_csv_to_combine])
-    # export to csv
-    combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
-
+    try:
+        # combine all files in the list
+        combined_csv = pd.concat([pd.read_csv(f) for f in list_of_csv_to_combine])
+        # export to csv
+        combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
+        print(f"[UTILS] Multiple csv combined in {combined_csv_path}")
+        return True
+    except pd.errors.ParserError as e:
+        print(e)
+        return False
 
 # return python module install location
 def getPythonModuleLocation(module_name):
