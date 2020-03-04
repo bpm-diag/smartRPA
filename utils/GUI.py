@@ -20,6 +20,7 @@ import utils.config
 import utils.generateRPAScript
 import utils.xesConverter
 import utils.process_mining
+import utils.utils
 
 class WidgetGallery(QDialog):
     def __init__(self, parent=None):
@@ -481,10 +482,12 @@ class WidgetGallery(QDialog):
 
     def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
-        t0 = ThreadWithReturnValue(target=utils.generateRPAScript.generateRPAScript, args=[log_filepath])
-        t0.start()
+        # t0 = ThreadWithReturnValue(target=utils.generateRPAScript.generateRPAScript, args=[log_filepath])
+        # t0.start()
+        rpa = utils.generateRPAScript.RPAScript(log_filepath, unified_RPA_script=False)
+        rpa_success = rpa.run()
         # this custom made thread class return values when joined
-        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}" if t0.join() else "- RPA actions not available"
+        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}" if rpa_success else "- RPA actions not available"
         self.statusListWidget.addItem(QListWidgetItem(msg))
 
     # Combine multiple csv into one once totalNumberOfRun (defined by user in ui) is reached and generate single xes
@@ -506,12 +509,11 @@ class WidgetGallery(QDialog):
                 utils.xesConverter.CSV2XES(combined_csv_filepath,
                                            xes_filepath,
                                            attributes_to_consider=["category", "application", "event_src_path", "event_dest_path", "clipboard_content"]
-                                           ).csvToXes()
+                                           ).run()
                 # generate process mining from xes
                 pm = utils.process_mining.ProcessMining(xes_filepath)
-                pm.create_alpha_miner()
-                pm.create_heuristics_miner()
-                pm.create_dfg()
+                pm.run()
+
             # reset
             self.runCount = 0
             self.csv_to_join.clear()

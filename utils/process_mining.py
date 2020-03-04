@@ -2,6 +2,7 @@
 # Process mining techniques
 # https://pm4py.fit.fraunhofer.de/documentation#discovery
 # ******************************
+from threading import Thread
 
 from pm4py.objects.log.adapters.pandas import csv_import_adapter
 from pm4py.objects.conversion.log import factory as conversion_factory
@@ -21,6 +22,17 @@ class ProcessMining:
     def __init__(self, filepath):
         self.filepath = filepath
         self.__log = self.__handle_log()
+
+    def run(self):
+        t0 = Thread(target=self.create_alpha_miner)
+        t1 = Thread(target=self.create_heuristics_miner)
+        t2 = Thread(target=self.create_dfg)
+        t0.start()
+        t1.start()
+        t2.start()
+        t0.join()
+        t1.join()
+        t2.join()
 
     def __handle_log(self):
         file_extension = utils.utils.getFileExtension(self.filepath)

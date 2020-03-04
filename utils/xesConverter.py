@@ -2,6 +2,7 @@
 # Convert csv to xes for process mining
 # http://www.xes-standard.org/downloads/doc/org/deckfour/xes/factory/XFactory.html
 # ******************************
+from threading import Thread
 
 import pandas
 from datetime import datetime
@@ -29,6 +30,11 @@ class CSV2XES:
             self.attributes_to_consider.append(self.timestamp_header)
         if self.events_header not in self.attributes_to_consider:
             self.attributes_to_consider.append(self.events_header)
+
+    def run(self):
+        t0 = Thread(target=self.csvToXes)
+        t0.start()
+        t0.join()
 
     def __isTimestamp(self, str):
         try:
