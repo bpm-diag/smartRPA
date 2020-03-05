@@ -598,7 +598,6 @@ class WidgetGallery(QMainWindow, QDialog):
             t0 = ThreadWithReturnValue(target=combineMultipleCsv, args=[self.csv_to_join, combined_csv_filepath])
             t0.start()
             if t0.join():
-            # if combineMultipleCsv(self.csv_to_join, combined_csv_filepath):
                 # convert merged csv to xes
                 utils.xesConverter.CSV2XES(combined_csv_filepath,
                                            xes_filepath,

@@ -112,7 +112,7 @@ def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
         combined_csv = pd.concat([pd.read_csv(f) for f in existing_csv_to_combine])
         # export to csv
         combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
-        print(f"[UTILS] Multiple csv combined in {combined_csv_path}")
+        print(f"[UTILS] {combined_csv_path} created by merging {existing_csv_to_combine}")
         return True
     except (pd.errors.ParserError, FileNotFoundError) as e:
         print(e)

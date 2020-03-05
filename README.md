@@ -91,9 +91,7 @@ To run the generated RPA scripts you must install `automagica` module.
 
     ```cmd
     set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
-
     set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
-
     pip3 install automagica==2.0.25
     ```
 
