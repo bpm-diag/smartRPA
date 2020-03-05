@@ -113,6 +113,8 @@ The project is composed by the following modules:
 -   [x] Office logger
 -   [x] Clipboard logger
 -   [x] RPA module
+-   [x] CSV to XES converter
+-   [x] Process Mining analysis
 
 A complete list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
 
