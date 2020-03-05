@@ -13,13 +13,13 @@ import os
 from threading import Thread
 import utils.config
 import utils
-from utils.utils import CHROME, WINDOWS, LINUX, MAC
+from utils.utils import CHROME, DESKTOP
 from pynput import mouse
 
 
 class RPAScript:
 
-    def __init__(self, csv_file_path, unified_RPA_script=False, delay_between_actions=0.8):
+    def __init__(self, csv_file_path, unified_RPA_script, delay_between_actions=0.8):
         self.csv_file_path = csv_file_path
         self.unified_RPA_script = unified_RPA_script
         self.__delay_between_actions = delay_between_actions
@@ -43,7 +43,7 @@ try:
     from automagica import *
 except ImportError as e:
     print("Please install 'automagica' module running 'pip3 install -U automagica'")
-    print("If you get openssl error check here https://github.com/marco2012/ComputerLogger#RPA")
+    print("If you get openssl error check here https://github.com/marco2012/ComputerLogger#automagica")
     sys.exit()
 \n"""
 
@@ -88,6 +88,9 @@ except ImportError as e:
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
             script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+        elif e == "paste":
+            script.write(f"print('Pasting clipboard text')\n")
+            script.write(f'type_text("""{cb}""")\n')
         elif e == "newWorkbook":
             script.write(f"print('Opening Excel...')\n")
             script.write("excel = Excel()\n")
@@ -145,7 +148,40 @@ except ImportError as e:
         #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
 
     def __handle_powerpoint_events(self, script, row):
-        return False
+        e = row['event_type']
+        # assign path if not null
+        path = ""
+        if not pandas.isna(row['event_src_path']):
+            path = row['event_src_path']
+        cb = row['clipboard_content']
+        presentation_name = row['title']
+        slides = row['slides']
+
+        script.write(f"# {row['timestamp']} {e}\n")
+        if self.__delay_between_actions > 0:
+            script.write(f"sleep({self.__delay_between_actions})\n")
+        if (e == "copy" or e == "cut") and not pandas.isna(cb):
+            script.write(f"print('Setting clipboard text')\n")
+            script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+        elif e == "paste":
+            script.write(f"print('Pasting clipboard text')\n")
+            script.write(f'type_text("""{cb}""")\n')
+        elif e == "newPresentation":
+            script.write(f"print('Opening Powerpoint...')\n")
+            script.write("powerpoint = Powerpoint(visible=True, path=None)\n")
+        elif e == "newPresentationSlide":
+            script.write(f"print('Adding slide to presentation')\n")
+            script.write(f"powerpoint.add_slide()\n")
+        elif e == "savePresentation":  # case 2), after case
+            script.write(f"print('saving presentation {presentation_name}')\n")
+            path = os.path.join(DESKTOP, 'presentation.pptx')
+            script.write(f"powerpoint.save_as(r'{path}')\n")
+        # elif e == "printPresentation" and not self.__SaveAsUI:  # if file has already been saved and it's on disk
+        #     script.write(f"print('Printing {presentation_name}')\n")
+        #     script.write(f"send_to_printer(r'{path}')\n")
+        elif e == "closePresentation":
+            script.write(f"print('Closing Powerpoint...')\n")
+            script.write("powerpoint.quit()\n")
 
     def __handle_system_events(self, script, row):
         e = row['event_type']
@@ -257,10 +293,14 @@ except ImportError as e:
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
             script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+        elif e == "paste":
+            script.write(f"print('Pasting clipboard text')\n")
+            script.write(f'type_text("""{cb}""")\n')
         # elif e == "newWindow":
         #     script.write(f"print('Opening new window')\n")
         #     # TODO
-        elif e == "newTab":
+        # When a window is opened, a new tab is automatically created at index 0 so I don't need to create it again
+        elif e == "newTab" and row['id'] != 0:
             script.write(f"print('Opening new tab')\n")
             new_tab = f'window.open("''");'
             script.write(f"browser.execute_script('{new_tab}')\n")
@@ -338,18 +378,18 @@ except NoSuchElementException:
                 self.__handle_excel_events(script, row)
         return True
 
+    # Generate powerpoint RPA python script
     def _generatePowerpointRPA(self):
-        # df = self.__dataframe.query('application=="Microsoft Powerpoint" | category=="Clipboard"')
-        # if df.empty:
-        #     return False
-        # RPA_filepath = self.__createRPAFile("_PowerpointRPA.py")
-        # print(f"[RPA] Generating Powerpoint RPA")
-        # with open(RPA_filepath, 'w') as script:
-        #     script.write(self.__createHeader())
-        #     for index, row in df.iterrows():
-        #         self.__handle_powerpoint_events(script, row)
-        # return True
-        return False
+        df = self.__dataframe.query('application=="Microsoft Powerpoint" | category=="Clipboard"')
+        if df.empty:
+            return False
+        RPA_filepath = self.__createRPAFile("_PowerpointRPA.py")
+        print(f"[RPA] Generating Powerpoint RPA")
+        with open(RPA_filepath, 'w') as script:
+            script.write(self.__createHeader())
+            for index, row in df.iterrows():
+                self.__handle_powerpoint_events(script, row)
+        return True
 
     # Generate system RPA python script
     def _generateSystemRPA(self):
@@ -392,7 +432,7 @@ try:
     browser.get('about:blank') 
 except WebDriverException as e:
     print(e)
-    print("If you get 'Permission denied' you did not set the correct permissions, run 'setup.py' first.")
+    print("If you get 'Permission denied' you did not set the correct permissions, run 'fix_permissions.py' first.")
     sys.exit()
     \n""")
             for index, row in df.iterrows():

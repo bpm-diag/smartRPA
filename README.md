@@ -1,7 +1,7 @@
 <p align="center">
 <img width="100%" src="docs/readme-header.png"><br/><br/>
     <a href="https://www.python.org/downloads/release/python-381/" alt="Activity">
-        <img src="https://img.shields.io/badge/Python-3.8-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/Python-3.8.1%20(x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
     <a href="#computerlogger" alt="Activity">
         <img src="https://img.shields.io/badge/Javascript-6-blue?style=flat&labelColor=F7DF1E&color=F7DF1E&logo=javascript&logoColor=white" /></a>
     <a href="#computerlogger" alt="Activity">
@@ -19,52 +19,47 @@
         <img src="https://img.shields.io/badge/Edge-80-blue?style=flat&labelColor=0078D7&color=0078D7&logo=microsoft-edge&logoColor=white" /></a>
     <a href="#computerlogger" alt="Activity">
         <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a> <br/><br/>
-  <img width="80%" src="docs/gui.jpg"/> 
-
+  <img width="80%" src="docs/gui.jpg"/>
 
 </p>
 
 ## Installation and execution:
 
+You must use _64bit_ version of Python 3. (Tested on _Python 3.8.1 64bit_)
+
 #### 1. **Install dependencies**
 
-- Install project dependencies
+-   Install project dependencies
 
-  ```bash
-  pip3 install -r requirements.txt
-  ```
+    ```bash
+    pip3 install -r requirements.txt
+    ```
 
-- Install RPA dependencies
+-   Install RPA dependencies
 
-  ```bash
-  pip3 install automagica==2.0.25
-  ```
+    [Details here](https://github.com/marco2012/ComputerLogger#rpa)
 
-- Set correct permissions if you're on MacOS
-
-  ```bash
-  python3 setup.py
-  ```
-
-#### 2. **Install browser extension** 
+#### 2. **Install browser extension**
 
 The browser extension supports 4 major browsers (<a href="https://gs.statcounter.com/browser-market-share/desktop/" target="_blank">80% market share combined</a>).
 
-- [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
+-   [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 
-- [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox` 
+-   [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox`
 
-- [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
+-   [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
 
-- [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
+-   [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
 Once main logger is running, you must click on the browser extension to enable it.
 
 #### 3. **Install Excel Addin (MacOS Only)**
-The excel addin is required to enable logging <u>only on MacOS</u>. [`NodeJS`](https://nodejs.org/en/download/) must be installed to run this addin. 
+
+The excel addin is required to enable logging <u>only on MacOS</u>. [`NodeJS`](https://nodejs.org/en/download/) must be installed to run this addin.
+
 ```bash
-cd modules/excelAddinMac 
-npm install 
+cd modules/excelAddinMac
+npm install
 npm start
 ```
 
@@ -80,27 +75,73 @@ The resulting log csv file will be in `/logs` directory.
 
 ## RPA
 
-*Robotic Process Automation* scripts are automatically generated for each log in `/RPA` directory
+_Robotic Process Automation_ scripts are automatically generated for each log in `/RPA` directory
 
-The following additional dependency is required for RPA:
+#### Automagica
+
+The following additional dependency is required for RPA and must be installed manually:
 
 ```bash
 pip3 install automagica==2.0.25
 ```
-It has not been added to `requirements.txt` because it could generate errors during install so it's better to install it manually.
 
-- On Windows, if you get the error  `Cannot open include file: 'openssl/opensslv.h': No such file or directory` 
+After installing `automagica`, _if you're on MacOS_, you must run:
 
-	1. Install [Win32 OpenSSL v1.1.1d (32bit)](https://slproweb.com/download/Win32OpenSSL-1_1_1d.exe).
-	2. Open CMD as Admin and type:
+```bash
+python3 fix_permissions.py
+```
 
-  ```bash
-  set LIB=C:\Program Files (x86)\OpenSSL-Win32\lib;%LIB%
-  set INCLUDE=C:\Program Files (x86)\OpenSSL-Win32\include;%INCLUDE%
-  pip3 install -U automagica
-  ```
+<details>
+<summary>
+    Click to show how to <b>fix installation errors</b> on Windows
+</summary>
+</br>
+When installing <code>automagica</code>, you could encounter errors with the <code>cryptography</code> module like <code>Cannot open include file: 'openssl/opensslv.h': No such file or directory</code>
 
-- For browser automation, [Google Chrome](https://www.google.com/chrome/) must be installed.
+<ol type="1">
+<li>Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a></li>
+<li>Install <a href="https://slproweb.com/download/Win64OpenSSL-1_1_1d.exe">Win64 OpenSSL v1.1.1d</a></li>
+<li>Open CMD as <i>admin</i> and type:</li>
+
+<pre>
+set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
+
+set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
+
+pip3 install automagica==2.0.25
+</pre>
+</ol>
+
+
+
+</details>
+
+#### PM4PY
+
+To enable process mining techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
+
+- On Windows, follow <a href="https://pm4py.fit.fraunhofer.de/install-windows-64">these instructions.</a>
+
+- On MacOS:
+    ```bash
+    brew install graphviz
+    pip3 install pm4py
+    ```
+
+<details>
+<summary>
+    Click to show how to <b>fix installation errors</b> on Windows
+</summary>
+</br>
+
+If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>. 
+
+</details>
+
+#### Browser automation
+
+For browser automation, [Google Chrome](https://www.google.com/chrome/) must be installed.
+
 
 ## Modules
 
@@ -117,28 +158,3 @@ The project is composed by the following modules:
 -   [x] Process Mining analysis
 
 A complete list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
-
-## Project structure
-
-```
-.
-├── README.md
-├── RPA
-├── docs
-├── logs
-├── mainLogger.py
-├── modules
-│   ├── browserlogger
-│   ├── clipboardEvents.py
-│   ├── excelAddinMac
-│   ├── officeEvents.py
-│   └── systemEvents.py
-├── requirements.txt
-└── utils
-    ├── GUI.py
-    ├── config.py
-    ├── consumerServer.py
-    ├── generateRPAScript.py
-    └── utils.py
-
-```

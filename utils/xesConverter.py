@@ -57,7 +57,7 @@ class CSV2XES:
             elif column_header == self.events_header:
                 attribute = XFactory.create_attribute_literal("concept:name", value)
             # if attributes_to_consider is empty I take all the attributes from csv, else only those in the list
-            elif (not self.attributes_to_consider) or (column_header in self.attributes_to_consider):
+            elif (self.attributes_to_consider == []) or (column_header in self.attributes_to_consider):
                 attribute = XFactory.create_attribute_literal(column_header, value)
             else:
                 continue
@@ -88,6 +88,9 @@ class CSV2XES:
                 event = self.__convert_line_in_event(row)
                 trace.append(event)
                 log.append(trace)
+            else:
+                print(f"[CSV2XES] Can't decode timestamp {timestamp} with format {self.timestamp_format}")
+                continue
 
         # Save log in xes format
         with open(self.xes_filepath, "w") as file:

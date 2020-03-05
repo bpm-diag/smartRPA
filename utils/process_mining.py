@@ -3,19 +3,20 @@
 # https://pm4py.fit.fraunhofer.de/documentation#discovery
 # ******************************
 from threading import Thread
-
-from pm4py.objects.log.adapters.pandas import csv_import_adapter
-from pm4py.objects.conversion.log import factory as conversion_factory
-from pm4py.objects.log.importer.xes import factory as xes_importer
-from pm4py.algo.discovery.alpha import factory as alpha_miner
-from pm4py.algo.discovery.heuristics import factory as heuristics_miner
-from pm4py.algo.discovery.dfg import factory as dfg_factory
-from pm4py.visualization.petrinet import factory as vis_factory
-from pm4py.visualization.heuristics_net import factory as hn_vis_factory
-from pm4py.visualization.petrinet import factory as pn_vis_factory
-from pm4py.visualization.dfg import factory as dfg_vis_factory
 import utils.utils
-
+try:
+    from pm4py.objects.log.adapters.pandas import csv_import_adapter
+    from pm4py.objects.conversion.log import factory as conversion_factory
+    from pm4py.objects.log.importer.xes import factory as xes_importer
+    from pm4py.algo.discovery.alpha import factory as alpha_miner
+    from pm4py.algo.discovery.heuristics import factory as heuristics_miner
+    from pm4py.algo.discovery.dfg import factory as dfg_factory
+    from pm4py.visualization.petrinet import factory as vis_factory
+    from pm4py.visualization.heuristics_net import factory as hn_vis_factory
+    from pm4py.visualization.petrinet import factory as pn_vis_factory
+    from pm4py.visualization.dfg import factory as dfg_vis_factory
+except ImportError as e:
+    print("[PROCESS MINING] Process mining analysis has been disabled because 'pm4py' module is not installed. See https://github.com/marco2012/ComputerLogger#PM4PY")
 
 class ProcessMining:
 

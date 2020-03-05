@@ -34,6 +34,9 @@ class Preferences(QMainWindow):
             Qt.WindowCloseButtonHint |
             Qt.WindowMinimizeButtonHint
         )
+        self.setWindowTitle("")
+        if WINDOWS:
+            self.resize(360, 320)
 
         slider_minimum = 1
         slider_maximum = 10
@@ -62,9 +65,7 @@ class Preferences(QMainWindow):
         label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
 
         self.slider_label = QLabel(alignment=Qt.AlignCenter)
-        self.slider_label.setToolTip("When the selected number of runs is reached, all CSV logs collected are merged "
-                                     "into one and a XES file is automatically generated, to be used for process "
-                                     "mining techniques")
+        self.slider_label.setToolTip("When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file is automatically generated, to be used for process mining techniques")
         self.handle_slider()
 
         confirmButton = QPushButton("OK")
@@ -78,6 +79,7 @@ class Preferences(QMainWindow):
         vbox = QVBoxLayout()
         vbox.addWidget(self.slider_label)
         vbox.addWidget(self.lcd)
+        vbox.addSpacing(10)
         vbox.addWidget(self.sld)
         vbox.addLayout(hbox)
         vbox.addWidget(confirmButton)
@@ -601,7 +603,11 @@ class WidgetGallery(QMainWindow, QDialog):
                                                                    "event_dest_path", "clipboard_content"]
                                            ).run()
                 # generate process mining from xes
-                utils.process_mining.ProcessMining(xes_filepath).run()
+                try:
+                    import pm4py
+                    utils.process_mining.ProcessMining(xes_filepath).run()
+                except ImportError as e:
+                    print("[GUI] Can't apply process mining techniques to generated XES file because 'pm4py' module is not installed. See https://github.com/marco2012/ComputerLogger#PM4PY")
 
             # reset
             self.runCount = 0

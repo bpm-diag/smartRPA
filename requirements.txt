@@ -12,7 +12,6 @@ nativeconfig==3.4.0
 pynput==1.6.7
 selenium==3.7.0
 opyenxes==0.3.0
-pm4py==1.2.11
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"
 pylnk3==0.3.0; platform_system == "Windows"
@@ -21,3 +20,4 @@ WMI==1.4.9; platform_system == "Windows"
 applescript==2019.4.13; platform_system == "Darwin"
 MacFSEvents==0.8.1; platform_system == "Darwin"
 pyobjc-core==6.1; platform_system == "Darwin"
+# pm4py==1.2.11; platform_system == "Darwin"

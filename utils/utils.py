@@ -9,6 +9,7 @@ from datetime import datetime
 import os
 import plistlib
 import importlib
+from importlib import util
 from threading import Thread
 from platform import system
 import utils.config
@@ -16,8 +17,8 @@ import utils.consumerServer
 import pandas as pd
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
-session = FuturesSession()
 
+session = FuturesSession()
 
 # ************
 # Constants
@@ -31,6 +32,7 @@ LINUX = (system() == "Linux")
 if WINDOWS:
     import winreg
     from win32com.shell import shell, shellcon
+
     RECENT_ITEMS_PATH_WIN = shell.SHGetFolderPath(0, shellcon.CSIDL_RECENT, None, 0)
     # RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
 
@@ -114,6 +116,7 @@ def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
     except (pd.errors.ParserError, FileNotFoundError) as e:
         print(e)
         return False
+
 
 # return python module install location
 def getPythonModuleLocation(module_name):

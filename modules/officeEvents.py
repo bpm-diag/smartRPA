@@ -812,6 +812,7 @@ def powerpointEvents(filename=None):
             self.seen_events = None
             self.Visible = 1
             self.presentationSlides = dict()
+            self.mouse = mouse.Controller()
 
         # ************
         # Utils
@@ -846,18 +847,20 @@ def powerpointEvents(filename=None):
                 "event_type": "activateWindow",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWindowDeactivate(self, Pres, Wn):
-            print(f"{timestamp()} {USER} Powerpoint activateWindow {Pres.Name} {Pres.Path} ")
+            print(f"{timestamp()} {USER} Powerpoint deactivateWindow {Pres.Name} {Pres.Path} ")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
-                "event_type": "activateWindow",
+                "event_type": "deactivateWindow",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnWindowBeforeRightClick(self, Sel, Cancel):
@@ -870,6 +873,7 @@ def powerpointEvents(filename=None):
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "rightClickPresentation",
+                "mouse_coord": self.mouse.position
             })
 
         def OnWindowBeforeDoubleClick(self, Sel, Cancel):
@@ -882,6 +886,7 @@ def powerpointEvents(filename=None):
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "doubleClickPresentation",
+                "mouse_coord": self.mouse.position
             })
 
         # ************
@@ -899,20 +904,22 @@ def powerpointEvents(filename=None):
                 "event_type": "newPresentation",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
+                "mouse_coord": self.mouse.position
             })
 
         def OnPresentationNewSlide(self, Sld):
             self.addSlide(Sld)
-            print(f"{timestamp()} {USER} Powerpoint newPresentation {Sld.Name} {Sld.SlideNumber} {self.getSlides()}")
+            print(f"{timestamp()} {USER} Powerpoint newPresentationSlide {Sld.Name} {Sld.SlideNumber} {self.getSlides()}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
-                "event_type": "newPresentation",
+                "event_type": "newPresentationSlide",
                 "title": Sld.Name,
                 "id": Sld.SlideNumber,
-                "slides": self.getSlides()
+                "slides": self.getSlides(),
+                "mouse_coord": self.mouse.position
             })
 
         def OnPresentationBeforeClose(self, Pres, Cancel):
@@ -925,7 +932,8 @@ def powerpointEvents(filename=None):
                 "event_type": "closePresentation",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
-                "slides": self.getSlides()
+                "slides": self.getSlides(),
+                "mouse_coord": self.mouse.position
             })
             self.presentationSlides.clear()
 
@@ -939,7 +947,8 @@ def powerpointEvents(filename=None):
                 "event_type": "savePresentation",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
-                "slides": self.getSlides()
+                "slides": self.getSlides(),
+                "mouse_coord": self.mouse.position
             })
 
         def OnAfterPresentationOpen(self, Pres):
@@ -969,13 +978,13 @@ def powerpointEvents(filename=None):
             })
 
         def OnPresentationPrint(self, Pres):
-            print(f"{timestamp()} {USER} Powerpoint openPresentation {Pres.Name} {self.getSlides()}")
+            print(f"{timestamp()} {USER} Powerpoint printPresentation {Pres.Name} {self.getSlides()}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
-                "event_type": "openPresentation",
+                "event_type": "printPresentation",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
                 "slides": self.getSlides()
