@@ -4,7 +4,7 @@
 # ****************************** #
 
 import os
-from nativeconfig import PreferredConfig, StringOption, BooleanOption
+from nativeconfig import PreferredConfig, StringOption, BooleanOption, IntOption
 
 
 class MyConfig(PreferredConfig):
@@ -21,3 +21,4 @@ class MyConfig(PreferredConfig):
     log_firefox = BooleanOption('log_firefox', default=False)
     log_edge = BooleanOption('log_edge', default=False)
     log_opera = BooleanOption('log_opera', default=False)
+    totalNumberOfRunGuiXes = IntOption('totalNumberOfRunGuiXes', default=1)

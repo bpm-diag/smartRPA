@@ -4,13 +4,15 @@
 # ****************************** #
 
 import sys
+
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QDir, QTimer
+from PyQt5.QtCore import Qt, QSize, QDir, QTimer, QRect, QMetaObject, pyqtSignal, QObject
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
-                             QAbstractItemView, QFileDialog, QRadioButton, QProgressDialog)
+                             QAbstractItemView, QFileDialog, QRadioButton, QProgressDialog, QMainWindow, QWidget,
+                             QDialogButtonBox, QSlider, QLCDNumber)
 import darkdetect
 from multiprocessing import Process
 from utils.utils import *
@@ -22,13 +24,72 @@ import utils.process_mining
 import utils.utils
 
 
-class WidgetGallery(QDialog):
+class Preferences(QMainWindow):
+    def __init__(self, parent=None):
+        super(Preferences, self).__init__(parent)
+
+        slider_minimum = 0
+        slider_maximum = 10
+
+        self.lcd = QLCDNumber(self)
+        self.lcd.setMinimumHeight(45)
+        self.sld = QSlider(Qt.Horizontal, self)
+        self.sld.setMinimum(slider_minimum)
+        self.sld.setMaximum(slider_maximum)
+        self.sld.valueChanged.connect(self.handle_slider)
+        label_minimum = QLabel(str(slider_minimum), alignment=Qt.AlignLeft)
+        label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight)
+
+        self.slider_label = QLabel(alignment=Qt.AlignCenter)
+        self.slider_label.setToolTip("When the selected number of runs is reached, all CSV logs collected are merged "
+                                     "into one and a XES file is automatically generated, to be used for process "
+                                     "mining techniques")
+        self.handle_slider()
+
+        confirmButton = QPushButton("OK")
+        confirmButton.setCheckable(True)
+        confirmButton.setChecked(False)
+        confirmButton.clicked.connect(self.handleButton)
+
+        hbox = QHBoxLayout()
+        hbox.addWidget(label_minimum, Qt.AlignLeft)
+        hbox.addWidget(label_maximum, Qt.AlignRight)
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.slider_label)
+        vbox.addWidget(self.lcd)
+        vbox.addWidget(self.sld)
+        vbox.addLayout(hbox)
+        vbox.addWidget(confirmButton)
+
+        wid = QWidget(self)
+        self.setCentralWidget(wid)
+        wid.setLayout(vbox)
+        wid.setGeometry(300, 300, 250, 150)
+        wid.show()
+
+    def handle_slider(self):
+        value = self.sld.value()
+        self.lcd.display(value)
+        msg = "Number of runs after which \nXES file is generated:"
+        self.slider_label.setText(msg)
+        utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = value
+
+    def handleButton(self):
+        self.close()
+
+
+class WidgetGallery(QMainWindow, QDialog):
     def __init__(self, parent=None):
         super(WidgetGallery, self).__init__(parent)
         self.originalPalette = QApplication.palette()
         self.setWindowTitle("ComputerLogger")
         self.setAppIcon()
         self.setStyle()
+
+        menu = self.menuBar().addMenu('File')
+        action = menu.addAction('Preferences...')
+        action.triggered.connect(self.handlePreferences)
+        self.preferencesDialog = Preferences(self)
 
         # create layouts
         self.createSystemLoggerGroupBox()
@@ -46,7 +107,7 @@ class WidgetGallery(QDialog):
         self.mainProcess = None
         self.officeFilename = None
         self.runCount = 0
-        self.totalNumberOfRun = 2  # TODO set with ui preferences
+        self.totalNumberOfRun = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
         self.csv_to_join = list()
 
         # Boolean variables that save the state of each checkbox
@@ -78,7 +139,11 @@ class WidgetGallery(QDialog):
         mainLayout.setRowStretch(2, 1)
         mainLayout.setColumnStretch(0, 1)
         mainLayout.setColumnStretch(1, 1)
-        self.setLayout(mainLayout)
+
+        wid = QWidget(self)
+        self.setCentralWidget(wid)
+        wid.setLayout(mainLayout)
+        # self.setLayout(mainLayout)
 
     def createSystemLoggerGroupBox(self):
         self.systemGroupBox = QGroupBox("System logger")
@@ -447,6 +512,9 @@ class WidgetGallery(QDialog):
         if OPERA:
             self.browserOperaCB.setChecked(self.allCBChecked)
 
+    def handlePreferences(self):
+        self.preferencesDialog.show()
+
     # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
         tag = self.sender().tag
@@ -489,6 +557,7 @@ class WidgetGallery(QDialog):
         # this custom made thread class return values when joined
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}" if rpa_success else "- RPA actions not available"
         self.statusListWidget.addItem(QListWidgetItem(msg))
+        print(f"[GUI] {msg}")
 
     # Combine multiple csv into one once totalNumberOfRun (defined by user in ui) is reached and generate single xes
     # file
@@ -634,7 +703,9 @@ class WidgetGallery(QDialog):
             self.mainProcess.terminate()
 
             log_filepath = utils.config.MyConfig.get_instance().log_filepath
-            self.statusListWidget.addItem(QListWidgetItem(f"- Log saved as {os.path.basename(log_filepath)}"))
+            msg = f" Log saved as {os.path.basename(log_filepath)}"
+            print(msg)
+            self.statusListWidget.addItem(QListWidgetItem(f"- {msg}"))
 
             # once log file is created, RPA actions are automatically generated for each category
             self.handleRPA(log_filepath)
