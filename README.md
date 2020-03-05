@@ -51,11 +51,13 @@ The browser extension supports 4 major browsers (<a href="https://gs.statcounter
 
 -   [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
-Once main logger is running, you must click on the browser extension to enable it.
+Once main logger is running, **you must click** on the browser extension to enable it.
 
 #### 3. **Install Excel Addin (MacOS Only)**
 
-The excel addin is required to enable logging <u>only on MacOS</u>. [`NodeJS`](https://nodejs.org/en/download/) must be installed to run this addin.
+The excel addin is required to enable logging <u>only on MacOS</u>.
+
+[`NodeJS`](https://nodejs.org/en/download/) must be installed to run this addin.
 
 ```bash
 cd modules/excelAddinMac
@@ -79,48 +81,34 @@ _Robotic Process Automation_ scripts are automatically generated for each log in
 
 #### Automagica
 
-The following additional dependency is required for RPA and must be installed manually:
+To run the generated RPA scripts you must install `automagica` module.
 
-```bash
-pip3 install automagica==2.0.25
-```
+- On Windows:
 
-After installing `automagica`, _if you're on MacOS_, you must run:
+    1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
+    2. Install <a href="https://slproweb.com/download/Win64OpenSSL-1_1_1d.exe">Win64 OpenSSL v1.1.1d</a>
+    3. Open CMD as <i>admin</i> and type:
 
-```bash
-python3 fix_permissions.py
-```
+    ```cmd
+    set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
 
-<details>
-<summary>
-    Click to show how to <b>fix installation errors</b> on Windows
-</summary>
-</br>
-When installing <code>automagica</code>, you could encounter errors with the <code>cryptography</code> module like <code>Cannot open include file: 'openssl/opensslv.h': No such file or directory</code>
+    set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
 
-<ol type="1">
-<li>Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a></li>
-<li>Install <a href="https://slproweb.com/download/Win64OpenSSL-1_1_1d.exe">Win64 OpenSSL v1.1.1d</a></li>
-<li>Open CMD as <i>admin</i> and type:</li>
+    pip3 install automagica==2.0.25
+    ```
 
-<pre>
-set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
+- On MacOS:
 
-set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
-
-pip3 install automagica==2.0.25
-</pre>
-</ol>
-
-
-
-</details>
+    ```bash
+    pip3 install automagica==2.0.25
+    python3 utils/fix_automagica_permissions.py
+    ```
 
 #### PM4PY
 
 To enable process mining techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
 
-- On Windows, follow <a href="https://pm4py.fit.fraunhofer.de/install-windows-64">these instructions.</a>
+- On Windows, follow <a href="https://pm4py.fit.fraunhofer.de/install-windows-64" target='_blank'>these instructions.</a>
 
 - On MacOS:
     ```bash

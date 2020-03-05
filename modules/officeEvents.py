@@ -9,7 +9,7 @@ from re import findall
 import os
 from shutil import rmtree
 from itertools import chain
-from utils.utils import timestamp, session, WINDOWS, USER, MAIN_DIRECTORY
+from utils.utils import timestamp, session, WINDOWS, USER, MAIN_DIRECTORY, getActiveWindowInfo
 from utils.consumerServer import SERVER_ADDR
 import utils.config
 from pynput import mouse
@@ -35,7 +35,7 @@ def excelEvents(filepath=None):
         def __init__(self):
             self.seen_events = {}
             self.Visible = 1
-            self.mouse = mouse.Controller()
+            # self.mouse = mouse.Controller()
 
         def setApplication(self, application):
             self.application = application
@@ -91,8 +91,9 @@ def excelEvents(filepath=None):
             })
 
         def OnWindowResize(self, Wb, Wn):
+            x, y, width, height = getActiveWindowInfo('size')
             print(
-                f"{timestamp()} {USER} resizeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} size:{Wn.Width}x{Wn.Height} ")
+                f"{timestamp()} {USER} resizeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} size {x},{y},{width},{height} ")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
@@ -104,7 +105,8 @@ def excelEvents(filepath=None):
                 "worksheets": self.getWorksheets(None, Wb),
                 "id": Wn.WindowNumber,
                 "event_src_path": Wb.Path,
-                "window_size": f"{Wn.Width}x{Wn.Height}"
+                "window_size": f"{x},{y},{width},{height}"
+               # "window_size": f"{Wn.Width},{Wn.Height}"
             })
 
         # ************
@@ -113,9 +115,10 @@ def excelEvents(filepath=None):
 
         def OnNewWorkbook(self, Wb):
             self.seen_events["OnNewWorkbook"] = None
-
+            # get excel window size
+            x, y, width, height = getActiveWindowInfo('size')
             print(
-                f"{timestamp()} {USER} newWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+                f"{timestamp()} {USER} newWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path} window_size {x},{y},{width},{height}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
@@ -125,7 +128,8 @@ def excelEvents(filepath=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": Wb.Path
+                "event_src_path": Wb.Path,
+                "window_size": f"{x},{y},{width},{height}"
             })
 
         def OnWorkbookOpen(self, Wb):
@@ -156,7 +160,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
@@ -176,7 +180,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "description": description,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWorkbookAfterSave(self, Wb, Success):
@@ -193,7 +197,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": savedPath,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWorkbookAddinInstall(self, Wb):
@@ -269,7 +273,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWorkbookBeforeClose(self, Wb, Cancel):
@@ -285,7 +289,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWorkbookActivate(self, Wb):
@@ -301,7 +305,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWorkbookDeactivate(self, Wb):
@@ -317,7 +321,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWorkbookModelChange(self, Wb, Changes):
@@ -394,7 +398,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "worksheets": self.getWorksheets(Sh, None),
                 "event_src_path": Sh.Parent.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnSheetBeforeDelete(self, Sh):
@@ -409,7 +413,7 @@ def excelEvents(filepath=None):
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
                 "worksheets": self.getWorksheets(Sh, None),
-                "mouse_coord": self.mouse.position
+                
             }),
 
         def OnSheetBeforeDoubleClick(self, Sh, Target, Cancel):
@@ -431,7 +435,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Address.replace('$', ''),
                 "cell_content": value,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnSheetBeforeRightClick(self, Sh, Target, Cancel):
@@ -452,7 +456,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Address.replace('$', ''),
                 "cell_content": value,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnSheetCalculate(self, Sh):
@@ -466,7 +470,7 @@ def excelEvents(filepath=None):
                 "event_type": "sheetCalculate",
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnSheetChange(self, Sh, Target):
@@ -507,7 +511,7 @@ def excelEvents(filepath=None):
                 "cell_range": cell_range,
                 "cell_range_number": cell_range_number,
                 "cell_content": value,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnSheetDeactivate(self, Sh):
@@ -524,7 +528,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "worksheets": self.getWorksheets(Sh, None),
                 "event_src_path": Sh.Parent.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnSheetFollowHyperlink(self, Sh, Target):
@@ -540,7 +544,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Range.Address.replace('$', ''),
                 "browser_url": Target.Address,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnSheetPivotTableAfterValueChange(self, Sh, TargetPivotTable, TargetRange):
@@ -586,7 +590,7 @@ def excelEvents(filepath=None):
                     "cell_range": cells_selected,
                     "cell_range_number": cell_range_number,
                     "cell_content": value,
-                    "mouse_coord": self.mouse.position
+                    
                 })
 
         def OnSheetTableUpdate(self, Sh, Target):
@@ -812,7 +816,7 @@ def powerpointEvents(filename=None):
             self.seen_events = None
             self.Visible = 1
             self.presentationSlides = dict()
-            self.mouse = mouse.Controller()
+            # self.mouse = mouse.Controller()
 
         # ************
         # Utils
@@ -847,7 +851,7 @@ def powerpointEvents(filename=None):
                 "event_type": "activateWindow",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWindowDeactivate(self, Pres, Wn):
@@ -860,7 +864,7 @@ def powerpointEvents(filename=None):
                 "event_type": "deactivateWindow",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWindowBeforeRightClick(self, Sel, Cancel):
@@ -873,7 +877,7 @@ def powerpointEvents(filename=None):
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "rightClickPresentation",
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnWindowBeforeDoubleClick(self, Sel, Cancel):
@@ -886,7 +890,7 @@ def powerpointEvents(filename=None):
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "doubleClickPresentation",
-                "mouse_coord": self.mouse.position
+                
             })
 
         # ************
@@ -904,7 +908,7 @@ def powerpointEvents(filename=None):
                 "event_type": "newPresentation",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnPresentationNewSlide(self, Sld):
@@ -919,7 +923,7 @@ def powerpointEvents(filename=None):
                 "title": Sld.Name,
                 "id": Sld.SlideNumber,
                 "slides": self.getSlides(),
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnPresentationBeforeClose(self, Pres, Cancel):
@@ -933,7 +937,7 @@ def powerpointEvents(filename=None):
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
                 "slides": self.getSlides(),
-                "mouse_coord": self.mouse.position
+                
             })
             self.presentationSlides.clear()
 
@@ -948,7 +952,7 @@ def powerpointEvents(filename=None):
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
                 "slides": self.getSlides(),
-                "mouse_coord": self.mouse.position
+                
             })
 
         def OnAfterPresentationOpen(self, Pres):

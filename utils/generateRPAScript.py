@@ -13,15 +13,23 @@ import os
 from threading import Thread
 import utils.config
 import utils
-from utils.utils import CHROME, DESKTOP
-from pynput import mouse
+from utils.utils import CHROME, DESKTOP, getActiveWindowInfo
 
 
 class RPAScript:
+    """This class generate RPA scripts for a given csv
 
-    def __init__(self, csv_file_path, unified_RPA_script, delay_between_actions=0.8):
+    :param csv_file_path: Path of the csv to analyse
+    :param generate_all_scripts: If True, all RPA scripts are generated, both individual (like excel, browser) and unified
+    :param unified_RPA_script: if True, a single RPA script is generated containing all the events in the log
+    :return: boolean indicating success status
+    :rtype: bool
+    """
+
+    def __init__(self, csv_file_path, generate_all_scripts=True, unified_RPA_script=False, delay_between_actions=0.8):
         self.csv_file_path = csv_file_path
         self.unified_RPA_script = unified_RPA_script
+        self.generate_all_scripts = generate_all_scripts
         self.__delay_between_actions = delay_between_actions
         self.__dataframe = pandas.read_csv(csv_file_path)
         self.__SaveAsUI = False
@@ -42,8 +50,8 @@ from time import sleep
 try:
     from automagica import *
 except ImportError as e:
-    print("Please install 'automagica' module running 'pip3 install -U automagica'")
-    print("If you get openssl error check here https://github.com/marco2012/ComputerLogger#automagica")
+    print("Please install 'automagica' module running 'pip3 install automagica==2.0.25'")
+    print("If you get errors check here https://github.com/marco2012/ComputerLogger#automagica")
     sys.exit()
 \n"""
 
@@ -74,16 +82,18 @@ except ImportError as e:
             path = row['event_src_path']
         mouse_coord = row['mouse_coord']
         cb = row['clipboard_content']
+        size = row["window_size"]
 
         script.write(f"# {row['timestamp']} {e}\n")
-        if self.__delay_between_actions > 0:
+        if e not in ["openWindow", "activateWorkbook", "newWorkbook"] and self.__delay_between_actions > 0:
             script.write(f"sleep({self.__delay_between_actions})\n")
+
         # if mouse_coord field is not null for a given row
         if not pandas.isna(mouse_coord):
             # mouse_coord is like '[809, 743]', I need to take each component separately and remove the space
-            m = list(map(lambda c: c.strip(), mouse_coord.strip('[]').split(',')))
-            script.write(f"print('Moving mouse to {mouse_coord}')\n")
-            script.write(f"move_mouse_to({m[0]}, {m[1]})\n")
+            # m = list(map(lambda c: c.strip(), mouse_coord.strip('[]').split(',')))
+            script.write(f"print('Clicking {mouse_coord}')\n")
+            script.write(f"click({mouse_coord})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
@@ -94,6 +104,12 @@ except ImportError as e:
         elif e == "newWorkbook":
             script.write(f"print('Opening Excel...')\n")
             script.write("excel = Excel()\n")
+            x, y, width, height = size.split(',')
+            script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+        elif e == "resizeWindow":
+            x, y, width, height = size.split(',')
+            script.write(f"print('Resizing window to {size}')\n")
+            script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
         elif e == "addWorksheet":
             script.write(f"print('Adding worksheet {sh}')\n")
             script.write(f"excel.add_worksheet('{sh}')\n")
@@ -134,12 +150,6 @@ except ImportError as e:
         elif e == "closeWindow":
             script.write(f"print('Closing Excel...')\n")
             script.write("excel.quit()\n")
-        # elif e == "resizeWindow":
-        #     size = row["window_size"]
-        #     width = size.split('x')[0]
-        #     height = size.split('x')[1]
-        #     script.write(f"print('Resizing window to {size}')\n")
-        #     script.write(f"resize_window({wb} - Excel, 0, 0, {width}, {height})\n")
         # elif e == "doubleClickCellWithValue":
         #     script.write(f"print('Double clicking on cell {cell_range} with value {value}')\n")
         #     script.write(f"double_click_on_text_ocr(text='{value}')\n")
@@ -367,13 +377,14 @@ except NoSuchElementException:
 
     # Generate excel RPA python script
     def _generateExcelRPA(self):
-        df = self.__dataframe.query('application=="Microsoft Excel" | category=="Clipboard"')
+        df = self.__dataframe.query(' application=="Microsoft Excel" | category=="Clipboard" | category=="MouseClick" ')
         if df.empty:
             return False
         RPA_filepath = self.__createRPAFile("_ExcelRPA.py")
         print(f"[RPA] Generating Excel RPA")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
+            script.write("from win32gui import GetForegroundWindow, GetWindowText\n")
             for index, row in df.iterrows():
                 self.__handle_excel_events(script, row)
         return True
@@ -432,7 +443,7 @@ try:
     browser.get('about:blank') 
 except WebDriverException as e:
     print(e)
-    print("If you get 'Permission denied' you did not set the correct permissions, run 'fix_permissions.py' first.")
+    print("If you get 'Permission denied' you did not set the correct permissions, run 'fix_automagica_permissions.py' first.")
     sys.exit()
     \n""")
             for index, row in df.iterrows():
@@ -461,12 +472,20 @@ except WebDriverException as e:
             print(f"[RPA] Can't find specified csv_file_path {self.csv_file_path}")
             self.success = False
         else:
-            if self.unified_RPA_script:
+            if self.generate_all_scripts:
                 self._generateUnifiedRPA()
-            else:
                 self._generateExcelRPA()
                 self._generatePowerpointRPA()
                 self._generateSystemRPA()
                 self._generateBrowserRPA()
+            else:
+                if self.unified_RPA_script:
+                    self._generateUnifiedRPA()
+                else:
+                    self._generateExcelRPA()
+                    self._generatePowerpointRPA()
+                    self._generateSystemRPA()
+                    self._generateBrowserRPA()
+
             self.success = True
 

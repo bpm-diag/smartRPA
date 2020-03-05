@@ -1,12 +1,13 @@
 # ******************************
-# Setup script
+# Fix automagica permissions script
 # Must be executed only the first time, used to set correct permissions
 # ******************************
 
-import utils
-from utils.utils import WINDOWS
 import subprocess
 import sys, os
+from platform import system
+import importlib
+from importlib import util
 
 try:
     from automagica import *
@@ -16,12 +17,19 @@ except ImportError as e:
     sys.exit()
 
 
+# return python module install location
+def getPythonModuleLocation(module_name):
+    module = importlib.util.find_spec(module_name)
+    if module:
+        return module.submodule_search_locations[0]
+
+
 # automagica post install
 if __name__ == '__main__':
-    if WINDOWS:
+    if system() == "Windows":
         print("[SETUP] You're ready!")
     else:
-        automagica_path = utils.utils.getPythonModuleLocation('automagica')
+        automagica_path = getPythonModuleLocation('automagica')
         print(f"[SETUP] automagica module is installed in: {automagica_path} ")
 
         # Make binaries executable
@@ -38,4 +46,5 @@ if __name__ == '__main__':
         if os.access(binaries_path, os.X_OK):
             print("[SETUP] You're ready!")
         else:
-            print(f"[SETUP] Something went wrong when setting executable permissions, try to set the manually executing 'chmod -R +x {binaries_path}' ")
+            print(
+                f"[SETUP] Something went wrong when setting executable permissions, try to set the manually executing 'chmod -R +x {binaries_path}' ")

@@ -32,6 +32,7 @@ LINUX = (system() == "Linux")
 if WINDOWS:
     import winreg
     from win32com.shell import shell, shellcon
+    import win32gui
 
     RECENT_ITEMS_PATH_WIN = shell.SHGetFolderPath(0, shellcon.CSIDL_RECENT, None, 0)
     # RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
@@ -117,6 +118,18 @@ def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
         print(e)
         return False
 
+
+def getActiveWindowInfo(parameter):
+    try:
+        hwnd = win32gui.GetForegroundWindow()
+        name = win32gui.GetWindowText(hwnd)
+        x0, y0, x1, y1 = win32gui.GetWindowRect(hwnd)
+        if parameter == "name":
+            return name
+        elif parameter == "size":
+            return x0, y0, x1, y1
+    except Exception:
+        pass
 
 # return python module install location
 def getPythonModuleLocation(module_name):

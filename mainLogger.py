@@ -12,7 +12,7 @@ import utils.GUI
 import utils.config
 import utils.consumerServer
 import utils.utils
-from modules import systemEvents
+from modules import systemEvents, mouseEvents
 from modules import officeEvents
 from modules import clipboardEvents
 
@@ -112,6 +112,10 @@ def startLogger(systemLoggerFilesFolder,
             t5 = Thread(target=officeEvents.excelEvents)
             t5.daemon = True
             t5.start()
+
+            t14 = Thread(target=mouseEvents.logMouse)
+            t14.daemon = True
+            t14.start()
 
         if officeExcel and MAC:
             t13 = Thread(target=officeEvents.excelEventsMacServer)

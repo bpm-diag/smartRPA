@@ -573,7 +573,7 @@ class WidgetGallery(QMainWindow, QDialog):
 
     def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
-        rpa = utils.generateRPAScript.RPAScript(log_filepath, unified_RPA_script=False)
+        rpa = utils.generateRPAScript.RPAScript(log_filepath, generate_all_scripts=True, unified_RPA_script=False)
         rpa_success = rpa.run()
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}" if rpa_success else "- RPA actions not available"
         self.statusListWidget.addItem(QListWidgetItem(msg))
@@ -595,7 +595,10 @@ class WidgetGallery(QMainWindow, QDialog):
             xes_filepath = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_name.strip('_combined'),
                                         csv_name + '.xes')
             # if merging csv is succesful
-            if combineMultipleCsv(self.csv_to_join, combined_csv_filepath):
+            t0 = ThreadWithReturnValue(target=combineMultipleCsv, args=[self.csv_to_join, combined_csv_filepath])
+            t0.start()
+            if t0.join():
+            # if combineMultipleCsv(self.csv_to_join, combined_csv_filepath):
                 # convert merged csv to xes
                 utils.xesConverter.CSV2XES(combined_csv_filepath,
                                            xes_filepath,
