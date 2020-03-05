@@ -154,10 +154,11 @@ document.body.onclick = e => {
         tag_name: target.name,
         tag_title: target.title,
         tag_value: target.value,
-        tag_html: html.substring(0,50), //take only the first 50 characters otherwise it's too long
+        tag_html: html.substring(0,50) || "", //take only the first 50 characters otherwise it's too long
         tag_href: target.href || "",
-        tag_innerText: target.innerText.substring(0,50), //take only the first 30 characters otherwise it's too long
+        tag_innerText: target.innerText.substring(0,50) || "", //take only the first 50 characters otherwise it's too long
         tag_option: target.option,
+        tag_attributes: getTargetAttributes(target) || "",
         xpath: getXPath(target)
     };
 
@@ -240,6 +241,7 @@ document.body.onchange = e => {
         id: target.id,
         tag_name: target.name,
         tag_value: target.value,
+        tag_attributes: getTargetAttributes(target) || "",
         xpath: getXPath(target)
     };
 

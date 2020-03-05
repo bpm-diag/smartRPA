@@ -28,23 +28,23 @@
 
 #### 1. **Install dependencies**
 
-Install project dependencies
+- Install project dependencies
 
-```bash
-pip3 install -r requirements.txt
-```
+  ```bash
+  pip3 install -r requirements.txt
+  ```
 
-Install RPA dependencies
+- Install RPA dependencies
 
-```bash
-pip3 install -U automagica
-```
+  ```bash
+  pip3 install automagica==2.0.25
+  ```
 
-Set correct permissions if you're on MacOS
+- Set correct permissions if you're on MacOS
 
-```bash
-python3 setup.py
-```
+  ```bash
+  python3 setup.py
+  ```
 
 #### 2. **Install browser extension** 
 
@@ -85,7 +85,7 @@ The resulting log csv file will be in `/logs` directory.
 The following additional dependency is required for RPA:
 
 ```bash
-pip3 install -U automagica
+pip3 install automagica==2.0.25
 ```
 It has not been added to `requirements.txt` because it could generate errors during install so it's better to install it manually.
 

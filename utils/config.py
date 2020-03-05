@@ -10,6 +10,7 @@ from nativeconfig import PreferredConfig, StringOption, BooleanOption, IntOption
 class MyConfig(PreferredConfig):
     REGISTRY_PATH = r'Software\ComputerLogger'
     JSON_PATH = os.path.expanduser('~/.config/ComputerLogger/config')
+
     # directory of main file. Used when creating logs or rpa files to know where to save them
     main_directory = StringOption('main_directory')
     # path of the current log file being written. It must be saved here because I need this reference when main
@@ -21,4 +22,6 @@ class MyConfig(PreferredConfig):
     log_firefox = BooleanOption('log_firefox', default=False)
     log_edge = BooleanOption('log_edge', default=False)
     log_opera = BooleanOption('log_opera', default=False)
-    totalNumberOfRunGuiXes = IntOption('totalNumberOfRunGuiXes', default=1)
+    # When totalNumberOfRunGuiXes of runs is reached (set by user in preferences), all CSV logs collected are merged
+    # into one and a XES file is automatically generated, to be used for process mining techniques
+    totalNumberOfRunGuiXes = IntOption('totalNumberOfRunGuiXes', default=2)

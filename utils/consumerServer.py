@@ -31,7 +31,7 @@ HEADER = [
     "id", "title", "description", "browser_url", "eventQual", "tab_moved_from_index", "tab_moved_to_index",
     "newZoomFactor", "oldZoomFactor", "tab_pinned", "tab_audible", "tab_muted", "window_ingognito", "file_size",
     "tag_category", "tag_type", "tag_name", "tag_title", "tag_value", "tag_checked", "tag_html", "tag_href",
-    "tag_innerText", "tag_option", "xpath"
+    "tag_innerText", "tag_option", "tag_attributes", "xpath"
 ]
 
 

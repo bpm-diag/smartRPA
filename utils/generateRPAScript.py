@@ -19,7 +19,7 @@ from pynput import mouse
 
 class RPAScript:
 
-    def __init__(self, csv_file_path, delay_between_actions=0.8, unified_RPA_script=False):
+    def __init__(self, csv_file_path, unified_RPA_script=False, delay_between_actions=0.8):
         self.csv_file_path = csv_file_path
         self.unified_RPA_script = unified_RPA_script
         self.__delay_between_actions = delay_between_actions
@@ -76,7 +76,8 @@ except ImportError as e:
         cb = row['clipboard_content']
 
         script.write(f"# {row['timestamp']} {e}\n")
-        script.write(f"sleep({self.__delay_between_actions})\n")
+        if self.__delay_between_actions > 0:
+            script.write(f"sleep({self.__delay_between_actions})\n")
         # if mouse_coord field is not null for a given row
         if not pandas.isna(mouse_coord):
             # mouse_coord is like '[809, 743]', I need to take each component separately and remove the space
@@ -143,6 +144,9 @@ except ImportError as e:
         #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
         #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
 
+    def __handle_powerpoint_events(self, script, row):
+        return False
+
     def __handle_system_events(self, script, row):
         e = row['event_type']
         cb = row['clipboard_content']
@@ -159,7 +163,8 @@ except ImportError as e:
 
         if e not in ["selectedFile", "selectedFolder"]:
             script.write(f"# {row['timestamp']} {e}\n")
-            script.write(f"sleep({self.__delay_between_actions})\n")
+            if self.__delay_between_actions > 0:
+                script.write(f"sleep({self.__delay_between_actions})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
@@ -246,7 +251,7 @@ except ImportError as e:
         value = row['tag_value']
 
         script.write(f"# {row['timestamp']} {e}\n")
-        if e not in ["newWindow", "closeWindow", "typed", "submit", "formSubmit"]:
+        if e not in ["newWindow", "closeWindow", "typed", "submit", "formSubmit"] and self.__delay_between_actions > 0:
             script.write(f"sleep({self.__delay_between_actions})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
@@ -262,9 +267,9 @@ except ImportError as e:
         elif e == "selectTab":
             script.write(f"print('Selecting tab {id}')\n")
             script.write(f"""
-            if {id} <= len(browser.window_handles):
-                browser.switch_to.window(browser.window_handles[{id}])\n
-            """)
+if {id} <= len(browser.window_handles):
+    browser.switch_to.window(browser.window_handles[{id}])\n
+""")
         elif e == "closeTab":
             script.write(f"print('Closing tab')\n")
             script.write(f"browser.close()\n")
@@ -287,10 +292,11 @@ except ImportError as e:
                 script.write(f"browser.find_element_by_xpath('{xpath}').send_keys('{value}')\n")
         elif e == "clickButton" or e == "clickRadioButton" or e == "mouseClick":
             script.write(f"print('Clicking button')\n")
-            script.write(f"""try:
-                browser.find_element_by_xpath('{xpath}').click()
-            except NoSuchElementException:
-                pass
+            script.write(f"""
+try:
+    browser.find_element_by_xpath('{xpath}').click()
+except NoSuchElementException:
+    pass
             """)
         elif e == "doubleClick" and xpath != '':
             script.write(f"print('Double click')\n")
@@ -332,6 +338,19 @@ except ImportError as e:
                 self.__handle_excel_events(script, row)
         return True
 
+    def _generatePowerpointRPA(self):
+        # df = self.__dataframe.query('application=="Microsoft Powerpoint" | category=="Clipboard"')
+        # if df.empty:
+        #     return False
+        # RPA_filepath = self.__createRPAFile("_PowerpointRPA.py")
+        # print(f"[RPA] Generating Powerpoint RPA")
+        # with open(RPA_filepath, 'w') as script:
+        #     script.write(self.__createHeader())
+        #     for index, row in df.iterrows():
+        #         self.__handle_powerpoint_events(script, row)
+        # return True
+        return False
+
     # Generate system RPA python script
     def _generateSystemRPA(self):
         df = self.__dataframe.query('category=="OperatingSystem" | category=="Clipboard"')
@@ -359,21 +378,22 @@ except ImportError as e:
         RPA_filepath = self.__createRPAFile("_BrowserRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
-            script.write("""try:
-        from selenium.common.exceptions import *
-        from selenium.webdriver.common.keys import Keys
-        from selenium.webdriver.common.action_chains import ActionChains
-        from selenium.webdriver.support.ui import Select
-        from selenium.webdriver.support.ui import WebDriverWait
-        from selenium.webdriver.support import expected_conditions
-        from selenium.webdriver.common.by import By
-        print("Opening Chrome...")
-        browser = Chrome(incognito=False, focus_window=True)
-        browser.get('about:blank') 
-    except WebDriverException as e:
-        print(e)
-        print("If you get 'Permission denied' you did not set the correct permissions, run 'setup.py' first.")
-        sys.exit()
+            script.write("""
+try:
+    from selenium.common.exceptions import *
+    from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.common.action_chains import ActionChains
+    from selenium.webdriver.support.ui import Select
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions
+    from selenium.webdriver.common.by import By
+    print("Opening Chrome...")
+    browser = Chrome(incognito=False, focus_window=True)
+    browser.get('about:blank') 
+except WebDriverException as e:
+    print(e)
+    print("If you get 'Permission denied' you did not set the correct permissions, run 'setup.py' first.")
+    sys.exit()
     \n""")
             for index, row in df.iterrows():
                 self.__handle_browser_events(script, row)
@@ -389,6 +409,7 @@ except ImportError as e:
             script.write(self.__createHeader())
             for index, row in df.iterrows():
                 self.__handle_excel_events(script, row)
+                self.__handle_powerpoint_events(script, row)
                 self.__handle_system_events(script, row)
                 self.__handle_browser_events(script, row)
         return True
@@ -404,6 +425,7 @@ except ImportError as e:
                 self._generateUnifiedRPA()
             else:
                 self._generateExcelRPA()
+                self._generatePowerpointRPA()
                 self._generateSystemRPA()
                 self._generateBrowserRPA()
             self.success = True

@@ -102,14 +102,16 @@ def getChromeVersionMac():
 
 
 def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
+    # make sure that given csv to combine actually exist in system
+    existing_csv_to_combine = [p for p in list_of_csv_to_combine if os.path.exists(p)]
     try:
         # combine all files in the list
-        combined_csv = pd.concat([pd.read_csv(f) for f in list_of_csv_to_combine])
+        combined_csv = pd.concat([pd.read_csv(f) for f in existing_csv_to_combine])
         # export to csv
         combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
         print(f"[UTILS] Multiple csv combined in {combined_csv_path}")
         return True
-    except pd.errors.ParserError as e:
+    except (pd.errors.ParserError, FileNotFoundError) as e:
         print(e)
         return False
 

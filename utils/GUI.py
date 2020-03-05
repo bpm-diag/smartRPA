@@ -4,15 +4,14 @@
 # ****************************** #
 
 import sys
-
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QDir, QTimer, QRect, QMetaObject, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, QSize, QDir, QTimer
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
-                             QAbstractItemView, QFileDialog, QRadioButton, QProgressDialog, QMainWindow, QWidget,
-                             QDialogButtonBox, QSlider, QLCDNumber)
+                             QAbstractItemView, QFileDialog, QRadioButton, QProgressDialog,
+                             QMainWindow, QWidget, QSlider, QLCDNumber)
 import darkdetect
 from multiprocessing import Process
 from utils.utils import *
@@ -24,21 +23,43 @@ import utils.process_mining
 import utils.utils
 
 
+# Preferences window
 class Preferences(QMainWindow):
     def __init__(self, parent=None):
         super(Preferences, self).__init__(parent)
+        self.setWindowFlags(
+            Qt.Window |
+            Qt.WindowTitleHint |
+            Qt.CustomizeWindowHint |
+            Qt.WindowCloseButtonHint |
+            Qt.WindowMinimizeButtonHint
+        )
 
-        slider_minimum = 0
+        slider_minimum = 1
         slider_maximum = 10
 
         self.lcd = QLCDNumber(self)
         self.lcd.setMinimumHeight(45)
+
         self.sld = QSlider(Qt.Horizontal, self)
         self.sld.setMinimum(slider_minimum)
         self.sld.setMaximum(slider_maximum)
+        self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
         self.sld.valueChanged.connect(self.handle_slider)
-        label_minimum = QLabel(str(slider_minimum), alignment=Qt.AlignLeft)
-        label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight)
+
+        if WINDOWS:
+            monospaceFont = 'Lucida Console'
+            fontSize = 10
+        elif MAC:
+            monospaceFont = 'Monaco'
+            fontSize = 13
+        else:
+            monospaceFont = 'monospace'
+            fontSize = 13
+
+        font = QFont(monospaceFont, fontSize, QFont.Normal)
+        label_minimum = QLabel(str(slider_minimum), alignment=Qt.AlignLeft, font=font)
+        label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
 
         self.slider_label = QLabel(alignment=Qt.AlignCenter)
         self.slider_label.setToolTip("When the selected number of runs is reached, all CSV logs collected are merged "
@@ -550,11 +571,8 @@ class WidgetGallery(QMainWindow, QDialog):
 
     def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
-        # t0 = ThreadWithReturnValue(target=utils.generateRPAScript.generateRPAScript, args=[log_filepath])
-        # t0.start()
         rpa = utils.generateRPAScript.RPAScript(log_filepath, unified_RPA_script=False)
         rpa_success = rpa.run()
-        # this custom made thread class return values when joined
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}" if rpa_success else "- RPA actions not available"
         self.statusListWidget.addItem(QListWidgetItem(msg))
         print(f"[GUI] {msg}")
@@ -562,10 +580,11 @@ class WidgetGallery(QMainWindow, QDialog):
     # Combine multiple csv into one once totalNumberOfRun (defined by user in ui) is reached and generate single xes
     # file
     def handleRunCount(self, log_filepath):
+        self.csv_to_join.append(log_filepath)
+        print(f"[GUI] Run count = {self.runCount}, Total = {self.totalNumberOfRun}")
         # after each run append generated csv log to list, when totalNumberOfRun is reached, the csv in this list will
         # be merged into one
-        self.csv_to_join.append(log_filepath)
-        if self.runCount >= self.totalNumberOfRun:
+        if self.runCount >= self.totalNumberOfRun and self.csv_to_join:
             # use as name the last csv added to the list (used for naming RPA folder, merged csv and xes file)
             csv_filepath = self.csv_to_join[-1]
             # get csv filename from path, without extension
@@ -582,8 +601,7 @@ class WidgetGallery(QMainWindow, QDialog):
                                                                    "event_dest_path", "clipboard_content"]
                                            ).run()
                 # generate process mining from xes
-                pm = utils.process_mining.ProcessMining(xes_filepath)
-                pm.run()
+                utils.process_mining.ProcessMining(xes_filepath).run()
 
             # reset
             self.runCount = 0

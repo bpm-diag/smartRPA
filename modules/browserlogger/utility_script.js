@@ -25,13 +25,23 @@ function getBrowser() {
 // convert snake_case string to camelCase
 const toCamelCase = (s) => {
     if (typeof s === 'string' || s instanceof String){
-          return s.replace(/([-_][a-z])/ig, ($1) => {
+        return s.replace(/([-_][a-z])/ig, ($1) => {
             return $1.toUpperCase()
-              .replace('-', '')
-              .replace('_', '');
-          });
+                .replace('-', '')
+                .replace('_', '');
+        });
     } else return s;
 };
+
+// return attributes of given target element
+function getTargetAttributes(target){
+    if (typeof(target) === "undefined") return "";
+    let attributesDict = {};
+    let attr = target.attributes;
+    for (let i = 0; i < attr.length; i++)
+        attributesDict[attr[i].nodeName] = attr[i].nodeValue;
+    return attributesDict;
+}
 
 // get element xpath for easier selection during RPA
 function getXPath(node) {
@@ -46,7 +56,7 @@ function getXPath(node) {
                 ++position;
         }
         return position;
-     };
+    };
     if (node instanceof Document)
         return '/';
     for (; node && !(node instanceof Document); node = node.nodeType == Node.ATTRIBUTE_NODE ? node.ownerElement : node.parentNode) {
