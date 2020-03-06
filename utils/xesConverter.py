@@ -65,9 +65,14 @@ class CSV2XES:
         return XFactory.create_event(attribute_map)
 
     def csvToXes(self):
+
         # load csv in pandas dataframe and replace nan with None
         # https://www.w3resource.com/pandas/series/series-fillna.php
-        df = pandas.read_csv(self.csv_filepath).fillna(method='ffill')
+        try:
+            df = pandas.read_csv(self.csv_filepath, encoding="latin").fillna(method='ffill')
+        except UnicodeDecodeError as e:
+            print(f"[CSV2XES] Could not decode {self.csv_filepath}: {e}")
+            return False
 
         # create dictionary with column name as key and row data as value, like
         # {'category': 'Browser', 'event_type': 'newTab'}

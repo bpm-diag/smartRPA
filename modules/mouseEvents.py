@@ -9,17 +9,20 @@ def logMouse():
     print("[Mouse] Mouse logging started...")
 
     def _on_click(x, y, button, pressed):
-        if 'Excel' in getActiveWindowInfo('name') and pressed:
-            coord = f"{x},{y}"
-            print(f"{timestamp()} {USER} OperatingSystem click {coord}")
-            session.post(consumerServer.SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
-                "category": "MouseClick",
-                "application": "OperatingSystem",
-                "event_type": "click",
-                "mouse_coord": coord
-            })
+        try:
+            if 'Excel' in getActiveWindowInfo('name') and pressed:
+                coord = f"{x},{y}"
+                print(f"{timestamp()} {USER} OperatingSystem click {coord}")
+                session.post(consumerServer.SERVER_ADDR, json={
+                    "timestamp": timestamp(),
+                    "user": USER,
+                    "category": "MouseClick",
+                    "application": "OperatingSystem",
+                    "event_type": "click",
+                    "mouse_coord": coord
+                })
+        except Exception:
+            pass
 
     # Collect events until released
     with mouse.Listener(on_click=_on_click) as listener:

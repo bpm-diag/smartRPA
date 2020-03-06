@@ -4,6 +4,7 @@
 # ****************************** #
 
 import sys
+
 sys.path.append('../')  # this way main file is visible from this file
 from PyQt5.QtCore import Qt, QSize, QDir, QTimer
 from PyQt5.QtGui import QFont, QIcon
@@ -21,6 +22,9 @@ import utils.generateRPAScript
 import utils.xesConverter
 import utils.process_mining
 import utils.utils
+
+# If True, xes and process mining are generated on every csv log
+ANALYSE_ALL_CSV = True
 
 
 # Preferences window
@@ -65,7 +69,8 @@ class Preferences(QMainWindow):
         label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
 
         self.slider_label = QLabel(alignment=Qt.AlignCenter)
-        self.slider_label.setToolTip("When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file is automatically generated, to be used for process mining techniques")
+        self.slider_label.setToolTip(
+            "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file is automatically generated, to be used for process mining techniques")
         self.handle_slider()
 
         confirmButton = QPushButton("OK")
@@ -579,6 +584,22 @@ class WidgetGallery(QMainWindow, QDialog):
         self.statusListWidget.addItem(QListWidgetItem(msg))
         print(f"[GUI] {msg}")
 
+    def handleXes(self, csv_filepath, xes_filepath):
+
+        # convert merged csv to xes
+        utils.xesConverter.CSV2XES(csv_filepath,
+                                   xes_filepath,
+                                   attributes_to_consider=["category", "application", "event_src_path",
+                                                           "event_dest_path", "clipboard_content"]
+                                   ).run()
+        # generate process mining from xes
+        try:
+            import pm4py
+            utils.process_mining.ProcessMining(xes_filepath).run()
+        except ImportError as e:
+            print(
+                "[GUI] Can't apply process mining techniques to generated XES file because 'pm4py' module is not installed. See https://github.com/marco2012/ComputerLogger#PM4PY")
+
     # Combine multiple csv into one once totalNumberOfRun (defined by user in ui) is reached and generate single xes
     # file
     def handleRunCount(self, log_filepath):
@@ -592,24 +613,23 @@ class WidgetGallery(QMainWindow, QDialog):
             # get csv filename from path, without extension
             csv_name = getFilename(csv_filepath)
             combined_csv_filepath = os.path.join(MAIN_DIRECTORY, 'RPA', csv_name, csv_name + '_combined.csv')
-            xes_filepath = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_name.strip('_combined'),
-                                        csv_name + '.xes')
-            # if merging csv is succesful
             t0 = ThreadWithReturnValue(target=combineMultipleCsv, args=[self.csv_to_join, combined_csv_filepath])
             t0.start()
+            # if merging csv is succesful
             if t0.join():
-                # convert merged csv to xes
-                utils.xesConverter.CSV2XES(combined_csv_filepath,
-                                           xes_filepath,
-                                           attributes_to_consider=["category", "application", "event_src_path",
-                                                                   "event_dest_path", "clipboard_content"]
-                                           ).run()
-                # generate process mining from xes
-                try:
-                    import pm4py
-                    utils.process_mining.ProcessMining(xes_filepath).run()
-                except ImportError as e:
-                    print("[GUI] Can't apply process mining techniques to generated XES file because 'pm4py' module is not installed. See https://github.com/marco2012/ComputerLogger#PM4PY")
+
+                # generate xes for each csv to join
+                if ANALYSE_ALL_CSV:
+                    for csv_filepath in self.csv_to_join:
+                        xes_filepath = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA',
+                                                    getFilename(csv_filepath).strip('_combined'),
+                                                    getFilename(csv_filepath) + '.xes')
+                        self.handleXes(csv_filepath, xes_filepath)
+
+                # generate xes for combined csv
+                xes_filepath = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_name.strip('_combined'),
+                                            csv_name + '.xes')
+                self.handleXes(combined_csv_filepath, xes_filepath)
 
             # reset
             self.runCount = 0

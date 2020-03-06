@@ -26,16 +26,25 @@ class RPAScript:
     :rtype: bool
     """
 
-    def __init__(self, csv_file_path, generate_all_scripts=True, unified_RPA_script=False, delay_between_actions=0.8):
+    def __init__(self, csv_file_path, generate_all_scripts=True, unified_RPA_script=False, delay_between_actions=0.5):
         self.csv_file_path = csv_file_path
         self.unified_RPA_script = unified_RPA_script
         self.generate_all_scripts = generate_all_scripts
         self.__delay_between_actions = delay_between_actions
-        self.__dataframe = pandas.read_csv(csv_file_path)
         self.__SaveAsUI = False
         self.success = False
+        self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
+                               "newWindow", "closeWindow", "typed", "submit", "formSubmit", "enableBrowserExtension",
+                               "newWindow", "newTab", "startPage", "activateWorkbook", "openWindow", "click", "clickTextField"]
+        try:
+            self.__dataframe = pandas.read_csv(csv_file_path, encoding="latin")
+        except UnicodeDecodeError as e:
+            print(f"[CSV2XES] Could not decode {csv_file_path}: {e}")
 
     def run(self):
+        if not os.path.exists(self.csv_file_path):
+            print(f"[CSV2XES] {self.csv_file_path} does not exist")
+            return False
         t0 = Thread(target=self.generateRPAScript)
         t0.start()
         t0.join()
@@ -55,6 +64,25 @@ except ImportError as e:
     sys.exit()
 \n"""
 
+    def __createBrowserHeader(self):
+        return """
+try:
+    from selenium.common.exceptions import *
+    from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.common.action_chains import ActionChains
+    from selenium.webdriver.support.ui import Select
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions
+    from selenium.webdriver.common.by import By
+    print("Opening Chrome...")
+    browser = Chrome(incognito=False, focus_window=True)
+    browser.get('about:blank') 
+except WebDriverException as e:
+    print(e)
+    print("If you get 'Permission denied' you did not set the correct permissions, run 'utils/fix_automagica_permissions.py' first.")
+    sys.exit()
+    \n"""
+
     # Create and return rpa directory and file for each specific RPA
     def __createRPAFile(self, RPA_type):
         # csv_file_path is like /Users/marco/Desktop/ComputerLogger/logs/2020-02-25_23-21-57.csv
@@ -73,7 +101,7 @@ except ImportError as e:
         e = row['event_type']
         wb = row['workbook']
         sh = row['current_worksheet']
-        value = row['cell_content']
+        cell_value = row['cell_content']
         cell_range = row['cell_range']
         range_number = row['cell_range_number']
         # assign path if not null
@@ -84,16 +112,16 @@ except ImportError as e:
         cb = row['clipboard_content']
         size = row["window_size"]
 
-        script.write(f"# {row['timestamp']} {e}\n")
-        if e not in ["openWindow", "activateWorkbook", "newWorkbook"] and self.__delay_between_actions > 0:
+        if e not in self.eventsToIgnore:
+            script.write(f"# {row['timestamp']} {e}\n")
             script.write(f"sleep({self.__delay_between_actions})\n")
 
         # if mouse_coord field is not null for a given row
-        if not pandas.isna(mouse_coord):
-            # mouse_coord is like '[809, 743]', I need to take each component separately and remove the space
-            # m = list(map(lambda c: c.strip(), mouse_coord.strip('[]').split(',')))
-            script.write(f"print('Clicking {mouse_coord}')\n")
-            script.write(f"click({mouse_coord})\n")
+        # if not pandas.isna(mouse_coord) and mouse_coord != "0,0":
+        #     # mouse_coord is like '[809, 743]', I need to take each component separately and remove the space
+        #     # m = list(map(lambda c: c.strip(), mouse_coord.strip('[]').split(',')))
+        #     script.write(f"print('Clicking {mouse_coord}')\n")
+        #     script.write(f"click({mouse_coord})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
@@ -105,11 +133,11 @@ except ImportError as e:
             script.write(f"print('Opening Excel...')\n")
             script.write("excel = Excel()\n")
             x, y, width, height = size.split(',')
-            script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
-        elif e == "resizeWindow":
+            # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+        elif e == "resizeWindow": # TODO
             x, y, width, height = size.split(',')
             script.write(f"print('Resizing window to {size}')\n")
-            script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+            # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
         elif e == "addWorksheet":
             script.write(f"print('Adding worksheet {sh}')\n")
             script.write(f"excel.add_worksheet('{sh}')\n")
@@ -123,7 +151,7 @@ except ImportError as e:
             script.write(f"print('cell {cell_range} value = ' + str(rc))\n")
         elif e == "editCellSheet":
             script.write(f"print('Writing cell {cell_range}')\n")
-            script.write(f'excel.write_cell({range_number}, "{value}")\n')
+            script.write(f'excel.write_cell({range_number}, "{cell_value}")\n')
         elif e == "getRange":
             script.write(f"print('Reading cell_range {cell_range}')\n")
             script.write(f"excel.activate_range('{cell_range}')\n")
@@ -167,8 +195,8 @@ except ImportError as e:
         presentation_name = row['title']
         slides = row['slides']
 
-        script.write(f"# {row['timestamp']} {e}\n")
-        if self.__delay_between_actions > 0:
+        if e not in self.eventsToIgnore:
+            script.write(f"# {row['timestamp']} {e}\n")
             script.write(f"sleep({self.__delay_between_actions})\n")
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
@@ -207,10 +235,9 @@ except ImportError as e:
         item_name = path.replace('\\', r'\\')
         item_name_dest = path.replace('\\', r'\\')
 
-        if e not in ["selectedFile", "selectedFolder"]:
+        if e not in self.eventsToIgnore:
             script.write(f"# {row['timestamp']} {e}\n")
-            if self.__delay_between_actions > 0:
-                script.write(f"sleep({self.__delay_between_actions})\n")
+            script.write(f"sleep({self.__delay_between_actions})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
@@ -296,8 +323,8 @@ except ImportError as e:
             xpath = row['xpath']
         value = row['tag_value']
 
-        script.write(f"# {row['timestamp']} {e}\n")
-        if e not in ["newWindow", "closeWindow", "typed", "submit", "formSubmit"] and self.__delay_between_actions > 0:
+        if e not in self.eventsToIgnore:
+            script.write(f"# {row['timestamp']} {e}\n")
             script.write(f"sleep({self.__delay_between_actions})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
@@ -310,7 +337,7 @@ except ImportError as e:
         #     script.write(f"print('Opening new window')\n")
         #     # TODO
         # When a window is opened, a new tab is automatically created at index 0 so I don't need to create it again
-        elif e == "newTab" and row['id'] != 0:
+        elif e == "newTab" and int(row['id']) != 0:
             script.write(f"print('Opening new tab')\n")
             new_tab = f'window.open("''");'
             script.write(f"browser.execute_script('{new_tab}')\n")
@@ -335,27 +362,45 @@ if {id} <= len(browser.window_handles):
             if row['tag_category'] == "SELECT":
                 tag_value = row['tag_value']
                 script.write(f"print('Selecting text')\n")
-                script.write(
-                    f"Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}'))\n")
+                # script.write(
+                #     f"Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}')\n")
+                script.write(f"""
+try:
+    Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}')
+except Exception:
+    pass
+\n""")
             else:
                 script.write(f"print('Inserting text')\n")
-                script.write(f"browser.find_element_by_xpath('{xpath}').send_keys('{value}')\n")
+                # script.write(f"browser.find_element_by_xpath('{xpath}').send_keys('{value}')\n")
+                script.write(f"""
+try:
+    browser.find_element_by_xpath('{xpath}').send_keys('{value}')
+except Exception:
+    pass
+\n""")
         elif e == "clickButton" or e == "clickRadioButton" or e == "mouseClick":
             script.write(f"print('Clicking button')\n")
             script.write(f"""
 try:
     browser.find_element_by_xpath('{xpath}').click()
-except NoSuchElementException:
+except Exception:
     pass
-            """)
+\n""")
         elif e == "doubleClick" and xpath != '':
             script.write(f"print('Double click')\n")
             script.write(
                 f"ActionChains(browser).double_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
         elif e == "contextMenu" and xpath != '':
             script.write(f"print('Context menu')\n")
-            script.write(
-                f"ActionChains(browser).context_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
+            # script.write(
+            #     f"ActionChains(browser).context_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
+            script.write(f"""
+try:
+    f"ActionChains(browser).context_click(browser.find_element_by_xpath('{xpath}')).perform()
+except Exception:
+    pass
+\n""")
         elif e == "selectText":
             pass
         elif e == "zoomTab":
@@ -371,7 +416,13 @@ except NoSuchElementException:
             mouse_coord = row['mouse_coord']
             script.write(f"print('Mouse click')\n")
             script.write(f"actions = ActionChains(browser)\n")
-            script.write(f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
+            # script.write(f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
+            script.write(f"""
+try:
+    actions.move_to_element(browser.find_element_by_tag_name('body'))
+except Exception:
+    pass
+\n""")
             script.write(f"actions.moveByOffset({mouse_coord})\n")
             script.write(f"actions.click().build().perform()\n")
 
@@ -384,7 +435,7 @@ except NoSuchElementException:
         print(f"[RPA] Generating Excel RPA")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
-            script.write("from win32gui import GetForegroundWindow, GetWindowText\n")
+            script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
                 self.__handle_excel_events(script, row)
         return True
@@ -429,23 +480,7 @@ except NoSuchElementException:
         RPA_filepath = self.__createRPAFile("_BrowserRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
-            script.write("""
-try:
-    from selenium.common.exceptions import *
-    from selenium.webdriver.common.keys import Keys
-    from selenium.webdriver.common.action_chains import ActionChains
-    from selenium.webdriver.support.ui import Select
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions
-    from selenium.webdriver.common.by import By
-    print("Opening Chrome...")
-    browser = Chrome(incognito=False, focus_window=True)
-    browser.get('about:blank') 
-except WebDriverException as e:
-    print(e)
-    print("If you get 'Permission denied' you did not set the correct permissions, run 'fix_automagica_permissions.py' first.")
-    sys.exit()
-    \n""")
+            script.write(self.__createBrowserHeader())
             for index, row in df.iterrows():
                 self.__handle_browser_events(script, row)
         return True
@@ -458,11 +493,187 @@ except WebDriverException as e:
         RPA_filepath = self.__createRPAFile("_UnifiedRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
+            script.write(self.__createBrowserHeader())
+            script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
-                self.__handle_excel_events(script, row)
-                self.__handle_powerpoint_events(script, row)
-                self.__handle_system_events(script, row)
-                self.__handle_browser_events(script, row)
+                # TODO fix this mess
+                # self.__handle_browser_events(script, row)
+                # self.__handle_excel_events(script, row)
+                # self.__handle_powerpoint_events(script, row)
+                # self.__handle_system_events(script, row)
+                e = row['event_type']
+                wb = row['workbook']
+                sh = row['current_worksheet']
+                cell_value = row['cell_content']
+                cell_range = row['cell_range']
+                range_number = row['cell_range_number']
+                # assign path if not null
+                path = ""
+                if not pandas.isna(row['event_src_path']):
+                    path = row['event_src_path']
+                mouse_coord = row['mouse_coord']
+                cb = row['clipboard_content']
+                size = row["window_size"]
+                url = "about:blank"
+                if not pandas.isna(row['browser_url']):
+                    url = row['browser_url']
+                id = ""
+                if not pandas.isna(row['id']):
+                    id = row['id']
+                xpath = ""
+                if not pandas.isna(row['xpath']):
+                    xpath = row['xpath']
+                value = row['tag_value']
+
+                if e not in self.eventsToIgnore:
+                    script.write(f"# {row['timestamp']} {e}\n")
+                    script.write(f"sleep({self.__delay_between_actions})\n")
+
+                # EXCEL
+
+                # if mouse_coord field is not null for a given row TODO
+                # if not pandas.isna(mouse_coord) and mouse_coord != "0,0":
+                #     # mouse_coord is like '[809, 743]', I need to take each component separately and remove the space
+                #     # m = list(map(lambda c: c.strip(), mouse_coord.strip('[]').split(',')))
+                #     script.write(f"print('Clicking {mouse_coord}')\n")
+                #     script.write(f"click({mouse_coord})\n")
+
+                if (e == "copy" or e == "cut") and not pandas.isna(cb):
+                    script.write(f"print('Setting clipboard text')\n")
+                    script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+                elif e == "paste":
+                    script.write(f"print('Pasting clipboard text')\n")
+                    script.write(f'type_text("""{cb}""")\n')
+                elif e == "newWorkbook":
+                    script.write(f"print('Opening Excel...')\n")
+                    script.write("excel = Excel()\n")
+                    x, y, width, height = size.split(',')
+                    # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+                elif e == "resizeWindow":  # TODO
+                    x, y, width, height = size.split(',')
+                    script.write(f"print('Resizing window to {size}')\n")
+                    # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+                elif e == "addWorksheet":
+                    script.write(f"print('Adding worksheet {sh}')\n")
+                    script.write(f"excel.add_worksheet('{sh}')\n")
+                elif e == "selectWorksheet":
+                    script.write(f"print('Selecting worksheet {sh}')\n")
+                    script.write(f"excel.activate_worksheet('{sh}')\n")
+                elif e == "getCell":
+                    script.write(f"print('Reading cell {cell_range}')\n")
+                    script.write(f"excel.activate_range('{cell_range}')\n")
+                    script.write(f"rc = excel.read_cell({range_number})\n")
+                    script.write(f"print('cell {cell_range} value = ' + str(rc))\n")
+                elif e == "editCellSheet":
+                    script.write(f"print('Writing cell {cell_range}')\n")
+                    script.write(f'excel.write_cell({range_number}, "{cell_value}")\n')
+                elif e == "getRange":
+                    script.write(f"print('Reading cell_range {cell_range}')\n")
+                    script.write(f"excel.activate_range('{cell_range}')\n")
+                    script.write(f"rc = excel.read_range('{cell_range}')\n")
+                    script.write(f"print('cell {cell_range} value = ' + str(rc))\n")
+                elif e == "afterCalculate":
+                    script.write(f"print('Calculate')\n")
+                # In excel I have two kind of events:
+                # 1) beforeSave: filename is not yet known but here I know if the file is being saved for the first time
+                # (using Save As...) or if it's just a normal save, set SaveAsUI variable
+                # 2) saveWorkbook: filename chosen by user is known so I know file path
+                # If SaveAsUI is True I need to issue excel.save_as(path) command, else I just need excel.save()
+                elif e == "beforeSaveWorkbook":
+                    self.__SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
+                elif e == "saveWorkbook":  # case 2), after case
+                    script.write(f"print('saving workbook {wb}')\n")
+                    if self.__SaveAsUI:  # saving for the first time
+                        script.write(f"excel.save_as(r'{path}')\n")
+                    else:  # file already created
+                        script.write(f"excel.save()\n")
+                elif e == "printWorkbook" and not self.__SaveAsUI:  # if file has already been saved and it's on disk
+                    script.write(f"print('Printing {wb}')\n")
+                    script.write(f"send_to_printer(r'{path}')\n")
+                elif e == "closeWindow":
+                    script.write(f"print('Closing Excel...')\n")
+                    script.write("excel.quit()\n")
+                # elif e == "doubleClickCellWithValue":
+                #     script.write(f"print('Double clicking on cell {cell_range} with value {value}')\n")
+                #     script.write(f"double_click_on_text_ocr(text='{value}')\n")
+                # elif e == "rightClickCellWithValue":
+                #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
+                #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
+                elif (e == "copy" or e == "cut") and not pandas.isna(cb):
+                    script.write(f"print('Setting clipboard text')\n")
+                    script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+                elif e == "paste":
+                    script.write(f"print('Pasting clipboard text')\n")
+                    script.write(f'type_text("""{cb}""")\n')
+                # elif e == "newWindow":
+                #     script.write(f"print('Opening new window')\n")
+                #     # TODO
+                # When a window is opened, a new tab is automatically created at index 0 so I don't need to create it again
+                elif e == "newTab" and int(row['id']) != 0:
+                    script.write(f"print('Opening new tab')\n")
+                    new_tab = f'window.open("''");'
+                    script.write(f"browser.execute_script('{new_tab}')\n")
+                elif e == "selectTab":
+                    script.write(f"print('Selecting tab {id}')\n")
+                    script.write(f"""
+if {id} <= len(browser.window_handles):
+    browser.switch_to.window(browser.window_handles[{id}])\n
+""")
+                elif e == "closeTab":
+                    script.write(f"print('Closing tab')\n")
+                    script.write(f"browser.close()\n")
+                elif e == "reload":
+                    script.write(f"print('Reloading page')\n")
+                    script.write(f"browser.refresh()\n")
+                elif (e == "clickLink" or e == "link" or e == "typed") and ('chrome-extension' not in url):
+                    script.write(f"print('Loading link {url}')\n")
+                    script.write(f"browser.get('{url}')\n")
+                    script.write(
+                        f"WebDriverWait(browser, 5).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))\n")
+                elif e == "changeField":
+                    if row['tag_category'] == "SELECT":
+                        tag_value = row['tag_value']
+                        script.write(f"print('Selecting text')\n")
+                        script.write(
+                            f"Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}')\n")
+                    else:
+                        script.write(f"print('Inserting text')\n")
+                        script.write(f"browser.find_element_by_xpath('{xpath}').send_keys('{value}')\n")
+                elif e == "clickButton" or e == "clickRadioButton" or e == "mouseClick":
+                    script.write(f"print('Clicking button')\n")
+                    script.write(f"""
+try:
+    browser.find_element_by_xpath('{xpath}').click()
+except Exception:
+    pass
+\n""")
+                elif e == "doubleClick" and xpath != '':
+                    script.write(f"print('Double click')\n")
+                    script.write(
+                        f"ActionChains(browser).double_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
+                elif e == "contextMenu" and xpath != '':
+                    script.write(f"print('Context menu')\n")
+                    script.write(
+                        f"ActionChains(browser).context_click(browser.find_element_by_xpath('{xpath}')).perform()\n")
+                elif e == "selectText":
+                    pass
+                elif e == "zoomTab":
+                    # newZoomFactor is like 1.2 so I convert it to percentage
+                    newZoom = int(float(row['newZoomFactor']) * 100)
+                    script.write(f"print('Zooming page to {newZoom}%')\n")
+                    script.write(
+                        "browser.execute_script({}'{}%'{})\n".format('"document.body.style.zoom=', newZoom, '"'))
+                # elif e == "submit":
+                #     script.write(f"print('Submitting button')\n")
+                #     script.write(f"browser.find_element_by_xpath('{xpath}').submit()\n")
+                elif e == "mouse":  # TODO
+                    mouse_coord = row['mouse_coord']
+                    script.write(f"print('Mouse click')\n")
+                    script.write(f"actions = ActionChains(browser)\n")
+                    script.write(f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
+                    script.write(f"actions.moveByOffset({mouse_coord})\n")
+                    script.write(f"actions.click().build().perform()\n")
+
         return True
 
     # file called by GUI when main script terminates and csv log file is created.
@@ -488,4 +699,3 @@ except WebDriverException as e:
                     self._generateBrowserRPA()
 
             self.success = True
-
