@@ -135,7 +135,6 @@ class WidgetGallery(QMainWindow, QDialog):
         self.mainProcess = None
         self.officeFilename = None
         self.runCount = 0
-        self.totalNumberOfRun = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
         self.csv_to_join = list()
 
         # Boolean variables that save the state of each checkbox
@@ -580,7 +579,7 @@ class WidgetGallery(QMainWindow, QDialog):
         # generate RPA actions from log file just saved.
         rpa = utils.generateRPAScript.RPAScript(log_filepath, generate_all_scripts=True, unified_RPA_script=False)
         rpa_success = rpa.run()
-        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}" if rpa_success else "- RPA actions not available"
+        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
         print(f"[GUI] {msg}")
 
@@ -590,26 +589,23 @@ class WidgetGallery(QMainWindow, QDialog):
         # contains paths of csv to join
         self.csv_to_join.append(log_filepath)
 
-        print(f"[GUI] Run count = {self.runCount}, Total = {self.totalNumberOfRun}")
+        totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
+
+        print(f"[GUI] Run count = {self.runCount}, Total = {totalRunCount}")
+        self.statusListWidget.addItem(QListWidgetItem(f"- Run {self.runCount} out of {totalRunCount}"))
 
         # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
         # from these csv
-        if self.runCount >= self.totalNumberOfRun and self.csv_to_join:
+        if self.runCount >= totalRunCount and self.csv_to_join:
 
-            # csv_name is like 2020-03-06_12-50-28, I use as name the last csv added to list, the most recent
-            csv_name = getFilename(self.csv_to_join[-1])
-            # xes_filepath is like /Users/marco/Desktop/ComputerLogger/RPA/2020-03-06_12-50-28/2020-03-06_12-50-28.xes
-            xes_filepath = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_name.strip('_combined'), csv_name + '.xes')
-            # convert csv to xes
-            # utils.xesConverter.CSV2XES(self.csv_to_join, xes_filepath).run()
-
-            # generate process mining from xes
             try:
                 import pm4py
                 utils.process_mining.ProcessMining(self.csv_to_join).run()
             except ImportError as e:
                 print(
-                    "[GUI] Can't apply process mining techniques to generated XES file because 'pm4py' module is not installed. See https://github.com/marco2012/ComputerLogger#PM4PY")
+                    "[GUI] Can't apply process mining techniques to generated XES file because 'pm4py' module is not "
+                    "installed. See https://github.com/marco2012/ComputerLogger#PM4PY")
+                return False
 
             # reset counter and list
             self.runCount = 0
@@ -673,7 +669,7 @@ class WidgetGallery(QMainWindow, QDialog):
             # set gui parameters
             self.running = True
 
-            self.createProgressDialog("Starting...", "Starting server...", 1500)
+            self.createProgressDialog("Starting...", "Starting server...", 1200)
 
             self.statusListWidget.clear()
             self.compatibilityCheckMessage()
@@ -710,7 +706,7 @@ class WidgetGallery(QMainWindow, QDialog):
 
             self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
 
-            print("[GUI] Logger started")
+            print("[GUI] Loading threads, please wait...")
 
         # stop button clicked
         else:
@@ -729,7 +725,7 @@ class WidgetGallery(QMainWindow, QDialog):
             self.mainProcess.terminate()
 
             log_filepath = utils.config.MyConfig.get_instance().log_filepath
-            msg = f" Log saved as {os.path.basename(log_filepath)}"
+            msg = f"Log saved as {os.path.basename(log_filepath)}"
             print(msg)
             self.statusListWidget.addItem(QListWidgetItem(f"- {msg}"))
 
@@ -742,7 +738,7 @@ class WidgetGallery(QMainWindow, QDialog):
             if MAC and self.officeExcel:
                 os.system("pkill -f node")
 
-            print("[GUI] Main process terminated, daemon threads closed, waiting for new input...")
+            print("[GUI] Logger stopped")
 
 
 def buildGUI():

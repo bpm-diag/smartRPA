@@ -78,7 +78,7 @@ def createLogFile():
     filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
     utils.config.MyConfig.get_instance().log_filepath = os.path.join(logs, filename)
     # create HEADER
-    with open(utils.config.MyConfig.get_instance().log_filepath, 'a', newline='') as out_file:
+    with open(utils.config.MyConfig.get_instance().log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
         f.writerow(utils.consumerServer.HEADER)
 

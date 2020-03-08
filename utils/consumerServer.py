@@ -70,7 +70,7 @@ def writeLog():
 
         row.append(content.get(col))
 
-    with open(utils.config.MyConfig.get_instance().log_filepath, 'a', newline='') as out_file:
+    with open(utils.config.MyConfig.get_instance().log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
         f.writerow(row)
 

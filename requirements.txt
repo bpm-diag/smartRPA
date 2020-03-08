@@ -20,4 +20,6 @@ WMI==1.4.9; platform_system == "Windows"
 applescript==2019.4.13; platform_system == "Darwin"
 MacFSEvents==0.8.1; platform_system == "Darwin"
 pyobjc-core==6.1; platform_system == "Darwin"
-# pm4py==1.2.11; platform_system == "Darwin"
+# this is required also on windows but may lead to install errors because windows is missing some libraries so it's
+# better to install it manually
+pm4py==1.2.11; platform_system == "Darwin"

@@ -4,7 +4,10 @@
 # ******************************
 from threading import Thread
 import pandas
+import os
 import utils.utils
+import utils.config
+
 try:
     from pm4py.objects.log.adapters.pandas import csv_import_adapter
     from pm4py.objects.conversion.log import factory as conversion_factory
@@ -19,13 +22,22 @@ try:
     from pm4py.objects.log.exporter.xes import factory as xes_exporter
     from pm4py.util import constants
 except ImportError as e:
-    print("[PROCESS MINING] Process mining analysis has been disabled because 'pm4py' module is not installed. See https://github.com/marco2012/ComputerLogger#PM4PY")
+    print("[PROCESS MINING] Process mining analysis has been disabled because 'pm4py' module is not installed."
+          "See https://github.com/marco2012/ComputerLogger#PM4PY")
 
 
 class ProcessMining:
 
-    def __init__(self, filepath:list):
+    def __init__(self, filepath: list):
+        # list of csv paths
         self.filepath = filepath
+        # last csv in the list, use its name
+        self.last_csv = self.filepath[-1]
+        # name and extension of the last csv in the list
+        self.filename = utils.utils.getFilename(self.last_csv)
+        self.file_extension = utils.utils.getFileExtension(self.last_csv)
+        # path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/
+        self.save_path = os.path.join(utils.config.MyConfig().main_directory, 'RPA', self.filename)
         self.__log = self.__handle_log()
 
     def run(self):
@@ -41,45 +53,52 @@ class ProcessMining:
         # t1.join()
         t2.join()
         # t3.join()
-        print(f"[PROCESS MINING] Generated files in {self.filepath[-1].strip('.csv')}")
+        print(f"[PROCESS MINING] Generated files in {self.last_csv.strip('.csv')}")
 
     def __handle_log(self):
-        file_extension = utils.utils.getFileExtension(self.filepath[-1])
-        if file_extension == ".csv":
+        if self.file_extension == ".csv":
 
+            # create directory if does not exists
+            utils.utils.createDirectory(self.save_path)
+
+            # combine multiple csv into one and then export it to xes
             csv_to_combine = list()
-            for i,csv_path in enumerate(self.filepath):
-                df = pandas.read_csv(csv_path, encoding='latin')\
-                    .rename(columns={'event_type': 'concept:name', 'timestamp': 'time:timestamp'})
+            for i, csv_path in enumerate(self.filepath):
+                # load csv in pandas dataframe, rename columns to match xes standard and replace null values with
+                # empty string
+                df = pandas\
+                    .read_csv(csv_path, encoding='utf-8-sig') \
+                    .rename(columns={'event_type': 'concept:name',
+                                     'timestamp': 'time:timestamp',
+                                     'user': 'org:resource'}) \
+                    .fillna('')
+                # Each csv should have a separate case ID, so I insert a column to the left of each csv and assign
+                # number i. When I convert the combined csv to xes, all the rows with the same number will belong to a
+                # single trace, so I will have i traces.
                 df.insert(0, 'case:concept:name', i)
                 csv_to_combine.append(df)
+
             combined_csv = pandas.concat(csv_to_combine)
-
-            # # read database and specify event column by calling it concept:name
-            # dataframe = csv_import_adapter\
-            #             .import_dataframe_from_path(self.filepath, encoding='utf-8-sig')\
-            #             .rename(columns={'event_type': 'concept:name', 'timestamp': 'time:timestamp'})
-            # # add case id
-            # dataframe.insert(0, 'case:concept:name', '1')
-
-            # log = conversion_factory.apply(dataframe)
+            combined_csv_path = os.path.join(self.save_path, f'{self.filename}_combined.csv')
+            combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
 
             log = conversion_factory.apply(combined_csv)
 
             # convert csv to xes
-            xes_path = self.filepath[-1].replace(utils.utils.getFileExtension(self.filepath[-1]), f'_pm4py.xes')
+            print(f"[PROCESS MINING] Generating XES file from {self.last_csv}")
+            xes_path = os.path.join(self.save_path,
+                                    f'{self.filename}.xes')  # self.last_csv.replace(self.file_extension, f'_pm4py.xes')
             xes_exporter.export_log(log, xes_path)
 
             return log
-        elif file_extension == ".xes":
+        elif self.file_extension == ".xes":
             log = xes_importer.import_log(self.filepath)
             return log
         else:
             return "[PROCESS_MINING] Input file must be either .csv or .xes"
 
     def __create_image(self, gviz, img_name):
-        file_extension = utils.utils.getFileExtension(self.filepath[-1])
-        img_path = self.filepath[-1].replace(file_extension, f'_{img_name}.png')
+        img_path = os.path.join(self.save_path, f'{self.filename}_{img_name}.jpg')
         if img_name == "alpha_miner":
             vis_factory.save(gviz, img_path)
         elif img_name == "heuristic_miner":
@@ -105,7 +124,14 @@ class ProcessMining:
         self.__create_image(gviz, "petri_net")
 
     def create_dfg(self):
+        # calculate dfg
         dfg = dfg_factory.apply(self.__log, variant="frequency")
 
+        # write nodes to file
+        with open(os.path.join(self.save_path, 'dfg_nodes.py'), 'w', encoding='utf-8-sig') as file:
+            file.write("# This file contains the nodes of dfg image\n")
+            file.write(str(dfg))
+
+        # create graph
         gviz = dfg_vis_factory.apply(dfg, log=self.__log, variant="frequency")
         self.__create_image(gviz, "dfg")

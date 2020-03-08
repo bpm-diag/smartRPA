@@ -111,7 +111,7 @@ To enable process mining techniques you must install [PM4PY](https://pm4py.fit.f
 - On MacOS:
     ```bash
     brew install graphviz
-    pip3 install pm4py
+    pip3 install pm4py==1.2.11
     ```
 
 <details>

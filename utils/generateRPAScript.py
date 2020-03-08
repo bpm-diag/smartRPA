@@ -32,12 +32,11 @@ class RPAScript:
         self.generate_all_scripts = generate_all_scripts
         self.__delay_between_actions = delay_between_actions
         self.__SaveAsUI = False
-        self.success = False
         self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
                                "newWindow", "closeWindow", "typed", "submit", "formSubmit", "enableBrowserExtension",
                                "newWindow", "newTab", "startPage", "activateWorkbook", "openWindow", "click", "clickTextField"]
         try:
-            self.__dataframe = pandas.read_csv(csv_file_path, encoding="latin")
+            self.__dataframe = pandas.read_csv(csv_file_path, encoding='utf-8-sig')
         except UnicodeDecodeError as e:
             print(f"[CSV2XES] Could not decode {csv_file_path}: {e}")
 
@@ -48,7 +47,6 @@ class RPAScript:
         t0 = Thread(target=self.generateRPAScript)
         t0.start()
         t0.join()
-        return self.success
 
     # Adds import statements to generated python file
     def __createHeader(self):
@@ -432,7 +430,6 @@ except Exception:
         if df.empty:
             return False
         RPA_filepath = self.__createRPAFile("_ExcelRPA.py")
-        print(f"[RPA] Generating Excel RPA")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
@@ -446,7 +443,6 @@ except Exception:
         if df.empty:
             return False
         RPA_filepath = self.__createRPAFile("_PowerpointRPA.py")
-        print(f"[RPA] Generating Powerpoint RPA")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             for index, row in df.iterrows():
@@ -458,7 +454,6 @@ except Exception:
         df = self.__dataframe.query('category=="OperatingSystem" | category=="Clipboard"')
         if df.empty:
             return False
-        print(f"[RPA] Generating System RPA")
         RPA_filepath = self.__createRPAFile("_SystemRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
@@ -476,7 +471,6 @@ except Exception:
             print(f"[RPA] Google Chrome must be installed to generate RPA script.")
             return False
 
-        print(f"[RPA] Generating Browser RPA")
         RPA_filepath = self.__createRPAFile("_BrowserRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
@@ -489,7 +483,6 @@ except Exception:
         df = self.__dataframe
         if df.empty:
             return False
-        print(f"[RPA] Generating Unified RPA")
         RPA_filepath = self.__createRPAFile("_UnifiedRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
@@ -687,8 +680,9 @@ except Exception:
         # check if given csv log file exists
         if not os.path.exists(self.csv_file_path):
             print(f"[RPA] Can't find specified csv_file_path {self.csv_file_path}")
-            self.success = False
+            return False
         else:
+            print(f"[RPA] Generating RPA")
             if self.generate_all_scripts:
                 self._generateUnifiedRPA()
                 self._generateExcelRPA()
@@ -703,5 +697,4 @@ except Exception:
                     self._generatePowerpointRPA()
                     self._generateSystemRPA()
                     self._generateBrowserRPA()
-
-            self.success = True
+            return True

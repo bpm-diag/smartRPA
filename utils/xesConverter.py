@@ -12,7 +12,7 @@ from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 
 
-class CSV2XES2:
+class CSV2XES:
     """This class convert csv to xes
 
     :param csv_file_path: List of csv files to convert (list of strings representing the path of each csv). Each csv generates a trace in xes file
@@ -121,7 +121,7 @@ class CSV2XES2:
                     continue
 
             trace = XFactory.create_trace()
-            trace.append(events)
+            [trace.append(e) for e in events]
             log.append(trace)
             # timestamp_list_total.extend(timestamp_list)
 

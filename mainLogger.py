@@ -153,7 +153,7 @@ def startLogger(systemLoggerFilesFolder,
         if browserOpera:
             config.log_opera = True
 
-        print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
+        # print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
         # print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
         print(f"[mainLogger] Selected threads activated, logging to {utils.config.MyConfig.get_instance().log_filepath}")
 
