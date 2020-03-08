@@ -66,8 +66,7 @@ class ProcessMining:
             for i, csv_path in enumerate(self.filepath):
                 # load csv in pandas dataframe, rename columns to match xes standard and replace null values with
                 # empty string
-                df = pandas\
-                    .read_csv(csv_path, encoding='utf-8-sig') \
+                df = pandas.read_csv(csv_path, encoding='utf-8-sig') \
                     .rename(columns={'event_type': 'concept:name',
                                      'timestamp': 'time:timestamp',
                                      'user': 'org:resource'}) \

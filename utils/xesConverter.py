@@ -88,15 +88,21 @@ class CSV2XES:
         log = XFactory.create_log()
         # timestamp_list_total = list()
 
-        for csv_path in self.csv_filepath:
+        for i, csv_path in enumerate(self.csv_filepath):
 
             # load csv in pandas dataframe and replace nan with None
             # https://www.w3resource.com/pandas/series/series-fillna.php
             try:
-                df = pandas.read_csv(csv_path, encoding="latin").fillna(method='ffill')
+                df = pandas.read_csv(csv_path, encoding='utf-8-sig') \
+                    .rename(columns={'event_type': 'concept:name',
+                                     'timestamp': 'time:timestamp',
+                                     'user': 'org:resource'}) \
+                    .fillna('')
             except UnicodeDecodeError as e:
                 print(f"[CSV2XES] Could not decode {csv_path}: {e}")
                 return False
+
+            df.insert(0, 'case:concept:name', i)
 
             # create dictionary with column name as key and row data as value, like
             # {'category': 'Browser', 'event_type': 'newTab'}
