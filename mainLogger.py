@@ -113,9 +113,9 @@ def startLogger(systemLoggerFilesFolder,
             t5.daemon = True
             t5.start()
 
-            t14 = Thread(target=mouseEvents.logMouse)
-            t14.daemon = True
-            t14.start()
+            # t14 = Thread(target=mouseEvents.logMouse)
+            # t14.daemon = True
+            # t14.start()
 
         if officeExcel and MAC:
             t13 = Thread(target=officeEvents.excelEventsMacServer)

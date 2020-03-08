@@ -26,7 +26,7 @@ class RPAScript:
     :rtype: bool
     """
 
-    def __init__(self, csv_file_path, generate_all_scripts=True, unified_RPA_script=False, delay_between_actions=0.5):
+    def __init__(self, csv_file_path: str, generate_all_scripts=True, unified_RPA_script=False, delay_between_actions=0.5):
         self.csv_file_path = csv_file_path
         self.unified_RPA_script = unified_RPA_script
         self.generate_all_scripts = generate_all_scripts
@@ -357,7 +357,7 @@ if {id} <= len(browser.window_handles):
             script.write(f"print('Loading link {url}')\n")
             script.write(f"browser.get('{url}')\n")
             script.write(
-                f"WebDriverWait(browser, 5).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))\n")
+                f"WebDriverWait(browser, 2).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))\n")
         elif e == "changeField":
             if row['tag_category'] == "SELECT":
                 tag_value = row['tag_value']
@@ -416,7 +416,7 @@ except Exception:
             mouse_coord = row['mouse_coord']
             script.write(f"print('Mouse click')\n")
             script.write(f"actions = ActionChains(browser)\n")
-            # script.write(f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
+            # script.write(WebDriverWait"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
             script.write(f"""
 try:
     actions.move_to_element(browser.find_element_by_tag_name('body'))
@@ -629,13 +629,19 @@ if {id} <= len(browser.window_handles):
                     script.write(f"print('Loading link {url}')\n")
                     script.write(f"browser.get('{url}')\n")
                     script.write(
-                        f"WebDriverWait(browser, 5).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))\n")
+                        f"WebDriverWait(browser, 2).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))\n")
                 elif e == "changeField":
                     if row['tag_category'] == "SELECT":
                         tag_value = row['tag_value']
                         script.write(f"print('Selecting text')\n")
-                        script.write(
-                            f"Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}')\n")
+                        # script.write(
+                        #     f"Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}')\n")
+                        script.write(f"""
+try:
+    Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}')
+except Exception:
+    pass
+\n""")
                     else:
                         script.write(f"print('Inserting text')\n")
                         script.write(f"browser.find_element_by_xpath('{xpath}').send_keys('{value}')\n")
