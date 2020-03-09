@@ -23,9 +23,6 @@ import utils.xesConverter
 import utils.process_mining
 import utils.utils
 
-# If True, xes and process mining are generated on every csv log
-ANALYSE_ALL_CSV = True
-
 
 # Preferences window
 class Preferences(QMainWindow):
@@ -70,7 +67,8 @@ class Preferences(QMainWindow):
 
         self.slider_label = QLabel(alignment=Qt.AlignCenter)
         self.slider_label.setToolTip(
-            "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file is automatically generated, to be used for process mining techniques")
+            "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file "
+            "is automatically generated, to be used for process mining techniques")
         self.handle_slider()
 
         confirmButton = QPushButton("OK")
@@ -106,9 +104,9 @@ class Preferences(QMainWindow):
         self.close()
 
 
-class WidgetGallery(QMainWindow, QDialog):
+class MainApplication(QMainWindow, QDialog):
     def __init__(self, parent=None):
-        super(WidgetGallery, self).__init__(parent)
+        super(MainApplication, self).__init__(parent)
         self.originalPalette = QApplication.palette()
         self.setWindowTitle("ComputerLogger")
         self.setAppIcon()
@@ -592,7 +590,7 @@ class WidgetGallery(QMainWindow, QDialog):
         totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
 
         print(f"[GUI] Run count = {self.runCount}, Total = {totalRunCount}")
-        self.statusListWidget.addItem(QListWidgetItem(f"- Run {self.runCount} out of {totalRunCount}"))
+        self.statusListWidget.addItem(QListWidgetItem(f"- Run {self.runCount} of {totalRunCount}"))
 
         # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
         # from these csv
@@ -669,17 +667,7 @@ class WidgetGallery(QMainWindow, QDialog):
             # set gui parameters
             self.running = True
 
-            self.createProgressDialog("Starting...", "Starting server...", 1200)
-
-            self.statusListWidget.clear()
-            self.compatibilityCheckMessage()
-
-            self.runButton.setText('Stop logger')
-            self.runButton.update()
-
-            # used to count the numebr of time 'start button' is pressed in order to group event logs and generate
-            # xes file
-            self.runCount += 1
+            print("[GUI] Loading threads, please wait...")
 
             # start main process with the options selected in gui. It handles all other methods main method is
             # started as a process so it can be terminated once the button is clicked all the methods in the main
@@ -704,9 +692,19 @@ class WidgetGallery(QMainWindow, QDialog):
 
             self.mainProcess.start()
 
-            self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
+            self.createProgressDialog("Starting...", "Starting server...", 1200)
 
-            print("[GUI] Loading threads, please wait...")
+            self.statusListWidget.clear()
+            self.compatibilityCheckMessage()
+
+            self.runButton.setText('Stop logger')
+            self.runButton.update()
+
+            # used to count the numebr of time 'start button' is pressed in order to group event logs and generate
+            # xes file
+            self.runCount += 1
+
+            self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
 
         # stop button clicked
         else:
@@ -743,6 +741,6 @@ class WidgetGallery(QMainWindow, QDialog):
 
 def buildGUI():
     app = QApplication(sys.argv)
-    gallery = WidgetGallery()
-    gallery.show()
+    mainApplication = MainApplication()
+    mainApplication.show()
     sys.exit(app.exec_())

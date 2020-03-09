@@ -16,6 +16,7 @@ from modules import systemEvents, mouseEvents
 from modules import officeEvents
 from modules import clipboardEvents
 
+
 #  this method is called by GUI when the user presses "start logger" button
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
@@ -155,7 +156,7 @@ def startLogger(systemLoggerFilesFolder,
 
         # print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
         # print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
-        print(f"[mainLogger] Selected threads activated, logging to {utils.config.MyConfig.get_instance().log_filepath}")
+        print(f"[mainLogger] Selected threads activated, logging to {config.log_filepath}")
 
         # keep main active
         while 1:

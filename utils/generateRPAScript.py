@@ -220,36 +220,32 @@ except WebDriverException as e:
             script.write("powerpoint.quit()\n")
 
     def __handle_system_events(self, script, row):
+        # union of all other handlers
         e = row['event_type']
         cb = row['clipboard_content']
         app = row['application']
         # assign path if not null
         path = ""
+        item_name = path.replace('\\', r'\\')
         dest_path = ""
         if not pandas.isna(row['event_src_path']):
             path = row['event_src_path']
         if not pandas.isna(row['event_dest_path']):
             dest_path = row['event_dest_path']
-        item_name = path.replace('\\', r'\\')
-        item_name_dest = path.replace('\\', r'\\')
 
         if e not in self.eventsToIgnore:
             script.write(f"# {row['timestamp']} {e}\n")
-            script.write(f"sleep({self.__delay_between_actions})\n")
+            script.write(f"sleep({self.__delay_between_actions * 2})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
             script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
-        elif e == "openFile" and os.path.exists(path):
-            if os.path.exists(path):
-                script.write(f"print('Opening file {item_name}')\n")
-                script.write(f"open_file(r'{path}')\n")
-            else:
-                script.write(f"print('Could not find {item_name} ')\n")
-        elif e == "openFolder" and os.path.exists(path):
+        elif e == "openFile" and path:
+            script.write(f"print('Opening file {item_name}')\n")
+            script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
+        elif e == "openFolder" and path:
             script.write(f"print('Opening folder {item_name}')\n")
-            script.write(f"show_folder(r'{path}')\n")
-            pass
+            script.write(f"if file_exists(r'{path}'): show_folder(r'{path}')\n")
         elif e == "programOpen" and os.path.exists(path):
             script.write(f"print('Opening {app}')\n")
             script.write(f"if file_exists(r'{path}'): run(r'{path}')\n")
@@ -265,7 +261,7 @@ except WebDriverException as e:
             else:
                 script.write(f"print('Creating directory {item_name}')\n")
                 script.write(f"create_folder(r'{path}')\n")
-        elif e == "deleted" and os.path.exists(path):
+        elif e == "deleted" and path:
             # check if i have a file (with extension)
             if os.path.splitext(path)[1]:
                 script.write(f"print('Removing file {item_name}')\n")
@@ -277,16 +273,21 @@ except WebDriverException as e:
         elif e == "moved" and path:
             # check if file has been renamed, so source and dest path are the same
             if os.path.dirname(path) == os.path.dirname(dest_path):
+                try:
+                    import ntpath
+                    new_name = ntpath.basename(dest_path)
+                except ModuleNotFoundError:
+                    new_name = os.path.basename(dest_path)
                 # file
                 if os.path.splitext(path)[1]:
-                    script.write(f"print('Renaming file {item_name} to {item_name_dest}')\n")
+                    script.write(f"print('Renaming file {item_name} to {new_name}')\n")
                     script.write(
-                        f"if file_exists(r'{path}'): rename_file(r'{path}', new_name='{item_name_dest}')\n")
+                        f"if file_exists(r'{path}'): rename_file(r'{path}', new_name='{new_name}')\n")
                 # directory
                 else:
                     script.write(f"print('Renaming directory {item_name}')\n")
                     script.write(
-                        f"if folder_exists(r'{path}'): rename_folder(r'{path}', new_name='{item_name_dest}')\n")
+                        f"if folder_exists(r'{path}'): rename_folder(r'{path}', new_name='{new_name}')\n")
             # else file has been moved to a different folder
             else:
                 if os.path.splitext(path)[1]:
@@ -486,10 +487,14 @@ except Exception:
         RPA_filepath = self.__createRPAFile("_UnifiedRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
-            script.write(self.__createBrowserHeader())
+            # add browser header if browser is present in event log
+            if not df.query('category=="Browser"').empty:
+                script.write(self.__createBrowserHeader())
             script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
+
                 # TODO fix this mess
+
                 # self.__handle_browser_events(script, row)
                 # self.__handle_excel_events(script, row)
                 # self.__handle_powerpoint_events(script, row)
@@ -504,6 +509,9 @@ except Exception:
                 path = ""
                 if not pandas.isna(row['event_src_path']):
                     path = row['event_src_path']
+                app = row['application']
+                # assign path if not null
+                item_name = path.replace('\\', r'\\')
                 mouse_coord = row['mouse_coord']
                 cb = row['clipboard_content']
                 size = row["window_size"]
@@ -517,6 +525,10 @@ except Exception:
                 if not pandas.isna(row['xpath']):
                     xpath = row['xpath']
                 value = row['tag_value']
+                dest_path = ""
+                if not pandas.isna(row['event_dest_path']):
+                    dest_path = row['event_dest_path']
+
 
                 if e not in self.eventsToIgnore:
                     script.write(f"# {row['timestamp']} {e}\n")
@@ -592,12 +604,13 @@ except Exception:
                 # elif e == "rightClickCellWithValue":
                 #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
                 #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
-                elif (e == "copy" or e == "cut") and not pandas.isna(cb):
-                    script.write(f"print('Setting clipboard text')\n")
-                    script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+
                 elif e == "paste":
                     script.write(f"print('Pasting clipboard text')\n")
                     script.write(f'type_text("""{cb}""")\n')
+
+                #Browser
+
                 # elif e == "newWindow":
                 #     script.write(f"print('Opening new window')\n")
                 #     # TODO
@@ -673,6 +686,75 @@ except Exception:
                     script.write(f"actions.moveByOffset({mouse_coord})\n")
                     script.write(f"actions.click().build().perform()\n")
 
+                #system
+                elif e == "openFile" and path:
+                    script.write(f"print('Opening file {item_name}')\n")
+                    script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
+                elif e == "openFolder" and path:
+                    script.write(f"print('Opening folder {item_name}')\n")
+                    script.write(f"if file_exists(r'{path}'): show_folder(r'{path}')\n")
+                elif e == "programOpen" and os.path.exists(path):
+                    script.write(f"print('Opening {app}')\n")
+                    script.write(f"if file_exists(r'{path}'): run(r'{path}')\n")
+                elif e == "programClose" and os.path.exists(path):
+                    script.write(f"print('Closing {app}')\n")
+                    script.write(f"if file_exists(r'{path}'): kill_process(r'{path}')\n")
+                elif e == "created" and path:
+                    # check if i have a file (with extension)
+                    if os.path.splitext(path)[1]:
+                        script.write(f"print('Creating file {item_name}')\n")
+                        script.write(f"open(r'{path}', 'w')\n")
+                    # otherwise assume it's a directory
+                    else:
+                        script.write(f"print('Creating directory {item_name}')\n")
+                        script.write(f"create_folder(r'{path}')\n")
+                elif e == "deleted" and path:
+                    # check if i have a file (with extension)
+                    if os.path.splitext(path)[1]:
+                        script.write(f"print('Removing file {item_name}')\n")
+                        script.write(f"if file_exists(r'{path}'): remove_file(r'{path}')\n")
+                    # otherwise assume it's a directory
+                    else:
+                        script.write(f"print('Removing directory {item_name}')\n")
+                        script.write(f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
+                elif e == "moved" and path:
+                    # check if file has been renamed, so source and dest path are the same
+                    if os.path.dirname(path) == os.path.dirname(dest_path):
+                        try:
+                            import ntpath
+                            new_name = ntpath.basename(dest_path)
+                        except ModuleNotFoundError:
+                            new_name = os.path.basename(dest_path)
+                        # file
+                        if os.path.splitext(path)[1]:
+                            script.write(f"print('Renaming file {item_name} to {new_name}')\n")
+                            script.write(
+                                f"if file_exists(r'{path}'): rename_file(r'{path}', new_name='{new_name}')\n")
+                        # directory
+                        else:
+                            script.write(f"print('Renaming directory {item_name}')\n")
+                            script.write(
+                                f"if folder_exists(r'{path}'): rename_folder(r'{path}', new_name='{new_name}')\n")
+                    # else file has been moved to a different folder
+                    else:
+                        if os.path.splitext(path)[1]:
+                            script.write(f"print('Moving file {item_name}')\n")
+                            script.write(f"if file_exists(r'{path}'): move_file(r'{path}', r'{dest_path}')\n")
+                        # otherwise assume it's a directory
+                        else:
+                            script.write(f"print('Moving directory {item_name}')\n")
+                            script.write(f"if folder_exists(r'{path}'): move_folder(r'{path}', r'{dest_path}')\n")
+                elif e == "pressHotkey":
+                    hotkey = row["title"]
+                    hotkey_param = hotkey.split('+')
+                    meaning = row["description"]
+                    script.write(f"print('Pressing hotkey {hotkey} : {meaning}')\n")
+                    if len(hotkey_param) == 2:
+                        script.write(f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}')\n")
+                    elif len(hotkey_param) == 3:
+                        script.write(
+                            f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
+
         return True
 
     # file called by GUI when main script terminates and csv log file is created.
@@ -682,7 +764,6 @@ except Exception:
             print(f"[RPA] Can't find specified csv_file_path {self.csv_file_path}")
             return False
         else:
-            print(f"[RPA] Generating RPA")
             if self.generate_all_scripts:
                 self._generateUnifiedRPA()
                 self._generateExcelRPA()
@@ -697,4 +778,5 @@ except Exception:
                     self._generatePowerpointRPA()
                     self._generateSystemRPA()
                     self._generateBrowserRPA()
+            print(f"[RPA] Generated RPA in {self.csv_file_path.strip('.csv')}")
             return True
