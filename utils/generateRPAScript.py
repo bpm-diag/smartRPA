@@ -481,24 +481,29 @@ except Exception:
         return True
 
     def _generateUnifiedRPA(self):
+
         df = self.__dataframe
         if df.empty:
             return False
+        RPABrowser = not df.query('category=="Browser"').empty
+        RPASystem = not df.query('category=="OperatingSystem"').empty
+
         RPA_filepath = self.__createRPAFile("_UnifiedRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             # add browser header if browser is present in event log
-            if not df.query('category=="Browser"').empty:
+            if RPABrowser:
                 script.write(self.__createBrowserHeader())
             script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
 
-                # TODO fix this mess
+                # TODO fix
 
                 # self.__handle_browser_events(script, row)
                 # self.__handle_excel_events(script, row)
                 # self.__handle_powerpoint_events(script, row)
                 # self.__handle_system_events(script, row)
+
                 e = row['event_type']
                 wb = row['workbook']
                 sh = row['current_worksheet']
@@ -532,7 +537,10 @@ except Exception:
 
                 if e not in self.eventsToIgnore:
                     script.write(f"# {row['timestamp']} {e}\n")
-                    script.write(f"sleep({self.__delay_between_actions})\n")
+                    if RPASystem:
+                        script.write(f"sleep({self.__delay_between_actions * 2})\n")
+                    else:
+                        script.write(f"sleep({self.__delay_between_actions})\n")
 
                 # EXCEL
 

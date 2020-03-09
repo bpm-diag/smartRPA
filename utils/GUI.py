@@ -599,7 +599,7 @@ class MainApplication(QMainWindow, QDialog):
             try:
                 import pm4py
                 utils.process_mining.ProcessMining(self.csv_to_join).run()
-            except ImportError as e:
+            except ImportError:
                 print(
                     "[GUI] Can't apply process mining techniques to generated XES file because 'pm4py' module is not "
                     "installed. See https://github.com/marco2012/ComputerLogger#PM4PY")

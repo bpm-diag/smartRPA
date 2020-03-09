@@ -104,25 +104,31 @@ To run the generated RPA scripts you must install `automagica` module.
 
 #### PM4PY
 
-To enable process mining techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
+To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
 
-- On Windows, follow <a href="https://pm4py.fit.fraunhofer.de/install-windows-64" target='_blank'>these instructions.</a>
+- On Windows:
+
+    1. Install a Windows C/C++ compiler like [MinGW](https://osdn.net/projects/mingw/releases/) or [Visual Studio](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=Community&rel=15)
+    2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
+    3. Add `C:/Program Files/Graphviz/bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
+    4. `pip3 install pm4py==1.2.11` 
+
+    </br>
+    <details>
+    <summary>
+        Click to show how to <b>fix installation errors</b> on Windows
+    </summary>
+    </br>
+
+    If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>. 
+
+    </details>
 
 - On MacOS:
     ```bash
     brew install graphviz
     pip3 install pm4py==1.2.11
     ```
-
-<details>
-<summary>
-    Click to show how to <b>fix installation errors</b> on Windows
-</summary>
-</br>
-
-If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>. 
-
-</details>
 
 #### Browser automation
 
