@@ -87,7 +87,10 @@ except WebDriverException as e:
         # csv_filename is like 2020-02-25_23-21-57
         csv_filename = utils.utils.getFilename(self.csv_file_path)
         # RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA
-        RPA_directory = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_filename)
+        try:
+            RPA_directory = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_filename)
+        except TypeError:
+            RPA_directory = os.path.join(DESKTOP, csv_filename)
         utils.utils.createDirectory(RPA_directory)
         # RPA_filename is like 2020-02-25_23-21-57_RPA.py
         RPA_filename = csv_filename + RPA_type
