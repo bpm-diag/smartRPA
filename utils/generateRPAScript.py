@@ -89,7 +89,7 @@ except WebDriverException as e:
         # RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA
         try:
             RPA_directory = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_filename)
-        except TypeError:
+        except Exception:
             print(f"Could not create RPA directory, saving RPA script on Desktop")
             RPA_directory = os.path.join(DESKTOP, 'RPA', csv_filename)
         utils.utils.createDirectory(RPA_directory)
