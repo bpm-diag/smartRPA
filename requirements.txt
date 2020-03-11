@@ -12,6 +12,7 @@ nativeconfig==3.4.0
 pynput==1.6.7
 selenium==3.7.0
 lxml==4.5.0
+opyenxes==0.3.0
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"
 pylnk3==0.3.0; platform_system == "Windows"

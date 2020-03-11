@@ -112,17 +112,17 @@ class ProcessMining:
 
     def create_alpha_miner(self):
         net, initial_marking, final_marking = alpha_miner.apply(self.__log)
-        gviz = vis_factory.apply(net, initial_marking, final_marking)
+        gviz = vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
         self.__create_image(gviz, "alpha_miner")
 
     def create_heuristics_miner(self):
         heu_net = heuristics_miner.apply_heu(self.__log, parameters={"dependency_thresh": 0.99})
-        gviz = hn_vis_factory.apply(heu_net)
+        gviz = hn_vis_factory.apply(heu_net, parameters={"format": "jpg"})
         self.__create_image(gviz, "heuristic_miner")
 
     def create_petri_net(self):
         net, im, fm = heuristics_miner.apply(self.__log, parameters={"dependency_thresh": 0.99})
-        gviz = pn_vis_factory.apply(net, im, fm)
+        gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "jpg"})
         self.__create_image(gviz, "petri_net")
 
     def create_dfg(self):
@@ -132,8 +132,10 @@ class ProcessMining:
         # write nodes to file
         with open(os.path.join(self.save_path, 'dfg_nodes.py'), 'w', encoding='utf-8-sig') as file:
             file.write("# This file contains the nodes of dfg image\n")
-            file.write(str(dfg))
+            file.write("# (event_type, event_type): frequency\n")
+            for key, value in dfg.items():
+                file.write(f"{key}: {value}")
 
         # create graph
-        gviz = dfg_vis_factory.apply(dfg, log=self.__log, variant="frequency")
+        gviz = dfg_vis_factory.apply(dfg, log=self.__log, variant="frequency", parameters={"format": "jpg"})
         self.__create_image(gviz, "dfg")
