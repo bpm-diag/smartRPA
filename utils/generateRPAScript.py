@@ -13,7 +13,7 @@ import os
 from threading import Thread
 import utils.config
 import utils
-from utils.utils import CHROME, DESKTOP, getActiveWindowInfo
+from utils.utils import CHROME, DESKTOP, getActiveWindowInfo, WINDOWS
 
 
 class RPAScript:
@@ -347,7 +347,7 @@ except WebDriverException as e:
         elif e == "selectTab":
             script.write(f"print('Selecting tab {id}')\n")
             script.write(f"""
-if {id} <= len(browser.window_handles):
+if {id} < len(browser.window_handles):
     browser.switch_to.window(browser.window_handles[{id}])\n
 """)
         elif e == "closeTab":
@@ -498,7 +498,8 @@ except Exception:
             # add browser header if browser is present in event log
             if RPABrowser:
                 script.write(self.__createBrowserHeader())
-            script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
+            if WINDOWS:
+                script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
 
                 # TODO fix
@@ -634,7 +635,7 @@ except Exception:
                 elif e == "selectTab":
                     script.write(f"print('Selecting tab {id}')\n")
                     script.write(f"""
-if {id} <= len(browser.window_handles):
+if {id} < len(browser.window_handles):
     browser.switch_to.window(browser.window_handles[{id}])\n
 """)
                 elif e == "closeTab":
