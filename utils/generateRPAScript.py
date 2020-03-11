@@ -382,7 +382,18 @@ try:
 except Exception:
     pass
 \n""")
-        elif e == "clickButton" or e == "clickRadioButton" or e == "mouseClick":
+        elif e == "mouseClick":
+            if url:
+                script.write(f"print('Loading link {url}')\n")
+                script.write(f"browser.get('{url}')\n")
+            script.write(f"print('Clicking button')\n")
+            script.write(f"""
+try:
+    browser.find_element_by_xpath('{xpath}').click()
+except Exception:
+    pass
+\n""")
+        elif e == "clickButton" or e == "clickRadioButton":
             script.write(f"print('Clicking button')\n")
             script.write(f"""
 try:
@@ -428,6 +439,8 @@ except Exception:
 \n""")
             script.write(f"actions.moveByOffset({mouse_coord})\n")
             script.write(f"actions.click().build().perform()\n")
+        elif e == "audibleTab":
+            pass
 
     # Generate excel RPA python script
     def _generateExcelRPA(self):
@@ -437,7 +450,8 @@ except Exception:
         RPA_filepath = self.__createRPAFile("_ExcelRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
-            script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
+            if WINDOWS:
+                script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
                 self.__handle_excel_events(script, row)
         return True
@@ -664,7 +678,19 @@ except Exception:
                     else:
                         script.write(f"print('Inserting text')\n")
                         script.write(f"browser.find_element_by_xpath('{xpath}').send_keys('{value}')\n")
-                elif e == "clickButton" or e == "clickRadioButton" or e == "mouseClick":
+                elif e == "mouseClick":
+                    if url:
+                        script.write(f"print('Loading link {url}')\n")
+                        script.write(f"browser.get('{url}')\n")
+
+                    script.write(f"print('Clicking button')\n")
+                    script.write(f"""
+try:
+    browser.find_element_by_xpath('{xpath}').click()
+except Exception:
+    pass
+\n""")
+                elif e == "clickButton" or e == "clickRadioButton":
                     script.write(f"print('Clicking button')\n")
                     script.write(f"""
 try:
