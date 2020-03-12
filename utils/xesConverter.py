@@ -25,6 +25,7 @@ class CSV2XES:
     """
 
     def __init__(self, csv_filepath: list, xes_filepath: str = None,
+                 csv_separator=',',
                  events_header="concept:name",
                  timestamp_header="time:timestamp",
                  timestamp_format="%Y-%m-%d %H:%M:%S:%f",
@@ -32,6 +33,7 @@ class CSV2XES:
                  attributes_to_consider: list = None):
 
         self.csv_filepath = csv_filepath
+        self.csv_separator = csv_separator
 
         if xes_filepath:
             self.xes_filepath = xes_filepath
@@ -106,9 +108,9 @@ class CSV2XES:
 
         for i, csv_path in enumerate(self.csv_filepath):
 
-            # load csv in pandas dataframe, replace column names to match xes standard and replace null with empty string
+            # load csv in pandas dataframe,replace column names to match xes standard and replace null with empty string
             try:
-                df = pandas.read_csv(csv_path, encoding='utf-8-sig') \
+                df = pandas.read_csv(csv_path, encoding='utf-8-sig', sep=self.csv_separator) \
                     .rename(columns={self.events_header: 'concept:name',
                                      self.timestamp_header: 'time:timestamp',
                                      self.resource_header: 'org:resource'}) \
