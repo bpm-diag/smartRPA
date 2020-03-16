@@ -221,6 +221,12 @@ class ProcessMining:
             return "BrowserTab"
         elif e in ["generated", "urlHashChange", "typed", "selectText", "changeField", "reload"]:
             return "Edit"
+        elif e in ["activateWindow", "closeWindow", "deactivateWindow", "openWindow"]:
+            return "WindowAction"
+        elif e in ["deactivateWindow", "deselectWorksheet"]:
+            return "WorksheetAction"
+        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue"]:
+            return "CellAction"
         else:
             return e
 
