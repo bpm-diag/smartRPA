@@ -4,25 +4,33 @@
 # ******************************
 import os
 from threading import Thread
-
 import pandas
-
 import utils.config
 import utils.utils
 
 try:
+    from pm4py.util import constants
+    # importer
     from pm4py.objects.log.adapters.pandas import csv_import_adapter
-    from pm4py.objects.conversion.log import factory as conversion_factory
     from pm4py.objects.log.importer.xes import factory as xes_importer
     from pm4py.objects.log.exporter.xes import factory as xes_exporter
+    from pm4py.objects.conversion.log import factory as conversion_factory
+    from pm4py.objects.petri.exporter import pnml as pnml_exporter
+    # algorithms
     from pm4py.algo.discovery.alpha import factory as alpha_miner
     from pm4py.algo.discovery.heuristics import factory as heuristics_miner
     from pm4py.algo.discovery.dfg import factory as dfg_factory
+    from pm4py.objects.conversion.dfg import factory as dfg_conv_factory
+    # visualization
     from pm4py.visualization.petrinet import factory as vis_factory
     from pm4py.visualization.heuristics_net import factory as hn_vis_factory
     from pm4py.visualization.petrinet import factory as pn_vis_factory
     from pm4py.visualization.dfg import factory as dfg_vis_factory
     from pm4py.objects.log.util import sorting
+    from pm4pybpmn.visualization.bpmn import factory as bpmn_vis_factory
+    # BPMN
+    from pm4pybpmn.objects.conversion.petri_to_bpmn import factory as bpmn_converter
+    from pm4pybpmn.objects.bpmn.util import bpmn_diagram_layouter
 except ImportError as e:
     print("[PROCESS MINING] Process mining analysis has been disabled because 'pm4py' module is not installed."
           "See https://github.com/marco2012/ComputerLogger#PM4PY")
@@ -39,7 +47,7 @@ class ProcessMining:
         self.filename = utils.utils.getFilename(self.last_csv)
         self.file_extension = utils.utils.getFileExtension(self.last_csv)
         # path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/
-        self.save_path = os.path.join(utils.config.MyConfig().main_directory, 'RPA', self.filename)
+        self.save_path = utils.utils.getRPADirectory(self.filename)
         self.__log = self.__handle_log()
 
     def run(self):
@@ -58,10 +66,10 @@ class ProcessMining:
         print(f"[PROCESS MINING] Generated files in {self.last_csv.strip('.csv')}")
 
     def __handle_log(self):
-        if self.file_extension == ".csv":
+        # create directory if does not exists
+        utils.utils.createDirectory(self.save_path)
 
-            # create directory if does not exists
-            utils.utils.createDirectory(self.save_path)
+        if self.file_extension == ".csv":
 
             # combine multiple csv into one and then export it to xes
             csv_to_combine = list()
@@ -76,23 +84,45 @@ class ProcessMining:
                 # Each csv should have a separate case ID, so I insert a column to the left of each csv and assign
                 # number i. When I convert the combined csv to xes, all the rows with the same number will belong to a
                 # single trace, so I will have i traces.
-                df.insert(0, 'case:concept:name', i)
+                try:  # insert this column to create a unique trace for each csv
+                    df.insert(0, 'case:concept:name', i)
+                except ValueError:  # column already present
+                    pass
+
+                try:  # insert this column to create a unique trace for each csv
+                    df.insert(1, 'case:creator', 'CSV2XES by marco2012')
+                except ValueError:  # column already present
+                    pass
+
                 csv_to_combine.append(df)
 
+            # dataframe of combined csv
             combined_csv = pandas.concat(csv_to_combine)
+
+            # insert index for each row
+            combined_csv.insert(0, 'row_index', range(0, len(combined_csv)))
+
+            self.dataframe = combined_csv
+
+            # calculate csv path
             combined_csv_path = os.path.join(self.save_path, f'{self.filename}_combined.csv')
+
+            # save dataframe as csv
             combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
 
+            # convert csv to xes
             log = conversion_factory.apply(combined_csv)
+
+            # sort by timestamp
             log = sorting.sort_timestamp(log)
 
             # convert csv to xes
-            print(f"[PROCESS MINING] Generating XES file from {self.last_csv}")
-            xes_path = os.path.join(self.save_path,
-                                    f'{self.filename}.xes')  # self.last_csv.replace(self.file_extension, f'_pm4py.xes')
+            print(f"[PROCESS MINING] Generating XES file in {self.save_path}")
+            xes_path = os.path.join(self.save_path, f'{self.filename}.xes')
             xes_exporter.export_log(log, xes_path)
 
             return log
+
         elif self.file_extension == ".xes":
             log = xes_importer.import_log(self.filepath)
             return log
@@ -109,6 +139,8 @@ class ProcessMining:
             pn_vis_factory.save(gviz, img_path)
         elif img_name == "dfg":
             dfg_vis_factory.save(gviz, img_path)
+        elif img_name == "bpmn":
+            bpmn_vis_factory.save(gviz, img_path)
 
     def create_alpha_miner(self):
         net, initial_marking, final_marking = alpha_miner.apply(self.__log)
@@ -120,22 +152,119 @@ class ProcessMining:
         gviz = hn_vis_factory.apply(heu_net, parameters={"format": "jpg"})
         self.__create_image(gviz, "heuristic_miner")
 
-    def create_petri_net(self):
-        net, im, fm = heuristics_miner.apply(self.__log, parameters={"dependency_thresh": 0.99})
-        gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "jpg"})
+    def create_dfg(self, log=None, parameters={}):
+        # add custom columns to dfg
+
+        # for trace in self.__log:
+        #     for event in trace:
+        #         event["customClassifier"] = f'{event["row_index"]}-{event["concept:name"]}'
+                # try:
+                #     event["customClassifier"] = f'{event["concept:name"]}-{event["browser_url"]}-{event["tag_value"]}'
+                # except KeyError:
+                #     event["customClassifier"] = event["concept:name"]
+
+        # parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
+        # calculate dfg
+        if log is None:
+            log = self.__log
+        dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
+        return dfg
+
+    def __getSourceTargetNodes(self):
+        # source and target nodes in dfg graph are the first and last line in log file
+        events_list = self.dataframe['concept:name'].tolist()
+        events_list = [value for value in events_list if value != 'enableBrowserExtension']
+        source = events_list[0]
+        target = events_list[-1]
+        return source, target
+
+    def __createImageParameters(self):
+        source, target = self.__getSourceTargetNodes()
+        parameters = {"start_activities": [source], "end_activities": [target], "format": "jpg"}
+        return parameters
+
+    def save_dfg(self):
+        dfg = self.create_dfg()
+        parameters = self.__createImageParameters()
+        gviz = dfg_vis_factory.apply(dfg, log=self.__log, variant="frequency", parameters=parameters)
+        self.__create_image(gviz, "dfg")
+
+    def mostFrequentPathInDFG(self):
+        dfg = self.create_dfg()
+        source, target = self.__getSourceTargetNodes()
+        graphPath = utils.graphPath.HandleGraph(dfg, source, target)
+        graphPath.printPath()
+        return graphPath.frequentPath()
+
+    def create_petri_net(self, dfg=None):
+        if dfg is None:
+            dfg = self.create_dfg()
+        net, im, fm = dfg_conv_factory.apply(dfg)
+        return net, im, fm
+
+    def save_petri_net(self):
+        net, im, fm = self.create_petri_net()
+        parameters = self.__createImageParameters()
+        gviz = pn_vis_factory.apply(net, im, fm, parameters=parameters)
         self.__create_image(gviz, "petri_net")
 
-    def create_dfg(self):
-        # calculate dfg
-        dfg = dfg_factory.apply(self.__log, variant="frequency")
+    @staticmethod
+    def getHighLevelEvent(e):
+        if e in ["copy", "cut", "paste"]:
+            return "Copy and Paste"
+        elif e in ["clickLink", "mouseClick", "clickButton", "clickTextField", "doubleClick"]:
+            return "Click"
+        elif e in ["submit", "formSubmit", "selectOptions"]:
+            return "Submit"
+        elif e in ["newTab", "selectTab", "closeTab", "clickTextField"]:
+            return "BrowserTab"
+        elif e in ["generated", "urlHashChange", "typed", "selectText", "changeField", "reload"]:
+            return "Edit"
+        else:
+            return e
 
-        # write nodes to file
-        with open(os.path.join(self.save_path, 'dfg_nodes.py'), 'w', encoding='utf-8-sig') as file:
-            file.write("# This file contains the nodes of dfg image\n")
-            file.write("# (event_type, event_type): frequency\n")
-            for key, value in dfg.items():
-                file.write(f"{key}: {value}")
+    def aggregateDataForBpmn(self):
+        # remove duplicate events in dataframe
+        df = self.dataframe.drop_duplicates(subset="concept:name", keep='first')
+        log = conversion_factory.apply(df)
 
-        # create graph
-        gviz = dfg_vis_factory.apply(dfg, log=self.__log, variant="frequency", parameters={"format": "jpg"})
-        self.__create_image(gviz, "dfg")
+        for trace in log:
+            for event in trace:
+                e = event["concept:name"]
+                event["customClassifier"] = self.getHighLevelEvent(e)
+
+        # with open("/Users/marco/Desktop/log.py", 'w') as f:
+        #     f.write(str(log))
+
+        dfg_parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
+        return log, dfg_parameters
+
+    def _create_bpmn(self):
+
+        log, dfg_parameters = self.aggregateDataForBpmn()
+
+        dfg = self.create_dfg(log, dfg_parameters)
+        # remove same pairs in dfg
+        for w in list(dfg):
+            if w[0] == w[1]:
+                del (dfg[w])
+
+        net, initial_marking, final_marking = self.create_petri_net(dfg)
+
+        gviz = pn_vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
+        self.__create_image(gviz, "petri_net")
+
+        bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
+            net, initial_marking, final_marking)
+
+        try:
+            bpmn_graph = bpmn_diagram_layouter.apply(bpmn_graph)
+        except TypeError:
+            pass
+
+        return bpmn_graph, log
+
+    def save_bpmn(self):
+        bpmn_graph, log = self._create_bpmn()
+        bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "jpg"})
+        self.__create_image(bpmn_figure, "bpmn")

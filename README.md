@@ -111,7 +111,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
     1. Install a Windows C/C++ compiler like [MinGW](https://osdn.net/projects/mingw/releases/) or [Visual Studio](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=Community&rel=15)
     2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
     3. Add `C:/Program Files/Graphviz/bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
-    4. `pip3 install pm4py==1.2.11` 
+    4. `pip3 install pm4py==1.2.11 pm4pybpmn==0.1.3` 
 
     </br>
     <details>
@@ -127,7 +127,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 - On MacOS:
     ```bash
     brew install graphviz
-    pip3 install pm4py==1.2.11
+    pip3 install pm4py==1.2.11 pm4pybpmn==0.1.3
     ```
 
 #### Browser automation

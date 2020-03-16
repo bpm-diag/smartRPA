@@ -93,6 +93,17 @@ def getFileExtension(path):
     return os.path.splitext(os.path.basename(path))[1]
 
 
+# RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
+def getRPADirectory(csv_file_path):
+    csv_filename = getFilename(csv_file_path)
+    try:
+        RPA_directory = os.path.join(MAIN_DIRECTORY, 'RPA', csv_filename)
+    except Exception:
+        print(f"Could not create RPA directory, saving RPA script on Desktop")
+        RPA_directory = os.path.join(DESKTOP, 'RPA', csv_filename)
+    return RPA_directory.strip('_combined')
+
+
 # return current chrome version, used to detect selenium driver
 def getChromeVersionMac():
     if os.path.exists("/Applications/Google Chrome.app"):

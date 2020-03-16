@@ -6,7 +6,6 @@
 # ******************************
 
 import sys
-
 sys.path.append('../')  # this way main file is visible from this file
 import pandas
 import os
@@ -26,15 +25,23 @@ class RPAScript:
     :rtype: bool
     """
 
-    def __init__(self, csv_file_path: str, generate_all_scripts=True, unified_RPA_script=False, delay_between_actions=0.5):
-        self.csv_file_path = csv_file_path
+    def __init__(self,
+                 csv_file_path: str,
+                 generate_all_scripts=True,
+                 unified_RPA_script=False,
+                 delay_between_actions=0.5):
+
         self.unified_RPA_script = unified_RPA_script
         self.generate_all_scripts = generate_all_scripts
         self.__delay_between_actions = delay_between_actions
         self.__SaveAsUI = False
         self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
                                "newWindow", "closeWindow", "typed", "submit", "formSubmit", "enableBrowserExtension",
-                               "newWindow", "newTab", "startPage", "activateWorkbook", "openWindow", "click", "clickTextField"]
+                               "newWindow", "newTab", "startPage", "activateWorkbook", "openWindow", "click",
+                               "clickTextField"]
+
+        self.csv_file_path = csv_file_path
+        self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
         try:
             self.__dataframe = pandas.read_csv(csv_file_path, encoding='utf-8-sig')
         except UnicodeDecodeError as e:
@@ -62,7 +69,8 @@ except ImportError as e:
     sys.exit()
 \n"""
 
-    def __createBrowserHeader(self):
+    @staticmethod
+    def __createBrowserHeader():
         return """
 try:
     from selenium.common.exceptions import *
@@ -85,22 +93,20 @@ except WebDriverException as e:
     def __createRPAFile(self, RPA_type):
         # csv_file_path is like /Users/marco/Desktop/ComputerLogger/logs/2020-02-25_23-21-57.csv
         # csv_filename is like 2020-02-25_23-21-57
-        csv_filename = utils.utils.getFilename(self.csv_file_path)
-        # RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA
-        try:
-            RPA_directory = os.path.join(utils.utils.MAIN_DIRECTORY, 'RPA', csv_filename)
-        except Exception:
-            print(f"Could not create RPA directory, saving RPA script on Desktop")
-            RPA_directory = os.path.join(DESKTOP, 'RPA', csv_filename)
-        utils.utils.createDirectory(RPA_directory)
+        utils.utils.createDirectory(self.RPA_directory)
         # RPA_filename is like 2020-02-25_23-21-57_RPA.py
-        RPA_filename = csv_filename + RPA_type
+        RPA_filename = utils.utils.getFilename(self.csv_file_path) + RPA_type
         # RPA_filepath is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57/2020-02-25_23-21-57_RPA.py
-        RPA_filepath = os.path.join(RPA_directory, RPA_filename)
+        RPA_filepath = os.path.join(self.RPA_directory, RPA_filename)
         return RPA_filepath
 
     def __handle_excel_events(self, script, row):
-        e = row['event_type']
+        try:
+            e = row['event_type']
+            timestamp = row['timestampt']
+        except KeyError:
+            e = row['concept:name']
+            timestamp = row['time:timestamp']
         wb = row['workbook']
         sh = row['current_worksheet']
         cell_value = row['cell_content']
@@ -115,7 +121,7 @@ except WebDriverException as e:
         size = row["window_size"]
 
         if e not in self.eventsToIgnore:
-            script.write(f"# {row['timestamp']} {e}\n")
+            script.write(f"# {timestamp} {e}\n")
             script.write(f"sleep({self.__delay_between_actions})\n")
 
         # if mouse_coord field is not null for a given row
@@ -188,7 +194,12 @@ except WebDriverException as e:
         #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
 
     def __handle_powerpoint_events(self, script, row):
-        e = row['event_type']
+        try:
+            e = row['event_type']
+            timestamp = row['timestampt']
+        except KeyError:
+            e = row['concept:name']
+            timestamp = row['time:timestamp']
         # assign path if not null
         path = ""
         if not pandas.isna(row['event_src_path']):
@@ -198,7 +209,7 @@ except WebDriverException as e:
         slides = row['slides']
 
         if e not in self.eventsToIgnore:
-            script.write(f"# {row['timestamp']} {e}\n")
+            script.write(f"# {timestamp} {e}\n")
             script.write(f"sleep({self.__delay_between_actions})\n")
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
@@ -225,7 +236,12 @@ except WebDriverException as e:
 
     def __handle_system_events(self, script, row):
         # union of all other handlers
-        e = row['event_type']
+        try:
+            e = row['event_type']
+            timestamp = row['timestampt']
+        except KeyError:
+            e = row['concept:name']
+            timestamp = row['time:timestamp']
         cb = row['clipboard_content']
         app = row['application']
         # assign path if not null
@@ -238,7 +254,7 @@ except WebDriverException as e:
             dest_path = row['event_dest_path']
 
         if e not in self.eventsToIgnore:
-            script.write(f"# {row['timestamp']} {e}\n")
+            script.write(f"# {timestamp} {e}\n")
             script.write(f"sleep({self.__delay_between_actions * 2})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
@@ -313,7 +329,14 @@ except WebDriverException as e:
                     f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
 
     def __handle_browser_events(self, script, row):
-        e = row['event_type']
+
+        try:
+            e = row['event_type']
+            timestamp = row['timestampt']
+        except KeyError:
+            e = row['concept:name']
+            timestamp = row['time:timestamp']
+
         cb = row['clipboard_content']
         url = "about:blank"
         if not pandas.isna(row['browser_url']):
@@ -327,7 +350,7 @@ except WebDriverException as e:
         value = row['tag_value']
 
         if e not in self.eventsToIgnore:
-            script.write(f"# {row['timestamp']} {e}\n")
+            script.write(f"# {timestamp} {e}\n")
             script.write(f"sleep({self.__delay_between_actions})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
@@ -498,15 +521,13 @@ except Exception:
                 self.__handle_browser_events(script, row)
         return True
 
-    def _generateUnifiedRPA(self):
-
-        df = self.__dataframe
+    def _generateUnifiedRPA(self, df: pandas.DataFrame, filename="_UnifiedRPA.py"):
         if df.empty:
             return False
         RPABrowser = not df.query('category=="Browser"').empty
         RPASystem = not df.query('category=="OperatingSystem"').empty
 
-        RPA_filepath = self.__createRPAFile("_UnifiedRPA.py")
+        RPA_filepath = self.__createRPAFile(filename)
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             # add browser header if browser is present in event log
@@ -522,8 +543,13 @@ except Exception:
                 # self.__handle_excel_events(script, row)
                 # self.__handle_powerpoint_events(script, row)
                 # self.__handle_system_events(script, row)
+                try:
+                    e = row['event_type']
+                    timestamp = row['timestampt']
+                except KeyError:
+                    e = row['concept:name']
+                    timestamp = row['time:timestamp']
 
-                e = row['event_type']
                 wb = row['workbook']
                 sh = row['current_worksheet']
                 cell_value = row['cell_content']
@@ -555,7 +581,7 @@ except Exception:
 
 
                 if e not in self.eventsToIgnore:
-                    script.write(f"# {row['timestamp']} {e}\n")
+                    script.write(f"# {timestamp} {e}\n")
                     if RPASystem:
                         script.write(f"sleep({self.__delay_between_actions * 2})\n")
                     else:
@@ -796,6 +822,13 @@ except Exception:
 
         return True
 
+    def generateRPAMostFrequentPath(self, mostFrequentPathInDFG: list):
+        # take only rows composing most frequent path
+        mask = self.__dataframe['concept:name'].isin(mostFrequentPathInDFG)
+        df = self.__dataframe[mask]
+        df.to_csv(os.path.join(self.RPA_directory, 'filtered_csv_only_most_frequent_paths.csv'), index=False, encoding='utf-8-sig')
+        self._generateUnifiedRPA(df, filename="_MostFrequentPathUnifiedRPA.py")
+
     # file called by GUI when main script terminates and csv log file is created.
     def generateRPAScript(self):
         # check if given csv log file exists
@@ -804,14 +837,14 @@ except Exception:
             return False
         else:
             if self.generate_all_scripts:
-                self._generateUnifiedRPA()
+                self._generateUnifiedRPA(self.__dataframe)
                 self._generateExcelRPA()
                 self._generatePowerpointRPA()
                 self._generateSystemRPA()
                 self._generateBrowserRPA()
             else:
                 if self.unified_RPA_script:
-                    self._generateUnifiedRPA()
+                    self._generateUnifiedRPA(self.__dataframe)
                 else:
                     self._generateExcelRPA()
                     self._generatePowerpointRPA()

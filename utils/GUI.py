@@ -597,12 +597,31 @@ class MainApplication(QMainWindow, QDialog):
         if self.runCount >= totalRunCount and self.csv_to_join:
 
             try:
+                # check if library is installed
                 import pm4py
-                utils.process_mining.ProcessMining(self.csv_to_join).run()
+                # create class, combine all csv into one
+                pm = utils.process_mining.ProcessMining(self.csv_to_join)
+                # create DFG for combined csv
+                pm.save_dfg()
+                # calculate high level bpmn and petri net based on dfg
+                pm.save_bpmn()
+                # calculate most frequent path in DFG
+                mostFrequentPathInDFG = pm.mostFrequentPathInDFG()
+
+                # # RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
+                # RPA_directory = utils.utils.getRPADirectory(self.csv_to_join[-1])
+                # combined_csv_path = os.path.join(RPA_directory,
+                #                                  utils.utils.getFilename(self.csv_to_join[-1]) + '_combined.csv')
+                # # create RPA based on most frequent path
+                # utils.generateRPAScript.RPAScript(combined_csv_path).generateRPAMostFrequentPath(mostFrequentPathInDFG)
+
             except ImportError:
                 print(
-                    "[GUI] Can't apply process mining techniques to generated XES file because 'pm4py' module is not "
-                    "installed. See https://github.com/marco2012/ComputerLogger#PM4PY")
+                    "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
+                    "See https://github.com/marco2012/ComputerLogger#PM4PY")
+                # reset counter and list
+                self.runCount = 0
+                self.csv_to_join.clear()
                 return False
 
             # reset counter and list
@@ -692,7 +711,7 @@ class MainApplication(QMainWindow, QDialog):
 
             self.mainProcess.start()
 
-            self.createProgressDialog("Starting...", "Starting server...", 1200)
+            self.createProgressDialog("Starting...", "Starting server...", 1500)
 
             self.statusListWidget.clear()
             self.compatibilityCheckMessage()
@@ -711,7 +730,7 @@ class MainApplication(QMainWindow, QDialog):
             # set gui parameters
             self.running = False
 
-            self.createProgressDialog("Stopping...", "Stopping server...", 1200)
+            self.createProgressDialog("Stopping...", "Stopping server...", 1500)
 
             self.runButton.setText('Start logger')
             self.runButton.update()
