@@ -223,10 +223,10 @@ class ProcessMining:
             return "Edit"
         elif e in ["activateWindow", "closeWindow", "deactivateWindow", "openWindow"]:
             return "WindowAction"
-        elif e in ["deactivateWindow", "deselectWorksheet"]:
-            return "WorksheetAction"
-        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue"]:
-            return "CellAction"
+        elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook"]:
+            return "WorkbookAction"
+        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "editCellSheet", "getCell", "getRange"]:
+            return "EditCellExcell"
         else:
             return e
 
