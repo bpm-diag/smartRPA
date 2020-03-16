@@ -90,7 +90,7 @@ except WebDriverException as e:
     \n"""
 
     # Create and return rpa directory and file for each specific RPA
-    def __createRPAFile(self, RPA_type):
+    def _createRPAFile(self, RPA_type):
         # csv_file_path is like /Users/marco/Desktop/ComputerLogger/logs/2020-02-25_23-21-57.csv
         # csv_filename is like 2020-02-25_23-21-57
         utils.utils.createDirectory(self.RPA_directory)
@@ -332,7 +332,7 @@ except WebDriverException as e:
 
         try:
             e = row['event_type']
-            timestamp = row['timestampt']
+            timestamp = row['timestamp']
         except KeyError:
             e = row['concept:name']
             timestamp = row['time:timestamp']
@@ -470,7 +470,7 @@ except Exception:
         df = self.__dataframe.query(' application=="Microsoft Excel" | category=="Clipboard" | category=="MouseClick" ')
         if df.empty:
             return False
-        RPA_filepath = self.__createRPAFile("_ExcelRPA.py")
+        RPA_filepath = self._createRPAFile("_ExcelRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             if WINDOWS:
@@ -484,7 +484,7 @@ except Exception:
         df = self.__dataframe.query('application=="Microsoft Powerpoint" | category=="Clipboard"')
         if df.empty:
             return False
-        RPA_filepath = self.__createRPAFile("_PowerpointRPA.py")
+        RPA_filepath = self._createRPAFile("_PowerpointRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             for index, row in df.iterrows():
@@ -496,7 +496,7 @@ except Exception:
         df = self.__dataframe.query('category=="OperatingSystem" | category=="Clipboard"')
         if df.empty:
             return False
-        RPA_filepath = self.__createRPAFile("_SystemRPA.py")
+        RPA_filepath = self._createRPAFile("_SystemRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             for index, row in df.iterrows():
@@ -513,7 +513,7 @@ except Exception:
             print(f"[RPA] Google Chrome must be installed to generate RPA script.")
             return False
 
-        RPA_filepath = self.__createRPAFile("_BrowserRPA.py")
+        RPA_filepath = self._createRPAFile("_BrowserRPA.py")
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             script.write(self.__createBrowserHeader())
@@ -527,7 +527,7 @@ except Exception:
         RPABrowser = not df.query('category=="Browser"').empty
         RPASystem = not df.query('category=="OperatingSystem"').empty
 
-        RPA_filepath = self.__createRPAFile(filename)
+        RPA_filepath = self._createRPAFile(filename)
         with open(RPA_filepath, 'w') as script:
             script.write(self.__createHeader())
             # add browser header if browser is present in event log
@@ -545,8 +545,9 @@ except Exception:
                 # self.__handle_system_events(script, row)
                 try:
                     e = row['event_type']
-                    timestamp = row['timestampt']
-                except KeyError:
+                    timestamp = row['timestamp']
+                except KeyError as e:
+                    print(e)
                     e = row['concept:name']
                     timestamp = row['time:timestamp']
 

@@ -48,7 +48,7 @@ class ProcessMining:
         self.file_extension = utils.utils.getFileExtension(self.last_csv)
         # path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/
         self.save_path = utils.utils.getRPADirectory(self.filename)
-        self.__log = self.__handle_log()
+        self.__log = self._handle_log()
 
     def run(self):
         t0 = Thread(target=self.create_alpha_miner)
@@ -65,7 +65,7 @@ class ProcessMining:
         # t3.join()
         print(f"[PROCESS MINING] Generated files in {self.last_csv.strip('.csv')}")
 
-    def __handle_log(self):
+    def _handle_log(self):
         # create directory if does not exists
         utils.utils.createDirectory(self.save_path)
 
@@ -129,7 +129,7 @@ class ProcessMining:
         else:
             return "[PROCESS_MINING] Input file must be either .csv or .xes"
 
-    def __create_image(self, gviz, img_name):
+    def _create_image(self, gviz, img_name):
         img_path = os.path.join(self.save_path, f'{self.filename}_{img_name}.jpg')
         if img_name == "alpha_miner":
             vis_factory.save(gviz, img_path)
@@ -141,16 +141,17 @@ class ProcessMining:
             dfg_vis_factory.save(gviz, img_path)
         elif img_name == "bpmn":
             bpmn_vis_factory.save(gviz, img_path)
+        print(f"[PROCESS MINING] Generated {img_name} in {img_path}")
 
     def create_alpha_miner(self):
         net, initial_marking, final_marking = alpha_miner.apply(self.__log)
         gviz = vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
-        self.__create_image(gviz, "alpha_miner")
+        self._create_image(gviz, "alpha_miner")
 
     def create_heuristics_miner(self):
         heu_net = heuristics_miner.apply_heu(self.__log, parameters={"dependency_thresh": 0.99})
         gviz = hn_vis_factory.apply(heu_net, parameters={"format": "jpg"})
-        self.__create_image(gviz, "heuristic_miner")
+        self._create_image(gviz, "heuristic_miner")
 
     def create_dfg(self, log=None, parameters={}):
         # add custom columns to dfg
@@ -170,7 +171,7 @@ class ProcessMining:
         dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
         return dfg
 
-    def __getSourceTargetNodes(self):
+    def _getSourceTargetNodes(self):
         # source and target nodes in dfg graph are the first and last line in log file
         events_list = self.dataframe['concept:name'].tolist()
         events_list = [value for value in events_list if value != 'enableBrowserExtension']
@@ -178,20 +179,20 @@ class ProcessMining:
         target = events_list[-1]
         return source, target
 
-    def __createImageParameters(self):
-        source, target = self.__getSourceTargetNodes()
+    def _createImageParameters(self):
+        source, target = self._getSourceTargetNodes()
         parameters = {"start_activities": [source], "end_activities": [target], "format": "jpg"}
         return parameters
 
     def save_dfg(self):
         dfg = self.create_dfg()
-        parameters = self.__createImageParameters()
+        parameters = self._createImageParameters()
         gviz = dfg_vis_factory.apply(dfg, log=self.__log, variant="frequency", parameters=parameters)
-        self.__create_image(gviz, "dfg")
+        self._create_image(gviz, "dfg")
 
     def mostFrequentPathInDFG(self):
         dfg = self.create_dfg()
-        source, target = self.__getSourceTargetNodes()
+        source, target = self._getSourceTargetNodes()
         graphPath = utils.graphPath.HandleGraph(dfg, source, target)
         graphPath.printPath()
         return graphPath.frequentPath()
@@ -204,12 +205,12 @@ class ProcessMining:
 
     def save_petri_net(self):
         net, im, fm = self.create_petri_net()
-        parameters = self.__createImageParameters()
+        parameters = self._createImageParameters()
         gviz = pn_vis_factory.apply(net, im, fm, parameters=parameters)
-        self.__create_image(gviz, "petri_net")
+        self._create_image(gviz, "petri_net")
 
     @staticmethod
-    def getHighLevelEvent(e):
+    def _getHighLevelEvent(e):
         if e in ["copy", "cut", "paste"]:
             return "Copy and Paste"
         elif e in ["clickLink", "mouseClick", "clickButton", "clickTextField", "doubleClick"]:
@@ -223,7 +224,7 @@ class ProcessMining:
         else:
             return e
 
-    def aggregateDataForBpmn(self):
+    def _aggregateDataForBpmn(self):
         # remove duplicate events in dataframe
         df = self.dataframe.drop_duplicates(subset="concept:name", keep='first')
         log = conversion_factory.apply(df)
@@ -231,7 +232,7 @@ class ProcessMining:
         for trace in log:
             for event in trace:
                 e = event["concept:name"]
-                event["customClassifier"] = self.getHighLevelEvent(e)
+                event["customClassifier"] = self._getHighLevelEvent(e)
 
         # with open("/Users/marco/Desktop/log.py", 'w') as f:
         #     f.write(str(log))
@@ -241,7 +242,7 @@ class ProcessMining:
 
     def _create_bpmn(self):
 
-        log, dfg_parameters = self.aggregateDataForBpmn()
+        log, dfg_parameters = self._aggregateDataForBpmn()
 
         dfg = self.create_dfg(log, dfg_parameters)
         # remove same pairs in dfg
@@ -252,7 +253,7 @@ class ProcessMining:
         net, initial_marking, final_marking = self.create_petri_net(dfg)
 
         gviz = pn_vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
-        self.__create_image(gviz, "petri_net")
+        self._create_image(gviz, "petri_net")
 
         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
             net, initial_marking, final_marking)
@@ -267,4 +268,4 @@ class ProcessMining:
     def save_bpmn(self):
         bpmn_graph, log = self._create_bpmn()
         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "jpg"})
-        self.__create_image(bpmn_figure, "bpmn")
+        self._create_image(bpmn_figure, "bpmn")
