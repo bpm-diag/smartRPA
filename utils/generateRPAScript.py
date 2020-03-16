@@ -56,7 +56,7 @@ class RPAScript:
         t0.join()
 
     # Adds import statements to generated python file
-    def __createHeader(self):
+    def _createHeader(self):
         return f"""
 # This file was auto generated based on {self.csv_file_path}
 import sys, os
@@ -70,7 +70,7 @@ except ImportError as e:
 \n"""
 
     @staticmethod
-    def __createBrowserHeader():
+    def _createBrowserHeader():
         return """
 try:
     from selenium.common.exceptions import *
@@ -100,7 +100,7 @@ except WebDriverException as e:
         RPA_filepath = os.path.join(self.RPA_directory, RPA_filename)
         return RPA_filepath
 
-    def __handle_excel_events(self, script, row):
+    def _handle_excel_events(self, script, row):
         try:
             e = row['event_type']
             timestamp = row['timestampt']
@@ -193,7 +193,7 @@ except WebDriverException as e:
         #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
         #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
 
-    def __handle_powerpoint_events(self, script, row):
+    def _handle_powerpoint_events(self, script, row):
         try:
             e = row['event_type']
             timestamp = row['timestampt']
@@ -234,7 +234,7 @@ except WebDriverException as e:
             script.write(f"print('Closing Powerpoint...')\n")
             script.write("powerpoint.quit()\n")
 
-    def __handle_system_events(self, script, row):
+    def _handle_system_events(self, script, row):
         # union of all other handlers
         try:
             e = row['event_type']
@@ -328,7 +328,7 @@ except WebDriverException as e:
                 script.write(
                     f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
 
-    def __handle_browser_events(self, script, row):
+    def _handle_browser_events(self, script, row):
 
         try:
             e = row['event_type']
@@ -472,11 +472,11 @@ except Exception:
             return False
         RPA_filepath = self._createRPAFile("_ExcelRPA.py")
         with open(RPA_filepath, 'w') as script:
-            script.write(self.__createHeader())
+            script.write(self._createHeader())
             if WINDOWS:
                 script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
-                self.__handle_excel_events(script, row)
+                self._handle_excel_events(script, row)
         return True
 
     # Generate powerpoint RPA python script
@@ -486,9 +486,9 @@ except Exception:
             return False
         RPA_filepath = self._createRPAFile("_PowerpointRPA.py")
         with open(RPA_filepath, 'w') as script:
-            script.write(self.__createHeader())
+            script.write(self._createHeader())
             for index, row in df.iterrows():
-                self.__handle_powerpoint_events(script, row)
+                self._handle_powerpoint_events(script, row)
         return True
 
     # Generate system RPA python script
@@ -498,9 +498,9 @@ except Exception:
             return False
         RPA_filepath = self._createRPAFile("_SystemRPA.py")
         with open(RPA_filepath, 'w') as script:
-            script.write(self.__createHeader())
+            script.write(self._createHeader())
             for index, row in df.iterrows():
-                self.__handle_system_events(script, row)
+                self._handle_system_events(script, row)
         return True
 
     # Generate browser RPA python script
@@ -515,10 +515,10 @@ except Exception:
 
         RPA_filepath = self._createRPAFile("_BrowserRPA.py")
         with open(RPA_filepath, 'w') as script:
-            script.write(self.__createHeader())
-            script.write(self.__createBrowserHeader())
+            script.write(self._createHeader())
+            script.write(self._createBrowserHeader())
             for index, row in df.iterrows():
-                self.__handle_browser_events(script, row)
+                self._handle_browser_events(script, row)
         return True
 
     def _generateUnifiedRPA(self, df: pandas.DataFrame, filename="_UnifiedRPA.py"):
@@ -529,20 +529,20 @@ except Exception:
 
         RPA_filepath = self._createRPAFile(filename)
         with open(RPA_filepath, 'w') as script:
-            script.write(self.__createHeader())
+            script.write(self._createHeader())
             # add browser header if browser is present in event log
             if RPABrowser:
-                script.write(self.__createBrowserHeader())
+                script.write(self._createBrowserHeader())
             if WINDOWS:
                 script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
 
                 # TODO fix
 
-                # self.__handle_browser_events(script, row)
-                # self.__handle_excel_events(script, row)
-                # self.__handle_powerpoint_events(script, row)
-                # self.__handle_system_events(script, row)
+                # self._handle_browser_events(script, row)
+                # self._handle_excel_events(script, row)
+                # self._handle_powerpoint_events(script, row)
+                # self._handle_system_events(script, row)
                 try:
                     e = row['event_type']
                     timestamp = row['timestamp']

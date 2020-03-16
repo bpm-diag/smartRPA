@@ -7,9 +7,12 @@ from threading import Thread
 import pandas
 import utils.config
 import utils.utils
+from collections import Counter
 
 try:
+    # constants
     from pm4py.util import constants
+    from pm4py.util import xes_constants as xes_util
     # importer
     from pm4py.objects.log.adapters.pandas import csv_import_adapter
     from pm4py.objects.log.importer.xes import factory as xes_importer
@@ -48,13 +51,13 @@ class ProcessMining:
         self.file_extension = utils.utils.getFileExtension(self.last_csv)
         # path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/
         self.save_path = utils.utils.getRPADirectory(self.filename)
-        self.__log = self._handle_log()
+        self._log = self._handle_log()
 
     def run(self):
         t0 = Thread(target=self.create_alpha_miner)
         t1 = Thread(target=self.create_heuristics_miner)
-        t2 = Thread(target=self.create_dfg)
-        t3 = Thread(target=self.create_petri_net)
+        t2 = Thread(target=self._createDFG)
+        t3 = Thread(target=self._create_petri_net)
         # t0.start()
         # t1.start()
         t2.start()
@@ -144,32 +147,42 @@ class ProcessMining:
         print(f"[PROCESS MINING] Generated {img_name} in {img_path}")
 
     def create_alpha_miner(self):
-        net, initial_marking, final_marking = alpha_miner.apply(self.__log)
+        net, initial_marking, final_marking = alpha_miner.apply(self._log)
         gviz = vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
         self._create_image(gviz, "alpha_miner")
 
     def create_heuristics_miner(self):
-        heu_net = heuristics_miner.apply_heu(self.__log, parameters={"dependency_thresh": 0.99})
+        heu_net = heuristics_miner.apply_heu(self._log, parameters={"dependency_thresh": 0.99})
         gviz = hn_vis_factory.apply(heu_net, parameters={"format": "jpg"})
         self._create_image(gviz, "heuristic_miner")
 
-    def create_dfg(self, log=None, parameters={}):
-        # add custom columns to dfg
-
-        # for trace in self.__log:
-        #     for event in trace:
-        #         event["customClassifier"] = f'{event["row_index"]}-{event["concept:name"]}'
-                # try:
-                #     event["customClassifier"] = f'{event["concept:name"]}-{event["browser_url"]}-{event["tag_value"]}'
-                # except KeyError:
-                #     event["customClassifier"] = event["concept:name"]
-
-        # parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
-        # calculate dfg
+    def _createDFG(self, log=None, parameters={}):
         if log is None:
-            log = self.__log
+            log = self._log
         dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
         return dfg
+    
+    def _createCustomDFG(self):
+        window = 1
+        for trace in self._log:
+            for event in trace:
+                event["customClassifier"] = f'{event["concept:name"]}-{event["row_index"]}'
+
+        parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
+        if constants.PARAMETER_CONSTANT_ACTIVITY_KEY not in parameters:
+            parameters[constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = xes_util.DEFAULT_NAME_KEY
+        activity_key = parameters[constants.PARAMETER_CONSTANT_ACTIVITY_KEY]
+        # dfgs = map((lambda t: [(t[i - window][activity_key], t[i][activity_key]) for i in range(window, len(t))]), log)
+        dfgs = list()
+        for t in self._log:
+            for i in range(window, len(t)):
+                dfgs.append([(t[i - window][activity_key], t[i][activity_key])])
+        l_id = list()
+        for lista in dfgs:
+            for dfg in lista:
+                l_id.append(dfg)
+        counter_id = Counter(l_id)
+        return counter_id
 
     def _getSourceTargetNodes(self):
         # source and target nodes in dfg graph are the first and last line in log file
@@ -185,26 +198,26 @@ class ProcessMining:
         return parameters
 
     def save_dfg(self):
-        dfg = self.create_dfg()
+        dfg = self._createDFG()
         parameters = self._createImageParameters()
-        gviz = dfg_vis_factory.apply(dfg, log=self.__log, variant="frequency", parameters=parameters)
+        gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
         self._create_image(gviz, "dfg")
 
     def mostFrequentPathInDFG(self):
-        dfg = self.create_dfg()
+        dfg = self._createCustomDFG()
         source, target = self._getSourceTargetNodes()
         graphPath = utils.graphPath.HandleGraph(dfg, source, target)
         graphPath.printPath()
         return graphPath.frequentPath()
 
-    def create_petri_net(self, dfg=None):
+    def _create_petri_net(self, dfg=None):
         if dfg is None:
-            dfg = self.create_dfg()
+            dfg = self._createDFG()
         net, im, fm = dfg_conv_factory.apply(dfg)
         return net, im, fm
 
     def save_petri_net(self):
-        net, im, fm = self.create_petri_net()
+        net, im, fm = self._create_petri_net()
         parameters = self._createImageParameters()
         gviz = pn_vis_factory.apply(net, im, fm, parameters=parameters)
         self._create_image(gviz, "petri_net")
@@ -256,13 +269,13 @@ class ProcessMining:
 
         log, dfg_parameters = self._aggregateDataForBpmn()
 
-        dfg = self.create_dfg(log, dfg_parameters)
+        dfg = self._createDFG(log, dfg_parameters)
         # remove same pairs in dfg
         for w in list(dfg):
             if w[0] == w[1]:
                 del (dfg[w])
 
-        net, initial_marking, final_marking = self.create_petri_net(dfg)
+        net, initial_marking, final_marking = self._create_petri_net(dfg)
 
         gviz = pn_vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
         self._create_image(gviz, "petri_net")
