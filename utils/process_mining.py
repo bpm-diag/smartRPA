@@ -211,22 +211,28 @@ class ProcessMining:
 
     @staticmethod
     def _getHighLevelEvent(e):
+        # general
         if e in ["copy", "cut", "paste"]:
             return "Copy and Paste"
-        elif e in ["clickLink", "mouseClick", "clickButton", "clickTextField", "doubleClick"]:
+        # browser
+        elif e in ["clickLink", "mouseClick", "clickButton", "clickTextField", "doubleClick", "clickTextField"]:
             return "Click"
         elif e in ["submit", "formSubmit", "selectOptions"]:
             return "Submit"
-        elif e in ["newTab", "selectTab", "closeTab", "clickTextField"]:
+        elif e in ["newTab", "selectTab", "closeTab", "moveTab", "zoomTab"]:
             return "BrowserTab"
-        elif e in ["generated", "urlHashChange", "typed", "selectText", "changeField", "reload"]:
+        elif e in ["generated", "urlHashChange", "typed", "selectText", "changeField", "reload", "contextMenu"]:
             return "Edit"
+        # excel
         elif e in ["activateWindow", "closeWindow", "deactivateWindow", "openWindow"]:
             return "WindowAction"
-        elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook"]:
+        elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook", "worksheetActivated"]:
             return "WorkbookAction"
-        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "editCellSheet", "getCell", "getRange"]:
-            return "EditCellExcell"
+        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "editCellSheet", "getCell", "getRange", "doubleClickCellWithValue", "afterCalculate"]:
+            return "EditCellExcel"
+        # system
+        elif e in ["itemSelected", "deleted", "moved", "created"]:
+            return "FilesAndFolders"
         else:
             return e
 
