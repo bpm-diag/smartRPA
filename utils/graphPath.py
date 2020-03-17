@@ -24,12 +24,13 @@ class HandleGraph:
             # else set weight to -1
             # use negative weight to find maximum cost path later
             try:
-                w = DG[node1][node2]['weight'] - 1
+                w = DG[node1][node2]['weight'] + 1
             except KeyError:
-                w = -1
+                w = 1
 
             if node1 != node2:
                 DG.add_edge(node1, node2, weight=w)
+
         return DG
 
     def _path_cost(self, path):
@@ -42,9 +43,19 @@ class HandleGraph:
         )
 
     def frequentPath(self):
+        # try:
+        #     # most_frequent_path = self._heaviest_path(self.source, self.target)
+        #     most_frequent_path = nx.bellman_ford_path(self.graph, self.source, self.target)
+        #     return most_frequent_path
+        # except nx.exception.NodeNotFound as e:
+        #     print(e)
+        # except nx.exception.NetworkXUnbounded as e:
+        #     print(e)
+        #     cycles = nx.simple_cycles(self.graph)
+        #     for cycle in cycles:
+        #         print(cycle)
         try:
             most_frequent_path = self._heaviest_path(self.source, self.target)
-            # most_frequent_path = nx.bellman_ford_predecessor_and_distance(self.graph, self.source, self.target)
             return most_frequent_path
         except (nx.exception.NodeNotFound, nx.exception.NetworkXUnbounded) as e:
             print(e)

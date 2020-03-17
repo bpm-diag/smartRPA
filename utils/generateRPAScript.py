@@ -6,6 +6,7 @@
 # ******************************
 
 import sys
+
 sys.path.append('../')  # this way main file is visible from this file
 import pandas
 import os
@@ -33,8 +34,8 @@ class RPAScript:
 
         self.unified_RPA_script = unified_RPA_script
         self.generate_all_scripts = generate_all_scripts
-        self.__delay_between_actions = delay_between_actions
-        self.__SaveAsUI = False
+        self._delay_between_actions = delay_between_actions
+        self._SaveAsUI = False
         self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
                                "newWindow", "closeWindow", "typed", "submit", "formSubmit", "enableBrowserExtension",
                                "newWindow", "newTab", "startPage", "activateWorkbook", "openWindow", "click",
@@ -43,7 +44,7 @@ class RPAScript:
         self.csv_file_path = csv_file_path
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
         try:
-            self.__dataframe = pandas.read_csv(csv_file_path, encoding='utf-8-sig')
+            self._dataframe = pandas.read_csv(csv_file_path, encoding='utf-8-sig')
         except UnicodeDecodeError as e:
             print(f"[CSV2XES] Could not decode {csv_file_path}: {e}")
 
@@ -122,7 +123,7 @@ except WebDriverException as e:
 
         if e not in self.eventsToIgnore:
             script.write(f"# {timestamp} {e}\n")
-            script.write(f"sleep({self.__delay_between_actions})\n")
+            script.write(f"sleep({self._delay_between_actions})\n")
 
         # if mouse_coord field is not null for a given row
         # if not pandas.isna(mouse_coord) and mouse_coord != "0,0":
@@ -142,7 +143,7 @@ except WebDriverException as e:
             script.write("excel = Excel()\n")
             x, y, width, height = size.split(',')
             # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
-        elif e == "resizeWindow": # TODO
+        elif e == "resizeWindow":  # TODO
             x, y, width, height = size.split(',')
             script.write(f"print('Resizing window to {size}')\n")
             # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
@@ -173,14 +174,14 @@ except WebDriverException as e:
         # 2) saveWorkbook: filename chosen by user is known so I know file path
         # If SaveAsUI is True I need to issue excel.save_as(path) command, else I just need excel.save()
         elif e == "beforeSaveWorkbook":
-            self.__SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
+            self._SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
         elif e == "saveWorkbook":  # case 2), after case
             script.write(f"print('saving workbook {wb}')\n")
-            if self.__SaveAsUI:  # saving for the first time
+            if self._SaveAsUI:  # saving for the first time
                 script.write(f"excel.save_as(r'{path}')\n")
             else:  # file already created
                 script.write(f"excel.save()\n")
-        elif e == "printWorkbook" and not self.__SaveAsUI:  # if file has already been saved and it's on disk
+        elif e == "printWorkbook" and not self._SaveAsUI:  # if file has already been saved and it's on disk
             script.write(f"print('Printing {wb}')\n")
             script.write(f"send_to_printer(r'{path}')\n")
         elif e == "closeWindow":
@@ -210,7 +211,7 @@ except WebDriverException as e:
 
         if e not in self.eventsToIgnore:
             script.write(f"# {timestamp} {e}\n")
-            script.write(f"sleep({self.__delay_between_actions})\n")
+            script.write(f"sleep({self._delay_between_actions})\n")
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
             script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
@@ -227,7 +228,7 @@ except WebDriverException as e:
             script.write(f"print('saving presentation {presentation_name}')\n")
             path = os.path.join(DESKTOP, 'presentation.pptx')
             script.write(f"powerpoint.save_as(r'{path}')\n")
-        # elif e == "printPresentation" and not self.__SaveAsUI:  # if file has already been saved and it's on disk
+        # elif e == "printPresentation" and not self._SaveAsUI:  # if file has already been saved and it's on disk
         #     script.write(f"print('Printing {presentation_name}')\n")
         #     script.write(f"send_to_printer(r'{path}')\n")
         elif e == "closePresentation":
@@ -255,7 +256,7 @@ except WebDriverException as e:
 
         if e not in self.eventsToIgnore:
             script.write(f"# {timestamp} {e}\n")
-            script.write(f"sleep({self.__delay_between_actions * 2})\n")
+            script.write(f"sleep({self._delay_between_actions * 2})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
@@ -351,7 +352,7 @@ except WebDriverException as e:
 
         if e not in self.eventsToIgnore:
             script.write(f"# {timestamp} {e}\n")
-            script.write(f"sleep({self.__delay_between_actions})\n")
+            script.write(f"sleep({self._delay_between_actions})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
             script.write(f"print('Setting clipboard text')\n")
@@ -467,7 +468,7 @@ except Exception:
 
     # Generate excel RPA python script
     def _generateExcelRPA(self):
-        df = self.__dataframe.query(' application=="Microsoft Excel" | category=="Clipboard" | category=="MouseClick" ')
+        df = self._dataframe.query(' application=="Microsoft Excel" | category=="Clipboard" | category=="MouseClick" ')
         if df.empty:
             return False
         RPA_filepath = self._createRPAFile("_ExcelRPA.py")
@@ -481,7 +482,7 @@ except Exception:
 
     # Generate powerpoint RPA python script
     def _generatePowerpointRPA(self):
-        df = self.__dataframe.query('application=="Microsoft Powerpoint" | category=="Clipboard"')
+        df = self._dataframe.query('application=="Microsoft Powerpoint" | category=="Clipboard"')
         if df.empty:
             return False
         RPA_filepath = self._createRPAFile("_PowerpointRPA.py")
@@ -493,7 +494,7 @@ except Exception:
 
     # Generate system RPA python script
     def _generateSystemRPA(self):
-        df = self.__dataframe.query('category=="OperatingSystem" | category=="Clipboard"')
+        df = self._dataframe.query('category=="OperatingSystem" | category=="Clipboard"')
         if df.empty:
             return False
         RPA_filepath = self._createRPAFile("_SystemRPA.py")
@@ -505,7 +506,7 @@ except Exception:
 
     # Generate browser RPA python script
     def _generateBrowserRPA(self):
-        df = self.__dataframe.query('category=="Browser" | category=="Clipboard"')
+        df = self._dataframe.query('category=="Browser" | category=="Clipboard"')
         if df.empty:
             return False
         # chrome browser must be installed
@@ -539,15 +540,10 @@ except Exception:
 
                 # TODO fix
 
-                # self._handle_browser_events(script, row)
-                # self._handle_excel_events(script, row)
-                # self._handle_powerpoint_events(script, row)
-                # self._handle_system_events(script, row)
                 try:
                     e = row['event_type']
                     timestamp = row['timestamp']
-                except KeyError as e:
-                    print(e)
+                except KeyError:
                     e = row['concept:name']
                     timestamp = row['time:timestamp']
 
@@ -580,13 +576,12 @@ except Exception:
                 if not pandas.isna(row['event_dest_path']):
                     dest_path = row['event_dest_path']
 
-
                 if e not in self.eventsToIgnore:
                     script.write(f"# {timestamp} {e}\n")
                     if RPASystem:
-                        script.write(f"sleep({self.__delay_between_actions * 2})\n")
+                        script.write(f"sleep({self._delay_between_actions * 2})\n")
                     else:
-                        script.write(f"sleep({self.__delay_between_actions})\n")
+                        script.write(f"sleep({self._delay_between_actions})\n")
 
                 # EXCEL
 
@@ -639,14 +634,14 @@ except Exception:
                 # 2) saveWorkbook: filename chosen by user is known so I know file path
                 # If SaveAsUI is True I need to issue excel.save_as(path) command, else I just need excel.save()
                 elif e == "beforeSaveWorkbook":
-                    self.__SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
+                    self._SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
                 elif e == "saveWorkbook":  # case 2), after case
                     script.write(f"print('saving workbook {wb}')\n")
-                    if self.__SaveAsUI:  # saving for the first time
+                    if self._SaveAsUI:  # saving for the first time
                         script.write(f"excel.save_as(r'{path}')\n")
                     else:  # file already created
                         script.write(f"excel.save()\n")
-                elif e == "printWorkbook" and not self.__SaveAsUI:  # if file has already been saved and it's on disk
+                elif e == "printWorkbook" and not self._SaveAsUI:  # if file has already been saved and it's on disk
                     script.write(f"print('Printing {wb}')\n")
                     script.write(f"send_to_printer(r'{path}')\n")
                 elif e == "closeWindow":
@@ -663,7 +658,7 @@ except Exception:
                     script.write(f"print('Pasting clipboard text')\n")
                     script.write(f'type_text("""{cb}""")\n')
 
-                #Browser
+                # Browser
 
                 # elif e == "newWindow":
                 #     script.write(f"print('Opening new window')\n")
@@ -752,7 +747,7 @@ except Exception:
                     script.write(f"actions.moveByOffset({mouse_coord})\n")
                     script.write(f"actions.click().build().perform()\n")
 
-                #system
+                # system
                 elif e == "openFile" and path:
                     script.write(f"print('Opening file {item_name}')\n")
                     script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
@@ -821,14 +816,22 @@ except Exception:
                         script.write(
                             f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
 
+        print(f"[RPA] Generated Unified RPA in {RPA_filepath}")
         return True
 
     def generateRPAMostFrequentPath(self, mostFrequentPathInDFG: list):
         # take only rows composing most frequent path
-        mask = self.__dataframe['concept:name'].isin(mostFrequentPathInDFG)
-        df = self.__dataframe[mask]
-        df.to_csv(os.path.join(self.RPA_directory, 'filtered_csv_only_most_frequent_paths.csv'), index=False, encoding='utf-8-sig')
-        self._generateUnifiedRPA(df, filename="_MostFrequentPathUnifiedRPA.py")
+        # mask = self._dataframe['concept:name'].isin(mostFrequentPathInDFG)
+        # df = self._dataframe[mask]
+        # df.to_csv(os.path.join(self.RPA_directory, 'filtered_csv_only_most_frequent_paths.csv'), index=False, encoding='utf-8-sig')
+        # self._generateUnifiedRPA(df, filename="_MostFrequentPathUnifiedRPA.py")
+        df = self._dataframe
+        path_frequent = list()
+        for path in mostFrequentPathInDFG:
+            path_rows = df.loc[df['concept:name'] == path]
+            path_frequent.append(path_rows)
+        df_frequent = pandas.concat(path_frequent)
+        self._generateUnifiedRPA(df_frequent, filename="_MostFrequentPathUnifiedRPA.py")
 
     # file called by GUI when main script terminates and csv log file is created.
     def generateRPAScript(self):
@@ -838,14 +841,14 @@ except Exception:
             return False
         else:
             if self.generate_all_scripts:
-                self._generateUnifiedRPA(self.__dataframe)
+                self._generateUnifiedRPA(self._dataframe)
                 self._generateExcelRPA()
                 self._generatePowerpointRPA()
                 self._generateSystemRPA()
                 self._generateBrowserRPA()
             else:
                 if self.unified_RPA_script:
-                    self._generateUnifiedRPA(self.__dataframe)
+                    self._generateUnifiedRPA(self._dataframe)
                 else:
                     self._generateExcelRPA()
                     self._generatePowerpointRPA()

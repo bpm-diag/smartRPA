@@ -184,16 +184,19 @@ class ProcessMining:
         counter_id = Counter(l_id)
         return counter_id
 
-    def _getSourceTargetNodes(self):
+    def _getSourceTargetNodes(self, high_level=False):
         # source and target nodes in dfg graph are the first and last line in log file
         events_list = self.dataframe['concept:name'].tolist()
         events_list = [value for value in events_list if value != 'enableBrowserExtension']
         source = events_list[0]
         target = events_list[-1]
+        if high_level:
+            source = self._getHighLevelEvent(source)
+            target = self._getHighLevelEvent(target)
         return source, target
 
-    def _createImageParameters(self):
-        source, target = self._getSourceTargetNodes()
+    def _createImageParameters(self, high_level=False):
+        source, target = self._getSourceTargetNodes(high_level)
         parameters = {"start_activities": [source], "end_activities": [target], "format": "jpg"}
         return parameters
 
@@ -213,7 +216,8 @@ class ProcessMining:
     def _create_petri_net(self, dfg=None):
         if dfg is None:
             dfg = self._createDFG()
-        net, im, fm = dfg_conv_factory.apply(dfg)
+        parameters = self._createImageParameters(high_level=True)
+        net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
         return net, im, fm
 
     def save_petri_net(self):
