@@ -40,7 +40,7 @@ class Preferences(QMainWindow):
             self.resize(360, 320)
 
         slider_minimum = 1
-        slider_maximum = 10
+        slider_maximum = 100
 
         self.lcd = QLCDNumber(self)
         self.lcd.setMinimumHeight(45)
@@ -579,7 +579,6 @@ class MainApplication(QMainWindow, QDialog):
         rpa_success = rpa.run()
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
-        print(f"[GUI] {msg}")
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
@@ -604,16 +603,18 @@ class MainApplication(QMainWindow, QDialog):
                 # create DFG for combined csv
                 pm.save_dfg()
                 # calculate high level bpmn and petri net based on dfg
-                pm.save_bpmn()
-                # calculate most frequent path in DFG
-                mostFrequentPathInDFG = pm.mostFrequentPathInDFG()
+                pm.createAbstractProcess()
 
+                # calculate most frequent path in DFG
+                # mostFrequentPathInDFG = pm.mostFrequentPathInDFG()
                 # # RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
                 # RPA_directory = utils.utils.getRPADirectory(self.csv_to_join[-1])
                 # combined_csv_path = os.path.join(RPA_directory,
                 #                                  utils.utils.getFilename(self.csv_to_join[-1]) + '_combined.csv')
+
                 # # create RPA based on most frequent path
-                # utils.generateRPAScript.RPAScript(combined_csv_path).generateRPAMostFrequentPath(mostFrequentPathInDFG)
+                mostFrequentCase = pm.selectMostFrequentCase()
+                utils.generateRPAScript.RPAScript(self.csv_to_join[-1]).generateRPAMostFrequentPath(mostFrequentCase)
 
             except ImportError:
                 print(
@@ -742,12 +743,12 @@ class MainApplication(QMainWindow, QDialog):
             self.mainProcess.terminate()
 
             log_filepath = utils.config.MyConfig.get_instance().log_filepath
-            msg = f"Log saved as {os.path.basename(log_filepath)}"
+            msg = f"[GUI] Log saved as {os.path.basename(log_filepath)}"
             print(msg)
-            self.statusListWidget.addItem(QListWidgetItem(f"- {msg}"))
+            self.statusListWidget.addItem(QListWidgetItem(f"- {msg.strip('[GUI] ')}"))
 
             # once log file is created, RPA actions are automatically generated for each category
-            self.handleRPA(log_filepath)
+            # self.handleRPA(log_filepath)
             # generate xes file from combined csv
             self.handleRunCount(log_filepath)
 

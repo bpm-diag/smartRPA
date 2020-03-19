@@ -12,6 +12,7 @@ import importlib
 from importlib import util
 from threading import Thread
 from platform import system
+from urllib.parse import urlparse
 import utils.config
 import utils.consumerServer
 import pandas as pd
@@ -142,6 +143,7 @@ def getActiveWindowInfo(parameter):
     except Exception:
         pass
 
+
 # return python module install location
 def getPythonModuleLocation(module_name):
     module = importlib.util.find_spec(module_name)
@@ -163,6 +165,9 @@ def getChromedriverPath():
     # if MAC: os.chmod(chromedriver, 755)
     return chromedriver
 
+
+def getHostname(url):
+    return urlparse(url).hostname
 
 # ************
 # Class

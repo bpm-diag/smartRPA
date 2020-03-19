@@ -53,21 +53,6 @@ class ProcessMining:
         self.save_path = utils.utils.getRPADirectory(self.filename)
         self._log = self._handle_log()
 
-    def run(self):
-        t0 = Thread(target=self.create_alpha_miner)
-        t1 = Thread(target=self.create_heuristics_miner)
-        t2 = Thread(target=self._createDFG)
-        t3 = Thread(target=self._create_petri_net)
-        # t0.start()
-        # t1.start()
-        t2.start()
-        # t3.start()
-        # t0.join()
-        # t1.join()
-        t2.join()
-        # t3.join()
-        print(f"[PROCESS MINING] Generated files in {self.last_csv.strip('.csv')}")
-
     def _handle_log(self):
         # create directory if does not exists
         utils.utils.createDirectory(self.save_path)
@@ -95,6 +80,11 @@ class ProcessMining:
                 try:  # insert this column to create a unique trace for each csv
                     df.insert(1, 'case:creator', 'CSV2XES by marco2012')
                 except ValueError:  # column already present
+                    pass
+
+                try:
+                    df.insert(2, 'lifecycle:transition', 'complete')
+                except ValueError:
                     pass
 
                 csv_to_combine.append(df)
@@ -132,6 +122,17 @@ class ProcessMining:
         else:
             return "[PROCESS_MINING] Input file must be either .csv or .xes"
 
+    def selectMostFrequentCase(self):
+        df = self.dataframe
+        df1 = df.groupby('case:concept:name')['concept:name'].agg(', '.join).reset_index()
+        df2 = df1.groupby('concept:name', sort=False)['case:concept:name'].agg(list).reset_index(name='variants')
+        variants = df2['variants'].tolist()
+        longest_variants = max(variants, key=len)
+        longest_variant = longest_variants[0]
+        print(f"[PROCESS MINING] {len(variants)} variants available, the most frequent one contains {len(longest_variants)} cases, selecting the first one")
+        case = df.loc[df['case:concept:name'] == longest_variant]
+        return case
+
     def _create_image(self, gviz, img_name):
         img_path = os.path.join(self.save_path, f'{self.filename}_{img_name}.jpg')
         if img_name == "alpha_miner":
@@ -156,9 +157,17 @@ class ProcessMining:
         gviz = hn_vis_factory.apply(heu_net, parameters={"format": "jpg"})
         self._create_image(gviz, "heuristic_miner")
 
-    def _createDFG(self, log=None, parameters={}):
+    def _createDFG(self, log=None, parameters=None):
+        if parameters is None:
+            parameters = {}
         if log is None:
             log = self._log
+
+        # for trace in self._log:
+        #     for event in trace:
+        #         event["customClassifier"] = f'{event["concept:name"]}-{event["browser_url"]}'
+        # parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
+
         dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
         return dfg
     
@@ -184,19 +193,19 @@ class ProcessMining:
         counter_id = Counter(l_id)
         return counter_id
 
-    def _getSourceTargetNodes(self, high_level=False):
+    def _getSourceTargetNodes(self, log=None, high_level=False):
         # source and target nodes in dfg graph are the first and last line in log file
-        events_list = self.dataframe['concept:name'].tolist()
-        events_list = [value for value in events_list if value != 'enableBrowserExtension']
+        if log and high_level:
+            events_list = [event["customClassifier"] for trace in log for event in trace]
+        else:
+            events_list = self.dataframe['concept:name'].tolist()
+            events_list = [value for value in events_list if value != 'enableBrowserExtension']
         source = events_list[0]
         target = events_list[-1]
-        if high_level:
-            source = self._getHighLevelEvent(source)
-            target = self._getHighLevelEvent(target)
         return source, target
 
-    def _createImageParameters(self, high_level=False):
-        source, target = self._getSourceTargetNodes(high_level)
+    def _createImageParameters(self, log=None, high_level=False):
+        source, target = self._getSourceTargetNodes(log, high_level)
         parameters = {"start_activities": [source], "end_activities": [target], "format": "jpg"}
         return parameters
 
@@ -214,9 +223,11 @@ class ProcessMining:
         return graphPath.frequentPath()
 
     def _create_petri_net(self, dfg=None):
-        if dfg is None:
-            dfg = self._createDFG()
-        parameters = self._createImageParameters(high_level=True)
+        # if dfg is None:
+        #     dfg = self._createDFG()
+        log, dfg_parameters = self._aggregateDataForBpmn()
+        dfg = self._createDFG(log, dfg_parameters)
+        parameters = self._createImageParameters(log=log, high_level=True)
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
         return net, im, fm
 
@@ -226,46 +237,18 @@ class ProcessMining:
         gviz = pn_vis_factory.apply(net, im, fm, parameters=parameters)
         self._create_image(gviz, "petri_net")
 
-    @staticmethod
-    def _getHighLevelEvent(e):
-        # general
-        if e in ["copy", "cut", "paste"]:
-            return "Copy and Paste"
-        # browser
-        elif e in ["clickLink", "mouseClick", "clickButton", "clickTextField", "doubleClick", "clickTextField"]:
-            return "Click"
-        elif e in ["submit", "formSubmit", "selectOptions"]:
-            return "Submit"
-        elif e in ["newTab", "selectTab", "closeTab", "moveTab", "zoomTab"]:
-            return "BrowserTab"
-        elif e in ["generated", "urlHashChange", "typed", "selectText", "changeField", "reload", "contextMenu"]:
-            return "Edit"
-        # excel
-        elif e in ["activateWindow", "closeWindow", "deactivateWindow", "openWindow"]:
-            return "WindowAction"
-        elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook", "worksheetActivated"]:
-            return "WorkbookAction"
-        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "editCellSheet", "getCell", "getRange", "doubleClickCellWithValue", "afterCalculate"]:
-            return "EditCellExcel"
-        # system
-        elif e in ["itemSelected", "deleted", "moved", "created"]:
-            return "FilesAndFolders"
+    def _aggregateDataForBpmn(self, remove_duplicates=True):
+        if remove_duplicates:
+            # remove duplicate events in dataframe
+            df = self.dataframe.drop_duplicates(subset="concept:name", keep='first')
+            log = conversion_factory.apply(df)
         else:
-            return e
-
-    def _aggregateDataForBpmn(self):
-        # remove duplicate events in dataframe
-        df = self.dataframe.drop_duplicates(subset="concept:name", keep='first')
-        log = conversion_factory.apply(df)
-
+            log = self._log
+        # take only
+        log = conversion_factory.apply(self.selectMostFrequentCase())
         for trace in log:
             for event in trace:
-                e = event["concept:name"]
-                event["customClassifier"] = self._getHighLevelEvent(e)
-
-        # with open("/Users/marco/Desktop/log.py", 'w') as f:
-        #     f.write(str(log))
-
+                event["customClassifier"] = self._getHighLevelEvent(event)
         dfg_parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
         return log, dfg_parameters
 
@@ -298,3 +281,45 @@ class ProcessMining:
         bpmn_graph, log = self._create_bpmn()
         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "jpg"})
         self._create_image(bpmn_figure, "bpmn")
+
+    def createAbstractProcess(self):
+        #self.save_bpmn()
+        self.save_petri_net()
+
+    @staticmethod
+    def _getHighLevelEvent(event):
+
+        e = event["concept:name"]
+        url = utils.utils.getHostname(event['browser_url'])
+        app = event['application']
+
+        # general
+        if e in ["copy", "cut", "paste", "ctrl+c"]:  # TODO keyboard
+            return f"Copy and Paste: {event['clipboard_content']}"
+        # browser
+        elif e in ["clickLink", "clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick"]:
+            return f"[{app}] Click {event['tag_category']} on {url}"
+        elif e in ["link", "reload", "generated", "urlHashChange", ]:
+            return f"[{app}] Navigate to {url}"
+        elif e in ["submit", "formSubmit", "selectOptions"]:
+            return "Submit"
+        elif e in ["newTab", "selectTab", "closeTab", "moveTab", "zoomTab"]:
+            return "Browser Tab"
+        elif e in ["typed", "selectText", "contextMenu"]:
+            return f"[{app}] Edit {event['tag_category']} on {url}"
+        elif e in ["changeField"]:
+            return f"[{app}] Write '{event['tag_value']}' in {event['tag_category']} on {url}"
+        # excel
+        elif e in ["activateWindow", "closeWindow", "deactivateWindow", "openWindow"]:
+            return "WindowAction"
+        elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook",
+                   "worksheetActivated"]:
+            return "WorkbookAction"
+        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell",
+                   "editCellSheet", "getCell", "getRange", "doubleClickCellWithValue", "afterCalculate"]:
+            return "EditCellExcel"
+        # system
+        elif e in ["itemSelected", "deleted", "moved", "created"]:
+            return "FilesAndFolders"
+        else:
+            return e

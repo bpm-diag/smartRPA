@@ -129,6 +129,11 @@ class CSV2XES:
             except ValueError:  # column already present
                 pass
 
+            try:
+                df.insert(2, 'lifecycle:transition', 'complete')
+            except ValueError:
+                pass
+
             # create dictionary with column name as key and row data as value, like
             # {'category': 'Browser', 'event_type': 'newTab'}
             # if attributes_to_consider is not empty I need to take only certain columns from csv

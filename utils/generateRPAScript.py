@@ -28,12 +28,8 @@ class RPAScript:
 
     def __init__(self,
                  csv_file_path: str,
-                 generate_all_scripts=True,
-                 unified_RPA_script=False,
                  delay_between_actions=0.5):
 
-        self.unified_RPA_script = unified_RPA_script
-        self.generate_all_scripts = generate_all_scripts
         self._delay_between_actions = delay_between_actions
         self._SaveAsUI = False
         self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
@@ -819,19 +815,8 @@ except Exception:
         print(f"[RPA] Generated Unified RPA in {RPA_filepath}")
         return True
 
-    def generateRPAMostFrequentPath(self, mostFrequentPathInDFG: list):
-        # take only rows composing most frequent path
-        # mask = self._dataframe['concept:name'].isin(mostFrequentPathInDFG)
-        # df = self._dataframe[mask]
-        # df.to_csv(os.path.join(self.RPA_directory, 'filtered_csv_only_most_frequent_paths.csv'), index=False, encoding='utf-8-sig')
-        # self._generateUnifiedRPA(df, filename="_MostFrequentPathUnifiedRPA.py")
-        df = self._dataframe
-        path_frequent = list()
-        for path in mostFrequentPathInDFG:
-            path_rows = df.loc[df['concept:name'] == path]
-            path_frequent.append(path_rows)
-        df_frequent = pandas.concat(path_frequent)
-        self._generateUnifiedRPA(df_frequent, filename="_MostFrequentPathUnifiedRPA.py")
+    def generateRPAMostFrequentPath(self, df: pandas.DataFrame):
+        self._generateUnifiedRPA(df, filename="_MostFrequentPathUnifiedRPA.py")
 
     # file called by GUI when main script terminates and csv log file is created.
     def generateRPAScript(self):
@@ -840,19 +825,10 @@ except Exception:
             print(f"[RPA] Can't find specified csv_file_path {self.csv_file_path}")
             return False
         else:
-            if self.generate_all_scripts:
-                self._generateUnifiedRPA(self._dataframe)
-                self._generateExcelRPA()
-                self._generatePowerpointRPA()
-                self._generateSystemRPA()
-                self._generateBrowserRPA()
-            else:
-                if self.unified_RPA_script:
-                    self._generateUnifiedRPA(self._dataframe)
-                else:
-                    self._generateExcelRPA()
-                    self._generatePowerpointRPA()
-                    self._generateSystemRPA()
-                    self._generateBrowserRPA()
+            self._generateUnifiedRPA(self._dataframe)
+            # self._generateExcelRPA()
+            # self._generatePowerpointRPA()
+            # self._generateSystemRPA()
+            # self._generateBrowserRPA()
             print(f"[RPA] Generated RPA in {self.csv_file_path.strip('.csv')}")
             return True
