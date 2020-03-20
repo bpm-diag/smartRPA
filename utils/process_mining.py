@@ -134,21 +134,28 @@ class ProcessMining:
             return "[PROCESS_MINING] Input file must be either .csv or .xes"
 
     # return most frequent case in log in order to build RPA script
-    def selectMostFrequentCase(self):
+    def selectMostFrequentCase(self, flattened=False):
         df = self.dataframe
+
+        df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
+        df['flattened'] = df[
+            ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook", "cell_content",
+             "cell_range", "cell_range_number", "slides"]].agg(','.join, axis=1)
+
+        groupby_column = 'flattened' if flattened else 'concept:name'
 
         # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
         # For example I get
         # ID  Trace   Action
         # 0   1   Create Fine, Send Fine
         # 1   2   Insert Fine Notification, Add penalty, Payment
-        df1 = df.groupby('case:concept:name')['concept:name'].agg(', '.join).reset_index()
+        df1 = df.groupby('case:concept:name')[groupby_column].agg(', '.join).reset_index()
 
         # calculate variants, grouping the previous dataframe
         # concept:name  variants
         # typed, clickTextField, changeField, mouseClick...	    [0]
         # typed, changeField, mouseClick, formSubmit, li...	    [1]
-        df2 = df1.groupby('concept:name', sort=False)['case:concept:name'].agg(list).reset_index(name='variants')
+        df2 = df1.groupby(groupby_column, sort=False)['case:concept:name'].agg(list).reset_index(name='variants')
 
         # get variants as list, each item represents a trace in the log
         # [[0], [1], [2], [3], [4,5]]
@@ -162,9 +169,9 @@ class ProcessMining:
 
             # Check similarities between all the strings in the log and return the most frequent one
             def func(name, threshold=85):
-                matches = df2.apply(lambda row: (fuzz.token_sort_ratio(row['concept:name'], name) >= threshold), axis=1)
+                matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
                 return [i for i, x in enumerate(matches) if x]
-            df3 = df2.apply(lambda row: func(row['concept:name']), axis=1)  # axis=1 means apply function to each row
+            df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
 
             # In this example, elements 2 and 4 in variants list are similar to element 0 and so on
             # [[0, 2, 4], [1], [0, 2], [3], [0, 4]]
@@ -178,7 +185,7 @@ class ProcessMining:
                 print(f"[PROCESS MINING] There are {len(variants)} variants, all different, selecting first case of the first variant")
             else:
                 print(f"[PROCESS MINING] There are {len(variants)} variants available, all with 1 case. "
-                      f"Variants {longest_variants} are similar, selecting the first case of variant {longest_variant}")
+                      f"Variants {list(map(lambda x: x+1, longest_variants))} are similar, selecting the first case of variant {longest_variant+1}")
         else:
             # there is a frequent variant, pick first case
             print(
@@ -276,39 +283,76 @@ class ProcessMining:
         gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
         self._create_image(gviz, "DFG")
 
-    def _aggregateData(self, remove_duplicates=True, only_most_frequent_case=False):
-        if only_most_frequent_case:
-            log = conversion_factory.apply(self.mostFrequentCase)
-        elif remove_duplicates:
-            # remove duplicate events in dataframe
-            df = self.dataframe.drop_duplicates(subset="concept:name", keep='first')
-            log = conversion_factory.apply(df)
+    @staticmethod
+    def _getHighLevelEvent(row):
+
+        e = row["concept:name"]
+        url = utils.utils.getHostname(row['browser_url'])
+        app = row['application']
+
+        # general
+        if e in ["copy", "cut", "paste"]:  # TODO keyboard
+            return f"Copy and Paste: {row['clipboard_content']}"
+        # browser
+        elif e in ["clickLink", "clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick"]:
+            return f"[{app}] Click {row['tag_category']} on {url}"
+        elif e in ["link", "reload", "generated", "urlHashChange", ]:
+            return f"[{app}] Navigate to {url}"
+        elif e in ["submit", "formSubmit", "selectOptions"]:
+            return "Submit"
+        elif e in ["newTab", "selectTab", "closeTab", "moveTab", "zoomTab"]:
+            return "Browser Tab"
+        elif e in ["typed", "selectText", "contextMenu"]:
+            return f"[{app}] Edit {row['tag_category']} on {url}"
+        elif e in ["changeField"]:
+            return f"[{app}] Write '{row['tag_value']}' in {row['tag_category']} on {url}"
+        # excel
+        elif e in ["activateWindow", "closeWindow", "deactivateWindow", "openWindow", "newWindow"]:
+            return "WindowAction"
+        elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook",
+                   "worksheetActivated"]:
+            return "WorkbookAction"
+        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell",
+                   "editCellSheet", "getCell", "getRange", "doubleClickCellWithValue", "afterCalculate"]:
+            return "EditCellExcel"
+        # system
+        elif e in ["itemSelected", "deleted", "moved", "created"]:
+            return "FilesAndFolders"
         else:
-            log = self._log
+            return e
 
-        for trace in log:
-            for event in trace:
-                event["customClassifier"] = self._getHighLevelEvent(event)
+    def _aggregateData(self, remove_duplicates=True, only_most_frequent_case=False):
+
+        df = self.mostFrequentCase
+
+        # remove rows
+        df = df[~df.browser_url.str.contains('chrome-extension://')]
+        rows_to_remove = ["activateWindow", "closeWindow", "deactivateWindow", "openWindow", "newWindow"]
+        df = df[~df['concept:name'].isin(rows_to_remove)]
+
+        # convert events to high level
+        df['customClassifier'] = df.apply(lambda row: self._getHighLevelEvent(row), axis=1)
+
+        log = conversion_factory.apply(df)
         dfg_parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
-
         return log, dfg_parameters
 
-    def _create_petri_net(self, only_most_frequent):
-        log, dfg_parameters = self._aggregateData(remove_duplicates=False, only_most_frequent_case=only_most_frequent)
+    def _create_petri_net(self):
+        log, dfg_parameters = self._aggregateData()
         dfg = self._createDFG(log, dfg_parameters)
         parameters = self._createImageParameters(log=log, high_level=True)
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
         return net, im, fm
 
     def save_petri_net(self, name, only_most_frequent=True):
-        net, im, fm = self._create_petri_net(only_most_frequent)
+        net, im, fm = self._create_petri_net()
         gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "jpg"})
         self._create_image(gviz, name)
 
     def _create_bpmn(self):
 
         # petri net
-        net, initial_marking, final_marking = self._create_petri_net(True)
+        net, initial_marking, final_marking = self._create_petri_net()
         gviz = pn_vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
         self._create_image(gviz, "petri_net")
 
@@ -326,41 +370,3 @@ class ProcessMining:
         self.save_dfg()
         self.save_bpmn()  # includes petri net
         print(f"[PROCESS MINING] Generated DFG, Petri Net and BPMN in {self.discovery_log_path}")
-
-    @staticmethod
-    def _getHighLevelEvent(event):
-
-        e = event["concept:name"]
-        url = utils.utils.getHostname(event['browser_url'])
-        app = event['application']
-
-        # general
-        if e in ["copy", "cut", "paste", "ctrl+c"]:  # TODO keyboard
-            return f"Copy and Paste: {event['clipboard_content']}"
-        # browser
-        elif e in ["clickLink", "clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick"]:
-            return f"[{app}] Click {event['tag_category']} on {url}"
-        elif e in ["link", "reload", "generated", "urlHashChange", ]:
-            return f"[{app}] Navigate to {url}"
-        elif e in ["submit", "formSubmit", "selectOptions"]:
-            return "Submit"
-        elif e in ["newTab", "selectTab", "closeTab", "moveTab", "zoomTab"]:
-            return "Browser Tab"
-        elif e in ["typed", "selectText", "contextMenu"]:
-            return f"[{app}] Edit {event['tag_category']} on {url}"
-        elif e in ["changeField"]:
-            return f"[{app}] Write '{event['tag_value']}' in {event['tag_category']} on {url}"
-        # excel
-        elif e in ["activateWindow", "closeWindow", "deactivateWindow", "openWindow"]:
-            return "WindowAction"
-        elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook",
-                   "worksheetActivated"]:
-            return "WorkbookAction"
-        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell",
-                   "editCellSheet", "getCell", "getRange", "doubleClickCellWithValue", "afterCalculate"]:
-            return "EditCellExcel"
-        # system
-        elif e in ["itemSelected", "deleted", "moved", "created"]:
-            return "FilesAndFolders"
-        else:
-            return e

@@ -612,6 +612,8 @@ class MainApplication(QMainWindow, QDialog):
                 # # create RPA based on most frequent path
                 utils.generateRPAScript.RPAScript(self.csv_to_join[-1]).generateRPAMostFrequentPath(pm.mostFrequentCase)
 
+                print(f"[GUI] RPA files generated in {os.path.dirname(self.csv_to_join[-1])}")
+
             except ImportError:
                 print(
                     "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
@@ -624,8 +626,6 @@ class MainApplication(QMainWindow, QDialog):
             # reset counter and list
             self.runCount = 0
             self.csv_to_join.clear()
-
-            self.statusListWidget.addItem(QListWidgetItem("- XES file generated"))
 
     # Create a dialog to select a file and return its path
     # Used if the user wants to select an existing file for logging excel
