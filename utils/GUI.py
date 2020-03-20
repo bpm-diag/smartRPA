@@ -600,11 +600,8 @@ class MainApplication(QMainWindow, QDialog):
                 import pm4py
                 # create class, combine all csv into one
                 pm = utils.process_mining.ProcessMining(self.csv_to_join)
-                # create DFG for combined csv
-                pm.save_dfg()
                 # calculate high level bpmn and petri net based on dfg
-                pm.createAbstractProcess()
-
+                pm.createGraphs()
                 # calculate most frequent path in DFG
                 # mostFrequentPathInDFG = pm.mostFrequentPathInDFG()
                 # # RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
@@ -613,8 +610,7 @@ class MainApplication(QMainWindow, QDialog):
                 #                                  utils.utils.getFilename(self.csv_to_join[-1]) + '_combined.csv')
 
                 # # create RPA based on most frequent path
-                mostFrequentCase = pm.selectMostFrequentCase()
-                utils.generateRPAScript.RPAScript(self.csv_to_join[-1]).generateRPAMostFrequentPath(mostFrequentCase)
+                utils.generateRPAScript.RPAScript(self.csv_to_join[-1]).generateRPAMostFrequentPath(pm.mostFrequentCase)
 
             except ImportError:
                 print(
