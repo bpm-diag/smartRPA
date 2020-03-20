@@ -40,7 +40,7 @@ class Preferences(QMainWindow):
             self.resize(360, 320)
 
         slider_minimum = 1
-        slider_maximum = 100
+        slider_maximum = 50
 
         self.lcd = QLCDNumber(self)
         self.lcd.setMinimumHeight(45)

@@ -558,14 +558,14 @@ def logProcessesMac():
             for app in closed_programs:
                 if app in open_programs:
                     open_programs.remove(app)
-                    print(f"{timestamp()} {USER} programClose {app.strip()}")
+                    print(f"{timestamp()} {USER} programClose {app.strip()}.app")
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
                         "user": USER,
                         "category": "OperatingSystem",
                         "application": app.strip(),
                         "event_type": "programClose",
-                        "event_src_path": f"/Applications/{app.strip()}",
+                        "event_src_path": f"/Applications/{app.strip()}.app",
                         "mouse_coord": mouse.position
                     })
 

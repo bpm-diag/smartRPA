@@ -42,12 +42,13 @@ except ImportError as e:
 class ProcessMining:
 
     def __init__(self, filepath: list):
+
         # list of csv paths
         self.filepath = filepath
         # last csv in the list, use its name
         self.last_csv = self.filepath[-1]
         # name and extension of the last csv in the list
-        self.filename = utils.utils.getFilename(self.last_csv)
+        self.filename = utils.utils.getFilename(self.last_csv).strip('_combined')
         self.file_extension = utils.utils.getFileExtension(self.last_csv)
         # path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/
         self._create_directories()
@@ -182,14 +183,16 @@ class ProcessMining:
             longest_variant = longest_variants[0]
 
             if len(longest_variants) == 1:
-                print(f"[PROCESS MINING] There are {len(variants)} variants, all different, selecting first case of the first variant")
+                print(f"[PROCESS MINING] There is 1 variant, selecting first case")
             else:
                 print(f"[PROCESS MINING] There are {len(variants)} variants available, all with 1 case. "
-                      f"Variants {list(map(lambda x: x+1, longest_variants))} are similar, selecting the first case of variant {longest_variant+1}")
+                      f"Variants {list(map(lambda x: x+1, longest_variants))} are similar, "
+                      f"selecting the first case of variant {longest_variant+1}")
         else:
             # there is a frequent variant, pick first case
             print(
-                f"[PROCESS MINING] {len(variants)} variants available, the most frequent one contains {len(longest_variants)} cases, selecting the first case")
+                f"[PROCESS MINING] There are {len(variants)} variants available, "
+                f"the most frequent one contains {len(longest_variants)} cases, selecting the first case")
             longest_variant = longest_variants[0]
 
         # return rows corresponding to selected trace
@@ -291,24 +294,32 @@ class ProcessMining:
         app = row['application']
 
         # general
-        if e in ["copy", "cut", "paste"]:  # TODO keyboard
-            return f"Copy and Paste: {row['clipboard_content']}"
+        if e in ["copy", "cut", "paste"]:  # take only first 15 characters of clipboard
+            return f"Copy and Paste: {row['clipboard_content'][:15]}..."
         # browser
-        elif e in ["clickLink", "clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick"]:
+        elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick"]:
             return f"[{app}] Click {row['tag_category']} on {url}"
+        elif e in ["clickLink"]:
+            return f"[{app}] Click '{row['tag_innerText']}' on {url}"
         elif e in ["link", "reload", "generated", "urlHashChange", ]:
-            return f"[{app}] Navigate to {url}"
+                return f"[{app}] Navigate to {url}"
         elif e in ["submit", "formSubmit", "selectOptions"]:
             return "Submit"
-        elif e in ["newTab", "selectTab", "closeTab", "moveTab", "zoomTab"]:
+        elif e in ["selectTab", "moveTab", "zoomTab"]:
             return "Browser Tab"
+        elif e in ["newTab"]:
+            return f"[{app}] Open tab"
+        elif e in ["closeTab"]:
+            return f"[{app}] Close tab"
+        elif e in ["newWindow"]:
+            return f"[{app}] Open window"
+        elif e in ["closeWindow"]:
+            return f"[{app}] Close window"
         elif e in ["typed", "selectText", "contextMenu"]:
             return f"[{app}] Edit {row['tag_category']} on {url}"
         elif e in ["changeField"]:
-            return f"[{app}] Write '{row['tag_value']}' in {row['tag_category']} on {url}"
+            return f"[{app}] Write '{row['tag_value']}' in {row['tag_type']} {row['tag_category'].lower()} on {url}"
         # excel
-        elif e in ["activateWindow", "closeWindow", "deactivateWindow", "openWindow", "newWindow"]:
-            return "WindowAction"
         elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook",
                    "worksheetActivated"]:
             return "WorkbookAction"
@@ -321,16 +332,19 @@ class ProcessMining:
         else:
             return e
 
-    def _aggregateData(self, remove_duplicates=True, only_most_frequent_case=False):
+    def _aggregateData(self):
 
         df = self.mostFrequentCase
 
         # remove rows
         df = df[~df.browser_url.str.contains('chrome-extension://')]
-        rows_to_remove = ["activateWindow", "closeWindow", "deactivateWindow", "openWindow", "newWindow"]
+        df = df[~df.eventQual.str.contains('clientRedirect')]
+        df = df[~df.eventQual.str.contains('serverRedirect')]
+        rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow"
+                          "selectTab", "moveTab", "zoomTab", "typed", "mouseClick"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
-        # convert events to high level
+        # convert each row of events to high level
         df['customClassifier'] = df.apply(lambda row: self._getHighLevelEvent(row), axis=1)
 
         log = conversion_factory.apply(df)

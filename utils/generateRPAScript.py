@@ -13,7 +13,7 @@ import os
 from threading import Thread
 import utils.config
 import utils
-from utils.utils import CHROME, DESKTOP, getActiveWindowInfo, WINDOWS
+from utils.utils import CHROME, DESKTOP, getActiveWindowInfo, WINDOWS, MAC
 
 
 class RPAScript:
@@ -34,7 +34,7 @@ class RPAScript:
         self._SaveAsUI = False
         self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
                                "newWindow", "closeWindow", "typed", "submit", "formSubmit", "enableBrowserExtension",
-                               "newWindow", "newTab", "startPage", "activateWorkbook", "openWindow", "click",
+                               "newWindow", "startPage", "activateWorkbook", "openWindow", "click",
                                "clickTextField"]
 
         self.csv_file_path = csv_file_path
@@ -54,7 +54,7 @@ class RPAScript:
 
     # Adds import statements to generated python file
     def _createHeader(self):
-        return f"""
+        h = f"""
 # This file was auto generated based on {self.csv_file_path}
 import sys, os
 from time import sleep
@@ -65,6 +65,9 @@ except ImportError as e:
     print("If you get errors check here https://github.com/marco2012/ComputerLogger#automagica")
     sys.exit()
 \n"""
+        if MAC:
+            h += "import applescript\n"
+        return h
 
     @staticmethod
     def _createBrowserHeader():
@@ -129,8 +132,11 @@ except WebDriverException as e:
         #     script.write(f"click({mouse_coord})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
-            script.write(f"print('Setting clipboard text')\n")
-            script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            if WINDOWS:
+                script.write(f"print('Setting clipboard text')\n")
+                script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            else:
+                script.write("print('Setting clipboard is only supported on Windows')\n")
         elif e == "paste":
             script.write(f"print('Pasting clipboard text')\n")
             script.write(f'type_text("""{cb}""")\n')
@@ -209,8 +215,11 @@ except WebDriverException as e:
             script.write(f"# {timestamp} {e}\n")
             script.write(f"sleep({self._delay_between_actions})\n")
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
-            script.write(f"print('Setting clipboard text')\n")
-            script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            if WINDOWS:
+                script.write(f"print('Setting clipboard text')\n")
+                script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            else:
+                script.write("print('Setting clipboard is only supported on Windows')\n")
         elif e == "paste":
             script.write(f"print('Pasting clipboard text')\n")
             script.write(f'type_text("""{cb}""")\n')
@@ -255,8 +264,11 @@ except WebDriverException as e:
             script.write(f"sleep({self._delay_between_actions * 2})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
-            script.write(f"print('Setting clipboard text')\n")
-            script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            if WINDOWS:
+                script.write(f"print('Setting clipboard text')\n")
+                script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            else:
+                script.write("print('Setting clipboard is only supported on Windows')\n")
         elif e == "openFile" and path:
             script.write(f"print('Opening file {item_name}')\n")
             script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
@@ -351,8 +363,11 @@ except WebDriverException as e:
             script.write(f"sleep({self._delay_between_actions})\n")
 
         if (e == "copy" or e == "cut") and not pandas.isna(cb):
-            script.write(f"print('Setting clipboard text')\n")
-            script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            if WINDOWS:
+                script.write(f"print('Setting clipboard text')\n")
+                script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+            else:
+                script.write("print('Setting clipboard is only supported on Windows')\n")
         elif e == "paste":
             script.write(f"print('Pasting clipboard text')\n")
             script.write(f'type_text("""{cb}""")\n')
@@ -589,8 +604,11 @@ except Exception:
                 #     script.write(f"click({mouse_coord})\n")
 
                 if (e == "copy" or e == "cut") and not pandas.isna(cb):
-                    script.write(f"print('Setting clipboard text')\n")
-                    script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+                    if WINDOWS:
+                        script.write(f"print('Setting clipboard text')\n")
+                        script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+                    else:
+                        script.write("print('Setting clipboard is only supported on Windows')\n")
                 elif e == "paste":
                     script.write(f"print('Pasting clipboard text')\n")
                     script.write(f'type_text("""{cb}""")\n')
@@ -752,10 +770,16 @@ except Exception:
                     script.write(f"if file_exists(r'{path}'): show_folder(r'{path}')\n")
                 elif e == "programOpen" and os.path.exists(path):
                     script.write(f"print('Opening {app}')\n")
-                    script.write(f"if file_exists(r'{path}'): run(r'{path}')\n")
+                    if MAC:
+                        script.write(f"applescript.tell.app('{os.path.basename(path)}', open)\n")
+                    else:
+                        script.write(f"run(r'{path}')\n")
                 elif e == "programClose" and os.path.exists(path):
                     script.write(f"print('Closing {app}')\n")
-                    script.write(f"if file_exists(r'{path}'): kill_process(r'{path}')\n")
+                    if MAC:
+                        script.write(f"applescript.tell.app('{os.path.basename(path)}', quit)\n")
+                    else:
+                        script.write(f"kill_process(r'{path}')\n")
                 elif e == "created" and path:
                     # check if i have a file (with extension)
                     if os.path.splitext(path)[1]:
@@ -765,7 +789,7 @@ except Exception:
                     else:
                         script.write(f"print('Creating directory {item_name}')\n")
                         script.write(f"create_folder(r'{path}')\n")
-                elif e == "deleted" and path:
+                elif e == "deleted" and path and os.path.exists(path):
                     # check if i have a file (with extension)
                     if os.path.splitext(path)[1]:
                         script.write(f"print('Removing file {item_name}')\n")
@@ -774,7 +798,7 @@ except Exception:
                     else:
                         script.write(f"print('Removing directory {item_name}')\n")
                         script.write(f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
-                elif e == "moved" and path:
+                elif (e == "moved" or e == "Unmount") and path:
                     # check if file has been renamed, so source and dest path are the same
                     if os.path.dirname(path) == os.path.dirname(dest_path):
                         try:
