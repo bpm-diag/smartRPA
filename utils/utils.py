@@ -89,6 +89,10 @@ def getFilename(path):
     return os.path.splitext(os.path.basename(path))[0]
 
 
+def removeWhitespaces(string):
+    return " ".join(string.split())
+
+
 # return file extension of a given path like .csv
 def getFileExtension(path):
     return os.path.splitext(os.path.basename(path))[1]
@@ -168,6 +172,7 @@ def getChromedriverPath():
 
 def getHostname(url):
     return urlparse(url).hostname.strip('www.') if url else url
+
 
 # ************
 # Class

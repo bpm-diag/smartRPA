@@ -267,7 +267,7 @@ class MainApplication(QMainWindow, QDialog):
         # layout.addLayout(hboxExcel)
         # layout.addLayout(hboxWord)
         # layout.addLayout(hboxPowerpoint)
-        layout.addWidget(self.officeOutlookCB)
+        # layout.addWidget(self.officeOutlookCB)
 
         self.officeGroupBox.setLayout(layout)
 

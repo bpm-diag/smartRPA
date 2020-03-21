@@ -225,7 +225,9 @@ def logProcessesWin():
     programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
                           "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe",
                           "LocalBridge.exe", "SearchProtocolHost.exe", "SearchFilterHost.exe", "splwow64.exe",
-                          "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe"]
+                          "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
+                          "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
+                          "software_reporter_tool.exe"]
 
     running = [p.name() for p in psutil.process_iter() if p.name() not in programs_to_ignore]
 

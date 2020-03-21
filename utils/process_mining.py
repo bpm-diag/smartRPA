@@ -2,6 +2,7 @@
 # Process mining techniques
 # https://pm4py.fit.fraunhofer.de/documentation#discovery
 # ******************************
+import ntpath
 import os
 from threading import Thread
 import pandas
@@ -201,7 +202,7 @@ class ProcessMining:
         return case
 
     def _create_image(self, gviz, img_name, verbose=False):
-        img_path = os.path.join(self.save_path, self.discovery_log_path, f'{self.filename}_{img_name}.jpg')
+        img_path = os.path.join(self.save_path, self.discovery_log_path, f'{self.filename}_{img_name}.pdf')
         if img_name == "alpha_miner":
             vis_factory.save(gviz, img_path)
         elif img_name == "heuristic_miner":
@@ -218,12 +219,12 @@ class ProcessMining:
 
     def create_alpha_miner(self):
         net, initial_marking, final_marking = alpha_miner.apply(self._log)
-        gviz = vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
+        gviz = vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "pdf"})
         self._create_image(gviz, "alpha_miner")
 
     def create_heuristics_miner(self):
         heu_net = heuristics_miner.apply_heu(self._log, parameters={"dependency_thresh": 0.99})
-        gviz = hn_vis_factory.apply(heu_net, parameters={"format": "jpg"})
+        gviz = hn_vis_factory.apply(heu_net, parameters={"format": "pdf"})
         self._create_image(gviz, "heuristic_miner")
 
     def _getSourceTargetNodes(self, log=None, high_level=False):
@@ -239,7 +240,7 @@ class ProcessMining:
 
     def _createImageParameters(self, log=None, high_level=False):
         source, target = self._getSourceTargetNodes(log, high_level)
-        parameters = {"start_activities": [source], "end_activities": [target], "format": "jpg"}
+        parameters = {"start_activities": [source], "end_activities": [target], "format": "pdf"}
         return parameters
 
     def _createDFG(self, log=None, parameters=None):
@@ -292,10 +293,16 @@ class ProcessMining:
         e = row["concept:name"]
         url = utils.utils.getHostname(row['browser_url'])
         app = row['application']
+        cb = utils.utils.removeWhitespaces(row['clipboard_content'])
 
         # general
         if e in ["copy", "cut", "paste"]:  # take only first 15 characters of clipboard
-            return f"Copy and Paste:\n{row['clipboard_content'][:20]}..."
+            if len(cb) > 20:
+                return f"Copy and Paste: {cb[:20]}..."
+            if len(cb) == 0:
+                return f"Copy and Paste"
+            else:
+                return f"Copy and Paste: {cb}"
 
         # browser
         elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick", "clickCheckboxButton"]:
@@ -324,25 +331,29 @@ class ProcessMining:
         elif e in ["changeField"]:
             return f"[{app}] Write '{row['tag_value']}' in {row['tag_type']} {row['tag_category'].lower()} on {url}"
 
-        # excel
-        elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook",
-                   "worksheetActivated"]:
-            return "WorkbookAction"
-        elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell",
-                   "editCellSheet", "getCell", "getRange", "doubleClickCellWithValue", "afterCalculate"]:
-            return "EditCellExcel"
-
         # system
-        elif e in ["itemSelected", "deleted", "moved", "created", "Mount", "Unmount"]:
+        elif e in ["itemSelected", "deleted", "moved", "created", "Mount", "Unmount", "openFile"]:
             path = row['event_src_path']
-            name, extension = os.path.splitext(path)
-            name = os.path.basename(name)
+            name, extension = ntpath.splitext(path)
+            name = ntpath.basename(path)
             if extension:
                 return f"[{app}] Edit file '{name}'"
             else:
                 return f"[{app}] Edit folder '{name}'"
         elif e in ["programOpen", "programClose"]:
-            return f"Use program '{app}'"
+            return f"Use program '{app.lower()}'"
+
+        # excel
+        elif e in ["newWorkbook", "openWorkbook", "activateWorkbook"]:
+            return f"[Excel] Open {row['workbook']}"
+        elif e in ["editCellSheet", "getCell", "getRange"]:
+            if row['current_worksheet'] != '':
+                # return f"[Excel] Edit Cell {row['cell_range']} on {row['current_worksheet']} with value '{row['cell_content']}'"
+                return f"[Excel] Edit Cell on {row['current_worksheet']}"
+            else:
+                return f"[Excel] Edit Cell"
+        elif e in ["addWorksheet", "deselectWorksheet", "selectWorksheet"]:
+            return "[Excel] Change worksheet"
 
         else:
             return e
@@ -351,12 +362,17 @@ class ProcessMining:
 
         df = self.mostFrequentCase
 
-        # remove rows
+        # filter rows
         df = df[~df.browser_url.str.contains('chrome-extension://')]
         df = df[~df.eventQual.str.contains('clientRedirect')]
         df = df[~df.eventQual.str.contains('serverRedirect')]
+        df = df[df['clipboard_content'].str.strip() == '']
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
-                          "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit"]
+                          "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit",
+                          "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
+                          "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
+                          "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
+                          "programOpen", "programClose"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level
@@ -364,7 +380,6 @@ class ProcessMining:
 
         # check duplicates
         # print(df[df['customClassifier'].duplicated() == True])
-
         # remove duplicates
         if remove_duplicates:
             df = df.drop_duplicates(subset='customClassifier', keep='first')
@@ -382,14 +397,14 @@ class ProcessMining:
 
     def save_petri_net(self, name, only_most_frequent=True):
         net, im, fm = self._create_petri_net()
-        gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "jpg"})
+        gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "pdf"})
         self._create_image(gviz, name)
 
     def _create_bpmn(self, remove_duplicates):
 
         # petri net
         net, initial_marking, final_marking = self._create_petri_net(remove_duplicates)
-        gviz = pn_vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
+        gviz = pn_vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "pdf"})
         self._create_image(gviz, "petri_net")
 
         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
@@ -399,7 +414,7 @@ class ProcessMining:
 
     def save_bpmn(self, remove_duplicates: bool):
         bpmn_graph = self._create_bpmn(remove_duplicates)
-        bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "jpg"})
+        bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
         if remove_duplicates:
             self._create_image(bpmn_figure, "BPMN_without_duplicates")
         else:

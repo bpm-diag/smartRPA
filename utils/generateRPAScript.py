@@ -95,7 +95,7 @@ except WebDriverException as e:
         # csv_filename is like 2020-02-25_23-21-57
         utils.utils.createDirectory(self.RPA_directory)
         # RPA_filename is like 2020-02-25_23-21-57_RPA.py
-        RPA_filename = utils.utils.getFilename(self.csv_file_path) + RPA_type
+        RPA_filename = utils.utils.getFilename(self.csv_file_path).strip('_combined') + RPA_type
         # RPA_filepath is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57/2020-02-25_23-21-57_RPA.py
         RPA_filepath = os.path.join(self.RPA_directory, RPA_filename)
         return RPA_filepath
@@ -569,7 +569,9 @@ except WebDriverException as e:
                 # assign path if not null
                 item_name = path.replace('\\', r'\\')
                 mouse_coord = row['mouse_coord']
+
                 cb = row['clipboard_content']
+
                 size = row["window_size"]
                 url = "about:blank"
                 if not pandas.isna(row['browser_url']):
@@ -592,7 +594,9 @@ except WebDriverException as e:
                     else:
                         script.write(f"sleep({self._delay_between_actions})\n")
 
+                ######
                 # EXCEL
+                ######
 
                 # if mouse_coord field is not null for a given row TODO
                 # if not pandas.isna(mouse_coord) and mouse_coord != "0,0":
@@ -602,12 +606,14 @@ except WebDriverException as e:
                 #     script.write(f"click({mouse_coord})\n")
 
                 if (e == "copy" or e == "cut") and not pandas.isna(cb):
+                    cb = utils.utils.removeWhitespaces(cb)
                     if WINDOWS:
                         script.write(f"print('Setting clipboard text')\n")
                         script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
                     else:
                         script.write("print('Setting clipboard is only supported on Windows')\n")
                 elif e == "paste":
+                    cb = utils.utils.removeWhitespaces(cb)
                     script.write(f"print('Pasting clipboard text')\n")
                     script.write(f'type_text("""{cb}""")\n')
                 elif e == "newWorkbook":
@@ -670,7 +676,15 @@ except WebDriverException as e:
                     script.write(f"print('Pasting clipboard text')\n")
                     script.write(f'type_text("""{cb}""")\n')
 
+                ######
+                # Word
+                ######
+
+
+
+                ######
                 # Browser
+                ######
 
                 # elif e == "newWindow":
                 #     script.write(f"print('Opening new window')\n")
@@ -793,7 +807,10 @@ except Exception:
                     script.write(f"actions.moveByOffset({mouse_coord})\n")
                     script.write(f"actions.click().build().perform()\n")
 
-                # system
+                ######
+                # System
+                ######
+
                 elif e == "openFile" and path:
                     script.write(f"print('Opening file {item_name}')\n")
                     script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
