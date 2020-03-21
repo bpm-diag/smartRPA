@@ -2,14 +2,18 @@
 # Process mining techniques
 # https://pm4py.fit.fraunhofer.de/documentation#discovery
 # ******************************
-import ntpath
+try:
+    import ntpath
+except ModuleNotFoundError:
+    import os
 import os
 from threading import Thread
 import pandas
 import utils.config
 import utils.utils
-from collections import Counter
 from fuzzywuzzy import fuzz
+from datetime import datetime
+
 try:
     # constants
     from pm4py.util import constants
@@ -353,7 +357,7 @@ class ProcessMining:
             else:
                 return f"[Excel] Edit Cell"
         elif e in ["addWorksheet", "deselectWorksheet", "selectWorksheet"]:
-            return "[Excel] Change worksheet"
+            return f"[Excel] Select {row['current_worksheet']}"
 
         else:
             return e

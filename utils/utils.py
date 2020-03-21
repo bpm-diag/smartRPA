@@ -171,7 +171,7 @@ def getChromedriverPath():
 
 
 def getHostname(url):
-    return urlparse(url).hostname.strip('www.') if url else url
+    return urlparse(url).hostname if url else url
 
 
 # ************

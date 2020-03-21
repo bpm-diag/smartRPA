@@ -681,6 +681,28 @@ except WebDriverException as e:
                 ######
 
 
+                #####
+                # PowerPoint
+                #####
+
+                elif e == "newPresentation":
+                    script.write(f"print('Opening Powerpoint...')\n")
+                    script.write("powerpoint = Powerpoint(visible=True, path=None)\n")
+                elif e == "newPresentationSlide":
+                    script.write(f"print('Adding slide to presentation')\n")
+                    script.write(f"powerpoint.add_slide()\n")
+                elif e == "savePresentation":  # case 2), after case
+                    presentation_name = row['title']
+                    script.write(f"print('saving presentation {presentation_name}')\n")
+                    path = os.path.join(DESKTOP, 'presentation.pptx')
+                    script.write(f"powerpoint.save_as(r'{path}')\n")
+                # elif e == "printPresentation" and not self._SaveAsUI:  # if file has already been saved and it's on disk
+                #     script.write(f"print('Printing {presentation_name}')\n")
+                #     script.write(f"send_to_printer(r'{path}')\n")
+                elif e == "closePresentation":
+                    script.write(f"print('Closing Powerpoint...')\n")
+                    script.write("powerpoint.quit()\n")
+
 
                 ######
                 # Browser
