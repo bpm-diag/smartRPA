@@ -685,8 +685,11 @@ except Exception:
                 elif e == "selectTab":
                     script.write(f"print('Selecting tab {id}')\n")
                     script.write(f"""
-if {id} < len(browser.window_handles):
-    browser.switch_to.window(browser.window_handles[{id}])\n
+try:
+    if {id} <= len(browser.window_handles):
+        browser.switch_to.window(browser.window_handles[{id}])
+except Exception:
+    pass
 """)
                 elif e == "closeTab":
                     script.write(f"print('Closing tab')\n")
@@ -697,8 +700,13 @@ if {id} < len(browser.window_handles):
                 elif (e == "clickLink" or e == "link" or e == "typed") and ('chrome-extension' not in url):
                     script.write(f"print('Loading link {url}')\n")
                     script.write(f"browser.get('{url}')\n")
-                    script.write(
-                        f"WebDriverWait(browser, 2).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))\n")
+                    script.write("""
+try:
+    f"WebDriverWait(browser, 2).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))"
+except selenium.common.exceptions.TimeoutException:
+    pass
+"""
+)
                 elif e == "changeField":
                     if row['tag_category'] == "SELECT":
                         tag_value = row['tag_value']

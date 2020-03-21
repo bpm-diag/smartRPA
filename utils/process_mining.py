@@ -295,10 +295,14 @@ class ProcessMining:
 
         # general
         if e in ["copy", "cut", "paste"]:  # take only first 15 characters of clipboard
-            return f"Copy and Paste: {row['clipboard_content'][:15]}..."
+            return f"Copy and Paste:\n{row['clipboard_content'][:20]}..."
+
         # browser
-        elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick"]:
-            return f"[{app}] Click {row['tag_category']} on {url}"
+        elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick", "clickCheckboxButton"]:
+            if row['tag_type'] == 'submit':
+                return f"[{app}] Submit {row['tag_category'].lower()} on {url}"
+            else:
+                return f"[{app}] Click {row['tag_type']} {row['tag_category'].lower()} '{row['tag_name']}' on {url}"
         elif e in ["clickLink"]:
             return f"[{app}] Click '{row['tag_innerText']}' on {url}"
         elif e in ["link", "reload", "generated", "urlHashChange", ]:
@@ -319,6 +323,7 @@ class ProcessMining:
             return f"[{app}] Edit {row['tag_category']} on {url}"
         elif e in ["changeField"]:
             return f"[{app}] Write '{row['tag_value']}' in {row['tag_type']} {row['tag_category'].lower()} on {url}"
+
         # excel
         elif e in ["deactivateWindow", "deselectWorksheet", "newWorkbook", "openWorkbook", "saveWorkbook",
                    "worksheetActivated"]:
@@ -326,9 +331,19 @@ class ProcessMining:
         elif e in ["doubleClickCellWithValue", "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell",
                    "editCellSheet", "getCell", "getRange", "doubleClickCellWithValue", "afterCalculate"]:
             return "EditCellExcel"
+
         # system
-        elif e in ["itemSelected", "deleted", "moved", "created"]:
-            return "FilesAndFolders"
+        elif e in ["itemSelected", "deleted", "moved", "created", "Mount", "Unmount"]:
+            path = row['event_src_path']
+            name, extension = os.path.splitext(path)
+            name = os.path.basename(name)
+            if extension:
+                return f"[{app}] Edit file '{name}'"
+            else:
+                return f"[{app}] Edit folder '{name}'"
+        elif e in ["programOpen", "programClose"]:
+            return f"Use program '{app}'"
+
         else:
             return e
 
@@ -340,8 +355,8 @@ class ProcessMining:
         df = df[~df.browser_url.str.contains('chrome-extension://')]
         df = df[~df.eventQual.str.contains('clientRedirect')]
         df = df[~df.eventQual.str.contains('serverRedirect')]
-        rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow"
-                          "selectTab", "moveTab", "zoomTab", "typed", "mouseClick"]
+        rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
+                          "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level
