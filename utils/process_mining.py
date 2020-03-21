@@ -210,7 +210,7 @@ class ProcessMining:
             pn_vis_factory.save(gviz, img_path)
         elif img_name.lower() == "DFG":
             dfg_vis_factory.save(gviz, img_path)
-        elif img_name == "BPMN":
+        elif "BPMN" in img_name:
             bpmn_vis_factory.save(gviz, img_path)
 
         if verbose:
@@ -347,7 +347,7 @@ class ProcessMining:
         else:
             return e
 
-    def _aggregateData(self):
+    def _aggregateData(self, remove_duplicates=False):
 
         df = self.mostFrequentCase
 
@@ -362,12 +362,19 @@ class ProcessMining:
         # convert each row of events to high level
         df['customClassifier'] = df.apply(lambda row: self._getHighLevelEvent(row), axis=1)
 
+        # check duplicates
+        # print(df[df['customClassifier'].duplicated() == True])
+
+        # remove duplicates
+        if remove_duplicates:
+            df = df.drop_duplicates(subset='customClassifier', keep='first')
+
         log = conversion_factory.apply(df)
         dfg_parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
         return log, dfg_parameters
 
-    def _create_petri_net(self):
-        log, dfg_parameters = self._aggregateData()
+    def _create_petri_net(self, remove_duplicates):
+        log, dfg_parameters = self._aggregateData(remove_duplicates)
         dfg = self._createDFG(log, dfg_parameters)
         parameters = self._createImageParameters(log=log, high_level=True)
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
@@ -378,10 +385,10 @@ class ProcessMining:
         gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "jpg"})
         self._create_image(gviz, name)
 
-    def _create_bpmn(self):
+    def _create_bpmn(self, remove_duplicates):
 
         # petri net
-        net, initial_marking, final_marking = self._create_petri_net()
+        net, initial_marking, final_marking = self._create_petri_net(remove_duplicates)
         gviz = pn_vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "jpg"})
         self._create_image(gviz, "petri_net")
 
@@ -390,12 +397,16 @@ class ProcessMining:
 
         return bpmn_graph
 
-    def save_bpmn(self):
-        bpmn_graph = self._create_bpmn()
+    def save_bpmn(self, remove_duplicates: bool):
+        bpmn_graph = self._create_bpmn(remove_duplicates)
         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "jpg"})
-        self._create_image(bpmn_figure, "BPMN")
+        if remove_duplicates:
+            self._create_image(bpmn_figure, "BPMN_without_duplicates")
+        else:
+            self._create_image(bpmn_figure, "BPMN_with_duplicates")
 
     def createGraphs(self):
         self.save_dfg()
-        self.save_bpmn()  # includes petri net
+        self.save_bpmn(remove_duplicates=True)  # includes petri net
+        self.save_bpmn(remove_duplicates=False)  # includes petri net
         print(f"[PROCESS MINING] Generated DFG, Petri Net and BPMN in {self.discovery_log_path}")
