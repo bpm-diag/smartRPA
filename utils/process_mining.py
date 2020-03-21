@@ -359,6 +359,12 @@ class ProcessMining:
         elif e in ["addWorksheet", "deselectWorksheet", "selectWorksheet"]:
             return f"[Excel] Select {row['current_worksheet']}"
 
+        # powerpoint
+        elif e in ["newPresentation"]:
+            return f"[PowerPoint] Open {row['title']}"
+        elif e in ["newPresentationSlide", "savePresentation"]:
+            return f"[PowerPoint] Edit presentation"
+
         else:
             return e
 
@@ -376,7 +382,7 @@ class ProcessMining:
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
-                          "programOpen", "programClose"]
+                          "programOpen", "programClose", "closePresentation"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level
