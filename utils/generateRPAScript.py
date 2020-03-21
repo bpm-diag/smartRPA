@@ -7,9 +7,12 @@
 
 import sys
 
+import modules
+
 sys.path.append('../')  # this way main file is visible from this file
 import pandas
 import os
+import ntpath
 from threading import Thread
 import utils.config
 import utils
@@ -35,7 +38,8 @@ class RPAScript:
         self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
                                "newWindow", "closeWindow", "submit", "formSubmit", "enableBrowserExtension",
                                "newWindow", "startPage", "activateWorkbook", "openWindow", "click",
-                               "clickTextField"]
+                               "clickTextField", "newTab", "disableBrowserExtension", "installBrowserExtension",
+                               "logonComplete", "deleted", "programClose", "afterCalculate", "resizeWindow"]
 
         self.csv_file_path = csv_file_path
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
@@ -549,6 +553,10 @@ except WebDriverException as e:
                 script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
             for index, row in df.iterrows():
 
+                ######
+                # Variables
+                ######
+
                 try:
                     e = row['event_type']
                     timestamp = row['timestamp']
@@ -616,70 +624,88 @@ except WebDriverException as e:
                     cb = utils.utils.removeWhitespaces(cb)
                     script.write(f"print('Pasting clipboard text')\n")
                     script.write(f'type_text("""{cb}""")\n')
-                elif e == "newWorkbook":
-                    script.write(f"print('Opening Excel...')\n")
-                    script.write("excel = Excel()\n")
-                    x, y, width, height = size.split(',')
-                    # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
-                elif e == "resizeWindow":  # TODO
-                    x, y, width, height = size.split(',')
-                    script.write(f"print('Resizing window to {size}')\n")
-                    # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
-                elif e == "addWorksheet":
-                    script.write(f"print('Adding worksheet {sh}')\n")
-                    script.write(f"excel.add_worksheet('{sh}')\n")
-                elif e == "selectWorksheet":
-                    script.write(f"print('Selecting worksheet {sh}')\n")
-                    script.write(f"excel.activate_worksheet('{sh}')\n")
-                elif e == "getCell":
-                    script.write(f"print('Reading cell {cell_range}')\n")
-                    script.write(f"excel.activate_range('{cell_range}')\n")
-                    script.write(f"rc = excel.read_cell({range_number})\n")
-                    script.write(f"print('cell {cell_range} value = ' + str(rc))\n")
-                elif e == "editCellSheet":
-                    script.write(f"print('Writing cell {cell_range}')\n")
-                    script.write(f'excel.write_cell({range_number}, "{cell_value}")\n')
-                elif e == "getRange":
-                    script.write(f"print('Reading cell_range {cell_range}')\n")
-                    script.write(f"excel.activate_range('{cell_range}')\n")
-                    script.write(f"rc = excel.read_range('{cell_range}')\n")
-                    script.write(f"print('cell {cell_range} value = ' + str(rc))\n")
-                elif e == "afterCalculate":
-                    script.write(f"print('Calculate')\n")
-                # In excel I have two kind of events:
-                # 1) beforeSave: filename is not yet known but here I know if the file is being saved for the first time
-                # (using Save As...) or if it's just a normal save, set SaveAsUI variable
-                # 2) saveWorkbook: filename chosen by user is known so I know file path
-                # If SaveAsUI is True I need to issue excel.save_as(path) command, else I just need excel.save()
-                elif e == "beforeSaveWorkbook":
-                    self._SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
-                elif e == "saveWorkbook":  # case 2), after case
-                    script.write(f"print('saving workbook {wb}')\n")
-                    if self._SaveAsUI:  # saving for the first time
-                        script.write(f"excel.save_as(r'{path}')\n")
-                    else:  # file already created
-                        script.write(f"excel.save()\n")
-                elif e == "printWorkbook" and not self._SaveAsUI:  # if file has already been saved and it's on disk
-                    script.write(f"print('Printing {wb}')\n")
-                    script.write(f"send_to_printer(r'{path}')\n")
-                elif e == "closeWindow":
-                    script.write(f"print('Closing Excel...')\n")
-                    script.write("excel.quit()\n")
-                # elif e == "doubleClickCellWithValue":
-                #     script.write(f"print('Double clicking on cell {cell_range} with value {value}')\n")
-                #     script.write(f"double_click_on_text_ocr(text='{value}')\n")
-                # elif e == "rightClickCellWithValue":
-                #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
-                #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
 
-                elif e == "paste":
-                    script.write(f"print('Pasting clipboard text')\n")
-                    script.write(f'type_text("""{cb}""")\n')
+                if WINDOWS:
+                    if e == "newWorkbook":
+                        script.write(f"print('Opening Excel...')\n")
+                        script.write("excel = Excel()\n")
+                        x, y, width, height = size.split(',')
+                        # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+                    elif e == "resizeWindow":  # TODO
+                        x, y, width, height = size.split(',')
+                        script.write(f"print('Resizing window to {size}')\n")
+                        # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+                    elif e == "addWorksheet":
+                        script.write(f"print('Adding worksheet {sh}')\n")
+                        script.write(f"excel.add_worksheet('{sh}')\n")
+                    elif e == "selectWorksheet":
+                        script.write(f"print('Selecting worksheet {sh}')\n")
+                        script.write(f"excel.activate_worksheet('{sh}')\n")
+                    elif e == "getCell":
+                        script.write(f"print('Reading cell {cell_range}')\n")
+                        script.write(f"""
+try:
+    excel.activate_range('{cell_range}')
+    rc = excel.read_cell({range_number})
+    print('cell {cell_range} value = ' + str(rc))
+except Exception:
+    pass
+\n""")
+                    elif e == "editCellSheet":
+                        script.write(f"""
+try:
+    print('Writing cell {cell_range}')
+    excel.write_cell({range_number}, "{cell_value}")
+except Exception:
+    pass
+\n""")
+                    elif e == "getRange":
+                        script.write(f"""
+try:
+    print('Reading cell_range {cell_range}')
+    excel.activate_range('{cell_range}')
+    rc = excel.read_range('{cell_range}')
+    print('cell {cell_range} value = ' + str(rc))
+except Exception:
+    pass
+\n""")
+                    elif e == "afterCalculate":
+                        script.write(f"print('Calculate')\n")
+                    # In excel I have two kind of events:
+                    # 1) beforeSave: filename is not yet known but here I know if the file is being saved for the first time
+                    # (using Save As...) or if it's just a normal save, set SaveAsUI variable
+                    # 2) saveWorkbook: filename chosen by user is known so I know file path
+                    # If SaveAsUI is True I need to issue excel.save_as(path) command, else I just need excel.save()
+                    elif e == "beforeSaveWorkbook":
+                        self._SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
+                    elif e == "saveWorkbook":  # case 2), after case
+                        script.write(f"print('saving workbook {wb}')\n")
+                        if self._SaveAsUI:  # saving for the first time
+                            script.write(f"excel.save_as(r'{path}')\n")
+                        else:  # file already created
+                            script.write(f"excel.save()\n")
+                    elif e == "printWorkbook" and not self._SaveAsUI:  # if file has already been saved and it's on disk
+                        script.write(f"print('Printing {wb}')\n")
+                        script.write(f"send_to_printer(r'{path}')\n")
+                    elif e == "closeWindow":
+                        script.write(f"print('Closing Excel...')\n")
+                        script.write("excel.quit()\n")
+                    # elif e == "doubleClickCellWithValue":
+                    #     script.write(f"print('Double clicking on cell {cell_range} with value {value}')\n")
+                    #     script.write(f"double_click_on_text_ocr(text='{value}')\n")
+                    # elif e == "rightClickCellWithValue":
+                    #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
+                    #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
+
+                else:
+                    script.write(f"print('Excel RPA not available on MacOS')\n")
 
                 ######
                 # Word
                 ######
-
+                if e == "newDocument":
+                    script.write(f"print('Opening Word...')\n")
+                    script.write("word = Word(visible=True, path=None)\n")
 
                 #####
                 # PowerPoint
@@ -702,7 +728,6 @@ except WebDriverException as e:
                 elif e == "closePresentation":
                     script.write(f"print('Closing Powerpoint...')\n")
                     script.write("powerpoint.quit()\n")
-
 
                 ######
                 # Browser
@@ -843,8 +868,13 @@ except Exception:
                     script.write(f"print('Opening {app}')\n")
                     if MAC:
                         script.write(f"applescript.tell.app('{os.path.basename(path)}', open)\n")
-                    else:
-                        script.write(f"run(r'{path}')\n")
+                    elif ntpath.basename(path) not in modules.systemEvents.programs_to_ignore:
+                        script.write(f"""
+try:
+    run(r'{path}')
+except Exception:
+    pass
+\n""")
                 elif e == "programClose" and os.path.exists(path):
                     script.write(f"print('Closing {app}')\n")
                     if MAC:
@@ -872,11 +902,9 @@ except Exception:
                 elif (e == "moved" or e == "Unmount") and path:
                     # check if file has been renamed, so source and dest path are the same
                     if os.path.dirname(path) == os.path.dirname(dest_path):
-                        try:
-                            import ntpath
-                            new_name = ntpath.basename(dest_path)
-                        except ModuleNotFoundError:
-                            new_name = os.path.basename(dest_path)
+
+                        new_name = ntpath.basename(dest_path)
+
                         # file
                         if os.path.splitext(path)[1]:
                             script.write(f"print('Renaming file {item_name} to {new_name}')\n")

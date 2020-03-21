@@ -9,6 +9,7 @@ from re import findall
 import os
 from shutil import rmtree
 from itertools import chain
+import subprocess
 from utils.utils import timestamp, session, WINDOWS, USER, MAIN_DIRECTORY, getActiveWindowInfo
 from utils.consumerServer import SERVER_ADDR
 import utils.config
@@ -648,8 +649,9 @@ def excelEvents(filepath=None):
 def excelEventsMacServer():
     print("[officeEvents] Excel on Mac logging started")
     macExcelAddinPath = os.path.join(MAIN_DIRECTORY, 'modules', 'excelAddinMac')
-    os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1")
-
+    # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1")
+    os.system(f"cd {macExcelAddinPath} && npm run dev-server")
+    # os.system("pkill -f node")
 
 def wordEvents(filename=None):
     # ************

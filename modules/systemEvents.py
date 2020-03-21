@@ -5,6 +5,7 @@
 # ****************************** #
 
 from sys import path
+
 path.append('../')  # this way main file is visible from this file
 import keyboard
 import pyperclip
@@ -18,6 +19,7 @@ from utils import consumerServer
 from utils.utils import *
 import psutil
 import pynput
+
 mouse = pynput.mouse.Controller()
 
 if WINDOWS:
@@ -32,6 +34,13 @@ if WINDOWS:
 if MAC:
     import applescript
     import fsevents
+
+programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
+                      "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe",
+                      "LocalBridge.exe", "SearchProtocolHost.exe", "SearchFilterHost.exe", "splwow64.exe",
+                      "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
+                      "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
+                      "software_reporter_tool.exe", "chrome.exe"]
 
 
 #  monitor file/folder changes on windows
@@ -92,7 +101,6 @@ def watchFolder():
 
 #  monitor file/folder changes on mac
 def watchFolderMac():
-
     from _fsevents import (
         loop,
         stop,
@@ -163,6 +171,7 @@ def watchFolderMac():
 
     # I need to save events already logged for each path otherwise the callback is called in loop after every event
     logged = dict()
+
     def callback(file_event):
         path = file_event.name
         event_type = _maskToString(file_event.mask)[0]
@@ -222,12 +231,6 @@ def logProcessesWin():
     new_programs = set()  # needed later to initialize 'closed' set
     new_programs_len = 0  # needed later to check if 'new_programs' set changes
     open_programs = []  # maintain set of open programs so I don't have duplicates when logging events
-    programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHost.exe", "backgroundTaskHost.exe",
-                          "MusNotification.exe", "usocoreworker.exe", "GoogleUpdate.exe", "plugin_host.exe",
-                          "LocalBridge.exe", "SearchProtocolHost.exe", "SearchFilterHost.exe", "splwow64.exe",
-                          "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
-                          "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
-                          "software_reporter_tool.exe"]
 
     running = [p.name() for p in psutil.process_iter() if p.name() not in programs_to_ignore]
 

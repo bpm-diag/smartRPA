@@ -60,6 +60,7 @@ class ProcessMining:
         self._log = self._handle_log()
         self.mostFrequentCase = self.selectMostFrequentCase()
 
+
     def _create_directories(self):
         # create directory if does not exists
         self.save_path = utils.utils.getRPADirectory(self.filename)
@@ -142,6 +143,8 @@ class ProcessMining:
     # return most frequent case in log in order to build RPA script
     def selectMostFrequentCase(self, flattened=False):
         df = self.dataframe
+        if df.empty:
+            return None
 
         df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
         df['flattened'] = df[
@@ -336,7 +339,7 @@ class ProcessMining:
             return f"[{app}] Write '{row['tag_value']}' in {row['tag_type']} {row['tag_category'].lower()} on {url}"
 
         # system
-        elif e in ["itemSelected", "deleted", "moved", "created", "Mount", "Unmount", "openFile"]:
+        elif e in ["itemSelected", "deleted", "moved", "created", "Mount", "Unmount", "openFile", "openFolder"]:
             path = row['event_src_path']
             name, extension = ntpath.splitext(path)
             name = ntpath.basename(path)
@@ -362,8 +365,14 @@ class ProcessMining:
         # powerpoint
         elif e in ["newPresentation"]:
             return f"[PowerPoint] Open {row['title']}"
-        elif e in ["newPresentationSlide", "savePresentation"]:
+        elif e in ["newPresentationSlide", "savePresentation", "SlideSelectionChanged"]:
             return f"[PowerPoint] Edit presentation"
+
+        # word
+        elif e in ["newDocument"]:
+            return f"[Word] Open document"
+        elif e in ["changeDocument"]:
+            return f"[Word] Edit document"
 
         else:
             return e
@@ -382,7 +391,8 @@ class ProcessMining:
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
-                          "programOpen", "programClose", "closePresentation"]
+                          "programOpen", "programClose", "closePresentation", "SlideSelectionChanged", "closeWorkbook",
+                          "deactivateWorkbook"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level
