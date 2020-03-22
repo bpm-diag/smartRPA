@@ -70,7 +70,7 @@ except ImportError as e:
     sys.exit()
 \n"""
         if MAC:
-            h += "import applescript\n"
+            h += "import applescript\nimport xlwings as xw\n\n"
         return h
 
     @staticmethod
@@ -544,6 +544,7 @@ except WebDriverException as e:
         RPASystem = not df.query('category=="OperatingSystem"').empty
 
         RPA_filepath = self._createRPAFile(filename)
+        excelMacOpened = False
         with open(RPA_filepath, 'w') as script:
             script.write(self._createHeader())
             # add browser header if browser is present in event log
@@ -551,6 +552,7 @@ except WebDriverException as e:
                 script.write(self._createBrowserHeader())
             if WINDOWS:
                 script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
+
             for index, row in df.iterrows():
 
                 ######
@@ -577,9 +579,7 @@ except WebDriverException as e:
                 # assign path if not null
                 item_name = path.replace('\\', r'\\')
                 mouse_coord = row['mouse_coord']
-
                 cb = row['clipboard_content']
-
                 size = row["window_size"]
                 url = "about:blank"
                 if not pandas.isna(row['browser_url']):
@@ -612,18 +612,6 @@ except WebDriverException as e:
                 #     # m = list(map(lambda c: c.strip(), mouse_coord.strip('[]').split(',')))
                 #     script.write(f"print('Clicking {mouse_coord}')\n")
                 #     script.write(f"click({mouse_coord})\n")
-
-                if (e == "copy" or e == "cut") and not pandas.isna(cb):
-                    cb = utils.utils.removeWhitespaces(cb)
-                    if WINDOWS:
-                        script.write(f"print('Setting clipboard text')\n")
-                        script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
-                    else:
-                        script.write("print('Setting clipboard is only supported on Windows')\n")
-                elif e == "paste":
-                    cb = utils.utils.removeWhitespaces(cb)
-                    script.write(f"print('Pasting clipboard text')\n")
-                    script.write(f'type_text("""{cb}""")\n')
 
                 if WINDOWS:
                     if e == "newWorkbook":
@@ -697,8 +685,29 @@ except Exception:
                     #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
                     #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
 
-                else:
-                    script.write(f"print('Excel RPA not available on MacOS')\n")
+                elif MAC:
+                    if e == "WorksheetActivated":
+                        if not excelMacOpened:
+                            excelMacOpened = True
+                            script.write(f"print('Opening Excel...')\n")
+                            script.write("wb = xw.Book()\n")
+                        script.write(f"print('Activating worksheet {sh}')\n")
+                        script.write("""
+try:
+    sht = wb.sheets['{sh}'].activate()
+except Exception:
+    pass
+\n""")
+                    if e == "WorksheetAdded":
+                        script.write(f"print('Adding worksheet {sh}')\n")
+                        script.write(f"sht = wb.sheets.add()\n")
+                    elif e == "editCell":
+                        cell_content = row['cell_content'].strip('[]').strip('"').strip()
+                        script.write(f"print('Editing cell {id}')\n")
+                        script.write(f"sht.range('{id}').value = '{cell_content}'\n")
+                    elif e == "editRange":
+                        script.write(f"print('Editing range {id}')\n")
+                        script.write(f"sht.range('{id}').value = {row['cell_content']}\n")
 
                 ######
                 # Word
@@ -857,6 +866,18 @@ except Exception:
                 ######
                 # System
                 ######
+
+                elif (e == "copy" or e == "cut") and not pandas.isna(cb):
+                    cb = utils.utils.removeWhitespaces(cb)
+                    if WINDOWS:
+                        script.write(f"print('Setting clipboard text')\n")
+                        script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+                    else:
+                        script.write("print('Setting clipboard is only supported on Windows')\n")
+                elif e == "paste":
+                    cb = utils.utils.removeWhitespaces(cb)
+                    script.write(f"print('Pasting clipboard text')\n")
+                    script.write(f'type_text("""{cb}""")\n')
 
                 elif e == "openFile" and path:
                     script.write(f"print('Opening file {item_name}')\n")

@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QMainWindow, QWidget, QSlider, QLCDNumber)
 import darkdetect
 from multiprocessing import Process
+import pandas
 from utils.utils import *
 import mainLogger
 import utils.config
@@ -575,7 +576,7 @@ class MainApplication(QMainWindow, QDialog):
 
     def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
-        rpa = utils.generateRPAScript.RPAScript(log_filepath, generate_all_scripts=True, unified_RPA_script=False)
+        rpa = utils.generateRPAScript.RPAScript(log_filepath)
         rpa_success = rpa.run()
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
@@ -583,11 +584,13 @@ class MainApplication(QMainWindow, QDialog):
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
 
-        # contains paths of csv to join
-        self.csv_to_join.append(log_filepath)
+        if pandas.read_csv(log_filepath, encoding='utf-8-sig').empty:
+            return "[GUI] Empty CSV, skipping"
+        else:
+            # contains paths of csv to join
+            self.csv_to_join.append(log_filepath)
 
         totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
-
         print(f"[GUI] Run count = {self.runCount}, Total = {totalRunCount}")
         self.statusListWidget.addItem(QListWidgetItem(f"- Run {self.runCount} of {totalRunCount}"))
 

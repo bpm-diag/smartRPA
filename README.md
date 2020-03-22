@@ -125,6 +125,9 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
     </details>
 
 - On MacOS:
+
+    Use [Brew](https://brew.sh/) package manager to install graphviz
+
     ```bash
     brew install graphviz
     pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3

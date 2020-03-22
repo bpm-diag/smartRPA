@@ -60,7 +60,6 @@ class ProcessMining:
         self._log = self._handle_log()
         self.mostFrequentCase = self.selectMostFrequentCase()
 
-
     def _create_directories(self):
         # create directory if does not exists
         self.save_path = utils.utils.getRPADirectory(self.filename)
@@ -350,16 +349,17 @@ class ProcessMining:
         elif e in ["programOpen", "programClose"]:
             return f"Use program '{app.lower()}'"
 
-        # excel
+        # excel win
         elif e in ["newWorkbook", "openWorkbook", "activateWorkbook"]:
             return f"[Excel] Open {row['workbook']}"
-        elif e in ["editCellSheet", "getCell", "getRange"]:
+        elif e in ["editCellSheet", "getCell", "getRange",
+                   "editCell", "editRange", "WorksheetCalculated", "WorksheetFormatChanged"]:
             if row['current_worksheet'] != '':
                 # return f"[Excel] Edit Cell {row['cell_range']} on {row['current_worksheet']} with value '{row['cell_content']}'"
                 return f"[Excel] Edit Cell on {row['current_worksheet']}"
             else:
                 return f"[Excel] Edit Cell"
-        elif e in ["addWorksheet", "deselectWorksheet", "selectWorksheet"]:
+        elif e in ["addWorksheet", "deselectWorksheet", "selectWorksheet", "WorksheetActivated"]:
             return f"[Excel] Select {row['current_worksheet']}"
 
         # powerpoint
@@ -392,7 +392,7 @@ class ProcessMining:
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "programOpen", "programClose", "closePresentation", "SlideSelectionChanged", "closeWorkbook",
-                          "deactivateWorkbook"]
+                          "deactivateWorkbook", "WorksheetAdded"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level
