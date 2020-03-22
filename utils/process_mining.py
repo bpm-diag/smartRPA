@@ -140,16 +140,16 @@ class ProcessMining:
             return "[PROCESS_MINING] Input file must be either .csv or .xes"
 
     # return most frequent case in log in order to build RPA script
-    def selectMostFrequentCase(self, flattened=False):
+    def selectMostFrequentCaseWithoutDuration(self, flattened=False):
         df = self.dataframe
         if df.empty:
             return None
 
+        # flattening
         df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
         df['flattened'] = df[
             ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook", "cell_content",
              "cell_range", "cell_range_number", "slides"]].agg(','.join, axis=1)
-
         groupby_column = 'flattened' if flattened else 'concept:name'
 
         # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
@@ -204,6 +204,108 @@ class ProcessMining:
 
         # return rows corresponding to selected trace
         case = df.loc[df['case:concept:name'] == longest_variant]
+
+        return case
+
+    def selectMostFrequentCase(self, flattened=False):
+        df = self.dataframe
+        if df.empty:
+            return None
+
+        # flattening
+        df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
+        df['flattened'] = df[
+            ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook", "cell_content",
+             "cell_range", "cell_range_number", "slides"]].agg(','.join, axis=1)
+        groupby_column = 'flattened' if flattened else 'concept:name'
+
+        # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
+        # For example I get
+        # case:concept:name     concept:name                            timestamp
+        # 0                     Create Fine, Send Fine                  2020-03-20 17:09:06:308, 2020-03-20 17:09:06:3
+        # 1                     Insert Fine Notification, Add penalty   2020-03-20 17:10:28:348, 2020-03-20 17:10:28:2
+        df1 = df.groupby(['case:concept:name'])[[groupby_column, 'time:timestamp']].agg(', '.join).reset_index()
+
+        # calculate duration in seconds for each row of dataframe
+        # I get a new a new column like
+        # duration
+        # 25.123
+        # 26.342
+        # 22.324
+        def getDuration(time):
+            timestamps = time.split(',')
+            start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%d %H:%M:%S:%f")
+            finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%d %H:%M:%S:%f")
+            duration = finish - start
+            return duration.total_seconds()
+        df1['duration'] = df1['time:timestamp'].apply(lambda time: getDuration(time))
+
+        # calculate variants, grouping the previous dataframe if there are equal rows
+        # concept:name                                          variants   duration
+        # typed, clickTextField, changeField, mouseClick...	    [0, 1]    [25.123, 26.342]
+        # typed, changeField, mouseClick, formSubmit, li...	    [2]       [22.324]
+        df2 = df1.groupby([groupby_column], sort=False)[['case:concept:name', 'duration']].agg(
+            list).reset_index().rename(columns={"case:concept:name": "variants"})
+
+        # return the concept:case:id of the variant with shortest duration
+        # not used when all traces are different
+        def _findVariantWithShortestDuration(df1: pandas.DataFrame, most_frequent_variants):
+            #  there are at least 2 equal variants, most_frequent_variants is an array like [0,1]
+            # take only the most frequent rows in dataframe, like [0,1]
+            most_frequent_variants_df = df1.iloc[most_frequent_variants, :]
+            # find the row with the smallest duration
+            durations = most_frequent_variants_df['duration'].tolist()
+            # return the index of the row with the smallest duration
+            min_duration_trace = most_frequent_variants_df.loc[most_frequent_variants_df['duration'] == min(durations)][
+                'case:concept:name'].tolist()[0]
+            return min_duration_trace, min(durations)
+
+        # get variants as list, each item represents a trace in the log
+        # [[0, 1], [2]]
+        variants = df2['variants'].tolist()
+
+        # longest variant is selected because it's the most frequent
+        # [0, 1]
+        most_frequent_variants = max(variants, key=len)
+
+        if len(most_frequent_variants) == 1:
+            # all variants are different, I need to check similarities or find the one with the
+            # shortest duration in the whole dataset
+
+            # Check similarities between all the strings in the log and return the most frequent one
+            #  I don't need to check similarities in the other case, because there the strings are exactly the same
+            def func(name, threshold=85):
+                matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
+                return [i for i, x in enumerate(matches) if x]
+
+            df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
+
+            most_frequent_variants = max(df3.tolist(), key=len)
+            if len(most_frequent_variants) == 1:
+                # there are no similar strings, all are different, so I find the one with the smallest duration
+                # in the whole dataset, I don't need to filter like in the other cases
+
+                #  get all durations as list
+                durations = df1['duration'].tolist()
+                #  find smallest duration and select row in dataframe with that duration
+                min_duration_trace = df1.loc[df1['duration'] == min(durations)]['case:concept:name'].tolist()[0]
+
+                print(
+                    f"[PROCESS MINING] All {len(variants)} variants are different, "
+                    f"case {min_duration_trace} is the shortest ({min(durations)} sec)")
+            else:
+                # some strings are similar, it should be like case below
+                min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
+                print(
+                    f"[PROCESS MINING] Traces {most_frequent_variants} are similar, "
+                    f"case {min_duration_trace} is the shortest ({duration} sec)")
+        else:
+            min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
+            print(
+                f"[PROCESS MINING] Traces {most_frequent_variants} are equal, "
+                f"case {min_duration_trace} is the shortest ({duration} sec)")
+
+        case = df.loc[df['case:concept:name'] == min_duration_trace]
 
         return case
 

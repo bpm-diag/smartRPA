@@ -4,6 +4,7 @@
 # ****************************** #
 
 import sys
+
 sys.path.append('../')  # this way main file is visible from this file
 from re import findall
 import os
@@ -107,7 +108,7 @@ def excelEvents(filepath=None):
                 "id": Wn.WindowNumber,
                 "event_src_path": Wb.Path,
                 "window_size": f"{x},{y},{width},{height}"
-               # "window_size": f"{Wn.Width},{Wn.Height}"
+                # "window_size": f"{Wn.Width},{Wn.Height}"
             })
 
         # ************
@@ -147,7 +148,7 @@ def excelEvents(filepath=None):
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path
             })
-            
+
         def OnWorkbookNewSheet(self, Wb, Sh):
             print(
                 f"{timestamp()} {USER} addWorksheet workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
@@ -161,7 +162,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                
+
             })
 
         def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
@@ -181,7 +182,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "description": description,
-                
+
             })
 
         def OnWorkbookAfterSave(self, Wb, Success):
@@ -198,7 +199,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": savedPath,
-                
+
             })
 
         def OnWorkbookAddinInstall(self, Wb):
@@ -274,7 +275,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                
+
             })
 
         def OnWorkbookBeforeClose(self, Wb, Cancel):
@@ -290,7 +291,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                
+
             })
 
         def OnWorkbookActivate(self, Wb):
@@ -306,7 +307,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                
+
             })
 
         def OnWorkbookDeactivate(self, Wb):
@@ -322,7 +323,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
                 "event_src_path": Wb.Path,
-                
+
             })
 
         def OnWorkbookModelChange(self, Wb, Changes):
@@ -381,7 +382,8 @@ def excelEvents(filepath=None):
             if values:
                 # If entire column/row is selected, I consider only the first 10.000 to save memory
                 # return list(filter(lambda s: s is not None, list(chain.from_iterable(list(values)))))
-                return [s for s in list(chain.from_iterable(list(values[:8000]))) if s is not None and type(s) is not float]
+                return [s for s in list(chain.from_iterable(list(values[:8000]))) if
+                        s is not None and type(s) is not float]
             else:
                 return ""
 
@@ -399,7 +401,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "worksheets": self.getWorksheets(Sh, None),
                 "event_src_path": Sh.Parent.Path,
-                
+
             })
 
         def OnSheetBeforeDelete(self, Sh):
@@ -414,7 +416,7 @@ def excelEvents(filepath=None):
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
                 "worksheets": self.getWorksheets(Sh, None),
-                
+
             }),
 
         def OnSheetBeforeDoubleClick(self, Sh, Target, Cancel):
@@ -436,7 +438,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Address.replace('$', ''),
                 "cell_content": value,
-                
+
             })
 
         def OnSheetBeforeRightClick(self, Sh, Target, Cancel):
@@ -457,7 +459,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Address.replace('$', ''),
                 "cell_content": value,
-                
+
             })
 
         def OnSheetCalculate(self, Sh):
@@ -471,7 +473,7 @@ def excelEvents(filepath=None):
                 "event_type": "sheetCalculate",
                 "workbook": Sh.Parent.Name,
                 "current_worksheet": Sh.Name,
-                
+
             })
 
         def OnSheetChange(self, Sh, Target):
@@ -512,7 +514,7 @@ def excelEvents(filepath=None):
                 "cell_range": cell_range,
                 "cell_range_number": cell_range_number,
                 "cell_content": value,
-                
+
             })
 
         def OnSheetDeactivate(self, Sh):
@@ -529,7 +531,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "worksheets": self.getWorksheets(Sh, None),
                 "event_src_path": Sh.Parent.Path,
-                
+
             })
 
         def OnSheetFollowHyperlink(self, Sh, Target):
@@ -545,7 +547,7 @@ def excelEvents(filepath=None):
                 "current_worksheet": Sh.Name,
                 "cell_range": Target.Range.Address.replace('$', ''),
                 "browser_url": Target.Address,
-                
+
             })
 
         def OnSheetPivotTableAfterValueChange(self, Sh, TargetPivotTable, TargetRange):
@@ -565,7 +567,7 @@ def excelEvents(filepath=None):
 
         def OnSheetSelectionChange(self, Sh, Target):
             # value returned is in the format $B$3:$D$3, I remove $ sign
-            cells_selected = Target.Address.replace('$','')
+            cells_selected = Target.Address.replace('$', '')
             cell_range_number = f"{Target.Column},{Target.Row}"
             event_type = "getCell"
             value = Target.Value if Target.Value else ""
@@ -591,7 +593,7 @@ def excelEvents(filepath=None):
                     "cell_range": cells_selected,
                     "cell_range_number": cell_range_number,
                     "cell_content": value,
-                    
+
                 })
 
         def OnSheetTableUpdate(self, Sh, Target):
@@ -652,6 +654,7 @@ def excelEventsMacServer():
     # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1")
     os.system(f"cd {macExcelAddinPath} && npm run dev-server")
     # os.system("pkill -f node")
+
 
 def wordEvents(filename=None):
     # ************
@@ -853,7 +856,7 @@ def powerpointEvents(filename=None):
                 "event_type": "activateWindow",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
-                
+
             })
 
         def OnWindowDeactivate(self, Pres, Wn):
@@ -866,7 +869,7 @@ def powerpointEvents(filename=None):
                 "event_type": "deactivateWindow",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
-                
+
             })
 
         def OnWindowBeforeRightClick(self, Sel, Cancel):
@@ -879,7 +882,7 @@ def powerpointEvents(filename=None):
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "rightClickPresentation",
-                
+
             })
 
         def OnWindowBeforeDoubleClick(self, Sel, Cancel):
@@ -892,7 +895,7 @@ def powerpointEvents(filename=None):
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "doubleClickPresentation",
-                
+
             })
 
         # ************
@@ -910,12 +913,13 @@ def powerpointEvents(filename=None):
                 "event_type": "newPresentation",
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
-                
+
             })
 
         def OnPresentationNewSlide(self, Sld):
             self.addSlide(Sld)
-            print(f"{timestamp()} {USER} Powerpoint newPresentationSlide {Sld.Name} {Sld.SlideNumber} {self.getSlides()}")
+            print(
+                f"{timestamp()} {USER} Powerpoint newPresentationSlide {Sld.Name} {Sld.SlideNumber} {self.getSlides()}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
@@ -925,7 +929,7 @@ def powerpointEvents(filename=None):
                 "title": Sld.Name,
                 "id": Sld.SlideNumber,
                 "slides": self.getSlides(),
-                
+
             })
 
         def OnPresentationBeforeClose(self, Pres, Cancel):
@@ -939,7 +943,7 @@ def powerpointEvents(filename=None):
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
                 "slides": self.getSlides(),
-                
+
             })
             self.presentationSlides.clear()
 
@@ -954,7 +958,7 @@ def powerpointEvents(filename=None):
                 "title": Pres.Name,
                 "event_src_path": Pres.Path,
                 "slides": self.getSlides(),
-                
+
             })
 
         def OnAfterPresentationOpen(self, Pres):
