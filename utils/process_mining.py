@@ -29,6 +29,7 @@ try:
     from pm4py.algo.discovery.heuristics import factory as heuristics_miner
     from pm4py.algo.discovery.dfg import factory as dfg_factory
     from pm4py.objects.conversion.dfg import factory as dfg_conv_factory
+    from pm4py.algo.discovery.inductive import factory as inductive_miner
     # visualization
     from pm4py.visualization.petrinet import factory as vis_factory
     from pm4py.visualization.heuristics_net import factory as hn_vis_factory
@@ -507,43 +508,41 @@ class ProcessMining:
             df = df.drop_duplicates(subset='customClassifier', keep='first')
 
         log = conversion_factory.apply(df)
-        dfg_parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
-        return log, dfg_parameters
+        parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
+        return log, parameters
 
-    def _create_petri_net(self, remove_duplicates):
-        log, dfg_parameters = self._aggregateData(remove_duplicates)
+    def _create_petri_net(self):
+        log, dfg_parameters = self._aggregateData()
         dfg = self._createDFG(log, dfg_parameters)
         parameters = self._createImageParameters(log=log, high_level=True)
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
         return net, im, fm
 
-    def save_petri_net(self, name, only_most_frequent=True):
+    def save_petri_net(self, name):
         net, im, fm = self._create_petri_net()
         gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "pdf"})
         self._create_image(gviz, name)
 
-    def _create_bpmn(self, remove_duplicates):
+    def _create_bpmn(self):
 
-        # petri net
-        net, initial_marking, final_marking = self._create_petri_net(remove_duplicates)
-        gviz = pn_vis_factory.apply(net, initial_marking, final_marking, parameters={"format": "pdf"})
-        self._create_image(gviz, "petri_net")
+        log, parameters = self._aggregateData()
+        net, initial_marking, final_marking = alpha_miner.apply(log, parameters=parameters)
+        #net, initial_marking, final_marking = self._create_petri_net()
 
         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
             net, initial_marking, final_marking)
 
+        #bpmn_graph = bpmn_diagram_layouter.apply(bpmn_graph)
+
         return bpmn_graph
 
-    def save_bpmn(self, remove_duplicates: bool):
-        bpmn_graph = self._create_bpmn(remove_duplicates)
+    def save_bpmn(self):
+        bpmn_graph = self._create_bpmn()
         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
-        if remove_duplicates:
-            self._create_image(bpmn_figure, "BPMN_without_duplicates")
-        else:
-            self._create_image(bpmn_figure, "BPMN_with_duplicates")
+        self._create_image(bpmn_figure, "BPMN")
 
     def createGraphs(self):
         self.save_dfg()
-        self.save_bpmn(remove_duplicates=True)  # includes petri net
-        self.save_bpmn(remove_duplicates=False)  # includes petri net
+        self.save_petri_net('petri_net')
+        self.save_bpmn()  # includes petri net
         print(f"[PROCESS MINING] Generated DFG, Petri Net and BPMN in {self.discovery_log_path}")
