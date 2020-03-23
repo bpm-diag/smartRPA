@@ -317,7 +317,7 @@ class ProcessMining:
             hn_vis_factory.save(gviz, img_path)
         elif "petri_net" in img_name:
             pn_vis_factory.save(gviz, img_path)
-        elif img_name.lower() == "DFG":
+        elif img_name == "DFG":
             dfg_vis_factory.save(gviz, img_path)
         elif "BPMN" in img_name:
             bpmn_vis_factory.save(gviz, img_path)
