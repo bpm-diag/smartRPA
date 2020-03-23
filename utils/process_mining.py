@@ -532,7 +532,7 @@ class ProcessMining:
         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
             net, initial_marking, final_marking)
 
-        #bpmn_graph = bpmn_diagram_layouter.apply(bpmn_graph)
+        # bpmn_graph = bpmn_diagram_layouter.apply(bpmn_graph)
 
         return bpmn_graph
 
