@@ -278,7 +278,6 @@ class ProcessMining:
             def func(name, threshold=85):
                 matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
                 return [i for i, x in enumerate(matches) if x]
-
             df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
 
             most_frequent_variants = max(df3.tolist(), key=len)
@@ -511,8 +510,8 @@ class ProcessMining:
         parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
         return log, parameters
 
-    def _create_petri_net(self):
-        log, dfg_parameters = self._aggregateData()
+    def _create_petri_net(self, remove_duplicates=False):
+        log, dfg_parameters = self._aggregateData(remove_duplicates)
         dfg = self._createDFG(log, dfg_parameters)
         parameters = self._createImageParameters(log=log, high_level=True)
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
@@ -525,9 +524,10 @@ class ProcessMining:
 
     def _create_bpmn(self):
 
-        log, parameters = self._aggregateData()
-        net, initial_marking, final_marking = alpha_miner.apply(log, parameters=parameters)
-        #net, initial_marking, final_marking = self._create_petri_net()
+        log, parameters = self._aggregateData(remove_duplicates=True)
+        net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
+
+        #net, initial_marking, final_marking = self._create_petri_net(remove_duplicates=True)
 
         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
             net, initial_marking, final_marking)

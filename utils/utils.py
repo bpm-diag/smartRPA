@@ -15,7 +15,7 @@ from platform import system
 from urllib.parse import urlparse
 import utils.config
 import utils.consumerServer
-import pandas as pd
+import pandas
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
 
@@ -93,6 +93,14 @@ def removeWhitespaces(string):
     return " ".join(string.split())
 
 
+def CSVEmpty(log_filepath, min_len=2):
+    try:
+        df = pandas.read_csv(log_filepath, encoding='utf-8-sig')
+    except pandas.errors.EmptyDataError:
+        return True
+    return df.empty or len(df) <= min_len
+
+
 # return file extension of a given path like .csv
 def getFileExtension(path):
     return os.path.splitext(os.path.basename(path))[1]
@@ -125,12 +133,12 @@ def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
     existing_csv_to_combine = [p for p in list_of_csv_to_combine if os.path.exists(p)]
     try:
         # combine all files in the list
-        combined_csv = pd.concat([pd.read_csv(f, encoding="latin") for f in existing_csv_to_combine])
+        combined_csv = pandas.concat([pandas.read_csv(f, encoding="latin") for f in existing_csv_to_combine])
         # export to csv
         combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
         print(f"[UTILS] {combined_csv_path} created by merging {existing_csv_to_combine}")
         return True
-    except (pd.errors.ParserError, FileNotFoundError) as e:
+    except (pandas.errors.ParserError, FileNotFoundError) as e:
         print(e)
         return False
 

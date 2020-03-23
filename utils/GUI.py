@@ -584,11 +584,14 @@ class MainApplication(QMainWindow, QDialog):
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
 
-        if pandas.read_csv(log_filepath, encoding='utf-8-sig').empty:
-            return "[GUI] Empty CSV, skipping"
+        if utils.utils.CSVEmpty(log_filepath):
+            print(f"[GUI] CSV log {os.path.basename(log_filepath)} emtpy, skipping")
+            return False
         else:
             # contains paths of csv to join
             self.csv_to_join.append(log_filepath)
+
+        self.runCount += 1
 
         totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
         print(f"[GUI] Run count = {self.runCount}, Total = {totalRunCount}")
@@ -718,10 +721,6 @@ class MainApplication(QMainWindow, QDialog):
 
             self.runButton.setText('Stop logger')
             self.runButton.update()
-
-            # used to count the numebr of time 'start button' is pressed in order to group event logs and generate
-            # xes file
-            self.runCount += 1
 
             self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
 
