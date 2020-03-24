@@ -156,6 +156,9 @@ def startLogger(systemLoggerFilesFolder,
 
         # print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
         # print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
+        if browserChrome or browserFirefox or browserEdge or browserOpera:
+            print(f"[mainLogger] Browser logging started")
+
         print(f"[mainLogger] Selected threads activated, logging to {config.log_filepath}")
 
         # keep main active

@@ -208,7 +208,7 @@ class ProcessMining:
 
         return case
 
-    def selectMostFrequentCase(self, flattened=False):
+    def selectMostFrequentCase(self, flattened=False, threshold=85):
         df = self.dataframe
         if df.empty:
             return None
@@ -216,8 +216,7 @@ class ProcessMining:
         # flattening
         df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
         df['flattened'] = df[
-            ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook", "cell_content",
-             "cell_range", "cell_range_number", "slides"]].agg(','.join, axis=1)
+            ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook"]].agg(','.join, axis=1)
         groupby_column = 'flattened' if flattened else 'concept:name'
 
         # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
@@ -275,7 +274,7 @@ class ProcessMining:
 
             # Check similarities between all the strings in the log and return the most frequent one
             #  I don't need to check similarities in the other case, because there the strings are exactly the same
-            def func(name, threshold=85):
+            def func(name):
                 matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
                 return [i for i, x in enumerate(matches) if x]
             df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
