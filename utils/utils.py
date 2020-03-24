@@ -15,6 +15,7 @@ from platform import system
 from urllib.parse import urlparse
 import utils.config
 import utils.consumerServer
+import unicodedata
 import pandas
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
@@ -181,6 +182,9 @@ def getChromedriverPath():
 def getHostname(url):
     return urlparse(url).hostname if url else url
 
+
+def toAscii(string):
+    return unicodedata.normalize('NFD', string).encode('ascii', 'ignore')
 
 # ************
 # Class

@@ -417,7 +417,10 @@ class ProcessMining:
             if row['tag_type'] == 'submit':
                 return f"[{app}] Submit {row['tag_category'].lower()} on {url}"
             else:
-                return f"[{app}] Click {row['tag_type']} {row['tag_category'].lower()} '{row['tag_name']}' on {url}"
+                if row['tag_type'].lower() == row['tag_category'].lower():
+                    return f"[{app}] Click {row['tag_type']} '{row['tag_name']}' on {url}"
+                else:
+                    return f"[{app}] Click {row['tag_type']} {row['tag_category'].lower()} '{row['tag_name']}' on {url}"
         elif e in ["clickLink"]:
             return f"[{app}] Click '{row['tag_innerText']}' on {url}"
         elif e in ["link", "reload", "generated", "urlHashChange", ]:
@@ -435,7 +438,11 @@ class ProcessMining:
         elif e in ["closeWindow"]:
             return f"[{app}] Close window"
         elif e in ["typed", "selectText", "contextMenu"]:
-            return f"[{app}] Edit {row['tag_category']} on {url}"
+            category = row['tag_category']
+            if len(category) == 0:
+                return f"[{app}] Edit on {url}"
+            else:
+                return f"[{app}] Edit {row['tag_category']} on {url}"
         elif e in ["changeField"]:
             return f"[{app}] Write '{row['tag_value']}' in {row['tag_type']} {row['tag_category'].lower()} on {url}"
 
@@ -494,7 +501,7 @@ class ProcessMining:
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "programOpen", "programClose", "closePresentation", "SlideSelectionChanged", "closeWorkbook",
-                          "deactivateWorkbook", "WorksheetAdded"]
+                          "deactivateWorkbook", "WorksheetAdded", "autoBookmark"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level

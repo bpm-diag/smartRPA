@@ -59,6 +59,7 @@ class RPAScript:
     # Adds import statements to generated python file
     def _createHeader(self):
         h = f"""
+# -*- coding: utf-8 -*-
 # This file was auto generated based on {self.csv_file_path}
 import sys, os
 from time import sleep
@@ -640,6 +641,7 @@ except Exception:
     pass
 \n""")
                     elif e == "editCellSheet":
+                        cell_value = utils.utils.toAscii(cell_value)
                         script.write(f"""
 try:
     print('Writing cell {cell_range}')
