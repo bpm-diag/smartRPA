@@ -46,7 +46,7 @@ class ChoicesDialog(QDialog):
             self.setWindowTitle("Choices")
 
         else:
-            QCoreApplication.quit() # TODO
+            QCoreApplication.quit()
 
     def handleReturn(self):
         # close dialog
