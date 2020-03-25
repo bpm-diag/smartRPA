@@ -782,7 +782,7 @@ except Exception:
                 elif e == "reload":
                     script.write(f"print('Reloading page')\n")
                     script.write(f"browser.refresh()\n")
-                elif (e == "clickLink" or e == "link" or e == "typed") and ('chrome-extension' not in url):
+                elif (e == "clickLink" or e == "typed") and ('chrome-extension' not in url):  # or e == "link" # disable because if user edits fields, this url changes
                     script.write(f"print('Loading link {url}')\n")
                     script.write(f"browser.get('{url}')\n")
                     script.write("""
@@ -792,6 +792,17 @@ except selenium.common.exceptions.TimeoutException:
     pass
 """
 )
+                elif e == "mouseClick":
+                    # if url:  # disable because if user edits fields, this url changes
+                    #     script.write(f"print('Loading link {url}')\n")
+                    #     script.write(f"browser.get('{url}')\n")
+                    script.write(f"print('Clicking button')\n")
+                    script.write(f"""
+try:
+    browser.find_element_by_xpath('{xpath}').click()
+except Exception:
+    pass
+\n""")
                 elif e == "changeField":
                     if row['tag_category'] == "SELECT":
                         tag_value = row['tag_value']
@@ -810,18 +821,7 @@ try:
 except Exception:
     pass
 \n""")
-                elif e == "mouseClick":
-                    if url:
-                        script.write(f"print('Loading link {url}')\n")
-                        script.write(f"browser.get('{url}')\n")
 
-                    script.write(f"print('Clicking button')\n")
-                    script.write(f"""
-try:
-    browser.find_element_by_xpath('{xpath}').click()
-except Exception:
-    pass
-\n""")
                 elif e == "clickButton" or e == "clickRadioButton":
                     script.write(f"print('Clicking button')\n")
                     script.write(f"""

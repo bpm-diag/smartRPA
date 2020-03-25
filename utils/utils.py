@@ -7,6 +7,7 @@ import errno
 from getpass import getuser
 from datetime import datetime
 import os
+import subprocess
 import plistlib
 import importlib
 from importlib import util
@@ -185,6 +186,14 @@ def getHostname(url):
 
 def toAscii(string):
     return unicodedata.normalize('NFD', string).encode('ascii', 'ignore')
+
+
+def open_file(path):
+    if WINDOWS:
+        os.startfile(path)
+    else:
+        opener = "open" if MAC else "xdg-open"
+        subprocess.call([opener, path])
 
 # ************
 # Class

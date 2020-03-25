@@ -28,5 +28,3 @@ xlwings==0.18.0; platform_system == "Darwin"
 opyenxes==0.3.0
 networkx==2.4
 # lxml==4.5.0
-# SNAKES==0.9.26
-# pm4pyclustering==0.0.1

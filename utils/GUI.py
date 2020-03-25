@@ -12,7 +12,8 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
                              QAbstractItemView, QFileDialog, QRadioButton, QProgressDialog,
-                             QMainWindow, QWidget, QSlider, QLCDNumber)
+                             QMainWindow, QWidget, QSlider, QLCDNumber, QDialogButtonBox,
+                             QFormLayout, QLineEdit)
 import darkdetect
 from multiprocessing import Process
 import pandas
@@ -24,18 +25,17 @@ import utils.xesConverter
 import utils.process_mining
 import utils.utils
 
-
 # Preferences window
 class Preferences(QMainWindow):
     def __init__(self, parent=None):
-        super(Preferences, self).__init__(parent)
-        self.setWindowFlags(
-            Qt.Window |
-            Qt.WindowTitleHint |
-            Qt.CustomizeWindowHint |
-            Qt.WindowCloseButtonHint |
-            Qt.WindowMinimizeButtonHint
-        )
+        super(Preferences, self).__init__(parent,
+                                          flags=Qt.Window |
+                                                Qt.WindowTitleHint |
+                                                Qt.CustomizeWindowHint |
+                                                Qt.WindowCloseButtonHint |
+                                                Qt.WindowMinimizeButtonHint
+                                          )
+
         self.setWindowTitle("")
         if WINDOWS:
             self.resize(360, 320)
@@ -574,65 +574,6 @@ class MainApplication(QMainWindow, QDialog):
         elif (tag == "browserOpera"):
             self.browserOpera = checked
 
-    def handleRPA(self, log_filepath):
-        # generate RPA actions from log file just saved.
-        rpa = utils.generateRPAScript.RPAScript(log_filepath)
-        rpa_success = rpa.run()
-        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
-        self.statusListWidget.addItem(QListWidgetItem(msg))
-
-    # Generate xes file from multiple csv, each csv corresponds to a trace
-    def handleRunCount(self, log_filepath):
-
-        if utils.utils.CSVEmpty(log_filepath):
-            print(f"[GUI] CSV log {os.path.basename(log_filepath)} emtpy, skipping")
-            return False
-        else:
-            # contains paths of csv to join
-            self.csv_to_join.append(log_filepath)
-
-        self.runCount += 1
-
-        totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
-        print(f"[GUI] Run count = {self.runCount}, Total = {totalRunCount}")
-        self.statusListWidget.addItem(QListWidgetItem(f"- Run {self.runCount} of {totalRunCount}"))
-
-        # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
-        # from these csv
-        if self.runCount >= totalRunCount and self.csv_to_join:
-
-            try:
-                # check if library is installed
-                import pm4py
-                # create class, combine all csv into one
-                pm = utils.process_mining.ProcessMining(self.csv_to_join)
-                # calculate high level bpmn and petri net based on dfg
-                pm.createGraphs()
-                # calculate most frequent path in DFG
-                # mostFrequentPathInDFG = pm.mostFrequentPathInDFG()
-                # # RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
-                # RPA_directory = utils.utils.getRPADirectory(self.csv_to_join[-1])
-                # combined_csv_path = os.path.join(RPA_directory,
-                #                                  utils.utils.getFilename(self.csv_to_join[-1]) + '_combined.csv')
-
-                # # create RPA based on most frequent path
-                utils.generateRPAScript.RPAScript(self.csv_to_join[-1]).generateRPAMostFrequentPath(pm.mostFrequentCase)
-
-                print(f"[GUI] RPA files generated in {os.path.dirname(self.csv_to_join[-1])}")
-
-            except ImportError:
-                print(
-                    "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
-                    "See https://github.com/marco2012/ComputerLogger#PM4PY")
-                # reset counter and list
-                self.runCount = 0
-                self.csv_to_join.clear()
-                return False
-
-            # reset counter and list
-            self.runCount = 0
-            self.csv_to_join.clear()
-
     # Create a dialog to select a file and return its path
     # Used if the user wants to select an existing file for logging excel
     # (not implemented in gui)
@@ -680,6 +621,71 @@ class MainApplication(QMainWindow, QDialog):
             return path
         else:
             return ''
+
+    def handleRPA(self, log_filepath):
+        # generate RPA actions from log file just saved.
+        rpa = utils.generateRPAScript.RPAScript(log_filepath)
+        rpa_success = rpa.run()
+        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
+        self.statusListWidget.addItem(QListWidgetItem(msg))
+
+    # Generate xes file from multiple csv, each csv corresponds to a trace
+    def handleRunCount(self, log_filepath):
+
+        if utils.utils.CSVEmpty(log_filepath):
+            print(f"[GUI] CSV log {os.path.basename(log_filepath)} emtpy, skipping")
+            return False
+        else:
+            # contains paths of csv to join
+            self.csv_to_join.append(log_filepath)
+
+        self.runCount += 1
+
+        totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
+        print(f"[GUI] Run count = {self.runCount}, Total = {totalRunCount}")
+        self.statusListWidget.addItem(QListWidgetItem(f"- Run {self.runCount} of {totalRunCount}"))
+
+        # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
+        # from these csv
+        if self.runCount >= totalRunCount and self.csv_to_join:
+
+            try:
+                # check if library is installed
+                import pm4py
+                # create class, combine all csv into one
+                pm = utils.process_mining.ProcessMining(self.csv_to_join)
+
+                # calculate high level bpmn and petri net based on dfg
+                pm.createGraphs()
+
+                # open BPMN
+                utils.utils.open_file(
+                    os.path.join(utils.utils.getRPADirectory(self.csv_to_join[-1]), 'discovery',
+                                 f'{utils.utils.getFilename(self.csv_to_join[-1]).strip("_combined")}_BPMN.pdf')
+                )
+
+                mostFrequentCase = utils.choicesDialog.buildOptionDialog(pm.mostFrequentCase)
+
+                # create RPA based on most frequent path
+                rpa = utils.generateRPAScript.RPAScript(self.csv_to_join[-1])
+                rpa.generateRPAMostFrequentPath(mostFrequentCase)
+
+                pm.createGraphs(mostFrequentCase)
+
+                print(f"[GUI] RPA files generated in {os.path.dirname(self.csv_to_join[-1])}")
+
+            except ImportError:
+                print(
+                    "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
+                    "See https://github.com/marco2012/ComputerLogger#PM4PY")
+                # reset counter and list
+                self.runCount = 0
+                self.csv_to_join.clear()
+                return False
+
+            # reset counter and list
+            self.runCount = 0
+            self.csv_to_join.clear()
 
     # Called when start button is clicked by user
     def onButtonClick(self):

@@ -59,6 +59,7 @@ class ProcessMining:
         # path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/
         self._create_directories()
         self._log = self._handle_log()
+        # low level trace used for rpa generation
         self.mostFrequentCase = self.selectMostFrequentCase()
 
     def _create_directories(self):
@@ -180,6 +181,7 @@ class ProcessMining:
             def func(name, threshold=85):
                 matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
                 return [i for i, x in enumerate(matches) if x]
+
             df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
 
             # In this example, elements 2 and 4 in variants list are similar to element 0 and so on
@@ -194,8 +196,8 @@ class ProcessMining:
                 print(f"[PROCESS MINING] There is 1 variant, selecting first case")
             else:
                 print(f"[PROCESS MINING] There are {len(variants)} variants available, all with 1 case. "
-                      f"Variants {list(map(lambda x: x+1, longest_variants))} are similar, "
-                      f"selecting the first case of variant {longest_variant+1}")
+                      f"Variants {list(map(lambda x: x + 1, longest_variants))} are similar, "
+                      f"selecting the first case of variant {longest_variant + 1}")
         else:
             # there is a frequent variant, pick first case
             print(
@@ -238,6 +240,7 @@ class ProcessMining:
             finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%d %H:%M:%S:%f")
             duration = finish - start
             return duration.total_seconds()
+
         df1['duration'] = df1['time:timestamp'].apply(lambda time: getDuration(time))
 
         # calculate variants, grouping the previous dataframe if there are equal rows
@@ -277,6 +280,7 @@ class ProcessMining:
             def func(name):
                 matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
                 return [i for i, x in enumerate(matches) if x]
+
             df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
 
             most_frequent_variants = max(df3.tolist(), key=len)
@@ -310,13 +314,13 @@ class ProcessMining:
 
     def _create_image(self, gviz, img_name, verbose=False):
         img_path = os.path.join(self.save_path, self.discovery_log_path, f'{self.filename}_{img_name}.pdf')
-        if img_name == "alpha_miner":
+        if "alpha_miner" in img_name:
             vis_factory.save(gviz, img_path)
-        elif img_name == "heuristic_miner":
+        elif "heuristic_miner" in img_name:
             hn_vis_factory.save(gviz, img_path)
         elif "petri_net" in img_name:
             pn_vis_factory.save(gviz, img_path)
-        elif img_name == "DFG":
+        elif "DFG" in img_name:
             dfg_vis_factory.save(gviz, img_path)
         elif "BPMN" in img_name:
             bpmn_vis_factory.save(gviz, img_path)
@@ -388,7 +392,7 @@ class ProcessMining:
     #     return graphPath.frequentPath()
     #
 
-    def save_dfg(self):
+    def save_dfg(self, high_level=False):
         dfg = self._createDFG()
         parameters = self._createImageParameters()
         gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
@@ -412,7 +416,8 @@ class ProcessMining:
                 return f"Copy and Paste: {cb}"
 
         # browser
-        elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick", "clickCheckboxButton"]:
+        elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick",
+                   "clickCheckboxButton"]:
             if row['tag_type'] == 'submit':
                 return f"[{app}] Submit {row['tag_category'].lower()} on {url}"
             else:
@@ -423,7 +428,7 @@ class ProcessMining:
         elif e in ["clickLink"]:
             return f"[{app}] Click '{row['tag_innerText']}' on {url}"
         elif e in ["link", "reload", "generated", "urlHashChange", ]:
-                return f"[{app}] Navigate to {url}"
+            return f"[{app}] Navigate to {url}"
         elif e in ["submit", "formSubmit", "selectOptions"]:
             return "Submit"
         elif e in ["selectTab", "moveTab", "zoomTab"]:
@@ -485,9 +490,11 @@ class ProcessMining:
         else:
             return e
 
-    def _aggregateData(self, remove_duplicates=False):
+    # transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN
+    def aggregateData(self, df: pandas.DataFrame = None, remove_duplicates=False):
 
-        df = self.mostFrequentCase
+        if df is None:
+            df = self.mostFrequentCase
 
         # filter rows
         df = df[~df.browser_url.str.contains('chrome-extension://')]
@@ -514,12 +521,16 @@ class ProcessMining:
 
         log = conversion_factory.apply(df)
         parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
-        return log, parameters
+        return df, log, parameters
 
     def _create_petri_net(self, remove_duplicates=False):
-        log, dfg_parameters = self._aggregateData(remove_duplicates)
+        df, log, dfg_parameters = self.aggregateData(remove_duplicates=remove_duplicates)
         dfg = self._createDFG(log, dfg_parameters)
         parameters = self._createImageParameters(log=log, high_level=True)
+
+        # gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
+        # self._create_image(gviz, "DFG")
+
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
         return net, im, fm
 
@@ -528,12 +539,13 @@ class ProcessMining:
         gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "pdf"})
         self._create_image(gviz, name)
 
-    def _create_bpmn(self):
+    def _create_bpmn(self, df: pandas.DataFrame = None):
 
-        log, parameters = self._aggregateData(remove_duplicates=True)
+        df, log, parameters = self.aggregateData(df, remove_duplicates=True)
+
         net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
 
-        #net, initial_marking, final_marking = self._create_petri_net(remove_duplicates=True)
+        # net, initial_marking, final_marking = self._create_petri_net(remove_duplicates=True)
 
         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
             net, initial_marking, final_marking)
@@ -542,13 +554,13 @@ class ProcessMining:
 
         return bpmn_graph
 
-    def save_bpmn(self):
-        bpmn_graph = self._create_bpmn()
+    def save_bpmn(self, df: pandas.DataFrame = None):
+        bpmn_graph = self._create_bpmn(df)
         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
         self._create_image(bpmn_figure, "BPMN")
 
-    def createGraphs(self):
-        self.save_dfg()
+    def createGraphs(self, df: pandas.DataFrame = None):
+        self.save_dfg(high_level=True)
         self.save_petri_net('petri_net')
-        self.save_bpmn()  # includes petri net
+        self.save_bpmn(df)  # includes petri net
         print(f"[PROCESS MINING] Generated DFG, Petri Net and BPMN in {self.discovery_log_path}")
