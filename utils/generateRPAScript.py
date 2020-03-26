@@ -184,24 +184,39 @@ except WebDriverException as e:
                 #     script.write(f"print('Clicking {mouse_coord}')\n")
                 #     script.write(f"click({mouse_coord})\n")
 
-                if WINDOWS:
-                    if e == "newWorkbook":
+                if e in ["newWorkbook"]:
+                    if WINDOWS:
                         script.write(f"print('Opening Excel...')\n")
                         script.write("excel = Excel()\n")
                         x, y, width, height = size.split(',')
-                        # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
-                    elif e == "resizeWindow":  # TODO
-                        x, y, width, height = size.split(',')
-                        script.write(f"print('Resizing window to {size}')\n")
-                        # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
-                    elif e == "addWorksheet":
-                        script.write(f"print('Adding worksheet {sh}')\n")
+                        # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")                # elif e == "resizeWindow":  # TODO
+                #     x, y, width, height = size.split(',')
+                #     script.write(f"print('Resizing window to {size}')\n")
+                #     # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+                elif e in ["addWorksheet", "WorksheetAdded"]:
+                    script.write(f"print('Adding worksheet {sh}')\n")
+                    if WINDOWS:
                         script.write(f"excel.add_worksheet('{sh}')\n")
-                    elif e == "selectWorksheet":
-                        script.write(f"print('Selecting worksheet {sh}')\n")
+                    elif MAC:
+                        script.write(f"sht = wb.sheets.add()\n")
+                elif e in ["selectWorksheet", "WorksheetActivated"]:
+                    script.write(f"print('Selecting worksheet {sh}')\n")
+                    if WINDOWS:
                         script.write(f"excel.activate_worksheet('{sh}')\n")
-                    elif e == "getCell":
-                        script.write(f"print('Reading cell {cell_range}')\n")
+                    elif MAC:
+                        if not excelMacOpened:
+                            excelMacOpened = True
+                            script.write(f"print('Opening Excel...')\n")
+                            script.write("wb = xw.Book()\n")
+                        script.write(f"""
+try:
+    sht = wb.sheets['{sh}'].activate()
+except Exception:
+    pass
+\n""")
+                elif e == "getCell":
+                    script.write(f"print('Reading cell {cell_range}')\n")
+                    if WINDOWS:
                         script.write(f"""
 try:
     excel.activate_range('{cell_range}')
@@ -210,81 +225,100 @@ try:
 except Exception:
     pass
 \n""")
-                    elif e == "editCellSheet":
-                        cell_value = utils.utils.toAscii(cell_value)
+                    elif MAC:
                         script.write(f"""
 try:
-    print('Writing cell {cell_range}')
-    excel.write_cell({range_number}, "{cell_value}")
+    rc = sht.range('{cell_range}').value
+    print('cell {cell_range} value = ' + str(rc))
 except Exception:
     pass
 \n""")
-                    elif e == "getRange":
+
+                elif e in ["editCellSheet", "editCell", "editRange"]:
+                    script.write(f"print('Writing cell {cell_range}')\n")
+                    if WINDOWS:
+                        cell_value = utils.utils.toAscii(cell_value)
                         script.write(f"""
 try:
-    print('Reading cell_range {cell_range}')
+    excel.write_cell({range_number}, '{cell_value}')
+except Exception:
+    pass
+\n""")
+                    elif MAC:
+                        cell_content = row['cell_content'].strip('[]').strip('"').strip()
+                        script.write(f"""
+try:
+    sht.range('{id}').value = '{cell_content}'
+except Exception:
+    pass
+\n""")
+
+                elif e == "getRange":
+                    script.write(f"print('Reading cell_range {cell_range}')\n")
+                    if WINDOWS:
+                        script.write(f"""
+try:
     excel.activate_range('{cell_range}')
     rc = excel.read_range('{cell_range}')
     print('cell {cell_range} value = ' + str(rc))
 except Exception:
     pass
 \n""")
-                    elif e == "afterCalculate":
-                        script.write(f"print('Calculate')\n")
-                    # In excel I have two kind of events:
-                    # 1) beforeSave: filename is not yet known but here I know if the file is being saved for the first time
-                    # (using Save As...) or if it's just a normal save, set SaveAsUI variable
-                    # 2) saveWorkbook: filename chosen by user is known so I know file path
-                    # If SaveAsUI is True I need to issue excel.save_as(path) command, else I just need excel.save()
-                    elif e == "beforeSaveWorkbook":
-                        self._SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
-                    elif e == "saveWorkbook":  # case 2), after case
-                        script.write(f"print('saving workbook {wb}')\n")
+                    elif MAC:
+                        script.write(f"""
+try:
+    excel.activate_range('{cell_range}')
+    rc = excel.read_range('{cell_range}')
+    print('cell {cell_range} value = ' + str(rc))
+except Exception:
+    pass
+\n""")
+
+                elif e == "afterCalculate":
+                    # script.write(f"print('Calculate')\n")
+                    pass
+
+                # In excel I have two kind of events:
+                # 1) beforeSave: filename is not yet known but here I know if the file is being saved for the first time
+                # (using Save As...) or if it's just a normal save, set SaveAsUI variable
+                # 2) saveWorkbook: filename chosen by user is known so I know file path
+                # If SaveAsUI is True I need to issue excel.save_as(path) command, else I just need excel.save()
+                elif e == "beforeSaveWorkbook":
+                    self._SaveAsUI = True if row["description"] == "SaveAs dialog box displayed" else False
+                elif e == "saveWorkbook":  # case 2), after case
+                    script.write(f"print('saving workbook {wb}')\n")
+                    if WINDOWS:
                         if self._SaveAsUI:  # saving for the first time
                             script.write(f"excel.save_as(r'{path}')\n")
                         else:  # file already created
                             script.write(f"excel.save()\n")
-                    elif e == "printWorkbook" and not self._SaveAsUI:  # if file has already been saved and it's on disk
+                    elif MAC:
+                        script.write(f"wb.save()\n")
+
+                elif e == "printWorkbook" and not self._SaveAsUI:  # if file has already been saved and it's on disk
+                    if WINDOWS:
                         script.write(f"print('Printing {wb}')\n")
                         script.write(f"send_to_printer(r'{path}')\n")
-                    elif e == "closeWindow":
-                        script.write(f"print('Closing Excel...')\n")
-                        script.write("excel.quit()\n")
-                    # elif e == "doubleClickCellWithValue":
-                    #     script.write(f"print('Double clicking on cell {cell_range} with value {value}')\n")
-                    #     script.write(f"double_click_on_text_ocr(text='{value}')\n")
-                    # elif e == "rightClickCellWithValue":
-                    #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
-                    #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
 
-                elif MAC:
-                    if e == "WorksheetActivated":
-                        if not excelMacOpened:
-                            excelMacOpened = True
-                            script.write(f"print('Opening Excel...')\n")
-                            script.write("wb = xw.Book()\n")
-                        script.write(f"print('Activating worksheet {sh}')\n")
-                        script.write(f"""
-try:
-    sht = wb.sheets['{sh}'].activate()
-except Exception:
-    pass
-\n""")
-                    if e == "WorksheetAdded":
-                        script.write(f"print('Adding worksheet {sh}')\n")
-                        script.write(f"sht = wb.sheets.add()\n")
-                    elif e == "editCell":
-                        cell_content = row['cell_content'].strip('[]').strip('"').strip()
-                        script.write(f"print('Editing cell {id}')\n")
-                        script.write(f"sht.range('{id}').value = '{cell_content}'\n")
-                    elif e == "editRange":
-                        script.write(f"print('Editing range {id}')\n")
-                        script.write(f"sht.range('{id}').value = {row['cell_content']}\n")
+                elif e == "closeWindow":
+                    script.write(f"print('Closing Excel...')\n")
+                    if WINDOWS:
+                        script.write("excel.quit()\n")
+                    elif MAC:
+                        script.write("wb.close()\n")
+
+                # elif e == "doubleClickCellWithValue":
+                #     script.write(f"print('Double clicking on cell {cell_range} with value {value}')\n")
+                #     script.write(f"double_click_on_text_ocr(text='{value}')\n")
+
+                # elif e == "rightClickCellWithValue":
+                #     script.write(f"print('Right clicking on cell {cell_range} with value {value}')\n")
+                #     script.write(f"right_click_on_text_ocr(text='{value}')\n")
 
                 ######
                 # Word
                 ######
-                if e == "newDocument":
+                elif e == "newDocument":
                     script.write(f"print('Opening Word...')\n")
                     script.write("word = Word(visible=True, path=None)\n")
 
