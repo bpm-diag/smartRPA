@@ -461,7 +461,7 @@ class ProcessMining:
             else:
                 return f"[{app}] Rename folder as '{path}'"
         elif e in ["programOpen", "programClose"]:
-            return f"Use program '{app.lower()}'"
+            return f"Use program '{app}'"
 
         # excel win
         elif e in ["newWorkbook", "openWorkbook", "activateWorkbook"]:
@@ -506,7 +506,7 @@ class ProcessMining:
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
-                          "programOpen", "programClose", "closePresentation", "SlideSelectionChanged", "closeWorkbook",
+                          "closePresentation", "SlideSelectionChanged", "closeWorkbook",
                           "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 

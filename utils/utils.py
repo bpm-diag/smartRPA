@@ -95,7 +95,7 @@ def removeWhitespaces(string):
     return " ".join(string.split())
 
 
-def CSVEmpty(log_filepath, min_len=2):
+def CSVEmpty(log_filepath, min_len=1):
     try:
         df = pandas.read_csv(log_filepath, encoding='utf-8-sig')
     except pandas.errors.EmptyDataError:
