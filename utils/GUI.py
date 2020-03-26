@@ -655,15 +655,19 @@ class MainApplication(QMainWindow, QDialog):
                 # create class, combine all csv into one
                 pm = utils.process_mining.ProcessMining(self.csv_to_join)
 
+                # create high level DFG model based on all logs
+                pm.highLevelDFG()
+
                 # calculate high level bpmn and petri net based on dfg
                 pm.createGraphs()
 
                 # open BPMN
                 utils.utils.open_file(
-                    os.path.join(utils.utils.getRPADirectory(self.csv_to_join[-1]), 'discovery',
+                    os.path.join(pm.discovery_path,
                                  f'{utils.utils.getFilename(self.csv_to_join[-1]).strip("_combined")}_BPMN.pdf')
                 )
 
+                # ask if some fields should be changed before generating RPA script
                 mostFrequentCase = utils.choicesDialog.buildOptionDialog(pm.mostFrequentCase)
 
                 # create RPA based on most frequent path

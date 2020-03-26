@@ -70,8 +70,8 @@ class ProcessMining:
         self.RPA_log_path = os.path.join(self.save_path, 'log')
         utils.utils.createDirectory(self.RPA_log_path)
 
-        self.discovery_log_path = os.path.join(self.save_path, 'discovery')
-        utils.utils.createDirectory(self.discovery_log_path)
+        self.discovery_path = os.path.join(self.save_path, 'discovery')
+        utils.utils.createDirectory(self.discovery_path)
 
     def _handle_log(self):
 
@@ -292,10 +292,13 @@ class ProcessMining:
                 durations = df1['duration'].tolist()
                 #  find smallest duration and select row in dataframe with that duration
                 min_duration_trace = df1.loc[df1['duration'] == min(durations)]['case:concept:name'].tolist()[0]
-
-                print(
-                    f"[PROCESS MINING] All {len(variants)} variants are different, "
-                    f"case {min_duration_trace} is the shortest ({min(durations)} sec)")
+                if len(variants) == 1:
+                    print(
+                        f"[PROCESS MINING] There is only 1 trace with duration: {min(durations)} sec")
+                else:
+                    print(
+                        f"[PROCESS MINING] All {len(variants)} variants are different, "
+                        f"case {min_duration_trace} is the shortest ({min(durations)} sec)")
             else:
                 # some strings are similar, it should be like case below
                 min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
@@ -313,7 +316,7 @@ class ProcessMining:
         return case
 
     def _create_image(self, gviz, img_name, verbose=False):
-        img_path = os.path.join(self.save_path, self.discovery_log_path, f'{self.filename}_{img_name}.pdf')
+        img_path = os.path.join(self.discovery_path, f'{self.filename}_{img_name}.pdf')
         if "alpha_miner" in img_name:
             vis_factory.save(gviz, img_path)
         elif "heuristic_miner" in img_name:
@@ -354,49 +357,40 @@ class ProcessMining:
         parameters = {"start_activities": [source], "end_activities": [target], "format": "pdf"}
         return parameters
 
-    def _createDFG(self, log=None, parameters=None):
-        if parameters is None:
-            parameters = {}
-        if log is None:
-            log = self._log
-        dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
-        return dfg
-
-    # def _createCustomDFG(self):
-    #     window = 1
-    #     for trace in self._log:
-    #         for event in trace:
-    #             event["customClassifier"] = f'{event["concept:name"]}-{event["row_index"]}'
-    #
-    #     parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
-    #     if constants.PARAMETER_CONSTANT_ACTIVITY_KEY not in parameters:
-    #         parameters[constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = xes_util.DEFAULT_NAME_KEY
-    #     activity_key = parameters[constants.PARAMETER_CONSTANT_ACTIVITY_KEY]
-    #     # dfgs = map((lambda t: [(t[i - window][activity_key], t[i][activity_key]) for i in range(window, len(t))]), log)
-    #     dfgs = list()
-    #     for t in self._log:
-    #         for i in range(window, len(t)):
-    #             dfgs.append([(t[i - window][activity_key], t[i][activity_key])])
-    #     l_id = list()
-    #     for lista in dfgs:
-    #         for dfg in lista:
-    #             l_id.append(dfg)
-    #     counter_id = Counter(l_id)
-    #     return counter_id
-    #
     # def mostFrequentPathInDFG(self):
     #     dfg = self._createCustomDFG()
     #     source, target = self._getSourceTargetNodes()
     #     graphPath = utils.graphPath.HandleGraph(dfg, source, target)
     #     graphPath.printPath()
     #     return graphPath.frequentPath()
-    #
 
-    def save_dfg(self, high_level=False):
-        dfg = self._createDFG()
-        parameters = self._createImageParameters()
-        gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
-        self._create_image(gviz, "DFG")
+    def _createDFG(self, log=None, parameters=None, high_level=False):
+        # create high level dfg, aggregate all data, not only most frequent one
+        if high_level:
+            df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+        else:
+            if parameters is None:
+                parameters = {}
+            if log is None:
+                log = self._log
+        dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
+        return dfg, log
+
+    def save_dfg(self, name="DFG", high_level=False):
+        dfg, log = self._createDFG()
+        parameters = self._createImageParameters(log=log, high_level=high_level)
+        if high_level:
+            gviz = dfg_vis_factory.apply(dfg, log=log, variant="frequency", parameters=parameters)
+        else:
+            gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
+        self._create_image(gviz, name)
+
+    def highLevelDFG(self):
+        df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+        dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
+        gviz_parameters = self._createImageParameters(log=log, high_level=True)
+        gviz = dfg_vis_factory.apply(dfg, log=log, variant="frequency", parameters=gviz_parameters)
+        self._create_image(gviz, "DFG_model")
 
     @staticmethod
     def _getHighLevelEvent(row):
@@ -405,15 +399,15 @@ class ProcessMining:
         url = utils.utils.getHostname(row['browser_url'])
         app = row['application']
         cb = utils.utils.removeWhitespaces(row['clipboard_content'])
-
         # general
         if e in ["copy", "cut", "paste"]:  # take only first 15 characters of clipboard
-            if len(cb) > 20:
-                return f"Copy and Paste: {cb[:20]}..."
+            print(f"len(cb)={len(cb)}")
+            if len(cb) > 30:
+                return f"Copy and Paste: '{cb[:30]}...'"
             if len(cb) == 0:
                 return f"Copy and Paste"
             else:
-                return f"Copy and Paste: {cb}"
+                return f"Copy and Paste: '{cb}'"
 
         # browser
         elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick",
@@ -451,27 +445,34 @@ class ProcessMining:
             return f"[{app}] Write '{row['tag_value']}' in {row['tag_type']} {row['tag_category'].lower()} on {url}"
 
         # system
-        elif e in ["itemSelected", "deleted", "moved", "created", "Mount", "Unmount", "openFile", "openFolder"]:
+        elif e in ["itemSelected", "deleted", "created", "Mount", "openFile", "openFolder"]:
             path = row['event_src_path']
             name, extension = ntpath.splitext(path)
             name = ntpath.basename(path)
             if extension:
-                return f"[{app}] Edit file '{name}'"
+                return f"[{app}] Edit file '{path}'"
             else:
-                return f"[{app}] Edit folder '{name}'"
+                return f"[{app}] Edit folder '{path}'"
+        elif e in ['moved', 'Unmount']:
+            path = row['event_dest_path'] if e == "moved" else row['event_src_path']
+            _, extension = ntpath.splitext(path)
+            if extension:
+                return f"[{app}] Rename file as '{path}'"
+            else:
+                return f"[{app}] Rename folder as '{path}'"
         elif e in ["programOpen", "programClose"]:
             return f"Use program '{app.lower()}'"
 
         # excel win
         elif e in ["newWorkbook", "openWorkbook", "activateWorkbook"]:
             return f"[Excel] Open {row['workbook']}"
-        elif e in ["editCellSheet", "getCell", "getRange",
-                   "editCell", "editRange", "WorksheetCalculated", "WorksheetFormatChanged"]:
+        elif e in ["getCell", "getRange", "WorksheetCalculated", "WorksheetFormatChanged"]:
             if row['current_worksheet'] != '':
-                # return f"[Excel] Edit Cell {row['cell_range']} on {row['current_worksheet']} with value '{row['cell_content']}'"
                 return f"[Excel] Edit Cell on {row['current_worksheet']}"
             else:
                 return f"[Excel] Edit Cell"
+        elif e in ["editCellSheet", "editCell", "editRange"]:
+            return f"[Excel] Edit cell {row['cell_range']} on {row['current_worksheet']} with value '{row['cell_content']}'"
         elif e in ["addWorksheet", "deselectWorksheet", "selectWorksheet", "WorksheetActivated"]:
             return f"[Excel] Select {row['current_worksheet']}"
 
@@ -500,7 +501,7 @@ class ProcessMining:
         df = df[~df.browser_url.str.contains('chrome-extension://')]
         df = df[~df.eventQual.str.contains('clientRedirect')]
         df = df[~df.eventQual.str.contains('serverRedirect')]
-        df = df[df['clipboard_content'].str.strip() == '']
+        # df = df[df['clipboard_content'].str.strip() == '']
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
                           "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit",
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
@@ -527,10 +528,8 @@ class ProcessMining:
         df, log, dfg_parameters = self.aggregateData(remove_duplicates=remove_duplicates)
         dfg = self._createDFG(log, dfg_parameters)
         parameters = self._createImageParameters(log=log, high_level=True)
-
         # gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
         # self._create_image(gviz, "DFG")
-
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
         return net, im, fm
 
@@ -540,18 +539,11 @@ class ProcessMining:
         self._create_image(gviz, name)
 
     def _create_bpmn(self, df: pandas.DataFrame = None):
-
         df, log, parameters = self.aggregateData(df, remove_duplicates=True)
-
         net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
-
         # net, initial_marking, final_marking = self._create_petri_net(remove_duplicates=True)
-
         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
             net, initial_marking, final_marking)
-
-        # bpmn_graph = bpmn_diagram_layouter.apply(bpmn_graph)
-
         return bpmn_graph
 
     def save_bpmn(self, df: pandas.DataFrame = None):
@@ -560,7 +552,6 @@ class ProcessMining:
         self._create_image(bpmn_figure, "BPMN")
 
     def createGraphs(self, df: pandas.DataFrame = None):
-        self.save_dfg(high_level=True)
-        self.save_petri_net('petri_net')
-        self.save_bpmn(df)  # includes petri net
-        print(f"[PROCESS MINING] Generated DFG, Petri Net and BPMN in {self.discovery_log_path}")
+        #self.save_petri_net('petri_net')
+        self.save_bpmn(df)
+        print(f"[PROCESS MINING] Generated BPMN in {self.discovery_path}")
