@@ -48,23 +48,34 @@ class ChoicesDialog(QDialog):
             e = row["concept:name"]
             url = utils.getHostname(row['browser_url'])
             app = row['application']
+
+            label = ""
+            value = ""
+
             if e == "changeField":
                 label = f"[{app}] Write in {row['tag_type']} {row['tag_category'].lower()} on {url}:"
-                self.layout.addRow(QLabel(label), QLineEdit(row['tag_value']))
+                value = row['tag_value']
             elif e in ["editCell", "editCellSheet", "editRange"]:
                 label = f"[Excel] Edit cell {row['cell_range']} on {row['current_worksheet']} with value:"
-                self.layout.addRow(QLabel(label), QLineEdit(row['cell_content']))
+                value = row['cell_content']
             elif e in ["moved", 'Unmount']:
                 path = row['event_dest_path'] if e == "moved" else row['event_src_path']
                 _, extension = ntpath.splitext(path)
                 if extension:
-                    self.layout.addRow(QLabel(f"[{app}] Rename file as:"), QLineEdit(path))
+                    label = f"[{app}] Rename file as:"
                 else:
-                    self.layout.addRow(QLabel(f"[{app}] Rename folder as:"), QLineEdit(path))
+                    label = f"[{app}] Rename folder as:"
+                value = path
             elif e in ["copy", "cut", "paste"]:
                 cb = utils.removeWhitespaces(row['clipboard_content'])
                 if len(cb) > 0:
-                    self.layout.addRow(QLabel("Copy and Paste:"), QLineEdit(cb))
+                    label = f"[{app}] Copy and Paste:"
+                    value = cb
+
+            if label != "" and value != "":
+                lineEdit = QLineEdit(value)
+                lineEdit.setMinimumWidth(270)
+                self.layout.addRow(QLabel(label), lineEdit)
 
     def handleReturn(self):
         # close dialog

@@ -401,13 +401,12 @@ class ProcessMining:
         cb = utils.utils.removeWhitespaces(row['clipboard_content'])
         # general
         if e in ["copy", "cut", "paste"]:  # take only first 15 characters of clipboard
-            print(f"len(cb)={len(cb)}")
             if len(cb) > 30:
-                return f"Copy and Paste: '{cb[:30]}...'"
+                return f"[{app}] Copy and Paste: '{cb[:30]}...'"
             if len(cb) == 0:
-                return f"Copy and Paste"
+                return f"[{app}] Copy and Paste"
             else:
-                return f"Copy and Paste: '{cb}'"
+                return f"[{app}] Copy and Paste: '{cb}'"
 
         # browser
         elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick",
@@ -442,11 +441,11 @@ class ProcessMining:
             else:
                 return f"[{app}] Edit {row['tag_category']} on {url}"
         elif e in ["changeField"]:
-            return f"[{app}] Write '{row['tag_value']}' in {row['tag_type']} {row['tag_category'].lower()} on {url}"
+            return f"[{app}] Write in {row['tag_type']} {row['tag_category'].lower()} on {url}: '{row['tag_value']}'"
 
         # system
         elif e in ["itemSelected", "deleted", "created", "Mount", "openFile", "openFolder"]:
-            path = row['event_src_path']
+            path = row['event_src_path'].replace('\\', r'\\')
             name, extension = ntpath.splitext(path)
             name = ntpath.basename(path)
             if extension:
@@ -455,6 +454,7 @@ class ProcessMining:
                 return f"[{app}] Edit folder '{path}'"
         elif e in ['moved', 'Unmount']:
             path = row['event_dest_path'] if e == "moved" else row['event_src_path']
+            path = path.replace('\\', r'\\')
             _, extension = ntpath.splitext(path)
             if extension:
                 return f"[{app}] Rename file as '{path}'"
@@ -501,14 +501,13 @@ class ProcessMining:
         df = df[~df.browser_url.str.contains('chrome-extension://')]
         df = df[~df.eventQual.str.contains('clientRedirect')]
         df = df[~df.eventQual.str.contains('serverRedirect')]
-        # df = df[df['clipboard_content'].str.strip() == '']
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
                           "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit",
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "programOpen", "programClose", "closePresentation", "SlideSelectionChanged", "closeWorkbook",
-                          "deactivateWorkbook", "WorksheetAdded", "autoBookmark"]
+                          "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level

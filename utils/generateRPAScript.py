@@ -185,11 +185,20 @@ except WebDriverException as e:
                 #     script.write(f"click({mouse_coord})\n")
 
                 if e in ["newWorkbook"]:
+                    script.write(f"print('Opening Excel...')\n")
                     if WINDOWS:
-                        script.write(f"print('Opening Excel...')\n")
                         script.write("excel = Excel()\n")
                         x, y, width, height = size.split(',')
                         # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")                # elif e == "resizeWindow":  # TODO
+                    elif MAC and not excelMacOpened:
+                        excelMacOpened = True
+                        script.write("wb = xw.Book()\n")
+                        script.write(f"""
+try:
+    sht = wb.sheets.active
+except Exception:
+    pass
+\n""")
                 #     x, y, width, height = size.split(',')
                 #     script.write(f"print('Resizing window to {size}')\n")
                 #     # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
