@@ -668,15 +668,19 @@ class MainApplication(QMainWindow, QDialog):
                 )
 
                 # ask if some fields should be changed before generating RPA script
-                mostFrequentCase = utils.choicesDialog.buildOptionDialog(pm.mostFrequentCase)
+                # build choices dialog, passing low level most frequent case to analyze
+                choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
+                # when OK button is pressed
+                if choicesDialog.exec_() in [0, 1]:
+                    mostFrequentCase = choicesDialog.df
 
-                # create RPA based on most frequent path
-                rpa = utils.generateRPAScript.RPAScript(self.csv_to_join[-1])
-                rpa.generateRPAMostFrequentPath(mostFrequentCase)
+                    # create RPA based on most frequent path
+                    rpa = utils.generateRPAScript.RPAScript(self.csv_to_join[-1])
+                    rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
-                pm.createGraphs(mostFrequentCase)
+                    pm.createGraphs(mostFrequentCase)
 
-                print(f"[GUI] RPA files generated in {os.path.dirname(self.csv_to_join[-1])}")
+                print(f"[GUI] RPA files generated in {utils.utils.getRPADirectory(self.csv_to_join[-1])}")
 
             except ImportError:
                 print(

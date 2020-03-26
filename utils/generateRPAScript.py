@@ -246,7 +246,6 @@ except Exception:
                 elif e in ["editCellSheet", "editCell", "editRange"]:
                     script.write(f"print('Writing cell {cell_range}')\n")
                     if WINDOWS:
-                        cell_value = utils.utils.toAscii(cell_value)
                         script.write(f"""
 try:
     excel.write_cell({range_number}, '{cell_value}')

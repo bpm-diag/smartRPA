@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QCoreApplication
 from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QFormLayout,
-                             QGroupBox, QLabel, QLineEdit, QVBoxLayout)
+                             QGroupBox, QLabel, QLineEdit, QVBoxLayout, QScrollArea)
 import pandas
 import sys
 import ntpath
@@ -30,13 +30,17 @@ class ChoicesDialog(QDialog):
             formGroupBox = QGroupBox()
             self.layout = QFormLayout()
             self.addRows()
-
             formGroupBox.setLayout(self.layout)
+
+            scroll = QScrollArea()
+            scroll.setWidget(formGroupBox)
+            scroll.setMaximumHeight(400)
 
             mainLayout = QVBoxLayout()
             mainLayout.addWidget(QLabel("Change input variables before generating RPA script"))
-            mainLayout.addWidget(formGroupBox)
+            mainLayout.addWidget(scroll)
             mainLayout.addWidget(buttonBox)
+
             self.setLayout(mainLayout)
 
         else:
@@ -109,6 +113,7 @@ class ChoicesDialog(QDialog):
         return self.df
 
 
+# used for testing
 def buildOptionDialog(df: pandas.DataFrame):
     app = QApplication(sys.argv)
     dialog = ChoicesDialog(df)
