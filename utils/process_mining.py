@@ -93,8 +93,8 @@ class ProcessMining:
 
                 try:  # insert this column to create a unique trace for each csv
                     df.insert(0, 'case:concept:name', i)
-                except ValueError:  # column already present
-                    pass
+                except ValueError:  # column already present, replace case id values so they are sequencial
+                    df['case:concept:name'] = i
 
                 try:  # insert this column to create a unique trace for each csv
                     df.insert(1, 'case:creator', 'CSV2XES by marco2012')
@@ -103,7 +103,7 @@ class ProcessMining:
 
                 try:
                     df.insert(2, 'lifecycle:transition', 'complete')
-                except ValueError:
+                except ValueError:  # column already present
                     pass
 
                 csv_to_combine.append(df)

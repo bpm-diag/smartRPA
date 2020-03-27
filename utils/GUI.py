@@ -116,6 +116,8 @@ class MainApplication(QMainWindow, QDialog):
         menu = self.menuBar().addMenu('File')
         action = menu.addAction('Preferences...')
         action.triggered.connect(self.handlePreferences)
+        mergeAction = menu.addAction('Merge and analyze multiple CSV...')
+        mergeAction.triggered.connect(self.handleMerge)
         self.preferencesDialog = Preferences(self)
 
         # create layouts
@@ -538,8 +540,67 @@ class MainApplication(QMainWindow, QDialog):
         if OPERA:
             self.browserOperaCB.setChecked(self.allCBChecked)
 
+        # Create a dialog to select a file and return its path
+        # Used if the user wants to select an existing file for logging excel
+        # (not implemented in gui)
+    @staticmethod
+    def getFilenameDialog(customDialog=True, title="Open", hiddenItems=False, isFolder=False, forOpen=True,
+                          directory='',
+                          filter_format=''):
+
+        options = QFileDialog.Options()
+        if customDialog:
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.DontUseCustomDirectoryIcons
+
+        dialog = QFileDialog()
+        dialog.setOptions(options)
+        dialog.setWindowTitle(title)
+
+        if hiddenItems:
+            dialog.setFilter(dialog.filter() | QDir.Hidden)
+
+        # Files or folders
+        if isFolder:
+            dialog.setFileMode(QFileDialog.DirectoryOnly)
+        else:
+            # dialog.setFileMode(QFileDialog.AnyFile)
+            dialog.setFileMode(QFileDialog.ExistingFiles)
+
+        # Opening or saving
+        if forOpen:
+            dialog.setAcceptMode(QFileDialog.AcceptOpen)
+        else:
+            dialog.setAcceptMode(QFileDialog.AcceptSave)
+
+        # Set format
+        if filter_format != '' and isFolder is False:
+            # dialog.setDefaultSuffix(filter_format)
+            dialog.setNameFilters([filter_format])
+
+        # starting directory
+        if directory != '':
+            dialog.setDirectory(str(directory))
+        else:
+            dialog.setDirectory(DESKTOP)
+
+        if dialog.exec_() == QDialog.Accepted:
+            path = dialog.selectedFiles()  # returns a list
+            return path
+        else:
+            return []
+
     def handlePreferences(self):
         self.preferencesDialog.show()
+
+    def handleMerge(self):
+        csv_to_merge = self.getFilenameDialog(customDialog=False,
+                                              title='Select CSV to merge',
+                                              filter_format="CSV log files (*.csv)")
+        if csv_to_merge:
+            self.handleProcessMining(sorted(csv_to_merge))
+        else:
+            print("[GUI] Select multiple csv to join")
 
     # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
@@ -574,60 +635,53 @@ class MainApplication(QMainWindow, QDialog):
         elif (tag == "browserOpera"):
             self.browserOpera = checked
 
-    # Create a dialog to select a file and return its path
-    # Used if the user wants to select an existing file for logging excel
-    # (not implemented in gui)
-    def getFilenameDialog(self, customDialog=True, title="Open", hiddenItems=False, isFolder=False, forOpen=True,
-                          directory='',
-                          filter_format=''):
-
-        options = QFileDialog.Options()
-        if customDialog:
-            options |= QFileDialog.DontUseNativeDialog
-            options |= QFileDialog.DontUseCustomDirectoryIcons
-
-        dialog = QFileDialog()
-        dialog.setOptions(options)
-        dialog.setWindowTitle(title)
-
-        if hiddenItems:
-            dialog.setFilter(dialog.filter() | QDir.Hidden)
-
-        # Files or folders
-        if isFolder:
-            dialog.setFileMode(QFileDialog.DirectoryOnly)
-        else:
-            dialog.setFileMode(QFileDialog.AnyFile)
-
-        # Opening or saving
-        if forOpen:
-            dialog.setAcceptMode(QFileDialog.AcceptOpen)
-        else:
-            dialog.setAcceptMode(QFileDialog.AcceptSave)
-
-        # Set format
-        if filter_format != '' and isFolder is False:
-            # dialog.setDefaultSuffix(filter_format)
-            dialog.setNameFilters([filter_format])
-
-        # starting directory
-        if directory != '':
-            dialog.setDirectory(str(directory))
-        else:
-            dialog.setDirectory(DESKTOP)
-
-        if dialog.exec_() == QDialog.Accepted:
-            path = dialog.selectedFiles()[0]  # returns a list
-            return path
-        else:
-            return ''
-
     def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
         rpa = utils.generateRPAScript.RPAScript(log_filepath)
         rpa_success = rpa.run()
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
+
+    def handleProcessMining(self, log_filepath: list):
+        try:
+            # check if library is installed
+            import pm4py
+            # create class, combine all csv into one
+            pm = utils.process_mining.ProcessMining(log_filepath)
+
+            # create high level DFG model based on all logs
+            pm.highLevelDFG()
+
+            # calculate high level bpmn and petri net based on dfg
+            pm.createGraphs()
+
+            # open BPMN
+            utils.utils.open_file(
+                os.path.join(pm.discovery_path,
+                             f'{utils.utils.getFilename(log_filepath[-1]).strip("_combined")}_BPMN.pdf')
+            )
+
+            # ask if some fields should be changed before generating RPA script
+            # build choices dialog, passing low level most frequent case to analyze
+            choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
+            # when OK button is pressed
+            if choicesDialog.exec_() in [0, 1]:
+                mostFrequentCase = choicesDialog.df
+
+                # create RPA based on most frequent path
+                rpa = utils.generateRPAScript.RPAScript(log_filepath[-1])
+                rpa.generateRPAMostFrequentPath(mostFrequentCase)
+
+                pm.createGraphs(mostFrequentCase)
+
+        except ImportError:
+            print(
+                "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
+                "See https://github.com/marco2012/ComputerLogger#PM4PY")
+            # reset counter and list
+            self.runCount = 0
+            self.csv_to_join.clear()
+            return False
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
@@ -649,47 +703,7 @@ class MainApplication(QMainWindow, QDialog):
         # from these csv
         if self.runCount >= totalRunCount and self.csv_to_join:
 
-            try:
-                # check if library is installed
-                import pm4py
-                # create class, combine all csv into one
-                pm = utils.process_mining.ProcessMining(self.csv_to_join)
-
-                # create high level DFG model based on all logs
-                pm.highLevelDFG()
-
-                # calculate high level bpmn and petri net based on dfg
-                pm.createGraphs()
-
-                # open BPMN
-                utils.utils.open_file(
-                    os.path.join(pm.discovery_path,
-                                 f'{utils.utils.getFilename(self.csv_to_join[-1]).strip("_combined")}_BPMN.pdf')
-                )
-
-                # ask if some fields should be changed before generating RPA script
-                # build choices dialog, passing low level most frequent case to analyze
-                choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
-                # when OK button is pressed
-                if choicesDialog.exec_() in [0, 1]:
-                    mostFrequentCase = choicesDialog.df
-
-                    # create RPA based on most frequent path
-                    rpa = utils.generateRPAScript.RPAScript(self.csv_to_join[-1])
-                    rpa.generateRPAMostFrequentPath(mostFrequentCase)
-
-                    pm.createGraphs(mostFrequentCase)
-
-                # print(f"[GUI] RPA files generated in {utils.utils.getRPADirectory(self.csv_to_join[-1])}")
-
-            except ImportError:
-                print(
-                    "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
-                    "See https://github.com/marco2012/ComputerLogger#PM4PY")
-                # reset counter and list
-                self.runCount = 0
-                self.csv_to_join.clear()
-                return False
+            self.handleProcessMining(self.csv_to_join)
 
             # reset counter and list
             self.runCount = 0
