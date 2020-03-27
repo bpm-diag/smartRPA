@@ -44,8 +44,14 @@ class ChoicesDialog(QDialog):
             self.setLayout(mainLayout)
 
         else:
-            # if filtered dataframe is empty there isn't any row to edit, so I don't show the dialog at all
-            QCoreApplication.quit()
+            buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
+            buttonBox.accepted.connect(self.accept)
+            layout = QVBoxLayout(self)
+            layout.addWidget(QLabel("Most frequent trace does not contain editable fields.\n"
+                                    "Presso OK to generate RPA script."))
+            layout.addWidget(buttonBox)
+            self.setLayout(layout)
+
 
     def addRows(self):
         for row_index, row in self.df.iterrows():

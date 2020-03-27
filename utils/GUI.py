@@ -680,7 +680,7 @@ class MainApplication(QMainWindow, QDialog):
 
                     pm.createGraphs(mostFrequentCase)
 
-                print(f"[GUI] RPA files generated in {utils.utils.getRPADirectory(self.csv_to_join[-1])}")
+                # print(f"[GUI] RPA files generated in {utils.utils.getRPADirectory(self.csv_to_join[-1])}")
 
             except ImportError:
                 print(
