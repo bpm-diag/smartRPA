@@ -48,10 +48,9 @@ class ChoicesDialog(QDialog):
             buttonBox.accepted.connect(self.accept)
             layout = QVBoxLayout(self)
             layout.addWidget(QLabel("Most frequent trace does not contain editable fields.\n"
-                                    "Presso OK to generate RPA script."))
+                                    "Press OK to generate RPA script."))
             layout.addWidget(buttonBox)
             self.setLayout(layout)
-
 
     def addRows(self):
         for row_index, row in self.df.iterrows():
