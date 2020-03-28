@@ -600,7 +600,7 @@ class MainApplication(QMainWindow, QDialog):
         if csv_to_merge:
             self.handleProcessMining(sorted(csv_to_merge))
         else:
-            print("[GUI] Select multiple csv to join")
+            print("[GUI] No csv selected...")
 
     # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
