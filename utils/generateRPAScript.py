@@ -39,7 +39,7 @@ class RPAScript:
                                "newWindow", "closeWindow", "submit", "formSubmit", "enableBrowserExtension",
                                "newWindow", "startPage", "activateWorkbook", "openWindow", "click",
                                "clickTextField", "newTab", "disableBrowserExtension", "installBrowserExtension",
-                               "logonComplete", "deleted", "programClose", "afterCalculate", "resizeWindow"]
+                               "logonComplete", "deleted", "programClose", "afterCalculate", "resizeWindow", "selectText"]
 
         self.csv_file_path = csv_file_path
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
@@ -385,6 +385,8 @@ try:
         for i in range(0, {id}):
             browser.execute_script('window.open("");')
         browser.switch_to.window(browser.window_handles[{id}])
+    if browser.current_url == 'about:blank':
+        browser.get('{url}') 
 except Exception:
     pass
 \n""")
@@ -425,16 +427,17 @@ except Exception:
     pass
 \n""")
                     else:
-                        script.write(f"print('Inserting text')\n")
+                        script.write(f"print('Inserting text: ' + '''{value}''')\n")
                         script.write(f"""
 try:
-    browser.find_element_by_xpath('{xpath}').send_keys('{value}')
+    browser.find_element_by_xpath('{xpath}').clear()
+    browser.find_element_by_xpath('{xpath}').send_keys('''{value}''')
 except Exception:
     pass
 \n""")
 
-                elif e == "clickButton" or e == "clickRadioButton":
-                    script.write(f"print('Clicking button')\n")
+                elif e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
+                    script.write(f"print('Clicking button {row['tag_name']}')\n")
                     script.write(f"""
 try:
     browser.find_element_by_xpath('{xpath}').click()

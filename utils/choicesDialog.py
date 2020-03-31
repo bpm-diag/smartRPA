@@ -14,6 +14,7 @@ class ChoicesDialog(QDialog):
                                                   Qt.WindowTitleHint |
                                                   Qt.CustomizeWindowHint)
         self.setWindowTitle("Choices")
+        # self.setFixedWidth(730)
 
         self.df = df
         self.filtered_df = self.df[self.df['concept:name'].isin(
@@ -62,8 +63,9 @@ class ChoicesDialog(QDialog):
             value = ""
 
             if e == "changeField":
-                label = f"[{app}] Write in {row['tag_type']} {row['tag_category'].lower()} on {url}:"
-                value = row['tag_value']
+                tags = list({row['tag_type'], row['tag_category'].lower(), row['tag_name']})
+                label = f"[{app}] Write in {' '.join(tags)} on {url}:"
+                value = row['tag_value'].replace('\n', ', ')
             elif e in ["editCell", "editCellSheet", "editRange"]:
                 label = f"[Excel] Edit cell {row['cell_range']} on {row['current_worksheet']} with value:"
                 value = row['cell_content']

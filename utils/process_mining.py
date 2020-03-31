@@ -93,7 +93,7 @@ class ProcessMining:
 
                 try:  # insert this column to create a unique trace for each csv
                     df.insert(0, 'case:concept:name', i)
-                except ValueError:  # column already present, replace case id values so they are sequencial
+                except ValueError:  # column already present, replace case id values so they are sequential
                     df['case:concept:name'] = i
 
                 try:  # insert this column to create a unique trace for each csv
@@ -108,8 +108,8 @@ class ProcessMining:
 
                 csv_to_combine.append(df)
 
-            # dataframe of combined csv
-            combined_csv = pandas.concat(csv_to_combine)
+            # dataframe of combined csv, sort by timestamp
+            combined_csv = pandas.concat(csv_to_combine)#.sort_values(by='time:timestamp')
 
             # insert index for each row
             # combined_csv.insert(0, 'row_index', range(0, len(combined_csv)))
@@ -410,7 +410,7 @@ class ProcessMining:
 
         # browser
         elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick",
-                   "clickCheckboxButton"]:
+                   "clickCheckboxButton", "clickRadioButton"]:
             if row['tag_type'] == 'submit':
                 return f"[{app}] Submit {row['tag_category'].lower()} on {url}"
             else:
@@ -441,7 +441,11 @@ class ProcessMining:
             else:
                 return f"[{app}] Edit {row['tag_category']} on {url}"
         elif e in ["changeField"]:
-            return f"[{app}] Write in {row['tag_type']} {row['tag_category'].lower()} on {url}: '{row['tag_value']}'"
+            # sometimes 2 out of 3 tags fields are equal, like TEXTAREA, textarea, luoghi
+            # I don't want to repeat them so I remove duplicates by creating a set and then print the remaining ones
+            tags = list({row['tag_type'], row['tag_category'].lower(), row['tag_name']})
+            value = row['tag_value'].replace('\n', ', ')
+            return f"[{app}] Write in {' '.join(tags)} on {url}: '{value}'"
 
         # system
         elif e in ["itemSelected", "deleted", "created", "Mount", "openFile", "openFolder"]:
