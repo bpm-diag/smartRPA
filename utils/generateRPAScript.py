@@ -6,6 +6,7 @@
 # ******************************
 
 import sys
+from multiprocessing.queues import Queue
 
 import modules
 
@@ -31,15 +32,18 @@ class RPAScript:
 
     def __init__(self,
                  csv_file_path: str,
+                 status_queue: Queue,
                  delay_between_actions=0.5):
 
+        self.status_queue = status_queue
         self._delay_between_actions = delay_between_actions
         self._SaveAsUI = False
         self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
                                "newWindow", "closeWindow", "submit", "formSubmit", "enableBrowserExtension",
                                "newWindow", "startPage", "activateWorkbook", "openWindow", "click",
                                "clickTextField", "newTab", "disableBrowserExtension", "installBrowserExtension",
-                               "logonComplete", "deleted", "programClose", "afterCalculate", "resizeWindow", "selectText"]
+                               "logonComplete", "deleted", "programClose", "afterCalculate",
+                               "resizeWindow", "selectText"]
 
         self.csv_file_path = csv_file_path
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
@@ -572,11 +576,12 @@ except Exception:
                         script.write(
                             f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
 
-        print(f"[RPA] Generated Unified RPA in {RPA_filepath}")
+        # self.status_queue.put(f"[RPA] Generated RPA script {ntpath.basename(RPA_filepath)}")
+        self.status_queue.put(f"[RPA] Generated RPA script")
         return True
 
     def generateRPAMostFrequentPath(self, df: pandas.DataFrame):
-        self._generateUnifiedRPA(df, filename="_MostFrequentPathUnifiedRPA.py")
+        self._generateUnifiedRPA(df, filename="_RPA.py")
 
     # file called by GUI when main script terminates and csv log file is created.
     def generateRPAScript(self):

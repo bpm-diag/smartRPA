@@ -15,8 +15,9 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QMainWindow, QWidget, QSlider, QLCDNumber, QDialogButtonBox,
                              QFormLayout, QLineEdit)
 import darkdetect
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 import pandas
+import time
 from utils.utils import *
 import mainLogger
 import utils.config
@@ -25,9 +26,10 @@ import utils.xesConverter
 import utils.process_mining
 import utils.utils
 
+
 # Preferences window
 class Preferences(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent, status_queue):
         super(Preferences, self).__init__(parent,
                                           flags=Qt.Window |
                                                 Qt.WindowTitleHint |
@@ -36,6 +38,7 @@ class Preferences(QMainWindow):
                                                 Qt.WindowMinimizeButtonHint
                                           )
 
+        self.status_queue = status_queue
         self.setWindowTitle("")
         if WINDOWS:
             self.resize(360, 320)
@@ -77,29 +80,54 @@ class Preferences(QMainWindow):
         confirmButton.setChecked(False)
         confirmButton.clicked.connect(self.handleButton)
 
-        hbox = QHBoxLayout()
-        hbox.addWidget(label_minimum, Qt.AlignLeft)
-        hbox.addWidget(label_maximum, Qt.AlignRight)
+        self.process_discovery_cb = QCheckBox("Enable Process Discovery \nanalysis on log file")
+        self.process_discovery_cb.setToolTip("If enabled, process discovery analysis is performed automatically\n"
+                                             "after selecting log file, otherwise only log file is generated")
+        self.process_discovery_cb.tag = "process_discovery_cb"
+        self.process_discovery_cb.stateChanged.connect(self.handle_cb)
+        self.process_discovery_cb.setChecked(utils.config.MyConfig.get_instance().perform_process_discovery)
+
+        processDiscoveryGroupBox = QGroupBox()
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.process_discovery_cb)
+        processDiscoveryGroupBox.setLayout(vbox)
+
+        xesGroupBox = QGroupBox()
         vbox = QVBoxLayout()
         vbox.addWidget(self.slider_label)
         vbox.addWidget(self.lcd)
         vbox.addSpacing(10)
         vbox.addWidget(self.sld)
+        hbox = QHBoxLayout()
+        hbox.addWidget(label_minimum, Qt.AlignLeft)
+        hbox.addWidget(label_maximum, Qt.AlignRight)
         vbox.addLayout(hbox)
-        vbox.addWidget(confirmButton)
+        xesGroupBox.setLayout(vbox)
+
+        mainLayout = QVBoxLayout()
+        mainLayout.addWidget(processDiscoveryGroupBox)
+        mainLayout.addWidget(xesGroupBox)
+        mainLayout.addWidget(confirmButton)
 
         wid = QWidget(self)
         self.setCentralWidget(wid)
-        wid.setLayout(vbox)
+        wid.setLayout(mainLayout)
         wid.setGeometry(300, 300, 250, 150)
         wid.show()
 
     def handle_slider(self):
         value = self.sld.value()
         self.lcd.display(value)
-        msg = "Number of runs after which \nXES file is generated:"
-        self.slider_label.setText(msg)
+        self.slider_label.setText("Number of runs after which \nXES file is generated:")
         utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = value
+
+    def handle_cb(self):
+        perform = self.process_discovery_cb.isChecked()
+        utils.config.MyConfig.get_instance().perform_process_discovery = perform
+        if perform:
+            self.status_queue.put("[GUI] Process discovery enabled")
+        else:
+            self.status_queue.put("[GUI] Process discovery disabled")
 
     def handleButton(self):
         self.close()
@@ -113,12 +141,9 @@ class MainApplication(QMainWindow, QDialog):
         self.setAppIcon()
         self.setStyle()
 
-        menu = self.menuBar().addMenu('File')
-        action = menu.addAction('Preferences...')
-        action.triggered.connect(self.handlePreferences)
-        mergeAction = menu.addAction('Merge and analyze multiple CSV...')
-        mergeAction.triggered.connect(self.handleMerge)
-        self.preferencesDialog = Preferences(self)
+        self.status_queue = Queue()
+
+        self.createMenu()
 
         # create layouts
         self.createSystemLoggerGroupBox()
@@ -172,6 +197,18 @@ class MainApplication(QMainWindow, QDialog):
         self.setCentralWidget(wid)
         wid.setLayout(mainLayout)
         # self.setLayout(mainLayout)
+
+        updateUIThread = Thread(target=self.updateListWidget)
+        updateUIThread.daemon = True
+        updateUIThread.start()
+
+    def createMenu(self):
+        menu = self.menuBar().addMenu('File')
+        action = menu.addAction('Preferences...')
+        action.triggered.connect(self.handlePreferences)
+        mergeAction = menu.addAction('Merge multiple CSV...')
+        mergeAction.triggered.connect(self.handleMerge)
+        self.preferencesDialog = Preferences(self, self.status_queue)
 
     def createSystemLoggerGroupBox(self):
         self.systemGroupBox = QGroupBox("System logger")
@@ -350,8 +387,19 @@ class MainApplication(QMainWindow, QDialog):
         self.statusListWidget = QListWidget()
         self.statusListWidget.setFont(QFont(monospaceFont, fontSize, QFont.Normal))
         self.statusListWidget.setSelectionMode(QAbstractItemView.NoSelection)
+        if WINDOWS:
+            self.statusListWidget.setFixedHeight(200)
+        else:
+            self.statusListWidget.setFixedHeight(140)
+        # self.statusListWidget.setMinimumWidth(self.statusListWidget.sizeHintForColumn(0))
+        self.statusListWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.statusListWidget.setWordWrap(True)
+        self.statusListWidget.setTextElideMode(Qt.ElideNone)
 
         self.statusLayout.addWidget(self.statusListWidget)
+        self.statusListWidget.addItem(QListWidgetItem("Ready to log, press Start button..."))
+        if not utils.config.MyConfig.get_instance().perform_process_discovery:
+            self.status_queue.put("[GUI] Process discovery disabled")
 
     def createProgressDialog(self, title, message, timeout):
         flags = Qt.WindowTitleHint | Qt.Dialog | Qt.WindowMaximizeButtonHint | Qt.CustomizeWindowHint
@@ -451,7 +499,7 @@ class MainApplication(QMainWindow, QDialog):
             self.officeOutlookCB.setDisabled(True)
 
             # window size
-            self.resize(360, 420)
+            self.resize(400, 420)
 
             # margins
             self.topLayout.setContentsMargins(0, 0, 0, 10)
@@ -483,7 +531,7 @@ class MainApplication(QMainWindow, QDialog):
             self.browserOperaCB.setChecked(False)
             self.browserOpera = False
 
-        self.compatibilityCheckMessage()
+        # self.compatibilityCheckMessage()
 
     def compatibilityCheckMessage(self):
         self.statusListWidget.clear()
@@ -543,6 +591,16 @@ class MainApplication(QMainWindow, QDialog):
         # Create a dialog to select a file and return its path
         # Used if the user wants to select an existing file for logging excel
         # (not implemented in gui)
+
+    # Reads queue and updates list widget
+    def updateListWidget(self):
+        while 1:
+            if not self.status_queue.empty():
+                item = self.status_queue.get()
+                print(item)
+                self.statusListWidget.addItem(QListWidgetItem(item))
+            time.sleep(0.5)
+
     @staticmethod
     def getFilenameDialog(customDialog=True, title="Open", hiddenItems=False, isFolder=False, forOpen=True,
                           directory='',
@@ -594,13 +652,15 @@ class MainApplication(QMainWindow, QDialog):
         self.preferencesDialog.show()
 
     def handleMerge(self):
+        self.statusListWidget.clear()
         csv_to_merge = self.getFilenameDialog(customDialog=False,
                                               title='Select CSV to merge',
                                               filter_format="CSV log files (*.csv)")
         if csv_to_merge:
-            self.handleProcessMining(sorted(csv_to_merge))
+            self.status_queue.put("[GUI] Merging selected files...")
+            self.handleProcessMining(sorted(csv_to_merge), merged=True)
         else:
-            print("[GUI] No csv selected...")
+            self.status_queue.put("[GUI] No csv selected...")
 
     # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
@@ -642,37 +702,39 @@ class MainApplication(QMainWindow, QDialog):
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
 
-    def handleProcessMining(self, log_filepath: list):
+    def handleProcessMining(self, log_filepath: list, merged=False):
         try:
             # check if library is installed
             import pm4py
             # create class, combine all csv into one
-            pm = utils.process_mining.ProcessMining(log_filepath)
+            pm = utils.process_mining.ProcessMining(log_filepath, self.status_queue, merged)
 
-            # create high level DFG model based on all logs
-            pm.highLevelDFG()
+            if utils.config.MyConfig.get_instance().perform_process_discovery:
+                # create high level DFG model based on all logs
+                pm.highLevelDFG()
 
-            # calculate high level bpmn and petri net based on dfg
-            pm.createGraphs()
+                # calculate high level bpmn and petri net based on dfg
+                pm.createGraphs()
 
-            # open BPMN
-            utils.utils.open_file(
-                os.path.join(pm.discovery_path,
-                             f'{utils.utils.getFilename(log_filepath[-1]).strip("_combined")}_BPMN.pdf')
-            )
+                # open BPMN
+                utils.utils.open_file(
+                    os.path.join(pm.discovery_path,
+                                 f'{utils.utils.getFilename(log_filepath[-1]).strip("_combined")}_BPMN.pdf')
+                )
 
-            # ask if some fields should be changed before generating RPA script
-            # build choices dialog, passing low level most frequent case to analyze
-            choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
-            # when OK button is pressed
-            if choicesDialog.exec_() in [0, 1]:
-                mostFrequentCase = choicesDialog.df
+                # ask if some fields should be changed before generating RPA script
+                # build choices dialog, passing low level most frequent case to analyze
+                choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
+                # when OK button is pressed
+                if choicesDialog.exec_() in [0, 1]:
+                    mostFrequentCase = choicesDialog.df
 
-                # create RPA based on most frequent path
-                rpa = utils.generateRPAScript.RPAScript(log_filepath[-1])
-                rpa.generateRPAMostFrequentPath(mostFrequentCase)
+                    # create RPA based on most frequent path
+                    rpa = utils.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
+                    rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
-                pm.createGraphs(mostFrequentCase)
+                    pm.createGraphs(mostFrequentCase)
+                    self.status_queue.put(f"[PROCESS MINING] Generated BPMN")
 
         except ImportError:
             print(
@@ -687,22 +749,22 @@ class MainApplication(QMainWindow, QDialog):
     def handleRunCount(self, log_filepath):
 
         if utils.utils.CSVEmpty(log_filepath):
-            print(f"[GUI] CSV log {os.path.basename(log_filepath)} emtpy, skipping")
+            self.status_queue.put(f"[GUI] Log file {os.path.basename(log_filepath)} is empty, removing")
+            os.remove(log_filepath)
             return False
         else:
             # contains paths of csv to join
             self.csv_to_join.append(log_filepath)
+            self.status_queue.put(f"[GUI] Log saved as {os.path.basename(log_filepath)}")
 
-        self.runCount += 1
+            self.runCount += 1
 
         totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
-        print(f"[GUI] Run count = {self.runCount}, Total = {totalRunCount}")
-        self.statusListWidget.addItem(QListWidgetItem(f"- Run {self.runCount} of {totalRunCount}"))
+        self.status_queue.put(f"[GUI] Run {self.runCount} of {totalRunCount}")
 
         # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
         # from these csv
         if self.runCount >= totalRunCount and self.csv_to_join:
-
             self.handleProcessMining(self.csv_to_join)
 
             # reset counter and list
@@ -717,7 +779,8 @@ class MainApplication(QMainWindow, QDialog):
             # set gui parameters
             self.running = True
 
-            print("[GUI] Loading threads, please wait...")
+            self.statusListWidget.clear()
+            self.status_queue.put("[GUI] Loading threads, please wait...")
 
             # start main process with the options selected in gui. It handles all other methods main method is
             # started as a process so it can be terminated once the button is clicked all the methods in the main
@@ -738,40 +801,36 @@ class MainApplication(QMainWindow, QDialog):
                 self.browserFirefox,
                 self.browserEdge,
                 self.browserOpera,
+                self.status_queue
             ))
 
             self.mainProcess.start()
 
             self.createProgressDialog("Starting...", "Starting server...", 1500)
 
-            self.statusListWidget.clear()
-            self.compatibilityCheckMessage()
+            # self.compatibilityCheckMessage()
 
             self.runButton.setText('Stop logger')
             self.runButton.update()
-
-            self.statusListWidget.addItem(QListWidgetItem("- Logging server running, recording logs..."))
 
         # stop button clicked
         else:
             # set gui parameters
             self.running = False
 
-            self.createProgressDialog("Stopping...", "Stopping server...", 1500)
+            # self.createProgressDialog("Stopping...", "Stopping server...", 1500)
 
             self.runButton.setText('Start logger')
             self.runButton.update()
 
-            self.compatibilityCheckMessage()
-            self.statusListWidget.addItem(QListWidgetItem(f"- Logger stopped."))
+            # self.compatibilityCheckMessage()
 
             # stop main process, automatically closing all daemon threads in main process
             self.mainProcess.terminate()
 
             log_filepath = utils.config.MyConfig.get_instance().log_filepath
-            msg = f"[GUI] Log saved as {os.path.basename(log_filepath)}"
-            print(msg)
-            self.statusListWidget.addItem(QListWidgetItem(f"- {msg.strip('[GUI] ')}"))
+
+            self.status_queue.put(f"[GUI] Logger stopped")
 
             # once log file is created, RPA actions are automatically generated for each category
             # self.handleRPA(log_filepath)
@@ -781,8 +840,6 @@ class MainApplication(QMainWindow, QDialog):
             # kill node server when closing python server, otherwise port remains occupied
             if MAC and self.officeExcel:
                 os.system("pkill -f node")
-
-            print("[GUI] Logger stopped")
 
 
 def buildGUI():

@@ -4,7 +4,7 @@
 # ****************************** #
 
 import os
-from nativeconfig import PreferredConfig, StringOption, BooleanOption, IntOption, DictOption, ArrayOption
+from nativeconfig import PreferredConfig, StringOption, BooleanOption, IntOption
 
 
 class MyConfig(PreferredConfig):
@@ -28,3 +28,5 @@ class MyConfig(PreferredConfig):
     # When totalNumberOfRunGuiXes of runs is reached (set by user in preferences), all CSV logs collected are merged
     # into one and a XES file is automatically generated, to be used for process mining techniques
     totalNumberOfRunGuiXes = IntOption('totalNumberOfRunGuiXes', default=1)
+
+    perform_process_discovery = BooleanOption('perform_process_discovery', default=True)

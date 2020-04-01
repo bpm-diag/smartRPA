@@ -33,6 +33,7 @@ def startLogger(systemLoggerFilesFolder,
                 browserFirefox,
                 browserEdge,
                 browserOpera,
+                status_queue
                 ):
     try:
         # create the threads as daemons so they are closed when main ends
@@ -154,16 +155,14 @@ def startLogger(systemLoggerFilesFolder,
         if browserOpera:
             config.log_opera = True
 
-        # print(f"[mainLogger] Chrome={browserChrome}, Firefox={browserFirefox}, Edge={browserEdge}, Opera={browserOpera}")
-        # print(f"[mainLogger] Excel={officeExcel}, Word={officeWord}, Powerpoint={officePowerpoint}, Outlook={officeOutlook}")
-        if browserChrome or browserFirefox or browserEdge or browserOpera:
-            print(f"[mainLogger] Browser logging started")
+        status_queue.put(f"[mainLogger] Logging started")
 
-        print(f"[mainLogger] Selected threads activated, logging to {config.log_filepath}")
+        if browserChrome or browserFirefox or browserEdge or browserOpera:
+            status_queue.put(f"[mainLogger] Remember to click on extension icon to enable browser logging")
 
         # keep main active
         while 1:
-            time.sleep(1)  # important: use sleep(1) and not pass
+            time.sleep(1)
 
     except (KeyboardInterrupt, SystemExit):
         print("Closing threads and exiting...")

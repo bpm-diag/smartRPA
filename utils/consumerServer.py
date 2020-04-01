@@ -9,6 +9,7 @@ import csv
 from logging import getLogger
 import utils.config
 import utils.utils
+# import utils.GUI
 
 # server port
 PORT = 4444

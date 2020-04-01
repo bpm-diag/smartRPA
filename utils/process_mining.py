@@ -13,6 +13,7 @@ import utils.config
 import utils.utils
 from fuzzywuzzy import fuzz
 from datetime import datetime
+from multiprocessing.queues import Queue
 
 try:
     # constants
@@ -47,8 +48,12 @@ except ImportError as e:
 
 class ProcessMining:
 
-    def __init__(self, filepath: list):
+    def __init__(self, filepath: list, status_queue: Queue, merged=False):
 
+        # queue to log messages to GUI
+        self.status_queue = status_queue
+        # true if class has been called when merging multiple files
+        self.merged = merged
         # list of csv paths
         self.filepath = filepath
         # last csv in the list, use its name
@@ -59,12 +64,18 @@ class ProcessMining:
         # path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/
         self._create_directories()
         self._log = self._handle_log()
-        # low level trace used for rpa generation
-        self.mostFrequentCase = self.selectMostFrequentCase()
+
+        if utils.config.MyConfig.get_instance().perform_process_discovery:
+            # low level trace used for rpa generation
+            self.mostFrequentCase = self.selectMostFrequentCase()
 
     def _create_directories(self):
         # create directory if does not exists
-        self.save_path = utils.utils.getRPADirectory(self.filename)
+        if self.merged:
+            self.save_path = utils.utils.getRPADirectory(self.filename + '_merged')
+        else:
+            self.save_path = utils.utils.getRPADirectory(self.filename)
+
         utils.utils.createDirectory(self.save_path)
 
         self.RPA_log_path = os.path.join(self.save_path, 'log')
@@ -109,7 +120,7 @@ class ProcessMining:
                 csv_to_combine.append(df)
 
             # dataframe of combined csv, sort by timestamp
-            combined_csv = pandas.concat(csv_to_combine)#.sort_values(by='time:timestamp')
+            combined_csv = pandas.concat(csv_to_combine)  # .sort_values(by='time:timestamp')
 
             # insert index for each row
             # combined_csv.insert(0, 'row_index', range(0, len(combined_csv)))
@@ -131,7 +142,8 @@ class ProcessMining:
             # convert csv to xes
             xes_path = os.path.join(self.save_path, 'log', f'{self.filename}.xes')
             xes_exporter.export_log(log, xes_path)
-            print(f"[PROCESS MINING] Generated XES file in {self.save_path}")
+            self.status_queue.put(f"[PROCESS MINING] Working directory is {self.save_path}")
+            self.status_queue.put(f"[PROCESS MINING] Generated XES file")
 
             return log
 
@@ -139,7 +151,8 @@ class ProcessMining:
             log = xes_importer.import_log(self.filepath)
             return log
         else:
-            return "[PROCESS_MINING] Input file must be either .csv or .xes"
+            self.status_queue.put("[PROCESS_MINING] Input file must be either .csv or .xes")
+            return False
 
     # return most frequent case in log in order to build RPA script
     def selectMostFrequentCaseWithoutDuration(self, flattened=False):
@@ -193,14 +206,15 @@ class ProcessMining:
             longest_variant = longest_variants[0]
 
             if len(longest_variants) == 1:
-                print(f"[PROCESS MINING] There is 1 variant, selecting first case")
+                self.status_queue.put(f"[PROCESS MINING] There is 1 variant, selecting first case")
             else:
-                print(f"[PROCESS MINING] There are {len(variants)} variants available, all with 1 case. "
-                      f"Variants {list(map(lambda x: x + 1, longest_variants))} are similar, "
-                      f"selecting the first case of variant {longest_variant + 1}")
+                self.status_queue.put(
+                    f"[PROCESS MINING] There are {len(variants)} variants available, all with 1 case. "
+                    f"Variants {list(map(lambda x: x + 1, longest_variants))} are similar, "
+                    f"selecting the first case of variant {longest_variant + 1}")
         else:
             # there is a frequent variant, pick first case
-            print(
+            self.status_queue.put(
                 f"[PROCESS MINING] There are {len(variants)} variants available, "
                 f"the most frequent one contains {len(longest_variants)} cases, selecting the first case")
             longest_variant = longest_variants[0]
@@ -293,21 +307,21 @@ class ProcessMining:
                 #  find smallest duration and select row in dataframe with that duration
                 min_duration_trace = df1.loc[df1['duration'] == min(durations)]['case:concept:name'].tolist()[0]
                 if len(variants) == 1:
-                    print(
+                    self.status_queue.put(
                         f"[PROCESS MINING] There is only 1 trace with duration: {min(durations)} sec")
                 else:
-                    print(
+                    self.status_queue.put(
                         f"[PROCESS MINING] All {len(variants)} variants are different, "
                         f"case {min_duration_trace} is the shortest ({min(durations)} sec)")
             else:
                 # some strings are similar, it should be like case below
                 min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
-                print(
+                self.status_queue.put(
                     f"[PROCESS MINING] Traces {most_frequent_variants} are similar, "
                     f"case {min_duration_trace} is the shortest ({duration} sec)")
         else:
             min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
-            print(
+            self.status_queue.put(
                 f"[PROCESS MINING] Traces {most_frequent_variants} are equal, "
                 f"case {min_duration_trace} is the shortest ({duration} sec)")
 
@@ -329,7 +343,7 @@ class ProcessMining:
             bpmn_vis_factory.save(gviz, img_path)
 
         if verbose:
-            print(f"[PROCESS MINING] Generated {img_name} in {img_path}")
+            self.status_queue.put(f"[PROCESS MINING] Generated {img_name} in {img_path}")
 
     def create_alpha_miner(self):
         net, initial_marking, final_marking = alpha_miner.apply(self._log)
@@ -401,8 +415,8 @@ class ProcessMining:
         cb = utils.utils.removeWhitespaces(row['clipboard_content'])
         # general
         if e in ["copy", "cut", "paste"]:  # take only first 15 characters of clipboard
-            if len(cb) > 30:
-                return f"[{app}] Copy and Paste: '{cb[:30]}...'"
+            if len(cb) > 80:
+                return f"[{app}] Copy and Paste: '{cb[:80]}...'"
             if len(cb) == 0:
                 return f"[{app}] Copy and Paste"
             else:
@@ -511,7 +525,8 @@ class ProcessMining:
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "closePresentation", "SlideSelectionChanged", "closeWorkbook",
-                          "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile"]
+                          "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile",
+                          "manualSubframe"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level
@@ -555,6 +570,7 @@ class ProcessMining:
         self._create_image(bpmn_figure, "BPMN")
 
     def createGraphs(self, df: pandas.DataFrame = None):
-        #self.save_petri_net('petri_net')
+        # self.save_petri_net('petri_net')
         self.save_bpmn(df)
-        print(f"[PROCESS MINING] Generated BPMN in {self.discovery_path}")
+        # self.status_queue.put(f"[PROCESS MINING] Generated BPMN")
+        # self.status_queue.put(f"[PROCESS MINING] Generated BPMN in {self.discovery_path}")
