@@ -399,7 +399,15 @@ except Exception:
                     script.write(f"browser.close()\n")
                 elif e == "reload":
                     script.write(f"print('Reloading page')\n")
-                    script.write(f"browser.refresh()\n")
+                    script.write(f"""
+try:
+    if browser.current_url != '{url}':
+        browser.get('{url}')
+    else: 
+        browser.refresh()
+except Exception:
+    pass
+""")
                 elif (e == "clickLink" or e == "typed") and ('chrome-extension' not in url):  # or e == "link" # disable because if user edits fields, this url changes
                     script.write(f"print('Loading link {url}')\n")
                     script.write(f"browser.get('{url}')\n")
@@ -413,7 +421,7 @@ except selenium.common.exceptions.TimeoutException:
                     # if url:  # disable because if user edits fields, this url changes
                     #     script.write(f"print('Loading link {url}')\n")
                     #     script.write(f"browser.get('{url}')\n")
-                    script.write(f"print('Clicking button')\n")
+                    script.write(f"print('Clicking button ')\n")
                     script.write(f"""
 try:
     browser.find_element_by_xpath('{xpath}').click()

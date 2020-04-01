@@ -24,7 +24,6 @@ try:
     from pm4py.objects.log.importer.xes import factory as xes_importer
     from pm4py.objects.log.exporter.xes import factory as xes_exporter
     from pm4py.objects.conversion.log import factory as conversion_factory
-    from pm4py.objects.petri.exporter import pnml as pnml_exporter
     # algorithms
     from pm4py.algo.discovery.alpha import factory as alpha_miner
     from pm4py.algo.discovery.heuristics import factory as heuristics_miner
@@ -37,6 +36,7 @@ try:
     from pm4py.visualization.petrinet import factory as pn_vis_factory
     from pm4py.visualization.dfg import factory as dfg_vis_factory
     from pm4py.objects.log.util import sorting
+    from pm4py.objects.petri.exporter import factory as pnml_factory
     from pm4pybpmn.visualization.bpmn import factory as bpmn_vis_factory
     # BPMN
     from pm4pybpmn.objects.conversion.petri_to_bpmn import factory as bpmn_converter
@@ -88,6 +88,9 @@ class ProcessMining:
 
         if self.file_extension == ".csv":
 
+            def createCaseID(ts):
+                return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%Y%m%d%H%M%S%f')
+
             # combine multiple csv into one and then export it to xes
             csv_to_combine = list()
             for i, csv_path in enumerate(self.filepath):
@@ -103,9 +106,9 @@ class ProcessMining:
                 # single trace, so I will have i traces.
 
                 try:  # insert this column to create a unique trace for each csv
-                    df.insert(0, 'case:concept:name', i)
+                    df.insert(0, 'case:concept:name', createCaseID(df['time:timestamp'][0]))
                 except ValueError:  # column already present, replace case id values so they are sequential
-                    df['case:concept:name'] = i
+                    pass
 
                 try:  # insert this column to create a unique trace for each csv
                     df.insert(1, 'case:creator', 'CSV2XES by marco2012')
@@ -569,8 +572,17 @@ class ProcessMining:
         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
         self._create_image(bpmn_figure, "BPMN")
 
-    def createGraphs(self, df: pandas.DataFrame = None):
-        # self.save_petri_net('petri_net')
-        self.save_bpmn(df)
-        # self.status_queue.put(f"[PROCESS MINING] Generated BPMN")
-        # self.status_queue.put(f"[PROCESS MINING] Generated BPMN in {self.discovery_path}")
+    # Petri net on entire process
+    def highLevelPetriNet(self):
+        df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+        dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
+        gviz_parameters = self._createImageParameters(log=log, high_level=True)
+        net, im, fm = dfg_conv_factory.apply(dfg, parameters=gviz_parameters)
+        pnml_factory.apply(net, im, os.path.join(self.discovery_path, f'{self.filename}_petri_final.pnml'),
+                           final_marking=fm)
+        # gviz = pn_vis_factory.apply(net, im, fm, parameters=gviz_parameters)
+        # self._create_image(gviz, "petri_net")
+
+    # def createGraphs(self, df: pandas.DataFrame = None):
+    #     self.save_bpmn(df)
+    #     self.highLevelPetriNet()

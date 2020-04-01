@@ -712,9 +712,10 @@ class MainApplication(QMainWindow, QDialog):
             if utils.config.MyConfig.get_instance().perform_process_discovery:
                 # create high level DFG model based on all logs
                 pm.highLevelDFG()
+                pm.highLevelPetriNet()
 
                 # calculate high level bpmn and petri net based on dfg
-                pm.createGraphs()
+                pm.save_bpmn()
 
                 # open BPMN
                 utils.utils.open_file(
@@ -733,8 +734,8 @@ class MainApplication(QMainWindow, QDialog):
                     rpa = utils.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
                     rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
-                    pm.createGraphs(mostFrequentCase)
-                    self.status_queue.put(f"[PROCESS MINING] Generated BPMN")
+                    pm.save_bpmn(mostFrequentCase)
+                    self.status_queue.put(f"[PROCESS MINING] Generated graphs")
 
         except ImportError:
             print(
