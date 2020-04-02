@@ -332,7 +332,10 @@ except Exception:
                 ######
                 elif e == "newDocument":
                     script.write(f"print('Opening Word...')\n")
-                    script.write("word = Word(visible=True, path=None)\n")
+                    if WINDOWS:
+                        script.write("word = Word(visible=True, path=None)\n")
+                    elif MAC and os.path.exists('/Applications/Microsoft Word.app'):
+                        script.write(f"applescript.tell.app('/Applications/Microsoft Word.app', 'open')\n")
 
                 #####
                 # PowerPoint
@@ -340,21 +343,34 @@ except Exception:
 
                 elif e == "newPresentation":
                     script.write(f"print('Opening Powerpoint...')\n")
-                    script.write("powerpoint = Powerpoint(visible=True, path=None)\n")
+                    if WINDOWS:
+                        script.write("powerpoint = Powerpoint(visible=True, path=None)\n")
+                    elif MAC and os.path.exists('/Applications/Microsoft PowerPoint.app'):
+                        script.write(f"applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'make new presentation')\n")
                 elif e == "newPresentationSlide":
                     script.write(f"print('Adding slide to presentation')\n")
-                    script.write(f"powerpoint.add_slide()\n")
+                    if WINDOWS:
+                        script.write(f"powerpoint.add_slide()\n")
+                    elif MAC:
+                        script.write("applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'set newSlide to make new slide at the end of active presentation')\n")
                 elif e == "savePresentation":  # case 2), after case
                     presentation_name = row['title']
                     script.write(f"print('saving presentation {presentation_name}')\n")
-                    path = os.path.join(DESKTOP, 'presentation.pptx')
-                    script.write(f"powerpoint.save_as(r'{path}')\n")
+                    if WINDOWS:
+                        path = os.path.join(DESKTOP, 'presentation.pptx')
+                        script.write(f"powerpoint.save_as(r'{path}')\n")
+                    elif MAC:
+                        script.write(
+                            f"applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'save active presentation')\n")
                 # elif e == "printPresentation" and not self._SaveAsUI:  # if file has already been saved and it's on disk
                 #     script.write(f"print('Printing {presentation_name}')\n")
                 #     script.write(f"send_to_printer(r'{path}')\n")
                 elif e == "closePresentation":
                     script.write(f"print('Closing Powerpoint...')\n")
-                    script.write("powerpoint.quit()\n")
+                    if WINDOWS:
+                        script.write("powerpoint.quit()\n")
+                    elif MAC:
+                        script.write(f"applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'close active presentation')\n")
 
                 ######
                 # Browser
@@ -512,11 +528,14 @@ except Exception:
                     script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
                 elif e == "openFolder" and path:
                     script.write(f"print('Opening folder {item_name}')\n")
-                    script.write(f"if file_exists(r'{path}'): show_folder(r'{path}')\n")
+                    if WINDOWS:
+                        script.write(f"if folder_exists(r'{path}'): show_folder(r'{path}')\n")
+                    elif MAC:
+                        script.write(f"if folder_exists(r'{path}'): open_file(r'{path}')\n")
                 elif e == "programOpen" and os.path.exists(path):
                     script.write(f"print('Opening {app}')\n")
                     if MAC:
-                        script.write(f"applescript.tell.app('{os.path.basename(path)}', open)\n")
+                        script.write(f"applescript.tell.app('{os.path.basename(path)}', 'open')\n")
                     elif ntpath.basename(path) not in modules.systemEvents.programs_to_ignore:
                         script.write(f"""
 try:
@@ -527,7 +546,7 @@ except Exception:
                 elif e == "programClose" and os.path.exists(path):
                     script.write(f"print('Closing {app}')\n")
                     if MAC:
-                        script.write(f"applescript.tell.app('{os.path.basename(path)}', quit)\n")
+                        script.write(f"applescript.tell.app('{os.path.basename(path)}', 'quit')\n")
                     else:
                         script.write(f"kill_process(r'{path}')\n")
                 elif e == "created" and path:
@@ -549,6 +568,7 @@ except Exception:
                         script.write(f"print('Removing directory {item_name}')\n")
                         script.write(f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
                 elif (e == "moved" or e == "Unmount") and path:
+
                     # check if file has been renamed, so source and dest path are the same
                     if os.path.dirname(path) == os.path.dirname(dest_path):
 
@@ -564,6 +584,7 @@ except Exception:
                             script.write(f"print('Renaming directory {item_name}')\n")
                             script.write(
                                 f"if folder_exists(r'{path}'): rename_folder(r'{path}', new_name='{new_name}')\n")
+
                     # else file has been moved to a different folder
                     else:
                         if os.path.splitext(path)[1]:
@@ -573,7 +594,8 @@ except Exception:
                         else:
                             script.write(f"print('Moving directory {item_name}')\n")
                             script.write(f"if folder_exists(r'{path}'): move_folder(r'{path}', r'{dest_path}')\n")
-                elif e == "pressHotkey":
+
+                elif e == "pressHotkey" and WINDOWS:
                     hotkey = row["title"]
                     hotkey_param = hotkey.split('+')
                     meaning = row["description"]
