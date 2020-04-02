@@ -1,7 +1,7 @@
 <p align="center">
 <img width="100%" src="docs/readme-header.png"><br/><br/>
     <a href="https://www.python.org/downloads/release/python-381/" alt="Activity">
-        <img src="https://img.shields.io/badge/Python-3.8.1%20(x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/Python-3.8.1(x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
     <a href="#computerlogger" alt="Activity">
         <img src="https://img.shields.io/badge/Javascript-6-blue?style=flat&labelColor=F7DF1E&color=F7DF1E&logo=javascript&logoColor=white" /></a>
     <a href="#computerlogger" alt="Activity">
@@ -25,7 +25,9 @@
 
 ## Installation and execution:
 
-You must use _64bit_ version of Python 3. (Tested on _Python 3.8.1 64bit_)
+You must use _64bit_ version of Python 3.8.1. 
+
+If you're on MacOS, download Python3 from the [official site](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg), do not use _brew_ or other packet managers.
 
 #### 1. **Install dependencies**
 

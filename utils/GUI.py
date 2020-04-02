@@ -748,7 +748,7 @@ class MainApplication(QMainWindow, QDialog):
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
-
+        print(f"[DEBUG] CSV path: {log_filepath}")
         if utils.utils.CSVEmpty(log_filepath):
             self.status_queue.put(f"[GUI] Log file {os.path.basename(log_filepath)} is empty, removing")
             os.remove(log_filepath)
@@ -829,14 +829,18 @@ class MainApplication(QMainWindow, QDialog):
             # stop main process, automatically closing all daemon threads in main process
             self.mainProcess.terminate()
 
-            log_filepath = utils.config.MyConfig.get_instance().log_filepath
-
             self.status_queue.put(f"[GUI] Logger stopped")
 
             # once log file is created, RPA actions are automatically generated for each category
             # self.handleRPA(log_filepath)
             # generate xes file from combined csv
-            self.handleRunCount(log_filepath)
+            log_filepath = utils.config.MyConfig.get_instance().log_filepath
+            if log_filepath:
+                self.handleRunCount(log_filepath)
+            else:
+                # during first time execution, log_filepath in config could be None
+                log_filepath = utils.utils.create_log_filepath()
+                self.handleRunCount(log_filepath)
 
             # kill node server when closing python server, otherwise port remains occupied
             if MAC and self.officeExcel:

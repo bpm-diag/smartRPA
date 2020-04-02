@@ -71,19 +71,28 @@ def createDirectory(path):
                 raise
 
 
-# used by main, creates new log file with the current timestamp in /logs directory at the root of the project.
-def createLogFile():
+def create_log_filepath():
     # filename to use in current session until the 'stop' button is pressed. must be set here because the filename
     # uses the current timestamp and it must remain the same during the whole session
     current_directory = utils.config.MyConfig.get_instance().main_directory
+    if current_directory is None:
+        current_directory = os.getcwd()
     logs = os.path.join(current_directory, 'logs')
     createDirectory(logs)
     filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
-    utils.config.MyConfig.get_instance().log_filepath = os.path.join(logs, filename)
+    log_filepath = os.path.join(logs, filename)
+    return log_filepath
+
+
+# used by main, creates new log file with the current timestamp in /logs directory at the root of the project.
+def createLogFile():
+    log_filepath = create_log_filepath()
+    utils.config.MyConfig.get_instance().log_filepath = log_filepath
     # create HEADER
     with open(utils.config.MyConfig.get_instance().log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
         f.writerow(utils.consumerServer.HEADER)
+    return log_filepath
 
 
 # return filename of a given path without extension, like 2020-02-25_23-21-57
@@ -113,9 +122,10 @@ def getRPADirectory(csv_file_path):
     csv_filename = getFilename(csv_file_path)
     try:
         RPA_directory = os.path.join(MAIN_DIRECTORY, 'RPA', csv_filename)
-    except Exception:
-        print(f"Could not create RPA directory, saving RPA script on Desktop")
-        RPA_directory = os.path.join(DESKTOP, 'RPA', csv_filename)
+    except Exception as e:
+        print(e)
+        print(f"[UTILS] Could not create RPA directory, saving RPA script on {os.getcwd()}")
+        RPA_directory = os.path.join(os.getcwd(), 'RPA', csv_filename)
     return RPA_directory.strip('_combined')
 
 
@@ -194,6 +204,7 @@ def open_file(path):
     else:
         opener = "open" if MAC else "xdg-open"
         subprocess.call([opener, path])
+
 
 # ************
 # Class

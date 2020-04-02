@@ -12,7 +12,7 @@ class MyConfig(PreferredConfig):
     JSON_PATH = os.path.expanduser('~/.config/ComputerLogger/config')
 
     # directory of main file. Used when creating logs or rpa files to know where to save them
-    main_directory = StringOption('main_directory')
+    main_directory = StringOption('main_directory', default=os.getcwd())
 
     # path of the current log file being written. It must be saved here because I need this reference when main
     # terminates to generate RPA log and to write messages to GUI
