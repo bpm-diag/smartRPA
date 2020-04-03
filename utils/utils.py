@@ -36,9 +36,25 @@ if WINDOWS:
     import winreg
     from win32com.shell import shell, shellcon
     import win32gui
+    import pythoncom
 
     RECENT_ITEMS_PATH_WIN = shell.SHGetFolderPath(0, shellcon.CSIDL_RECENT, None, 0)
     # RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
+
+
+# return shortcut lnk full path
+def shortcut_target(filename):
+    pythoncom.CoInitialize()
+    link = pythoncom.CoCreateInstance(
+        shell.CLSID_ShellLink,
+        None,
+        pythoncom.CLSCTX_INPROC_SERVER,
+        shell.IID_IShellLink
+    )
+    link.QueryInterface(pythoncom.IID_IPersistFile).Load(filename)
+    name, _ = link.GetPath(shell.SLGP_UNCPRIORITY)
+    return name
+
 
 USER = getuser()
 HOME_FOLDER = os.path.expanduser("~")

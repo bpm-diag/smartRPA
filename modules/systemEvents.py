@@ -28,7 +28,6 @@ if WINDOWS:
     import win32file
     import win32event
     import win32con
-    import pylnk3  # https://sourceforge.net/p/pylnk/home/documentation/
     import wmi
 
 if MAC:
@@ -326,9 +325,8 @@ def watchRecentsFilesWin():
     while 1:
         try:
             file_type, filename, action = files_changed.get_nowait()
-
             if action == "Created":
-                lnk_target = pylnk3.parse(filename).path
+                lnk_target = utils.utils.shortcut_target(filename)
                 file_extension = os.path.splitext(lnk_target)[1]
                 if file_extension:
                     eventType = "openFile"

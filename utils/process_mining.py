@@ -403,11 +403,14 @@ class ProcessMining:
         self._create_image(gviz, name)
 
     def highLevelDFG(self):
-        df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
-        dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
-        gviz_parameters = self._createImageParameters(log=log, high_level=True)
-        gviz = dfg_vis_factory.apply(dfg, log=log, variant="frequency", parameters=gviz_parameters)
-        self._create_image(gviz, "DFG_model")
+        try:
+            df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+            dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
+            gviz_parameters = self._createImageParameters(log=log, high_level=True)
+            gviz = dfg_vis_factory.apply(dfg, log=log, variant="frequency", parameters=gviz_parameters)
+            self._create_image(gviz, "DFG_model")
+        except Exception:
+            return False
 
     @staticmethod
     def _getHighLevelEvent(row):
