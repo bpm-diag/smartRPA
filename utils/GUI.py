@@ -736,6 +736,7 @@ class MainApplication(QMainWindow, QDialog):
 
                     pm.save_bpmn(mostFrequentCase)
                     self.status_queue.put(f"[PROCESS MINING] Generated graphs")
+                    self.status_queue.put(f"[GUI] Done")
 
         except ImportError:
             print(

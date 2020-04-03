@@ -40,7 +40,8 @@ programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHo
                       "LocalBridge.exe", "SearchProtocolHost.exe", "SearchFilterHost.exe", "splwow64.exe",
                       "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
                       "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
-                      "software_reporter_tool.exe", "chrome.exe"]
+                      "software_reporter_tool.exe", "chrome.exe", "OUTLOOK.EXE", "WMIADAP.exe", "audiodg.exe",
+                      "'OfficeC2RClient.exe"]
 
 
 #  monitor file/folder changes on windows
@@ -400,47 +401,52 @@ def detectSelectionWindowsExplorer():
 
 
 # logs hotkeys
-def logHotkeys():
-    print("[systemEvents] Hotkey logging started...")
-
-    # https://www.hongkiat.com/blog/100-keyboard-shortcuts-windows/
-    keys_to_detect = {
-        'alt+d': 'Select address bar',
-        'alt+F4': 'Close window',
-        'alt+esc': 'Cycle through windows',
-        'alt+tab': 'Cycle through open apps',
-        'alt+enter': 'Display item properties',
-        'alt+space+n': 'Minimise window',
-        'alt+space+x': 'Maximise window',
-        'ctrl+a': 'Select all',
-        # 'ctrl+c': 'Copy', # handled by clipboardEvents
-        'ctrl+d': 'Delete selected item',
-        'ctrl+e': 'Select search box',
-        'ctrl+f': 'Find',
-        'ctrl+h': 'Find and replace',
-        'ctrl+n': 'New',
-        'ctrl+r': 'Refresh',
-        'ctrl+s': 'Save',
-        'ctrl+p': 'Print',
-        'ctrl+v': 'Paste',
-        'ctrl+w': 'Close window',
-        'ctrl+x': 'Cut',
-        'ctrl+y': 'Undo',
-        'ctrl+z': 'Redo',
-        'ctrl+shift+t': 'Reopen closed tab',
-        'win+tab': 'Cycle through apps',
-        'win+d': 'Show/Hide desktop',
-        'win+e': 'Open explorer',
-        'win+f': 'Search for files',
-        'win+i': 'Open settings',
-        'win+m': 'Minimize all windows',
-        'win+p': 'Choose presentation display mode',
-        'win+r': 'Run',
-        'F1': 'Help',
-        'F2': 'Rename',
-        'F3': 'Search',
-        'F5': 'Refresh',
-    }
+def logHotkeys(only_paste_event=False):
+    if only_paste_event:
+        print("[systemEvents] Paste hotkey logging started...")
+        keys_to_detect = {
+            'ctrl+v': 'Paste',
+        }
+    else:
+        print("[systemEvents] Hotkey logging started...")
+        # https://www.hongkiat.com/blog/100-keyboard-shortcuts-windows/
+        keys_to_detect = {
+            'alt+d': 'Select address bar',
+            'alt+F4': 'Close window',
+            'alt+esc': 'Cycle through windows',
+            'alt+tab': 'Cycle through open apps',
+            'alt+enter': 'Display item properties',
+            'alt+space+n': 'Minimise window',
+            'alt+space+x': 'Maximise window',
+            'ctrl+a': 'Select all',
+            # 'ctrl+c': 'Copy', # handled by clipboardEvents
+            'ctrl+d': 'Delete selected item',
+            'ctrl+e': 'Select search box',
+            'ctrl+f': 'Find',
+            'ctrl+h': 'Find and replace',
+            'ctrl+n': 'New',
+            'ctrl+r': 'Refresh',
+            'ctrl+s': 'Save',
+            'ctrl+p': 'Print',
+            'ctrl+v': 'Paste',
+            'ctrl+w': 'Close window',
+            'ctrl+x': 'Cut',
+            'ctrl+y': 'Undo',
+            'ctrl+z': 'Redo',
+            'ctrl+shift+t': 'Reopen closed tab',
+            'win+tab': 'Cycle through apps',
+            'win+d': 'Show/Hide desktop',
+            'win+e': 'Open explorer',
+            'win+f': 'Search for files',
+            'win+i': 'Open settings',
+            'win+m': 'Minimize all windows',
+            'win+p': 'Choose presentation display mode',
+            'win+r': 'Run',
+            'F1': 'Help',
+            'F2': 'Rename',
+            'F3': 'Search',
+            'F5': 'Refresh',
+        }
 
     def handleHotkey(hotkey):
         meaning = keys_to_detect.get(hotkey)

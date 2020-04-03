@@ -111,17 +111,19 @@ class ChoicesDialog(QDialog):
         # 'i' is the current iteration (like 0,1,2) while row_index is the index of the row that I need to modify
         # (like 0,3,6)
         for i, (row_index, row) in enumerate(self.filtered_df.iterrows()):
-            print(i, row_index)
-            e = row["concept:name"]
-            if e == "changeField":
-                self.df.loc[row_index, 'tag_value'] = new_values[i]
-            elif e in ["editCell", "editCellSheet", "editRange"]:
-                self.df.loc[row_index, 'cell_content'] = new_values[i]
-            elif e in ["moved", "Unmount"]:
-                path = 'event_dest_path' if e == "moved" else 'event_src_path'
-                self.df.loc[row_index, path] = new_values[i]
-            elif e in ["copy", "cut", "paste"]:
-                self.df.loc[row_index, 'clipboard_content'] = new_values[i]
+            try:
+                e = row["concept:name"]
+                if e == "changeField":
+                    self.df.loc[row_index, 'tag_value'] = new_values[i]
+                elif e in ["editCell", "editCellSheet", "editRange"]:
+                    self.df.loc[row_index, 'cell_content'] = new_values[i]
+                elif e in ["moved", "Unmount"]:
+                    path = 'event_dest_path' if e == "moved" else 'event_src_path'
+                    self.df.loc[row_index, path] = new_values[i]
+                elif e in ["copy", "cut", "paste"]:
+                    self.df.loc[row_index, 'clipboard_content'] = new_values[i]
+            except Exception as exception:
+                print(exception)
 
     def getDF(self):
         # self.df.to_csv('/Users/marco/Desktop/temp.csv', encoding='utf-8-sig', index=False)

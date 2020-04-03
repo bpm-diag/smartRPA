@@ -67,6 +67,7 @@ class RPAScript:
 # This file was auto generated based on {self.csv_file_path}
 import sys, os
 from time import sleep
+import pyperclip
 try:
     from automagica import *
 except ImportError as e:
@@ -77,7 +78,6 @@ except ImportError as e:
         if MAC:
             h += "import applescript\n" \
                  "import xlwings as xw\n" \
-                 "import pyperclip\n" \
                  "\n"
         return h
 
@@ -137,9 +137,11 @@ except WebDriverException as e:
                 try:
                     e = row['event_type']
                     timestamp = row['timestamp']
+                    user = row['user']
                 except KeyError:
                     e = row['concept:name']
                     timestamp = row['time:timestamp']
+                    user = row['org:resource']
 
                 wb = row['workbook']
                 sh = row['current_worksheet']
@@ -151,13 +153,15 @@ except WebDriverException as e:
                 path = ""
                 if not pandas.isna(row['event_src_path']):
                     path = row['event_src_path']
+                    item_name = path.replace('\\', r'\\')
+                    # replace username with current user
+                    path = path.replace(user, utils.utils.USER, 1)
                 dest_path = ""
                 if not pandas.isna(row['event_dest_path']):
                     dest_path = row['event_dest_path']
+                    dest_path = dest_path.replace(user, utils.utils.USER, 1)
 
                 app = row['application']
-                # assign path if not null
-                item_name = path.replace('\\', r'\\')
                 mouse_coord = row['mouse_coord']
                 cb = row['clipboard_content']
                 size = row["window_size"]
@@ -524,6 +528,18 @@ except Exception:
                     cb = utils.utils.removeWhitespaces(cb)
                     script.write(f"print('Pasting clipboard text')\n")
                     script.write(f'type_text("""{cb}""")\n')
+                elif e == "pressHotkey" and WINDOWS:
+                    hotkey = row["title"]
+                    hotkey_param = hotkey.split('+')
+                    meaning = row["description"]
+                    script.write(f"print('Pressing hotkey {hotkey} : {meaning}')\n")
+                    if len(hotkey_param) == 2:
+                        script.write(f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}')\n")
+                    elif len(hotkey_param) == 3:
+                        script.write(
+                            f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
+
+                # path and dest_path must be changed according to current user
 
                 elif e == "openFile" and path:
                     script.write(f"print('Opening file {item_name}')\n")
@@ -535,11 +551,21 @@ except Exception:
                     elif MAC:
                         script.write(f"if folder_exists(r'{path}'): open_file(r'{path}')\n")
                 elif e == "programOpen" and os.path.exists(path):
-                    script.write(f"print('Opening {app}')\n")
-                    if MAC:
-                        script.write(f"applescript.tell.app('{os.path.basename(path)}', 'open')\n")
-                    elif ntpath.basename(path) not in modules.systemEvents.programs_to_ignore:
-                        script.write(f"""
+
+                    # do not open excel manually if there are events related to excel in dataframe,
+                    # because it is opened automatically above
+                    try:
+                        event_list = df['event_type'].tolist()
+                    except KeyError:
+                        event_list = df['concept:name'].tolist()
+                    if (app == "EXCEL.EXE" or app == "Microsoft Excel") and any(i in event_list for i in ["newWorkbook", "selectWorksheet", "WorksheetActivated"]):
+                        pass
+                    else:
+                        script.write(f"print('Opening {app}')\n")
+                        if MAC:
+                            script.write(f"applescript.tell.app('{os.path.basename(path)}', 'open')\n")
+                        elif WINDOWS and ntpath.basename(path) not in modules.systemEvents.programs_to_ignore:
+                            script.write(f"""
 try:
     run(r'{path}')
 except Exception:
@@ -596,17 +622,6 @@ except Exception:
                         else:
                             script.write(f"print('Moving directory {item_name}')\n")
                             script.write(f"if folder_exists(r'{path}'): move_folder(r'{path}', r'{dest_path}')\n")
-
-                elif e == "pressHotkey" and WINDOWS:
-                    hotkey = row["title"]
-                    hotkey_param = hotkey.split('+')
-                    meaning = row["description"]
-                    script.write(f"print('Pressing hotkey {hotkey} : {meaning}')\n")
-                    if len(hotkey_param) == 2:
-                        script.write(f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}')\n")
-                    elif len(hotkey_param) == 3:
-                        script.write(
-                            f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
 
         # self.status_queue.put(f"[RPA] Generated RPA script {ntpath.basename(RPA_filepath)}")
         self.status_queue.put(f"[RPA] Generated RPA script")

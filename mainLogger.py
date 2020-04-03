@@ -67,33 +67,40 @@ def startLogger(systemLoggerFilesFolder,
                 t2.daemon = True
                 t2.start()
 
-                t9 = Thread(target=systemEvents.detectSelectionWindowsExplorer)
-                t9.daemon = True
-                t9.start()
+                t3 = Thread(target=systemEvents.detectSelectionWindowsExplorer)
+                t3.daemon = True
+                t3.start()
 
-                t14 = Thread(target=systemEvents.printerLogger)
-                t14.daemon = True
-                t14.start()
+                t4 = Thread(target=systemEvents.printerLogger)
+                t4.daemon = True
+                t4.start()
 
             elif MAC:
-                t15 = Thread(target=systemEvents.watchFolderMac)
-                t15.daemon = True
-                t15.start()
+                t5 = Thread(target=systemEvents.watchFolderMac)
+                t5.daemon = True
+                t5.start()
 
         if systemLoggerPrograms:
             if WINDOWS:
-                t3 = Thread(target=systemEvents.logProcessesWin)
-                t3.daemon = True
-                t3.start()
+                t6 = Thread(target=systemEvents.logProcessesWin)
+                t6.daemon = True
+                t6.start()
             elif MAC:
-                t12 = Thread(target=systemEvents.logProcessesMac)
-                t12.daemon = True
-                t12.start()
+                t7 = Thread(target=systemEvents.logProcessesMac)
+                t7.daemon = True
+                t7.start()
 
         if systemLoggerClipboard:
-            t4 = Thread(target=clipboardEvents.logClipboard)
-            t4.daemon = True
-            t4.start()
+            # log copy event
+            t8 = Thread(target=clipboardEvents.logClipboard)
+            t8.daemon = True
+            t8.start()
+            # only way to log paste event is to detect ctrl + v, but it should not be started if hotkeys logging
+            # is already enabled
+            if not systemLoggerHotkeys and WINDOWS:
+                t9 = Thread(target=systemEvents.logHotkeys, args=[True])
+                t9.daemon = True
+                t9.start()
 
         if systemLoggerHotkeys and WINDOWS:
             t10 = Thread(target=systemEvents.logHotkeys)
@@ -112,34 +119,35 @@ def startLogger(systemLoggerFilesFolder,
         # office logger
         # ************
 
-        if officeExcel and WINDOWS:
-            t5 = Thread(target=officeEvents.excelEvents)
-            t5.daemon = True
-            t5.start()
+        if officeExcel:
+            if WINDOWS:
+                t12 = Thread(target=officeEvents.excelEvents)
+                t12.daemon = True
+                t12.start()
 
-            # t14 = Thread(target=mouseEvents.logMouse)
-            # t14.daemon = True
-            # t14.start()
+                # t14 = Thread(target=mouseEvents.logMouse)
+                # t14.daemon = True
+                # t14.start()
 
-        if officeExcel and MAC:
-            t13 = Thread(target=officeEvents.excelEventsMacServer)
-            t13.daemon = True
-            t13.start()
+            if MAC:
+                t13 = Thread(target=officeEvents.excelEventsMacServer)
+                t13.daemon = True
+                t13.start()
 
         if officeWord and WINDOWS:
-            t6 = Thread(target=officeEvents.wordEvents)
-            t6.daemon = True
-            t6.start()
+            t14 = Thread(target=officeEvents.wordEvents)
+            t14.daemon = True
+            t14.start()
 
         if officePowerpoint and WINDOWS:
-            t7 = Thread(target=officeEvents.powerpointEvents)
-            t7.daemon = True
-            t7.start()
+            t15 = Thread(target=officeEvents.powerpointEvents)
+            t15.daemon = True
+            t15.start()
 
         if officeOutlook and WINDOWS:
-            t8 = Thread(target=officeEvents.outlookEvents)
-            t8.daemon = True
-            t8.start()
+            t16 = Thread(target=officeEvents.outlookEvents)
+            t16.daemon = True
+            t16.start()
 
         # ************
         # browser logger
