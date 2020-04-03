@@ -15,6 +15,13 @@ import utils.utils
 PORT = 4444
 SERVER_ADDR = f'http://localhost:{PORT}'
 
+# The following variables are set by main during execution
+log_filepath = str()
+log_chrome = False
+log_firefox = False
+log_edge = False
+log_opera = False
+
 app = Flask(__name__)
 
 # disable server log
@@ -48,12 +55,11 @@ def writeLog():
     print(f"\nPOST received with content: {content}\n")
 
     # check if user enabled browser logging
-    config = utils.config.MyConfig.get_instance()
     application = content.get("application")
-    if (application == "Chrome" and not config.log_chrome) or \
-            (application == "Firefox" and not config.log_firefox) or \
-            (application == "Edge" and not config.log_edge) or \
-            (application == "Opera" and not config.log_opera):
+    if (application == "Chrome" and not log_chrome) or \
+            (application == "Firefox" and not log_firefox) or \
+            (application == "Edge" and not log_edge) or \
+            (application == "Opera" and not log_opera):
         print(f"{application} logging disabled by user.")
         return content
 
@@ -71,7 +77,7 @@ def writeLog():
 
         row.append(content.get(col))
 
-    with open(utils.config.MyConfig.get_instance().log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
+    with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
         f.writerow(row)
 
@@ -84,11 +90,10 @@ def writeLog():
 # get server status, for browser extension
 @app.route('/serverstatus', methods=['GET'])
 def getServerStatus():
-    config = utils.config.MyConfig.get_instance()
-    return jsonify(log_chrome=config.log_chrome,
-                   log_firefox=config.log_firefox,
-                   log_edge=config.log_edge,
-                   log_opera=config.log_opera)
+    return jsonify(log_chrome=log_chrome,
+                   log_firefox=log_firefox,
+                   log_edge=log_edge,
+                   log_opera=log_opera)
 
 
 # Enable CORS, for browser extension

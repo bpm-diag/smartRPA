@@ -17,12 +17,20 @@ class ChoicesDialog(QDialog):
         # self.setFixedWidth(730)
 
         self.df = df
+
+        # remove empty clipboard items
+        for row_index, row in self.df.iterrows():
+            if (row['concept:name'] == 'copy' or row['concept:name'] == 'paste') and \
+                    utils.removeWhitespaces(row['clipboard_content']) == '':
+                self.df.drop(row_index, inplace=True)
+
         self.filtered_df = self.df[self.df['concept:name'].isin(
             ['changeField',
              'editCell', 'editCellSheet', 'editRange',
              'moved', 'Unmount',
              'copy', 'cut', 'paste']
         )]
+
         if not self.filtered_df.empty:
 
             buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
@@ -79,9 +87,8 @@ class ChoicesDialog(QDialog):
                 value = path
             elif e in ["copy", "cut", "paste"]:
                 cb = utils.removeWhitespaces(row['clipboard_content'])
-                if len(cb) > 0:
-                    label = f"[{app}] Copy and Paste:"
-                    value = cb
+                label = f"[{app}] Copy and Paste:"
+                value = cb
 
             if label != "" and value != "":
                 lineEdit = QLineEdit(value)
@@ -104,6 +111,7 @@ class ChoicesDialog(QDialog):
         # 'i' is the current iteration (like 0,1,2) while row_index is the index of the row that I need to modify
         # (like 0,3,6)
         for i, (row_index, row) in enumerate(self.filtered_df.iterrows()):
+            print(i, row_index)
             e = row["concept:name"]
             if e == "changeField":
                 self.df.loc[row_index, 'tag_value'] = new_values[i]

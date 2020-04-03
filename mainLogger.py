@@ -33,22 +33,24 @@ def startLogger(systemLoggerFilesFolder,
                 browserFirefox,
                 browserEdge,
                 browserOpera,
-                status_queue
+                status_queue,
+                LOG_FILEPATH
                 ):
     try:
         # create the threads as daemons so they are closed when main ends
 
-        # set main directory in config
-        config = utils.config.MyConfig.get_instance()
-        config.main_directory = os.getcwd()
-
         # ************
         # main logging server
         # ************
-        utils.utils.createLogFile()
+        log_filepath = utils.utils.createLogFile()
+        # return log file to GUI so it can be processed
+        LOG_FILEPATH.put(log_filepath)
+
         t0 = Thread(target=utils.consumerServer.runServer)
         t0.daemon = True
         t0.start()
+
+        utils.consumerServer.log_filepath = log_filepath
 
         # ************
         # system logger
@@ -144,16 +146,16 @@ def startLogger(systemLoggerFilesFolder,
         # ************
 
         if browserChrome:
-            config.log_chrome = True
+            utils.consumerServer.log_chrome = True
 
         if browserFirefox:
-            config.log_firefox = True
+            utils.consumerServer.log_firefox = True
 
         if browserEdge:
-            config.log_edge = True
+            utils.consumerServer.log_edge = True
 
         if browserOpera:
-            config.log_opera = True
+            utils.consumerServer.log_opera = True
 
         status_queue.put(f"[mainLogger] Logging started")
 

@@ -146,10 +146,15 @@ except WebDriverException as e:
                 cell_value = row['cell_content']
                 cell_range = row['cell_range']
                 range_number = row['cell_range_number']
+
                 # assign path if not null
                 path = ""
                 if not pandas.isna(row['event_src_path']):
                     path = row['event_src_path']
+                dest_path = ""
+                if not pandas.isna(row['event_dest_path']):
+                    dest_path = row['event_dest_path']
+
                 app = row['application']
                 # assign path if not null
                 item_name = path.replace('\\', r'\\')
@@ -166,9 +171,6 @@ except WebDriverException as e:
                 if not pandas.isna(row['xpath']):
                     xpath = row['xpath']
                 value = row['tag_value']
-                dest_path = ""
-                if not pandas.isna(row['event_dest_path']):
-                    dest_path = row['event_dest_path']
 
                 if e not in self.eventsToIgnore:
                     script.write(f"# {timestamp} {e}\n")

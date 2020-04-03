@@ -522,6 +522,11 @@ class ProcessMining:
         df = df[~df.browser_url.str.contains('chrome-extension://')]
         df = df[~df.eventQual.str.contains('clientRedirect')]
         df = df[~df.eventQual.str.contains('serverRedirect')]
+
+        # remove rows that contain empty clipboard text
+        [df.drop(row_index, inplace=True) for row_index, row in df.iterrows() if
+         row['concept:name'] == 'copy' and utils.utils.removeWhitespaces(row['clipboard_content']) == '']
+
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
                           "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit",
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
@@ -578,7 +583,7 @@ class ProcessMining:
         dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
         gviz_parameters = self._createImageParameters(log=log, high_level=True)
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=gviz_parameters)
-        pnml_factory.apply(net, im, os.path.join(self.discovery_path, f'{self.filename}_petri_final.pnml'),
+        pnml_factory.apply(net, im, os.path.join(self.discovery_path, f'{self.filename}_petri_net.pnml'),
                            final_marking=fm)
         # gviz = pn_vis_factory.apply(net, im, fm, parameters=gviz_parameters)
         # self._create_image(gviz, "petri_net")

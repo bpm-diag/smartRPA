@@ -142,6 +142,7 @@ class MainApplication(QMainWindow, QDialog):
         self.setStyle()
 
         self.status_queue = Queue()
+        self.LOG_FILEPATH = Queue()
 
         self.createMenu()
 
@@ -714,7 +715,6 @@ class MainApplication(QMainWindow, QDialog):
                 pm.highLevelDFG()
                 pm.highLevelPetriNet()
 
-                # calculate high level bpmn and petri net based on dfg
                 pm.save_bpmn()
 
                 # open BPMN
@@ -802,7 +802,8 @@ class MainApplication(QMainWindow, QDialog):
                 self.browserFirefox,
                 self.browserEdge,
                 self.browserOpera,
-                self.status_queue
+                self.status_queue,
+                self.LOG_FILEPATH
             ))
 
             self.mainProcess.start()
@@ -832,15 +833,13 @@ class MainApplication(QMainWindow, QDialog):
             self.status_queue.put(f"[GUI] Logger stopped")
 
             # once log file is created, RPA actions are automatically generated for each category
-            # self.handleRPA(log_filepath)
-            # generate xes file from combined csv
-            log_filepath = utils.config.MyConfig.get_instance().log_filepath
-            if log_filepath:
-                self.handleRunCount(log_filepath)
+            # log_filepath = utils.config.MyConfig.get_instance().log_filepath
+            main_log_filepath = self.LOG_FILEPATH.get()
+            if main_log_filepath and os.path.exists(main_log_filepath):
+                self.handleRunCount(main_log_filepath)
             else:
-                # during first time execution, log_filepath in config could be None
-                log_filepath = utils.utils.create_log_filepath()
-                self.handleRunCount(log_filepath)
+                self.status_queue.put(f"[ERROR] Could not locate log file {main_log_filepath}, "
+                                      f"please restart the application and try again.")
 
             # kill node server when closing python server, otherwise port remains occupied
             if MAC and self.officeExcel:
