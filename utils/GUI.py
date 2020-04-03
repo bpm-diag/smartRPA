@@ -714,8 +714,8 @@ class MainApplication(QMainWindow, QDialog):
                 # create high level DFG model based on all logs
                 pm.highLevelDFG()
                 pm.highLevelPetriNet()
-
-                pm.save_bpmn()
+                pm.highLevelBPMN()
+                # pm.save_bpmn()
 
                 # open BPMN
                 utils.utils.open_file(
@@ -734,7 +734,7 @@ class MainApplication(QMainWindow, QDialog):
                     rpa = utils.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
                     rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
-                    pm.save_bpmn(mostFrequentCase)
+                    pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
                     self.status_queue.put(f"[PROCESS MINING] Generated graphs")
                     self.status_queue.put(f"[GUI] Done")
 
@@ -746,6 +746,8 @@ class MainApplication(QMainWindow, QDialog):
             self.runCount = 0
             self.csv_to_join.clear()
             return False
+        except Exception as e:
+            print(f"[GUI] Process mining analysis exited with error: {e}")
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):

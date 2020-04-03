@@ -97,8 +97,8 @@ def startLogger(systemLoggerFilesFolder,
             t8.start()
             # only way to log paste event is to detect ctrl + v, but it should not be started if hotkeys logging
             # is already enabled
-            if not systemLoggerHotkeys and WINDOWS:
-                t9 = Thread(target=systemEvents.logHotkeys, args=[True])
+            if WINDOWS:
+                t9 = Thread(target=systemEvents.logPasteHotkey)
                 t9.daemon = True
                 t9.start()
 

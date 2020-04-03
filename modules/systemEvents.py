@@ -29,6 +29,7 @@ if WINDOWS:
     import win32event
     import win32con
     import wmi
+    from win32com.shell import shell, shellcon
 
 if MAC:
     import applescript
@@ -40,7 +41,7 @@ programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHo
                       "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
                       "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
                       "software_reporter_tool.exe", "chrome.exe", "OUTLOOK.EXE", "WMIADAP.exe", "audiodg.exe",
-                      "'OfficeC2RClient.exe"]
+                      "'OfficeC2RClient.exe", "FileCoAuth.exe"]
 
 
 #  monitor file/folder changes on windows
@@ -317,6 +318,19 @@ def watchRecentsFilesWin():
             for result in _watch_path(self.path_to_watch):
                 self.results_queue.put(result)
 
+    # return full path of shortcut lnk
+    def _shortcut_target(filename):
+        pythoncom.CoInitialize()
+        link = pythoncom.CoCreateInstance(
+            shell.CLSID_ShellLink,
+            None,
+            pythoncom.CLSCTX_INPROC_SERVER,
+            shell.IID_IShellLink
+        )
+        link.QueryInterface(pythoncom.IID_IPersistFile).Load(filename)
+        name, _ = link.GetPath(shell.SLGP_UNCPRIORITY)
+        return name
+
     files_changed = Queue()
     Watcher(RECENT_ITEMS_PATH_WIN, files_changed)
 
@@ -326,7 +340,7 @@ def watchRecentsFilesWin():
         try:
             file_type, filename, action = files_changed.get_nowait()
             if action == "Created":
-                lnk_target = utils.utils.shortcut_target(filename)
+                lnk_target = _shortcut_target(filename)
                 file_extension = os.path.splitext(lnk_target)[1]
                 if file_extension:
                     eventType = "openFile"
@@ -399,52 +413,46 @@ def detectSelectionWindowsExplorer():
 
 
 # logs hotkeys
-def logHotkeys(only_paste_event=False):
-    if only_paste_event:
-        print("[systemEvents] Paste hotkey logging started...")
-        keys_to_detect = {
-            'ctrl+v': 'Paste',
-        }
-    else:
-        print("[systemEvents] Hotkey logging started...")
-        # https://www.hongkiat.com/blog/100-keyboard-shortcuts-windows/
-        keys_to_detect = {
-            'alt+d': 'Select address bar',
-            'alt+F4': 'Close window',
-            'alt+esc': 'Cycle through windows',
-            'alt+tab': 'Cycle through open apps',
-            'alt+enter': 'Display item properties',
-            'alt+space+n': 'Minimise window',
-            'alt+space+x': 'Maximise window',
-            'ctrl+a': 'Select all',
-            # 'ctrl+c': 'Copy', # handled by clipboardEvents
-            'ctrl+d': 'Delete selected item',
-            'ctrl+e': 'Select search box',
-            'ctrl+f': 'Find',
-            'ctrl+h': 'Find and replace',
-            'ctrl+n': 'New',
-            'ctrl+r': 'Refresh',
-            'ctrl+s': 'Save',
-            'ctrl+p': 'Print',
-            'ctrl+v': 'Paste',
-            'ctrl+w': 'Close window',
-            'ctrl+x': 'Cut',
-            'ctrl+y': 'Undo',
-            'ctrl+z': 'Redo',
-            'ctrl+shift+t': 'Reopen closed tab',
-            'win+tab': 'Cycle through apps',
-            'win+d': 'Show/Hide desktop',
-            'win+e': 'Open explorer',
-            'win+f': 'Search for files',
-            'win+i': 'Open settings',
-            'win+m': 'Minimize all windows',
-            'win+p': 'Choose presentation display mode',
-            'win+r': 'Run',
-            'F1': 'Help',
-            'F2': 'Rename',
-            'F3': 'Search',
-            'F5': 'Refresh',
-        }
+def logHotkeys():
+    print("[systemEvents] Hotkey logging started...")
+    # https://www.hongkiat.com/blog/100-keyboard-shortcuts-windows/
+    keys_to_detect = {
+        'alt+d': 'Select address bar',
+        'alt+F4': 'Close window',
+        'alt+esc': 'Cycle through windows',
+        'alt+tab': 'Cycle through open apps',
+        'alt+enter': 'Display item properties',
+        'alt+space+n': 'Minimise window',
+        'alt+space+x': 'Maximise window',
+        'ctrl+a': 'Select all',
+        # 'ctrl+c': 'Copy', # handled by clipboardEvents
+        'ctrl+d': 'Delete selected item',
+        'ctrl+e': 'Select search box',
+        'ctrl+f': 'Find',
+        'ctrl+h': 'Find and replace',
+        'ctrl+n': 'New',
+        'ctrl+r': 'Refresh',
+        'ctrl+s': 'Save',
+        'ctrl+p': 'Print',
+        # 'ctrl+v': 'Paste',
+        'ctrl+w': 'Close window',
+        'ctrl+x': 'Cut',
+        'ctrl+y': 'Undo',
+        'ctrl+z': 'Redo',
+        'ctrl+shift+t': 'Reopen closed tab',
+        'win+tab': 'Cycle through apps',
+        'win+d': 'Show/Hide desktop',
+        'win+e': 'Open explorer',
+        'win+f': 'Search for files',
+        'win+i': 'Open settings',
+        'win+m': 'Minimize all windows',
+        'win+p': 'Choose presentation display mode',
+        'win+r': 'Run',
+        'F1': 'Help',
+        'F2': 'Rename',
+        'F3': 'Search',
+        'F5': 'Refresh',
+    }
 
     def handleHotkey(hotkey):
         meaning = keys_to_detect.get(hotkey)
@@ -476,6 +484,31 @@ def logHotkeys(only_paste_event=False):
     for key in keys_to_detect.keys():
         keyboard.add_hotkey(key, handleHotkey, args=[key])
 
+    keyboard.wait()
+
+
+def logPasteHotkey():
+
+    def handleCB():
+        clipboard_content = pyperclip.paste()
+        print(f"{timestamp()} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
+        session.post(consumerServer.SERVER_ADDR, json={
+            "timestamp": timestamp(),
+            "user": USER,
+            "category": "OperatingSystem",
+            "application": 'Clipboard',
+            "event_type": 'paste',
+            "title": 'CTRL+V',
+            "description": 'Paste',
+            "clipboard_content": clipboard_content
+        })
+
+    def handleHotkey():
+        cb = Thread(target=handleCB)
+        cb.start()
+        cb.join()
+
+    keyboard.add_hotkey('ctrl+v', handleHotkey)
     keyboard.wait()
 
 

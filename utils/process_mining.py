@@ -333,20 +333,37 @@ class ProcessMining:
         return case
 
     def _create_image(self, gviz, img_name, verbose=False):
-        img_path = os.path.join(self.discovery_path, f'{self.filename}_{img_name}.pdf')
-        if "alpha_miner" in img_name:
-            vis_factory.save(gviz, img_path)
-        elif "heuristic_miner" in img_name:
-            hn_vis_factory.save(gviz, img_path)
-        elif "petri_net" in img_name:
-            pn_vis_factory.save(gviz, img_path)
-        elif "DFG" in img_name:
-            dfg_vis_factory.save(gviz, img_path)
-        elif "BPMN" in img_name:
-            bpmn_vis_factory.save(gviz, img_path)
+        try:
+            img_path = os.path.join(self.discovery_path, f'{self.filename}_{img_name}.pdf')
+            if "alpha_miner" in img_name:
+                vis_factory.save(gviz, img_path)
+            elif "heuristic_miner" in img_name:
+                hn_vis_factory.save(gviz, img_path)
+            elif "petri_net" in img_name:
+                pn_vis_factory.save(gviz, img_path)
+            elif "DFG" in img_name:
+                dfg_vis_factory.save(gviz, img_path)
+            elif "BPMN" in img_name:
+                bpmn_vis_factory.save(gviz, img_path)
 
-        if verbose:
-            self.status_queue.put(f"[PROCESS MINING] Generated {img_name} in {img_path}")
+            if verbose:
+                self.status_queue.put(f"[PROCESS MINING] Generated {img_name} in {img_path}")
+        except PermissionError as e:
+            print(f"[PROCESS MINING] Could not save image because of permission error: {e}")
+            print(f"Trying to save image on desktop")
+            img_path = os.path.join(utils.utils.DESKTOP, f'{self.filename}_{img_name}.pdf')
+            if "alpha_miner" in img_name:
+                vis_factory.save(gviz, img_path)
+            elif "heuristic_miner" in img_name:
+                hn_vis_factory.save(gviz, img_path)
+            elif "petri_net" in img_name:
+                pn_vis_factory.save(gviz, img_path)
+            elif "DFG" in img_name:
+                dfg_vis_factory.save(gviz, img_path)
+            elif "BPMN" in img_name:
+                bpmn_vis_factory.save(gviz, img_path)
+        except Exception as e:
+            print(f"[PROCESS MINING] Could not save image: {e}")
 
     def create_alpha_miner(self):
         net, initial_marking, final_marking = alpha_miner.apply(self._log)
@@ -401,16 +418,6 @@ class ProcessMining:
         else:
             gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
         self._create_image(gviz, name)
-
-    def highLevelDFG(self):
-        try:
-            df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
-            dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
-            gviz_parameters = self._createImageParameters(log=log, high_level=True)
-            gviz = dfg_vis_factory.apply(dfg, log=log, variant="frequency", parameters=gviz_parameters)
-            self._create_image(gviz, "DFG_model")
-        except Exception:
-            return False
 
     @staticmethod
     def _getHighLevelEvent(row):
@@ -580,16 +587,43 @@ class ProcessMining:
         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
         self._create_image(bpmn_figure, "BPMN")
 
+    def highLevelDFG(self, name="DFG_model"):
+        try:
+            df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+            dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
+            gviz_parameters = self._createImageParameters(log=log, high_level=True)
+            gviz = dfg_vis_factory.apply(dfg, log=log, variant="frequency", parameters=gviz_parameters)
+            self._create_image(gviz, name)
+        except Exception as e:
+            print(f"[PROCESS MINING] Could not create DFG: {e}")
+            return False
+
     # Petri net on entire process
     def highLevelPetriNet(self):
-        df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
-        dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
-        gviz_parameters = self._createImageParameters(log=log, high_level=True)
-        net, im, fm = dfg_conv_factory.apply(dfg, parameters=gviz_parameters)
-        pnml_factory.apply(net, im, os.path.join(self.discovery_path, f'{self.filename}_petri_net.pnml'),
-                           final_marking=fm)
+        try:
+            df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+            dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
+            gviz_parameters = self._createImageParameters(log=log, high_level=True)
+            net, im, fm = dfg_conv_factory.apply(dfg, parameters=gviz_parameters)
+            pnml_factory.apply(net, im, os.path.join(self.discovery_path, f'{self.filename}_petri_net.pnml'),
+                               final_marking=fm)
         # gviz = pn_vis_factory.apply(net, im, fm, parameters=gviz_parameters)
         # self._create_image(gviz, "petri_net")
+        except Exception as e:
+            print(f"[PROCESS MINING] Could not create Petri Net: {e}")
+            return False
+
+    def highLevelBPMN(self, df: pandas.DataFrame = None, name="BPMN"):
+        try:
+            df, log, parameters = self.aggregateData(df, remove_duplicates=True)
+            net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
+            bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
+                net, initial_marking, final_marking)
+            bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
+            self._create_image(bpmn_figure, name)
+        except Exception as e:
+            print(f"[PROCESS MINING] Could not create BPMN: {e}")
+            return False
 
     # def createGraphs(self, df: pandas.DataFrame = None):
     #     self.save_bpmn(df)
