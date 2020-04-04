@@ -39,7 +39,7 @@ class Preferences(QMainWindow):
                                           )
 
         self.status_queue = status_queue
-        self.setWindowTitle("")
+        self.setWindowTitle(" ")
         if WINDOWS:
             self.resize(360, 320)
 
@@ -69,7 +69,7 @@ class Preferences(QMainWindow):
         label_minimum = QLabel(str(slider_minimum), alignment=Qt.AlignLeft, font=font)
         label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
 
-        self.slider_label = QLabel(alignment=Qt.AlignCenter)
+        self.slider_label = QLabel("Number of runs after which \nXES file is generated:")
         self.slider_label.setToolTip(
             "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file "
             "is automatically generated, to be used for process mining techniques")
@@ -118,7 +118,6 @@ class Preferences(QMainWindow):
     def handle_slider(self):
         value = self.sld.value()
         self.lcd.display(value)
-        self.slider_label.setText("Number of runs after which \nXES file is generated:")
         utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = value
 
     def handle_cb(self):

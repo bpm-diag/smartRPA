@@ -503,8 +503,9 @@ def logPasteHotkey():
 
         print(f"{timestamp()} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
 
+        # remove milliseconds from timestamp so duplicated events are easier to remove
         session.post(consumerServer.SERVER_ADDR, json={
-            "timestamp": timestamp(),
+            "timestamp": timestamp()[:-3]+'000',
             "user": USER,
             "category": "OperatingSystem",
             "application": 'Clipboard',

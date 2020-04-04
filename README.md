@@ -25,7 +25,7 @@
 
 ## Installation and execution:
 
-Make sure you are using _64bit_ version of Python 3.8.1. You can download it from the official site for for [Windows](https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe) or [Mac](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg). Do not install python from a package manager like _brew_.
+Make sure you are using _64bit_ version of Python 3.8.1. You can download it from the official site for [Windows](https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe) or [MacOS](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg). Do not install Python from a package manager like _brew_.
 
 #### 1. **Install dependencies**
 
@@ -108,7 +108,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
 - On Windows:
 
-    1. Install a Windows C/C++ compiler like [MinGW](https://osdn.net/projects/mingw/releases/) or [Visual Studio](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=Community&rel=15)
+    1. Install [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16)
     2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
     3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
     4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3` 
