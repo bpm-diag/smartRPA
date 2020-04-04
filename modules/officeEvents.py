@@ -380,10 +380,12 @@ def excelEvents(filepath=None):
             # None, None, 'prova', None, None] Now I remove the elements that are None by applying a filter
             # operator to the previous list
             if values:
-                # If entire column/row is selected, I consider only the first 10.000 to save memory
-                # return list(filter(lambda s: s is not None, list(chain.from_iterable(list(values)))))
-                return [s for s in list(chain.from_iterable(list(values[:8000]))) if
-                        s is not None and type(s) is not float]
+                try:
+                    # If entire column/row is selected, I consider only the first 10.000 to save memory
+                    # return list(filter(lambda s: s is not None, list(chain.from_iterable(list(values)))))
+                    return [s for s in list(chain.from_iterable(list(values[:8000]))) if s is not None]
+                except TypeError:
+                    return values
             else:
                 return ""
 

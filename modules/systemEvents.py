@@ -41,7 +41,7 @@ programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHo
                       "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
                       "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
                       "software_reporter_tool.exe", "chrome.exe", "OUTLOOK.EXE", "WMIADAP.exe", "audiodg.exe",
-                      "'OfficeC2RClient.exe", "FileCoAuth.exe"]
+                      "'OfficeC2RClient.exe", "FileCoAuth.exe", "setup.exe", "MicrosoftEdgeUpdate.exe"]
 
 
 #  monitor file/folder changes on windows
@@ -454,16 +454,16 @@ def logHotkeys():
         'F5': 'Refresh',
     }
 
-    def handleHotkey(hotkey):
+    def handleH(hotkey):
         meaning = keys_to_detect.get(hotkey)
         event_type = "pressHotkey"
         clipboard_content = ""
         application = "Keyboard"
         # handle paste and cut events
-        if hotkey == "ctrl+v":
-            event_type = "paste"
-            clipboard_content = pyperclip.paste()
-            application = "Clipboard"
+        # if hotkey == "ctrl+v":
+        #     event_type = "paste"
+        #     clipboard_content = pyperclip.paste()
+        #     application = "Clipboard"
         if hotkey == "ctrl+x":
             event_type = "cut"
             clipboard_content = pyperclip.paste()
@@ -481,6 +481,11 @@ def logHotkeys():
             "mouse_coord": mouse.position
         })
 
+    def handleHotkey(key):
+        t = Thread(target=handleH, args=[key])
+        t.start()
+        t.join()
+
     for key in keys_to_detect.keys():
         keyboard.add_hotkey(key, handleHotkey, args=[key])
 
@@ -490,7 +495,11 @@ def logHotkeys():
 def logPasteHotkey():
 
     def handleCB():
-        clipboard_content = pyperclip.paste()
+        try:
+            clipboard_content = pyperclip.paste()
+        except Exception as e:
+            print(e)
+            clipboard_content = ""
         print(f"{timestamp()} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),

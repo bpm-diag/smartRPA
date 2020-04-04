@@ -518,10 +518,10 @@ except Exception:
                 ######
 
                 elif (e == "copy" or e == "cut") and not pandas.isna(cb):
-                    cb = utils.utils.removeWhitespaces(cb)
+                    # cb = utils.utils.removeWhitespaces(cb)
                     script.write(f"print('Setting clipboard text')\n")
                     if WINDOWS:
-                        script.write(f'set_to_clipboard("""{cb.rstrip()}""")\n')
+                        script.write(f'set_to_clipboard("""{cb}""")\n')
                     else:
                         script.write(f"pyperclip.copy('{cb}')\n")
                 elif e == "paste":

@@ -210,12 +210,14 @@ def toAscii(string):
 
 
 def open_file(path):
-    if WINDOWS:
-        os.startfile(path)
-    else:
-        opener = "open" if MAC else "xdg-open"
-        subprocess.call([opener, path])
-
+    try:
+        if WINDOWS:
+            os.startfile(path)
+        else:
+            opener = "open" if MAC else "xdg-open"
+            subprocess.call([opener, path])
+    except Exception as e:
+        print(f"[UTILS] Could not open file {path}: {e}")
 
 # ************
 # Class
