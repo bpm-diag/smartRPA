@@ -100,9 +100,17 @@ document.body.onclick = e => {
     let click_coord = `${event.screenX},${event.screenY}`; // relative to browser
     let url = document.URL;
     let html = target.innerHTML;
+    let innerText = target.innerText.substring(0,80) || "";
+    let tag_value = target.value;
 
     // remove html if clicking on youtube
     if (url.includes("youtube")) html = "";
+
+    // support for gmail
+    if (url.includes("mail.google.com")){
+        // email body
+        tag_value = document.querySelector(".Am.Al.editable").innerText
+    }
 
     // Set this variable to true if you want to log clicks on text elements like paragraphs, headers, div, span
     const LOG_TEXT_ELEMENTS = false;
@@ -153,10 +161,10 @@ document.body.onclick = e => {
         tag_type: type,
         tag_name: target.name,
         tag_title: target.title,
-        tag_value: target.value,
+        tag_value: tag_value,
         tag_html: html.substring(0,50) || "", //take only the first 50 characters otherwise it's too long
         tag_href: target.href || "",
-        tag_innerText: target.innerText.substring(0,50) || "", //take only the first 50 characters otherwise it's too long
+        tag_innerText: innerText, //take only the first 80 characters otherwise it's too long
         tag_option: target.option,
         tag_attributes: getTargetAttributes(target) || "",
         xpath: getXPath(target)

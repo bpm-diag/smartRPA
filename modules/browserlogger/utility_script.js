@@ -44,6 +44,7 @@ function getTargetAttributes(target){
 }
 
 // get element xpath for easier selection during RPA
+
 function getXPathOld(node) {
     let comp, comps = [];
     let xpath = '';
@@ -127,6 +128,13 @@ function getXPath(element) {
             ? [`id("${elm.id}")`]
             : [...segs(elm.parentNode), `${elm.localName.toLowerCase()}[${idx(elm)}]`];
     return segs(element).join('/');
+}
+
+function getElementByXPath(path) {
+    return (new XPathEvaluator())
+        .evaluate(path, document.documentElement, null,
+                        XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        .singleNodeValue;
 }
 
 // post request to server sending logging data
