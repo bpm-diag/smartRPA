@@ -44,7 +44,7 @@ function getTargetAttributes(target){
 }
 
 // get element xpath for easier selection during RPA
-function getXPath(node) {
+function getXPathOld(node) {
     let comp, comps = [];
     let xpath = '';
     let getPos = function(node) {
@@ -88,6 +88,45 @@ function getXPath(node) {
         }
     }
     return xpath;
+}
+
+function createXPathFromElement(elm) {
+    var allNodes = document.getElementsByTagName('*');
+    for (var segs = []; elm && elm.nodeType == 1; elm = elm.parentNode)
+    {
+        if (elm.hasAttribute('id')) {
+                var uniqueIdCount = 0;
+                for (var n=0;n < allNodes.length;n++) {
+                    if (allNodes[n].hasAttribute('id') && allNodes[n].id == elm.id) uniqueIdCount++;
+                    if (uniqueIdCount > 1) break;
+                };
+                if ( uniqueIdCount == 1) {
+                    segs.unshift('id("' + elm.getAttribute('id') + '")');
+                    return segs.join('/');
+                } else {
+                    segs.unshift(elm.localName.toLowerCase() + '[@id="' + elm.getAttribute('id') + '"]');
+                }
+        } else if (elm.hasAttribute('class')) {
+            segs.unshift(elm.localName.toLowerCase() + '[@class="' + elm.getAttribute('class') + '"]');
+        } else {
+            for (i = 1, sib = elm.previousSibling; sib; sib = sib.previousSibling) {
+                if (sib.localName == elm.localName)  i++; };
+                segs.unshift(elm.localName.toLowerCase() + '[' + i + ']');
+        };
+    };
+    return segs.length ? '/' + segs.join('/') : null;
+};
+
+function getXPath(element) {
+    const idx = (sib, name) => sib
+        ? idx(sib.previousElementSibling, name||sib.localName) + (sib.localName == name)
+        : 1;
+    const segs = elm => !elm || elm.nodeType !== 1
+        ? ['']
+        : elm.id && document.getElementById(elm.id) === elm
+            ? [`id("${elm.id}")`]
+            : [...segs(elm.parentNode), `${elm.localName.toLowerCase()}[${idx(elm)}]`];
+    return segs(element).join('/');
 }
 
 // post request to server sending logging data

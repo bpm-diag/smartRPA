@@ -466,6 +466,12 @@ except Exception:
 try:
     browser.find_element_by_xpath('{xpath}').clear()
     browser.find_element_by_xpath('{xpath}').send_keys('''{value}''')
+except selenium.common.exceptions.NoSuchElementException:
+    try:
+        browser.find_element_by_name('{row['tag_name']}').clear()
+        browser.find_element_by_name('{row['tag_name']}').send_keys('''{value}''') 
+    except Exception:
+        pass
 except Exception:
     pass
 \n""")

@@ -4,7 +4,6 @@ keyboard==0.13.4
 requests_futures==1.0.0
 Flask==1.1.1
 darkdetect==0.1.1
-psutil==5.4.6
 PyQt5==5.14.1
 watchdog==0.10.2
 pandas==1.0.0
@@ -13,6 +12,7 @@ pynput==1.6.7
 selenium==3.7.0
 python-Levenshtein==0.12.0
 fuzzywuzzy==0.18.0
+psutil==5.4.6
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"
 WMI==1.4.9; platform_system == "Windows"
