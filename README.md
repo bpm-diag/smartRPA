@@ -86,7 +86,7 @@ To run the generated RPA scripts you must install `automagica` module.
 - On Windows:
 
     1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
-    2. Install <a href="https://slproweb.com/download/Win64OpenSSL-1_1_1d.exe">Win64 OpenSSL v1.1.1d</a>
+    2. Install Win64 OpenSSL v1.1.1 from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>
     3. Open CMD as <i>admin</i> and type:
 
     ```cmd

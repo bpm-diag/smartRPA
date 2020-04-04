@@ -59,7 +59,7 @@ def startLogger(systemLoggerFilesFolder,
 
         if systemLoggerClipboard:
             # log copy event
-            t8 = Process(target=clipboardEvents.logClipboard)
+            t8 = Thread(target=clipboardEvents.logClipboard)
             t8.daemon = True
             t8.start()
             # only way to log paste event is to detect ctrl + v, but it should be started as process instead of thread
@@ -72,11 +72,11 @@ def startLogger(systemLoggerFilesFolder,
         if systemLoggerFilesFolder:
 
             if WINDOWS:
-                t1 = Process(target=systemEvents.watchFolder)
+                t1 = Thread(target=systemEvents.watchFolder)
                 t1.daemon = True
                 t1.start()
 
-                t2 = Process(target=systemEvents.watchRecentsFilesWin)
+                t2 = Thread(target=systemEvents.watchRecentsFilesWin)
                 t2.daemon = True
                 t2.start()
 
@@ -95,21 +95,21 @@ def startLogger(systemLoggerFilesFolder,
 
         if systemLoggerPrograms:
             if WINDOWS:
-                t6 = Process(target=systemEvents.logProcessesWin)
+                t6 = Thread(target=systemEvents.logProcessesWin)
                 t6.daemon = True
                 t6.start()
             elif MAC:
-                t7 = Process(target=systemEvents.logProcessesMac)
+                t7 = Thread(target=systemEvents.logProcessesMac)
                 t7.daemon = True
                 t7.start()
 
         if systemLoggerHotkeys and WINDOWS:
-            t10 = Process(target=systemEvents.logHotkeys)
+            t10 = Thread(target=systemEvents.logHotkeys)
             t10.daemon = True
             t10.start()
 
         if systemLoggerUSB and WINDOWS:
-            t11 = Process(target=systemEvents.logUSBDrives)
+            t11 = Thread(target=systemEvents.logUSBDrives)
             t11.daemon = True
             t11.start()
 
@@ -122,7 +122,7 @@ def startLogger(systemLoggerFilesFolder,
 
         if officeExcel:
             if WINDOWS:
-                t12 = Process(target=officeEvents.excelEvents)
+                t12 = Thread(target=officeEvents.excelEvents)
                 t12.daemon = True
                 t12.start()
 
