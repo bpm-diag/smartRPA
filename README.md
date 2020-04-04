@@ -86,8 +86,8 @@ To run the generated RPA scripts you must install `automagica` module.
 - On Windows:
 
     1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
-    2. Install Win64 OpenSSL v1.1.1 from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>
-    3. Open CMD as <i>admin</i> and type:
+    2. Install Win64 OpenSSL v1.1.1 from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
+    3. Open CMD as <i>admin</i> and type (one command per line):
 
     ```cmd
     set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
@@ -108,7 +108,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
 - On Windows:
 
-    1. Install [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16)
+    1. Install [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=Community&rel=15).  It is vital to install all C++ related development tools like _Windows 10 SDK, Visual C++ tools for CMake_ and others.
     2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
     3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
     4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3` 

@@ -17,7 +17,6 @@ from modules import systemEvents, mouseEvents
 from modules import officeEvents
 from modules import clipboardEvents
 
-
 #  this method is called by GUI when the user presses "start logger" button
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
@@ -65,7 +64,7 @@ def startLogger(systemLoggerFilesFolder,
             # only way to log paste event is to detect ctrl + v, but it should be started as process instead of thread
             # otherwise some events are lost
             if WINDOWS:
-                t9 = Process(target=systemEvents.logPasteHotkey)
+                t9 = Thread(target=systemEvents.logPasteHotkey)
                 t9.daemon = True
                 t9.start()
 
