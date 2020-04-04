@@ -500,7 +500,9 @@ def logPasteHotkey():
         except Exception as e:
             print(e)
             clipboard_content = ""
+
         print(f"{timestamp()} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
+
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),
             "user": USER,
@@ -512,12 +514,12 @@ def logPasteHotkey():
             "clipboard_content": clipboard_content
         })
 
-    def handleHotkey():
-        cb = Thread(target=handleCB)
-        cb.start()
-        cb.join()
+    # def handleHotkey():
+    #     cb = Thread(target=handleCB)
+    #     cb.start()
+    #     cb.join()
 
-    keyboard.add_hotkey('ctrl+v', handleHotkey)
+    keyboard.add_hotkey('ctrl+v', handleCB)
     keyboard.wait()
 
 

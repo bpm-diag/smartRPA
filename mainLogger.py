@@ -7,6 +7,7 @@ import os
 import sys
 import time
 from threading import Thread
+from multiprocessing import Process
 from utils.utils import WINDOWS, MAC, LINUX
 import utils.GUI
 import utils.config
@@ -56,6 +57,18 @@ def startLogger(systemLoggerFilesFolder,
         # system logger
         # ************
 
+        if systemLoggerClipboard:
+            # log copy event
+            t8 = Thread(target=clipboardEvents.logClipboard)
+            t8.daemon = True
+            t8.start()
+            # only way to log paste event is to detect ctrl + v, but it should be started as process instead of thread
+            # otherwise some events are lost
+            if WINDOWS:
+                t9 = Process(target=systemEvents.logPasteHotkey)
+                t9.daemon = True
+                t9.start()
+
         if systemLoggerFilesFolder:
 
             if WINDOWS:
@@ -89,18 +102,6 @@ def startLogger(systemLoggerFilesFolder,
                 t7 = Thread(target=systemEvents.logProcessesMac)
                 t7.daemon = True
                 t7.start()
-
-        if systemLoggerClipboard:
-            # log copy event
-            t8 = Thread(target=clipboardEvents.logClipboard)
-            t8.daemon = True
-            t8.start()
-            # only way to log paste event is to detect ctrl + v, but it should not be started if hotkeys logging
-            # is already enabled
-            if WINDOWS:
-                t9 = Thread(target=systemEvents.logPasteHotkey)
-                t9.daemon = True
-                t9.start()
 
         if systemLoggerHotkeys and WINDOWS:
             t10 = Thread(target=systemEvents.logHotkeys)
