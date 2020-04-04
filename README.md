@@ -25,7 +25,7 @@
 
 ## Installation and execution:
 
-Make sure you are using _64bit_ version of Python 3.8.1 downloaded from the [official site](https://www.python.org/downloads/release/python-381/) (and not from packet managers like brew).
+Make sure you are using _64bit_ version of Python 3.8.1. You can download it from the official site for for [Windows](https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe) or [Mac](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg). Do not install python from a package manager like _brew_.
 
 #### 1. **Install dependencies**
 
