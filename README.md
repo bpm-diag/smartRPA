@@ -25,9 +25,7 @@
 
 ## Installation and execution:
 
-You must use _64bit_ version of Python 3.8.1. 
-
-If you're on MacOS, download Python3 from the [official site](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg), do not use _brew_ or other packet managers.
+Make sure you are using _64bit_ version of Python 3.8.1 downloaded from the [official site](https://www.python.org/downloads/release/python-381/) (and not from packet managers like brew).
 
 #### 1. **Install dependencies**
 
