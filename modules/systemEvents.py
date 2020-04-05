@@ -41,7 +41,7 @@ programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHo
                       "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
                       "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
                       "software_reporter_tool.exe", "chrome.exe", "OUTLOOK.EXE", "WMIADAP.exe", "audiodg.exe",
-                      "'OfficeC2RClient.exe", "FileCoAuth.exe", "setup.exe", "MicrosoftEdgeUpdate.exe"]
+                      "'OfficeC2RClient.exe", "FileCoAuth.exe", "setup.exe", "MicrosoftEdgeUpdate.exe", "MpCmdRun.exe"]
 
 
 #  monitor file/folder changes on windows
@@ -74,17 +74,19 @@ def watchFolder():
                 elif event.event_type == "modified":  # avoid spam
                     return
                 else:  # created,deleted
-                    print(
-                        f"{timestamp()} {USER} OperatingSystem {event.event_type} {event.src_path}")
-                    session.post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": timestamp(),
-                        "user": USER,
-                        "category": "OperatingSystem",
-                        "application": "Finder" if MAC else "Explorer",
-                        "event_type": event.event_type,
-                        "event_src_path": event.src_path,
-                        "mouse_coord": mouse.position
-                    })
+                    # do not log temporary windows files
+                    if "~$" not in event.src_path:
+                        print(
+                            f"{timestamp()} {USER} OperatingSystem {event.event_type} {event.src_path}")
+                        session.post(consumerServer.SERVER_ADDR, json={
+                            "timestamp": timestamp(),
+                            "user": USER,
+                            "category": "OperatingSystem",
+                            "application": "Finder" if MAC else "Explorer",
+                            "event_type": event.event_type,
+                            "event_src_path": event.src_path,
+                            "mouse_coord": mouse.position
+                        })
 
     print("[systemEvents] Files/Folder logging started")
 
@@ -501,11 +503,13 @@ def logPasteHotkey():
             print(e)
             clipboard_content = ""
 
-        print(f"{timestamp()} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
+        ts = timestamp()[:-6]+'000000'
+
+        print(f"{ts} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
 
         # remove milliseconds from timestamp so duplicated events are easier to remove
         session.post(consumerServer.SERVER_ADDR, json={
-            "timestamp": timestamp()[:-3]+'000',
+            "timestamp": ts,
             "user": USER,
             "category": "OperatingSystem",
             "application": 'Clipboard',
@@ -515,12 +519,12 @@ def logPasteHotkey():
             "clipboard_content": clipboard_content
         })
 
-    # def handleHotkey():
-    #     cb = Thread(target=handleCB)
-    #     cb.start()
-    #     cb.join()
+    def handleHotkey():
+        cb = Thread(target=handleCB)
+        cb.start()
+        cb.join()
 
-    keyboard.add_hotkey('ctrl+v', handleCB)
+    keyboard.add_hotkey('ctrl+v', handleHotkey)
     keyboard.wait()
 
 

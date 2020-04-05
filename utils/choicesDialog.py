@@ -14,21 +14,23 @@ class ChoicesDialog(QDialog):
                                                   Qt.WindowTitleHint |
                                                   Qt.CustomizeWindowHint)
         self.setWindowTitle("Choices")
-        # self.setFixedWidth(730)
+        self.setMaximumWidth(1000)
+        self.setFixedWidth(1000)
+        self.setMaximumHeight(500)
 
         self.df = df
 
         # remove empty clipboard items
         for row_index, row in self.df.iterrows():
-            if (row['concept:name'] == 'copy' or row['concept:name'] == 'paste') and \
-                    utils.removeWhitespaces(row['clipboard_content']) == '':
+            e = row['concept:name']
+            if (e in ['cut', 'copy', 'paste']) and utils.removeWhitespaces(row['clipboard_content']) == '':
                 self.df.drop(row_index, inplace=True)
 
         self.filtered_df = self.df[self.df['concept:name'].isin(
             ['changeField',
              'editCell', 'editCellSheet', 'editRange',
              'moved', 'Unmount',
-             'copy', 'cut', 'paste']
+             ]  # removed cut and copy and paste
         )]
 
         if not self.filtered_df.empty:
@@ -43,7 +45,8 @@ class ChoicesDialog(QDialog):
 
             scroll = QScrollArea()
             scroll.setWidget(formGroupBox)
-            scroll.setMaximumHeight(400)
+            scroll.setMaximumHeight(600)
+            scroll.setMaximumWidth(1000)
 
             mainLayout = QVBoxLayout()
             mainLayout.addWidget(QLabel("Change input variables before generating RPA script"))
@@ -51,6 +54,9 @@ class ChoicesDialog(QDialog):
             mainLayout.addWidget(buttonBox)
 
             self.setLayout(mainLayout)
+            self.resize(self.sizeHint())
+            QApplication.processEvents()
+            self.adjustSize()
 
         else:
             buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
@@ -60,9 +66,12 @@ class ChoicesDialog(QDialog):
                                     "Press OK to generate RPA script."))
             layout.addWidget(buttonBox)
             self.setLayout(layout)
+            self.resize(self.sizeHint())
+            QApplication.processEvents()
+            self.adjustSize()
 
     def addRows(self):
-        for row_index, row in self.df.iterrows():
+        for row_index, row in self.filtered_df.iterrows():
             e = row["concept:name"]
             url = utils.getHostname(row['browser_url'])
             app = row['application']
@@ -123,7 +132,8 @@ class ChoicesDialog(QDialog):
                 elif e in ["copy", "cut", "paste"]:
                     self.df.loc[row_index, 'clipboard_content'] = new_values[i]
             except Exception as exception:
-                print(exception)
+                print(f"[CHOICESDIALOG] Error: {exception}")
+                continue
 
     def getDF(self):
         # self.df.to_csv('/Users/marco/Desktop/temp.csv', encoding='utf-8-sig', index=False)

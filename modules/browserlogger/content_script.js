@@ -16,7 +16,7 @@ document.body.onpaste = e => {
         "text/plain"
     );
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "paste",
@@ -38,7 +38,7 @@ window.onbeforeprint = e => {
     // console.log("print");
     let event = e || window.event;
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "print",
@@ -54,7 +54,7 @@ window.onhashchange = e => {
     // console.log("url hash change");
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "urlHashChange",
@@ -77,7 +77,7 @@ document.body.oncontextmenu = e => {
     let target = event.target;
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "contextMenu",
@@ -150,7 +150,7 @@ document.body.onclick = e => {
     }
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: eventType,
@@ -189,7 +189,7 @@ document.body.onmouseup = e => {
     if (selection) {
         // console.log("selection mouse up");
         let eventLog = {
-            timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+            timestamp: timestamp(),
             category: "Browser",
             application: getBrowser(),
             event_type: "selectText",
@@ -212,7 +212,7 @@ document.body.onsubmit = e => {
     let target = event.target;
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "submit",
@@ -239,7 +239,7 @@ document.body.onchange = e => {
     }
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "changeField",
@@ -264,7 +264,7 @@ document.body.ondblclick = e => {
     let target = event.target;
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "doubleClick",
@@ -283,7 +283,7 @@ document.body.ondragstart = e => {
     let target = event.target;
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "dragElement",
@@ -302,7 +302,7 @@ document.body.oncancel = e => {
     let event = e || window.event;
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "cancelDialog",
@@ -335,7 +335,7 @@ document.body.onfullscreenchange = e => {
     }
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "fullscreen",

@@ -12,7 +12,7 @@ chrome.bookmarks.onCreated.addListener((id, bookmark) => {
     // console.log("Bookmark created");
     // https://developer.chrome.com/extensions/bookmarks#type-BookmarkTreeNode
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "newBookmark",
@@ -28,7 +28,7 @@ chrome.bookmarks.onCreated.addListener((id, bookmark) => {
 chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
     // console.log("Bookmark removed");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "removeBookmark",
@@ -43,7 +43,7 @@ chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
 chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
     // console.log("Bookmark changed");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "modifyBookmark",
@@ -59,7 +59,7 @@ chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
 chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
     // console.log("Bookmark moved");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "moveBookmark"
@@ -92,7 +92,7 @@ chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
 chrome.downloads.onCreated.addListener(downloadItem => {
     // console.log("Download started");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "startDownload",
@@ -109,7 +109,7 @@ chrome.downloads.onCreated.addListener(downloadItem => {
 chrome.downloads.onErased.addListener(downloadId => {
     // console.log("Download erased");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "erasedDownload",
@@ -147,7 +147,7 @@ chrome.downloads.onErased.addListener(downloadId => {
 chrome.management.onInstalled.addListener(info => {
     // console.log("Extension installed");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "installBrowserExtension",
@@ -164,7 +164,7 @@ chrome.management.onInstalled.addListener(info => {
 chrome.management.onUninstalled.addListener(id => {
     // console.log("Extension uninstalled");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "uninstallBrowserExtension",
@@ -180,7 +180,7 @@ chrome.management.onEnabled.addListener(info => {
     // console.log("Extension enabled");
     console.log(info);
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "enableBrowserExtension",
@@ -197,7 +197,7 @@ chrome.management.onEnabled.addListener(info => {
 chrome.management.onDisabled.addListener(info => {
     // console.log("Extension disabled");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "disableBrowserExtension",
@@ -219,7 +219,7 @@ chrome.management.onDisabled.addListener(info => {
 chrome.notifications.onClosed.addListener((notificationId, byUser) => {
     // console.log("Notification closed");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "closedNotification",
@@ -234,7 +234,7 @@ chrome.notifications.onClosed.addListener((notificationId, byUser) => {
 chrome.notifications.onClicked.addListener(notificationId => {
     // console.log("Notification clicked");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "clickedNotification",
@@ -394,7 +394,7 @@ chrome.webNavigation.onCommitted.addListener(details => {
     // console.log("webNavigation commit");
 
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: details.transitionType,
@@ -439,7 +439,7 @@ chrome.windows.onCreated.addListener(window => {
 
     // https://developer.chrome.com/extensions/windows#type-Window
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "newWindow",
@@ -455,7 +455,7 @@ chrome.windows.onCreated.addListener(window => {
 chrome.windows.onRemoved.addListener(windowId => {
     // console.log("Window closed");
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: "closeWindow"
@@ -534,7 +534,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 // Prepares JSON log and makes POST request to server for tabs events
 function buildAndSendEventLog(eventType, tab, info) {
     let eventLog = {
-        timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
+        timestamp: timestamp(),
         category: "Browser",
         application: getBrowser(),
         event_type: eventType,

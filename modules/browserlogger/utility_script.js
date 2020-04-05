@@ -2,6 +2,10 @@
 // Utilities
 // ********************
 
+function timestamp(){
+    return moment().format("YYYY-MM-DD HH:mm:ss:SSSSSS")
+}
+
 function userAgent(string){
     return window.navigator.userAgent.indexOf(string) > -1;
 }

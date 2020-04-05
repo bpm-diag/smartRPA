@@ -534,8 +534,15 @@ class ProcessMining:
         df = df[~df.eventQual.str.contains('serverRedirect')]
 
         # remove rows that contain empty clipboard text
-        [df.drop(row_index, inplace=True) for row_index, row in df.iterrows() if
-         row['concept:name'] == 'copy' and utils.utils.removeWhitespaces(row['clipboard_content']) == '']
+        # [df.drop(row_index, inplace=True) for row_index, row in df.iterrows() if
+        #  row['concept:name'] == 'copy' and utils.utils.removeWhitespaces(row['clipboard_content']) == '']
+        for row_index, row in df.iterrows():
+            concept_name = row['concept:name']
+            cb_content = row['clipboard_content']
+            cat = row['category']
+            if (concept_name in ['cut', 'copy', 'paste']) and \
+                    utils.utils.removeWhitespaces(cb_content) == '':
+                df.drop(row_index, inplace=True)
 
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
                           "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit",
@@ -544,7 +551,7 @@ class ProcessMining:
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "closePresentation", "SlideSelectionChanged", "closeWorkbook",
                           "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile",
-                          "manualSubframe"]
+                          "manualSubframe", "copy"]
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level
@@ -621,6 +628,12 @@ class ProcessMining:
                 net, initial_marking, final_marking)
             bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
             self._create_image(bpmn_figure, name)
+            # try:
+            #     if name == "BPMN_final":
+            #         os.remove(os.path.join(self.discovery_path, f'{self.filename}_BPMN.pdf'))
+            # except Exception as e:
+            #     print(f"[PROCESS MINING] Could not delete old BPMN: {e}")
+            #     pass
         except Exception as e:
             print(f"[PROCESS MINING] Could not create BPMN: {e}")
             return False

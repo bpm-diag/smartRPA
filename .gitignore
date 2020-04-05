@@ -49,3 +49,4 @@ ipython_config.py
 Pipfile.lock
 __pypackages__/
 /modules/browserlogger/web-ext-artifacts/
+*.lnk

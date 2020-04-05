@@ -72,7 +72,7 @@ MAIN_DIRECTORY = os.getcwd()  # main file path
 # return current timestamp in the format '2020-02-12 17:11:14:465'
 # used by multiple modules
 def timestamp():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")#[:-3]
 
 
 # Create directory with the given path if it does not exist

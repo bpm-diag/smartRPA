@@ -135,8 +135,9 @@ def excelEvents(filepath=None):
             })
 
         def OnWorkbookOpen(self, Wb):
+            path = os.path.join(Wb.Path, Wb.Name)
             print(
-                f"{timestamp()} {USER} openWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+                f"{timestamp()} {USER} openWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {path}")
             session.post(SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
@@ -146,7 +147,7 @@ def excelEvents(filepath=None):
                 "workbook": Wb.Name,
                 "current_worksheet": Wb.ActiveSheet.Name,
                 "worksheets": self.getWorksheets(None, Wb),
-                "event_src_path": Wb.Path
+                "event_src_path": path
             })
 
         def OnWorkbookNewSheet(self, Wb, Sh):

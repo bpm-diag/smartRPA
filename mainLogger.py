@@ -17,6 +17,7 @@ from modules import systemEvents, mouseEvents
 from modules import officeEvents
 from modules import clipboardEvents
 
+
 #  this method is called by GUI when the user presses "start logger" button
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
@@ -24,7 +25,7 @@ def startLogger(systemLoggerFilesFolder,
                 systemLoggerHotkeys,
                 systemLoggerUSB,
                 systemLoggerEvents,
-                officeFilename,
+                officeFilepath,
                 officeExcel,
                 officeWord,
                 officePowerpoint,
@@ -34,7 +35,8 @@ def startLogger(systemLoggerFilesFolder,
                 browserEdge,
                 browserOpera,
                 status_queue,
-                LOG_FILEPATH
+                LOG_FILEPATH,
+                processesPID
                 ):
     try:
         # create the threads as daemons so they are closed when main ends
@@ -61,12 +63,14 @@ def startLogger(systemLoggerFilesFolder,
             t8 = Thread(target=clipboardEvents.logClipboard)
             t8.daemon = True
             t8.start()
+
             # only way to log paste event is to detect ctrl + v, but it should be started as process instead of thread
             # otherwise some events are lost
-            if WINDOWS:
-                t9 = Thread(target=systemEvents.logPasteHotkey)
-                t9.daemon = True
-                t9.start()
+            # if WINDOWS:
+            #     t9 = Process(target=systemEvents.logPasteHotkey)
+            #     t9.daemon = True
+            #     t9.start()
+            #     processesPID.put(t9.pid)
 
         if systemLoggerFilesFolder:
 
@@ -121,9 +125,10 @@ def startLogger(systemLoggerFilesFolder,
 
         if officeExcel:
             if WINDOWS:
-                t12 = Thread(target=officeEvents.excelEvents)
-                t12.daemon = True
+                t12 = Process(target=officeEvents.excelEvents, args=(officeFilepath,))
+                # t12.daemon = True
                 t12.start()
+                processesPID.put(t12.pid)
 
                 # t14 = Thread(target=mouseEvents.logMouse)
                 # t14.daemon = True
@@ -135,14 +140,16 @@ def startLogger(systemLoggerFilesFolder,
                 t13.start()
 
         if officeWord and WINDOWS:
-            t14 = Thread(target=officeEvents.wordEvents)
-            t14.daemon = True
+            t14 = Process(target=officeEvents.wordEvents)
+            # t14.daemon = True
             t14.start()
+            processesPID.put(t14.pid)
 
         if officePowerpoint and WINDOWS:
-            t15 = Thread(target=officeEvents.powerpointEvents)
-            t15.daemon = True
+            t15 = Process(target=officeEvents.powerpointEvents)
+            # t15.daemon = True
             t15.start()
+            processesPID.put(t15.pid)
 
         if officeOutlook and WINDOWS:
             t16 = Thread(target=officeEvents.outlookEvents)

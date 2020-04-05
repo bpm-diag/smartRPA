@@ -77,8 +77,7 @@ except ImportError as e:
 \n"""
         if MAC:
             h += "import applescript\n" \
-                 "import xlwings as xw\n" \
-                 "\n"
+                 "import xlwings as xw\n"
         return h
 
     @staticmethod
@@ -197,8 +196,8 @@ except WebDriverException as e:
                 if e in ["newWorkbook"]:
                     script.write(f"print('Opening Excel...')\n")
                     if WINDOWS:
-                        script.write("excel = Excel()\n")
-                        x, y, width, height = size.split(',')
+                        script.write("excel = Excel(visible=True)\n")
+                        # x, y, width, height = size.split(',')
                         # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")                # elif e == "resizeWindow":  # TODO
                     elif MAC and not excelMacOpened:
                         excelMacOpened = True
@@ -209,9 +208,11 @@ try:
 except Exception:
     pass
 \n""")
-                #     x, y, width, height = size.split(',')
-                #     script.write(f"print('Resizing window to {size}')\n")
-                #     # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")
+                elif e in ["openWorkbook"]:
+                    script.write(f"print('Opening Excel...')\n")
+                    if WINDOWS and os.path.exists(path):
+                        script.write(f"excel = Excel(visible=True, file_path=r'{path}')\n")
+
                 elif e in ["addWorksheet", "WorksheetAdded"]:
                     script.write(f"print('Adding worksheet {sh}')\n")
                     if WINDOWS:
@@ -379,147 +380,6 @@ except Exception:
                         script.write(f"applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'close active presentation')\n")
 
                 ######
-                # Browser
-                ######
-
-                # elif e == "newWindow":
-                #     script.write(f"print('Opening new window')\n")
-                #     # TODO
-                # When a window is opened, a new tab is automatically created at index 0 so I don't need to create it again
-                elif e == "newTab" and int(id) != 0:
-                    script.write(f"print('Opening new tab')\n")
-                    new_tab = f'window.open("''");'
-                    script.write(f"browser.execute_script('{new_tab}')\n")
-                    script.write(f"""
-try:
-    if 0 <= {id} < len(browser.window_handles):
-        browser.switch_to.window(browser.window_handles[{id}])
-    else:
-        for i in range(0, {id}):
-            browser.execute_script('window.open("");')
-        browser.switch_to.window(browser.window_handles[{id}])
-except Exception:
-    pass
-\n""")
-                elif e == "selectTab":
-                    script.write(f"print('Selecting tab {id}')\n")
-                    script.write(f"""
-try:
-    if 0 <= {id} < len(browser.window_handles):
-        browser.switch_to.window(browser.window_handles[{id}])
-    else:
-        for i in range(0, {id}):
-            browser.execute_script('window.open("");')
-        browser.switch_to.window(browser.window_handles[{id}])
-    if browser.current_url == 'about:blank':
-        browser.get('{url}') 
-except Exception:
-    pass
-\n""")
-                elif e == "closeTab":
-                    script.write(f"print('Closing tab')\n")
-                    script.write(f"browser.close()\n")
-                elif e == "reload":
-                    script.write(f"print('Reloading page')\n")
-                    script.write(f"""
-try:
-    if browser.current_url != '{url}':
-        browser.get('{url}')
-    else: 
-        browser.refresh()
-except Exception:
-    pass
-""")
-                elif (e == "clickLink" or e == "typed") and ('chrome-extension' not in url):  # or e == "link" # disable because if user edits fields, this url changes
-                    script.write(f"print('Loading link {url}')\n")
-                    script.write(f"browser.get('{url}')\n")
-                    script.write(f"""
-try:
-    WebDriverWait(browser, 2).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))
-except selenium.common.exceptions.TimeoutException:
-    pass
-\n""")
-                elif e == "mouseClick":
-                    # if url:  # disable because if user edits fields, this url changes
-                    #     script.write(f"print('Loading link {url}')\n")
-                    #     script.write(f"browser.get('{url}')\n")
-                    script.write(f"print('Clicking button ')\n")
-                    script.write(f"""
-try:
-    browser.find_element_by_xpath('{xpath}').click()
-except Exception:
-    pass
-\n""")
-                elif e == "changeField":
-                    if row['tag_category'] == "SELECT":
-                        tag_value = row['tag_value']
-                        script.write(f"print('Selecting text')\n")
-                        script.write(f"""
-try:
-    Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}')
-except Exception:
-    pass
-\n""")
-                    else:
-                        script.write(f"print('Inserting text: ' + '''{value}''')\n")
-                        script.write(f"""
-try:
-    browser.find_element_by_xpath('{xpath}').clear()
-    browser.find_element_by_xpath('{xpath}').send_keys('''{value}''')
-except selenium.common.exceptions.NoSuchElementException:
-    try:
-        browser.find_element_by_name('{row['tag_name']}').clear()
-        browser.find_element_by_name('{row['tag_name']}').send_keys('''{value}''') 
-    except Exception:
-        pass
-except Exception:
-    pass
-\n""")
-
-                elif e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
-                    script.write(f"print('Clicking button {row['tag_name']}')\n")
-                    script.write(f"""
-try:
-    browser.find_element_by_xpath('{xpath}').click()
-except Exception:
-    pass
-\n""")
-                elif e == "doubleClick" and xpath != '':
-                    script.write(f"print('Double click')\n")
-                    script.write(f"""
-try:
-    ActionChains(browser).double_click(browser.find_element_by_xpath('{xpath}')).perform()
-except Exception:
-    pass
-\n""")
-                elif e == "contextMenu" and xpath != '':
-                    script.write(f"print('Context menu')\n")
-                    script.write(f"""
-try:
-    ActionChains(browser).context_click(browser.find_element_by_xpath('{xpath}')).perform()
-except Exception:
-    pass
-\n""")
-                elif e == "selectText":
-                    pass
-                elif e == "zoomTab":
-                    # newZoomFactor is like 1.2 so I convert it to percentage
-                    newZoom = int(float(row['newZoomFactor']) * 100)
-                    script.write(f"print('Zooming page to {newZoom}%')\n")
-                    script.write(
-                        "browser.execute_script({}'{}%'{})\n".format('"document.body.style.zoom=', newZoom, '"'))
-                # elif e == "submit":
-                #     script.write(f"print('Submitting button')\n")
-                #     script.write(f"browser.find_element_by_xpath('{xpath}').submit()\n")
-                elif e == "mouse":  # TODO
-                    mouse_coord = row['mouse_coord']
-                    script.write(f"print('Mouse click')\n")
-                    script.write(f"actions = ActionChains(browser)\n")
-                    script.write(f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
-                    script.write(f"actions.moveByOffset({mouse_coord})\n")
-                    script.write(f"actions.click().build().perform()\n")
-
-                ######
                 # System
                 ######
 
@@ -530,10 +390,10 @@ except Exception:
                         script.write(f'set_to_clipboard("""{cb}""")\n')
                     else:
                         script.write(f"pyperclip.copy('{cb}')\n")
-                elif e == "paste":
-                    cb = utils.utils.removeWhitespaces(cb)
-                    script.write(f"print('Pasting clipboard text')\n")
-                    script.write(f'type_text("""{cb}""")\n')
+                # elif e == "paste":
+                #     cb = utils.utils.removeWhitespaces(cb)
+                #     script.write(f"print('Pasting clipboard text')\n")
+                #     script.write(f'type_text("""{cb}""")\n')
                 elif e == "pressHotkey" and WINDOWS:
                     hotkey = row["title"]
                     hotkey_param = hotkey.split('+')
@@ -564,7 +424,8 @@ except Exception:
                         event_list = df['event_type'].tolist()
                     except KeyError:
                         event_list = df['concept:name'].tolist()
-                    if (app == "EXCEL.EXE" or app == "Microsoft Excel") and any(i in event_list for i in ["newWorkbook", "selectWorksheet", "WorksheetActivated"]):
+                    if (app == "EXCEL.EXE" or app == "Microsoft Excel") and any(
+                            i in event_list for i in ["newWorkbook", "selectWorksheet", "WorksheetActivated"]):
                         pass
                     else:
                         script.write(f"print('Opening {app}')\n")
@@ -628,6 +489,154 @@ except Exception:
                         else:
                             script.write(f"print('Moving directory {item_name}')\n")
                             script.write(f"if folder_exists(r'{path}'): move_folder(r'{path}', r'{dest_path}')\n")
+
+                ######
+                # Browser
+                ######
+
+                # elif e == "newWindow":
+                #     script.write(f"print('Opening new window')\n")
+                #     # TODO
+
+                # When a window is opened, a new tab is automatically created at index 0
+                # so I don't need to create it again
+                elif e == "newTab" and int(id) != 0:
+                    script.write(f"print('Opening new tab')\n")
+                    new_tab = f'window.open("''");'
+                    script.write(f"browser.execute_script('{new_tab}')\n")
+                    script.write(f"""
+try:
+    if 0 <= {id} < len(browser.window_handles):
+        browser.switch_to.window(browser.window_handles[{id}])
+    else:
+        for i in range(0, {id}):
+            browser.execute_script('window.open("");')
+        browser.switch_to.window(browser.window_handles[{id}])
+except Exception:
+    pass
+\n""")
+                elif e == "selectTab":
+                    script.write(f"print('Selecting tab {id}')\n")
+                    script.write(f"""
+try:
+    if 0 <= {id} < len(browser.window_handles):
+        browser.switch_to.window(browser.window_handles[{id}])
+    else:
+        for i in range(0, {id}):
+            browser.execute_script('window.open("");')
+        browser.switch_to.window(browser.window_handles[{id}])
+    if browser.current_url == 'about:blank':
+        browser.get('{url}') 
+except Exception:
+    pass
+\n""")
+                elif e == "closeTab":
+                    script.write(f"print('Closing tab')\n")
+                    script.write(f"browser.close()\n")
+                elif e == "reload":
+                    script.write(f"print('Reloading page')\n")
+                    script.write(f"""
+try:
+    if browser.current_url != '{url}':
+        browser.get('{url}')
+    else: 
+        browser.refresh()
+except Exception:
+    pass
+""")
+                elif (e == "clickLink" or e == "typed") and ('chrome-extension' not in url):  # or e == "link" # disable because if user edits fields, this url changes
+                    script.write(f"print('Loading link {url}')\n")
+                    script.write(f"browser.get('{url}')\n")
+                    script.write(f"""
+try:
+    WebDriverWait(browser, 2).until(expected_conditions.presence_of_element_located((By.TAG_NAME, 'body')))
+except selenium.common.exceptions.TimeoutException:
+    pass
+\n""")
+                elif e == "mouseClick":
+                    # if url:  # disable because if user edits fields, this url changes
+                    #     script.write(f"print('Loading link {url}')\n")
+                    #     script.write(f"browser.get('{url}')\n")
+                    script.write(f"print('Clicking button ')\n")
+                    script.write(f"""
+try:
+    if browser.current_url == 'about:blank':
+        browser.get('{url}') 
+    browser.find_element_by_xpath('{xpath}').click()
+except Exception:
+    pass
+\n""")
+                elif e == "changeField":
+                    if row['tag_category'] == "SELECT":
+                        tag_value = row['tag_value']
+                        script.write(f"print('Selecting text')\n")
+                        script.write(f"""
+try:
+    Select(browser.find_element_by_xpath('{xpath}')).select_by_value('{tag_value}')
+except Exception:
+    pass
+\n""")
+                    else:
+                        script.write(f"print('Inserting text: ' + '''{value}''')\n")
+                        script.write(f"""
+try:
+    if browser.current_url == 'about:blank':
+        browser.get('{url}') 
+    browser.find_element_by_xpath('{xpath}').clear()
+    browser.find_element_by_xpath('{xpath}').send_keys('''{value}''')
+except selenium.common.exceptions.NoSuchElementException:
+    try:
+        browser.find_element_by_name('{row['tag_name']}').clear()
+        browser.find_element_by_name('{row['tag_name']}').send_keys('''{value}''') 
+    except Exception:
+        pass
+except Exception:
+    pass
+\n""")
+
+                elif e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
+                    script.write(f"print('Clicking button {row['tag_name']}')\n")
+                    script.write(f"""
+try:
+    browser.find_element_by_xpath('{xpath}').click()
+except Exception:
+    pass
+\n""")
+                elif e == "doubleClick" and xpath != '':
+                    script.write(f"print('Double click')\n")
+                    script.write(f"""
+try:
+    ActionChains(browser).double_click(browser.find_element_by_xpath('{xpath}')).perform()
+except Exception:
+    pass
+\n""")
+                elif e == "contextMenu" and xpath != '':
+                    script.write(f"print('Context menu')\n")
+                    script.write(f"""
+try:
+    ActionChains(browser).context_click(browser.find_element_by_xpath('{xpath}')).perform()
+except Exception:
+    pass
+\n""")
+                elif e == "selectText":
+                    pass
+                elif e == "zoomTab":
+                    # newZoomFactor is like 1.2 so I convert it to percentage
+                    newZoom = int(float(row['newZoomFactor']) * 100)
+                    script.write(f"print('Zooming page to {newZoom}%')\n")
+                    script.write(
+                        "browser.execute_script({}'{}%'{})\n".format('"document.body.style.zoom=', newZoom, '"'))
+                # elif e == "submit":
+                #     script.write(f"print('Submitting button')\n")
+                #     script.write(f"browser.find_element_by_xpath('{xpath}').submit()\n")
+                elif e == "mouse":  # TODO
+                    mouse_coord = row['mouse_coord']
+                    script.write(f"print('Mouse click')\n")
+                    script.write(f"actions = ActionChains(browser)\n")
+                    script.write(f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
+                    script.write(f"actions.moveByOffset({mouse_coord})\n")
+                    script.write(f"actions.click().build().perform()\n")
+
 
         # self.status_queue.put(f"[RPA] Generated RPA script {ntpath.basename(RPA_filepath)}")
         self.status_queue.put(f"[RPA] Generated RPA script")

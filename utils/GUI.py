@@ -2,8 +2,9 @@
 # GUI
 # Build native user interface and start main logger
 # ****************************** #
-
 import sys
+
+from utils.filenameDialog import getFilenameDialog
 
 sys.path.append('../')  # this way main file is visible from this file
 from PyQt5.QtCore import Qt, QSize, QDir, QTimer
@@ -13,7 +14,7 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
                              QAbstractItemView, QFileDialog, QRadioButton, QProgressDialog,
                              QMainWindow, QWidget, QSlider, QLCDNumber, QDialogButtonBox,
-                             QFormLayout, QLineEdit)
+                             QFormLayout, QLineEdit, QMessageBox)
 import darkdetect
 from multiprocessing import Process, Queue
 import pandas
@@ -25,6 +26,7 @@ import utils.generateRPAScript
 import utils.xesConverter
 import utils.process_mining
 import utils.utils
+import traceback
 
 
 # Preferences window
@@ -140,8 +142,12 @@ class MainApplication(QMainWindow, QDialog):
         self.setAppIcon()
         self.setStyle()
 
+        # queue used to send messages to GUI
         self.status_queue = Queue()
+        # queue used to get filepath of current log
         self.LOG_FILEPATH = Queue()
+        # queue used to kill processes before closing main, when pressing stop
+        self.processesPID = Queue()
 
         self.createMenu()
 
@@ -159,7 +165,7 @@ class MainApplication(QMainWindow, QDialog):
         #  Variables
         self.running = False
         self.mainProcess = None
-        self.officeFilename = None
+        self.officeFilepath = None
         self.runCount = 0
         self.csv_to_join = list()
 
@@ -203,12 +209,20 @@ class MainApplication(QMainWindow, QDialog):
         updateUIThread.start()
 
     def createMenu(self):
-        menu = self.menuBar().addMenu('File')
-        action = menu.addAction('Preferences...')
-        action.triggered.connect(self.handlePreferences)
-        mergeAction = menu.addAction('Merge multiple CSV...')
+        menu = self.menuBar()
+
+        fileMenu = menu.addMenu('File')
+        preferencesAction = fileMenu.addAction('Preferences...')
+        preferencesAction.triggered.connect(self.handlePreferences)
+        mergeAction = fileMenu.addAction('Merge multiple CSV...')
         mergeAction.triggered.connect(self.handleMerge)
+        runLogAction = fileMenu.addAction('Make RPA from log...')
+        runLogAction.triggered.connect(self.handleRunLogAction)
         self.preferencesDialog = Preferences(self, self.status_queue)
+
+        helpMenu = menu.addMenu('Help')
+        about = helpMenu.addAction('About')
+        about.triggered.connect(self.showAboutMessage)
 
     def createSystemLoggerGroupBox(self):
         self.systemGroupBox = QGroupBox("System logger")
@@ -601,66 +615,26 @@ class MainApplication(QMainWindow, QDialog):
                 self.statusListWidget.addItem(QListWidgetItem(item))
             time.sleep(0.5)
 
-    @staticmethod
-    def getFilenameDialog(customDialog=True, title="Open", hiddenItems=False, isFolder=False, forOpen=True,
-                          directory='',
-                          filter_format=''):
-
-        options = QFileDialog.Options()
-        if customDialog:
-            options |= QFileDialog.DontUseNativeDialog
-            options |= QFileDialog.DontUseCustomDirectoryIcons
-
-        dialog = QFileDialog()
-        dialog.setOptions(options)
-        dialog.setWindowTitle(title)
-
-        if hiddenItems:
-            dialog.setFilter(dialog.filter() | QDir.Hidden)
-
-        # Files or folders
-        if isFolder:
-            dialog.setFileMode(QFileDialog.DirectoryOnly)
-        else:
-            # dialog.setFileMode(QFileDialog.AnyFile)
-            dialog.setFileMode(QFileDialog.ExistingFiles)
-
-        # Opening or saving
-        if forOpen:
-            dialog.setAcceptMode(QFileDialog.AcceptOpen)
-        else:
-            dialog.setAcceptMode(QFileDialog.AcceptSave)
-
-        # Set format
-        if filter_format != '' and isFolder is False:
-            # dialog.setDefaultSuffix(filter_format)
-            dialog.setNameFilters([filter_format])
-
-        # starting directory
-        if directory != '':
-            dialog.setDirectory(str(directory))
-        else:
-            dialog.setDirectory(DESKTOP)
-
-        if dialog.exec_() == QDialog.Accepted:
-            path = dialog.selectedFiles()  # returns a list
-            return path
-        else:
-            return []
-
     def handlePreferences(self):
         self.preferencesDialog.show()
 
-    def handleMerge(self):
+    def handleMerge(self, merged=True, title='Select multiple CSV to merge', multipleItems=True):
         self.statusListWidget.clear()
-        csv_to_merge = self.getFilenameDialog(customDialog=False,
-                                              title='Select CSV to merge',
-                                              filter_format="CSV log files (*.csv)")
+        csv_to_merge = getFilenameDialog(customDialog=False,
+                                         title=title,
+                                         multipleItems=multipleItems,
+                                         filter_format="CSV log files (*.csv)")
         if csv_to_merge:
-            self.status_queue.put("[GUI] Merging selected files...")
-            self.handleProcessMining(sorted(csv_to_merge), merged=True)
+            if merged:
+                self.status_queue.put("[GUI] Merging selected files...")
+            else:
+                self.status_queue.put("[GUI] Analyzing selected log...")
+            self.handleProcessMining(sorted(csv_to_merge), merged)
         else:
             self.status_queue.put("[GUI] No csv selected...")
+
+    def handleRunLogAction(self):
+        return self.handleMerge(merged=False, title='Select CSV to run', multipleItems=False)
 
     # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
@@ -745,8 +719,13 @@ class MainApplication(QMainWindow, QDialog):
             self.runCount = 0
             self.csv_to_join.clear()
             return False
+        except PermissionError as e:
+            print(f"[GUI] Process mining analysis exited with error: {e}")
+            print(f"[GUI] Close the file if it's open and try again.")
         except Exception as e:
             print(f"[GUI] Process mining analysis exited with error: {e}")
+            traceback.print_exc()
+            print(traceback.format_exc())
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
@@ -763,7 +742,7 @@ class MainApplication(QMainWindow, QDialog):
             self.runCount += 1
 
         totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
-        self.status_queue.put(f"[GUI] Run {self.runCount} of {totalRunCount}")
+        self.status_queue.put(f"[GUI] Run {self.runCount} of {totalRunCount}, waiting for next run...")
 
         # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
         # from these csv
@@ -774,6 +753,27 @@ class MainApplication(QMainWindow, QDialog):
             self.runCount = 0
             self.csv_to_join.clear()
 
+    def showAboutMessage(self):
+        QMessageBox.about(self, "ComputerLogger", "ComputerLogger allows to record user interaction with the computer "
+                                                  "and perform process discovery analysis on the recorded logs, "
+                                                  "determining the best way to perform a task")
+
+    def excelDialog(self):
+        self.officeFilepath = None
+        if self.officeExcel and WINDOWS:
+            msgBox = QMessageBox()
+            msgBox.setWindowTitle("Excel spreadsheet")
+            msgBox.setText("Do you want to open an existing Excel spreadsheet or create a new one?")
+            msgBox.addButton(QPushButton('Open existing spreadsheet'), QMessageBox.YesRole)
+            msgBox.addButton(QPushButton('Create new spreadsheet'), QMessageBox.NoRole)
+            ret = msgBox.exec_()
+            if ret == 0:
+                path = getFilenameDialog(customDialog=False,
+                                         title='Select Excel spreadsheet to open',
+                                         multipleItems=False,
+                                         filter_format="Excel files (*.csv *.xlsx *xls *.xlsm)")
+                self.officeFilepath = path[0] if path else None
+
     # Called when start button is clicked by user
     def onButtonClick(self):
 
@@ -783,7 +783,11 @@ class MainApplication(QMainWindow, QDialog):
             self.running = True
 
             self.statusListWidget.clear()
-            self.status_queue.put("[GUI] Loading threads, please wait...")
+
+            # ask if user want to create new spreadsheet or open existing one
+            self.excelDialog()
+
+            self.status_queue.put("[GUI] Loading, please wait...")
 
             # start main process with the options selected in gui. It handles all other methods main method is
             # started as a process so it can be terminated once the button is clicked all the methods in the main
@@ -795,7 +799,7 @@ class MainApplication(QMainWindow, QDialog):
                 self.systemLoggerHotkeys,
                 self.systemLoggerUSB,
                 self.systemLoggerEvents,
-                self.officeFilename,
+                self.officeFilepath,
                 self.officeExcel,
                 self.officeWord,
                 self.officePowerpoint,
@@ -805,14 +809,13 @@ class MainApplication(QMainWindow, QDialog):
                 self.browserEdge,
                 self.browserOpera,
                 self.status_queue,
-                self.LOG_FILEPATH
+                self.LOG_FILEPATH,
+                self.processesPID
             ))
 
             self.mainProcess.start()
 
-            self.createProgressDialog("Starting...", "Starting server...", 1500)
-
-            # self.compatibilityCheckMessage()
+            self.createProgressDialog("Starting...", "Starting server...", 1000)
 
             self.runButton.setText('Stop logger')
             self.runButton.update()
@@ -827,8 +830,11 @@ class MainApplication(QMainWindow, QDialog):
             self.runButton.setText('Start logger')
             self.runButton.update()
 
-            # self.compatibilityCheckMessage()
-
+            # kill active processes before closing main
+            while not self.processesPID.empty():
+                pid = self.processesPID.get()
+                # print(f"[DEBUG] Killing PID {pid}")
+                os.kill(pid, -9)
             # stop main process, automatically closing all daemon threads in main process
             self.mainProcess.terminate()
 
@@ -836,12 +842,13 @@ class MainApplication(QMainWindow, QDialog):
 
             # once log file is created, RPA actions are automatically generated for each category
             # log_filepath = utils.config.MyConfig.get_instance().log_filepath
-            main_log_filepath = self.LOG_FILEPATH.get()
-            if main_log_filepath and os.path.exists(main_log_filepath):
-                self.handleRunCount(main_log_filepath)
+            if not self.LOG_FILEPATH.empty():
+                main_log_filepath = self.LOG_FILEPATH.get()
+                if main_log_filepath and os.path.exists(main_log_filepath):
+                    self.handleRunCount(main_log_filepath)
             else:
-                self.status_queue.put(f"[ERROR] Could not locate log file {main_log_filepath}, "
-                                      f"please restart the application and try again.")
+                self.status_queue.put(
+                    f"[GUI] Could not locate log file.")
 
             # kill node server when closing python server, otherwise port remains occupied
             if MAC and self.officeExcel:
