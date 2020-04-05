@@ -502,7 +502,10 @@ def excelEvents(filepath=None):
             # filterNoneRangeValues returns a list but if user selected a single cell I get a list of letters like
             # ['p', 'y', 't', 'h', 'o', 'n'] so if there is no ':' in selection i join the list to get the word back
             if not ':' in cell_range:
-                value = ''.join(value)
+                try:
+                    value = ''.join(value)
+                except TypeError:
+                    pass
 
             print(
                 f"{timestamp()} {USER} Microsoft Excel editCellSheet {Sh.Name} {Sh.Parent.Name} {cell_range} ({cell_range_number}) {value}")

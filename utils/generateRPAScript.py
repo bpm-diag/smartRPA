@@ -162,7 +162,9 @@ except WebDriverException as e:
 
                 app = row['application']
                 mouse_coord = row['mouse_coord']
-                cb = row['clipboard_content']
+
+                cb = utils.utils.processClipboard(row['clipboard_content'])
+
                 size = row["window_size"]
                 url = "about:blank"
                 if not pandas.isna(row['browser_url']):
@@ -173,7 +175,7 @@ except WebDriverException as e:
                 xpath = ""
                 if not pandas.isna(row['xpath']):
                     xpath = row['xpath']
-                value = row['tag_value']
+                value = utils.utils.unicodeString(row['tag_value'])
 
                 if e not in self.eventsToIgnore:
                     script.write(f"# {timestamp} {e}\n")
@@ -384,16 +386,30 @@ except Exception:
                 ######
 
                 elif (e == "copy" or e == "cut") and not pandas.isna(cb):
-                    # cb = utils.utils.removeWhitespaces(cb)
                     script.write(f"print('Setting clipboard text')\n")
                     if WINDOWS:
-                        script.write(f'set_to_clipboard("""{cb}""")\n')
+                        script.write(f'''
+try:
+    set_to_clipboard("""{cb}""")
+except Exception:
+    pass
+\n''')
                     else:
                         script.write(f"pyperclip.copy('{cb}')\n")
-                # elif e == "paste":
-                #     cb = utils.utils.removeWhitespaces(cb)
-                #     script.write(f"print('Pasting clipboard text')\n")
-                #     script.write(f'type_text("""{cb}""")\n')
+                # paste in browser is handled elsewhere
+                elif e == "paste" and row['category'] != 'Browser':
+                    script.write(f'print("Pasting clipboard text: {cb} in {row["title"]}")\n')
+                    if WINDOWS:
+                        script.write(f'''
+try:
+    set_window_to_foreground('{row['title']}')
+    type_text("""{cb}"""+'\\n')
+except Exception:
+    pass
+\n''')
+                    elif MAC:
+                        cb_text = f'"{cb}")'
+                        script.write(f"applescript.tell.app('System Events', 'keystroke {cb_text}')")
                 elif e == "pressHotkey" and WINDOWS:
                     hotkey = row["title"]
                     hotkey_param = hotkey.split('+')
@@ -577,22 +593,22 @@ except Exception:
     pass
 \n""")
                     else:
-                        script.write(f"print('Inserting text: ' + '''{value}''')\n")
-                        script.write(f"""
+                        script.write(f'print("Inserting text: {value}")\n')
+                        script.write(f'''
 try:
     if browser.current_url == 'about:blank':
         browser.get('{url}') 
     browser.find_element_by_xpath('{xpath}').clear()
-    browser.find_element_by_xpath('{xpath}').send_keys('''{value}''')
+    browser.find_element_by_xpath('{xpath}').send_keys("""{value}""")
 except selenium.common.exceptions.NoSuchElementException:
     try:
         browser.find_element_by_name('{row['tag_name']}').clear()
-        browser.find_element_by_name('{row['tag_name']}').send_keys('''{value}''') 
+        browser.find_element_by_name('{row['tag_name']}').send_keys("""{value}""") 
     except Exception:
         pass
 except Exception:
     pass
-\n""")
+\n''')
 
                 elif e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
                     script.write(f"print('Clicking button {row['tag_name']}')\n")

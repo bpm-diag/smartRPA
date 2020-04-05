@@ -495,29 +495,29 @@ def logHotkeys():
 
 
 def logPasteHotkey():
-
     def handleCB():
-        try:
+        # paste event in browser is handled separately so this should log only if I'm not in browser
+        browsers = ["chrome", "edge", "firefox", "opera"]
+        window_name = getActiveWindowName()
+        if not (any(b in window_name.lower() for b in browsers)):
             clipboard_content = pyperclip.paste()
-        except Exception as e:
-            print(e)
-            clipboard_content = ""
-
-        ts = timestamp()[:-6]+'000000'
-
-        print(f"{ts} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
-
-        # remove milliseconds from timestamp so duplicated events are easier to remove
-        session.post(consumerServer.SERVER_ADDR, json={
-            "timestamp": ts,
-            "user": USER,
-            "category": "OperatingSystem",
-            "application": 'Clipboard',
-            "event_type": 'paste',
-            "title": 'CTRL+V',
-            "description": 'Paste',
-            "clipboard_content": clipboard_content
-        })
+            try:
+                appName = window_name.split('-')[-1].strip()
+            except Exception:
+                appName = "Clipboard"
+            # remove milliseconds from timestamp so duplicated events are easier to remove
+            ts = timestamp()[:-6] + '000000'
+            print(f"{ts} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
+            session.post(consumerServer.SERVER_ADDR, json={
+                "timestamp": ts,
+                "user": USER,
+                "category": "OperatingSystem",
+                "application": appName,
+                "title": window_name,
+                "event_type": 'paste',
+                "description": 'Paste',
+                "clipboard_content": clipboard_content
+            })
 
     def handleHotkey():
         cb = Thread(target=handleCB)

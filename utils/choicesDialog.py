@@ -26,12 +26,15 @@ class ChoicesDialog(QDialog):
             if (e in ['cut', 'copy', 'paste']) and utils.removeWhitespaces(row['clipboard_content']) == '':
                 self.df.drop(row_index, inplace=True)
 
-        self.filtered_df = self.df[self.df['concept:name'].isin(
+        # take selected event names
+        mask1 = df['concept:name'].isin(
             ['changeField',
              'editCell', 'editCellSheet', 'editRange',
-             'moved', 'Unmount',
-             ]  # removed cut and copy and paste
-        )]
+             'moved', 'Unmount']
+        )
+        # exclude paste in browser, take only paste in OS, do not consider cut or copy
+        mask2 = ((df['concept:name'] == 'paste') & (df['category'] != 'Browser'))
+        self.filtered_df = self.df[mask1 | mask2]
 
         if not self.filtered_df.empty:
 

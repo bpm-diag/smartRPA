@@ -12,6 +12,7 @@ pynput==1.6.7
 selenium==3.7.0
 python-Levenshtein==0.12.0
 fuzzywuzzy==0.18.0
+Unidecode==1.1.1
 psutil==5.4.6
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"

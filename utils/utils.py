@@ -19,6 +19,7 @@ import utils.config
 import utils.consumerServer
 import unicodedata
 import pandas
+from unidecode import unidecode
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
 
@@ -128,6 +129,29 @@ def removeWhitespaces(string):
     return " ".join(string.split())
 
 
+def processClipboard(cb, remove_whitespaces=False):
+    try:
+        clipboard = unicodeString(cb.strip('"'))
+        if remove_whitespaces:
+            clipboard = removeWhitespaces(clipboard)
+        return clipboard
+    except Exception:
+        return cb
+
+
+def unicodeString(string):
+    try:
+        return unidecode(string
+                         .replace("à", "a'")
+                         .replace("è", "e'")
+                         .replace("ì", "i'")
+                         .replace("ò", "o'")
+                         .replace("ù", "u'")
+                         )
+    except Exception:
+        return string
+
+
 def CSVEmpty(log_filepath, min_len=1):
     try:
         df = pandas.read_csv(log_filepath, encoding='utf-8-sig')
@@ -179,6 +203,14 @@ def getActiveWindowInfo(parameter):
     except Exception:
         pass
 
+
+def getActiveWindowName():
+    try:
+        hwnd = win32gui.GetForegroundWindow()
+        name = win32gui.GetWindowText(hwnd)
+        return name
+    except Exception:
+        pass
 
 # return python module install location
 def getPythonModuleLocation(module_name):

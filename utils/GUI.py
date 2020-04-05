@@ -216,7 +216,7 @@ class MainApplication(QMainWindow, QDialog):
         preferencesAction.triggered.connect(self.handlePreferences)
         mergeAction = fileMenu.addAction('Merge multiple CSV...')
         mergeAction.triggered.connect(self.handleMerge)
-        runLogAction = fileMenu.addAction('Make RPA from log...')
+        runLogAction = fileMenu.addAction('RPA from log...')
         runLogAction.triggered.connect(self.handleRunLogAction)
         self.preferencesDialog = Preferences(self, self.status_queue)
 
@@ -815,7 +815,7 @@ class MainApplication(QMainWindow, QDialog):
 
             self.mainProcess.start()
 
-            self.createProgressDialog("Starting...", "Starting server...", 1000)
+            self.createProgressDialog("Loading...", "Loading...", 1000)
 
             self.runButton.setText('Stop logger')
             self.runButton.update()

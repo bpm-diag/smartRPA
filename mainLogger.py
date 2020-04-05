@@ -48,7 +48,7 @@ def startLogger(systemLoggerFilesFolder,
         # return log file to GUI so it can be processed
         LOG_FILEPATH.put(log_filepath)
 
-        t0 = Thread(target=utils.consumerServer.runServer)
+        t0 = Thread(target=utils.consumerServer.runServer, args=[status_queue])
         t0.daemon = True
         t0.start()
 
@@ -66,11 +66,11 @@ def startLogger(systemLoggerFilesFolder,
 
             # only way to log paste event is to detect ctrl + v, but it should be started as process instead of thread
             # otherwise some events are lost
-            # if WINDOWS:
-            #     t9 = Process(target=systemEvents.logPasteHotkey)
-            #     t9.daemon = True
-            #     t9.start()
-            #     processesPID.put(t9.pid)
+            if WINDOWS:
+                t9 = Process(target=systemEvents.logPasteHotkey)
+                # t9.daemon = True
+                t9.start()
+                processesPID.put(t9.pid)
 
         if systemLoggerFilesFolder:
 
@@ -79,9 +79,10 @@ def startLogger(systemLoggerFilesFolder,
                 t1.daemon = True
                 t1.start()
 
-                t2 = Thread(target=systemEvents.watchRecentsFilesWin)
-                t2.daemon = True
+                t2 = Process(target=systemEvents.watchRecentsFilesWin)
+                # t2.daemon = True
                 t2.start()
+                processesPID.put(t2.pid)
 
                 # t3 = Thread(target=systemEvents.detectSelectionWindowsExplorer)
                 # t3.daemon = True
@@ -129,6 +130,7 @@ def startLogger(systemLoggerFilesFolder,
                 # t12.daemon = True
                 t12.start()
                 processesPID.put(t12.pid)
+                status_queue.put(f"[mainLogger] Loading Excel...")
 
                 # t14 = Thread(target=mouseEvents.logMouse)
                 # t14.daemon = True
@@ -144,17 +146,20 @@ def startLogger(systemLoggerFilesFolder,
             # t14.daemon = True
             t14.start()
             processesPID.put(t14.pid)
+            status_queue.put(f"[mainLogger] Loading Word...")
 
         if officePowerpoint and WINDOWS:
             t15 = Process(target=officeEvents.powerpointEvents)
             # t15.daemon = True
             t15.start()
             processesPID.put(t15.pid)
+            status_queue.put(f"[mainLogger] Loading PowerPoint...")
 
         if officeOutlook and WINDOWS:
-            t16 = Thread(target=officeEvents.outlookEvents)
-            t16.daemon = True
+            t16 = Process(target=officeEvents.outlookEvents)
+            # t16.daemon = True
             t16.start()
+            processesPID.put(t16.pid)
 
         # ************
         # browser logger
@@ -172,7 +177,7 @@ def startLogger(systemLoggerFilesFolder,
         if browserOpera:
             utils.consumerServer.log_opera = True
 
-        status_queue.put(f"[mainLogger] Logging started")
+        # status_queue.put(f"[mainLogger] Logging started")
 
         if browserChrome or browserFirefox or browserEdge or browserOpera:
             status_queue.put(f"[mainLogger] Remember to click on extension icon to enable browser logging")

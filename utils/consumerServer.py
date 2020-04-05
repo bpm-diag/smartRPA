@@ -113,13 +113,12 @@ def isPortInUse(port):
 
 
 # start server thread, run by mainLogger
-def runServer():
+def runServer(status_queue):
     if not isPortInUse(PORT):
-        print("[Server] Logging server started...")
+        status_queue.put("[Server] Logging server started...")
         app.run(port=PORT, debug=False, use_reloader=False)
     else:
-        print(f"[Server] Could not start logging server, port {PORT} is already in use.")
-
+        status_queue.put(f"[Server] Could not start logging server, port {PORT} is already in use.")
 
 if __name__ == "__main__":
     app.run(port=PORT, debug=True, use_reloader=True)
