@@ -654,7 +654,6 @@ def excelEvents(status_queue, filepath=None):
 
 # run node server hiding node server output
 def excelEventsMacServer(status_queue, excelFilepath=None):
-    import applescript
     import xlwings as xw
     macExcelAddinPath = os.path.join(MAIN_DIRECTORY, 'modules', 'excelAddinMac')
     # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1") # hide output
@@ -666,7 +665,7 @@ def excelEventsMacServer(status_queue, excelFilepath=None):
         else:
             app = xw.App(visible=True)
             book = xw.Book()
-        status_queue.put("[officeEvents] Remember to enable OfficeLogger Add-In by clicking 'Insert > My Add-Ins>  "
+        status_queue.put("[officeEvents] Remember to enable OfficeLogger Add-In by clicking 'Insert > My Add-Ins > "
                          "OfficeLogger' and then 'Home > Show Taskpane'")
         os.system(f"cd {macExcelAddinPath} && npm run dev-server")
     else:

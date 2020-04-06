@@ -141,7 +141,7 @@ class ChoicesDialog(QDialog):
                     self.df.loc[row_index, 'clipboard_content'] = new_values[i]
             except Exception as exception:
                 # print(f"[CHOICESDIALOG] Error: {exception}")
-                continue
+                pass
 
     def getDF(self):
         # self.df.to_csv('/Users/marco/Desktop/temp.csv', encoding='utf-8-sig', index=False)

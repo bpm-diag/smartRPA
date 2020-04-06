@@ -125,11 +125,12 @@ def startLogger(systemLoggerFilesFolder,
         # ************
 
         if officeExcel:
+            status_queue.put(f"[mainLogger] Loading Excel...")
+
             if WINDOWS:
                 t12 = Process(target=officeEvents.excelEvents, args=(status_queue, excelFilepath,))
                 t12.start()
                 processesPID.put(t12.pid)
-                status_queue.put(f"[mainLogger] Loading Excel...")
 
                 # t14 = Thread(target=mouseEvents.logMouse)
                 # t14.daemon = True

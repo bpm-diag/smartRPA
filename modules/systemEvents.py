@@ -468,6 +468,8 @@ def logHotkeys():
         if hotkey == "ctrl+x":
             event_type = "cut"
             clipboard_content = pyperclip.paste()
+        if hotkey == "ctrl+h" and 'chrome' in appName.lower():
+            meaning = "Show history"
         print(f"{timestamp()} {USER} OperatingSystem {event_type} {hotkey.upper()} {meaning} {clipboard_content}")
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),

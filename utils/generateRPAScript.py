@@ -38,6 +38,7 @@ class RPAScript:
         self.status_queue = status_queue
         self._delay_between_actions = delay_between_actions
         self._SaveAsUI = False
+        self.excelMacOpened = False
         self.eventsToIgnore = ["openWindow", "activateWorkbook", "newWorkbook", "selectedFile", "selectedFolder",
                                "newWindow", "closeWindow", "submit", "formSubmit", "enableBrowserExtension",
                                "newWindow", "startPage", "activateWorkbook", "openWindow", "click",
@@ -100,6 +101,21 @@ except WebDriverException as e:
     sys.exit()
     \n"""
 
+    def _createOpenExcelMac(self, script, path):
+        self.excelMacOpened = True
+        # script.write(f"applescript.tell.app('Microsoft Excel', 'activate')\n")
+        script.write("app = xw.App(visible=True)\n")
+        if path and os.path.exists(path):
+            script.write(f"wb = xw.Book('{path}')\n")
+        else:
+            script.write("wb = xw.Book()\n")
+        script.write(f"""
+try:
+    sht = wb.sheets.active
+except Exception:
+    pass
+\n""")
+
     # Create and return rpa directory and file for each specific RPA
     def _createRPAFile(self, RPA_type):
         # csv_file_path is like /Users/marco/Desktop/ComputerLogger/logs/2020-02-25_23-21-57.csv
@@ -114,15 +130,13 @@ except WebDriverException as e:
     def _generateUnifiedRPA(self, df: pandas.DataFrame, filename="_UnifiedRPA.py"):
         if df.empty:
             return False
-        RPABrowser = not df.query('category=="Browser"').empty
-        RPASystem = not df.query('category=="OperatingSystem"').empty
 
         RPA_filepath = self._createRPAFile(filename)
         excelMacOpened = False
         with open(RPA_filepath, 'w') as script:
             script.write(self._createHeader())
             # add browser header if browser is present in event log
-            if RPABrowser:
+            if not df.query('category=="Browser"').empty:
                 script.write(self._createBrowserHeader())
             if WINDOWS:
                 script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
@@ -201,16 +215,9 @@ except WebDriverException as e:
                         script.write("excel = Excel(visible=True)\n")
                         # x, y, width, height = size.split(',')
                         # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")                # elif e == "resizeWindow":  # TODO
-                    elif MAC and not excelMacOpened:
-                        excelMacOpened = True
-                        script.write(f"applescript.tell.app('Microsoft Excel', 'activate')\n")
-                        script.write("wb = xw.Book()\n")
-                        script.write(f"""
-try:
-    sht = wb.sheets.active
-except Exception:
-    pass
-\n""")
+                    elif MAC and not self.excelMacOpened:
+                        self._createOpenExcelMac(script, path)
+
                 elif e in ["openWorkbook"]:
                     script.write(f"print('Opening Excel...')\n")
                     if WINDOWS and os.path.exists(path):
@@ -221,16 +228,14 @@ except Exception:
                     if WINDOWS:
                         script.write(f"excel.add_worksheet('{sh}')\n")
                     elif MAC:
-                        script.write(f"sht = wb.sheets.add()\n")
+                        script.write(f"sht = wb.sheets.add(name='{sh}')\n")
                 elif e in ["selectWorksheet", "WorksheetActivated"]:
                     script.write(f"print('Selecting worksheet {sh}')\n")
                     if WINDOWS:
                         script.write(f"excel.activate_worksheet('{sh}')\n")
                     elif MAC:
-                        if not excelMacOpened:
-                            excelMacOpened = True
-                            script.write(f"print('Opening Excel...')\n")
-                            script.write("wb = xw.Book()\n")
+                        if not self.excelMacOpened:
+                            self._createOpenExcelMac(script, path)
                         script.write(f"""
 try:
     sht = wb.sheets['{sh}'].activate()
@@ -258,7 +263,7 @@ except Exception:
 \n""")
 
                 elif e in ["editCellSheet", "editCell", "editRange"]:
-                    script.write(f"print('Writing cell {cell_range}')\n")
+                    script.write(f"print('Writing in cell {cell_range}')\n")
                     if WINDOWS:
                         script.write(f'''
 try:
@@ -267,17 +272,8 @@ except Exception:
     pass
 \n''')
                     elif MAC:
-                        if not excelMacOpened:
-                            excelMacOpened = True
-                            script.write(f"print('Opening Excel...')\n")
-                            script.write("wb = xw.Book()\n")
-                        script.write(f"""
-try:
-    sht = wb.sheets['{sh}']
-    sht.activate()
-except Exception:
-    pass
-\n""")
+                        if not self.excelMacOpened:
+                            self._createOpenExcelMac(script, path)
                         cell_content = row['cell_content'].strip('[]').strip('"').strip()
                         script.write(f'''
 try:
@@ -407,7 +403,7 @@ except Exception:
     pass
 \n''')
                     else:
-                        script.write(f"pyperclip.copy('{cb}')\n")
+                        script.write(f'pyperclip.copy("{cb}")\n')
                 # paste in browser is handled elsewhere
                 elif e == "paste" and row['category'] != 'Browser':
                     script.write(f'print("Pasting clipboard text: {cb} in {row["title"]}")\n')

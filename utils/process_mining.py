@@ -89,7 +89,7 @@ class ProcessMining:
         if self.file_extension == ".csv":
 
             def createCaseID(ts):
-                return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%Y%m%d%H%M%S%f')
+                return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%Y%m%d%H%M%S%f')# [:-3]
 
             # combine multiple csv into one and then export it to xes
             csv_to_combine = list()
