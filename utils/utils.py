@@ -42,7 +42,6 @@ if WINDOWS:
     RECENT_ITEMS_PATH_WIN = shell.SHGetFolderPath(0, shellcon.CSIDL_RECENT, None, 0)
     # RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
 
-
 # return shortcut lnk full path
 # def shortcut_target(filename):
 #     pythoncom.CoInitialize()
@@ -73,7 +72,7 @@ MAIN_DIRECTORY = os.getcwd()  # main file path
 # return current timestamp in the format '2020-02-12 17:11:14:465'
 # used by multiple modules
 def timestamp():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")#[:-3]
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")  # [:-3]
 
 
 # Create directory with the given path if it does not exist
@@ -152,6 +151,13 @@ def unicodeString(string):
         return string
 
 
+# check if port is available to start server
+def isPortInUse(port):
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('127.0.0.1', port)) == 0
+
+
 def CSVEmpty(log_filepath, min_len=1):
     try:
         df = pandas.read_csv(log_filepath, encoding='utf-8-sig')
@@ -212,6 +218,7 @@ def getActiveWindowName():
     except Exception:
         pass
 
+
 # return python module install location
 def getPythonModuleLocation(module_name):
     module = importlib.util.find_spec(module_name)
@@ -251,6 +258,7 @@ def open_file(path):
             subprocess.call([opener, path])
     except Exception as e:
         print(f"[UTILS] Could not open file {path}: {e}")
+
 
 # ************
 # Class

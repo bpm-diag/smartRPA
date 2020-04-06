@@ -33,7 +33,7 @@ class RPAScript:
     def __init__(self,
                  csv_file_path: str,
                  status_queue: Queue,
-                 delay_between_actions=0.5):
+                 delay_between_actions=0.2):
 
         self.status_queue = status_queue
         self._delay_between_actions = delay_between_actions
@@ -144,7 +144,7 @@ except WebDriverException as e:
 
                 wb = row['workbook']
                 sh = row['current_worksheet']
-                cell_value = row['cell_content']
+                cell_value = utils.utils.unicodeString(row['cell_content'])
                 cell_range = row['cell_range']
                 range_number = row['cell_range_number']
 
@@ -179,8 +179,8 @@ except WebDriverException as e:
 
                 if e not in self.eventsToIgnore:
                     script.write(f"# {timestamp} {e}\n")
-                    if RPASystem:
-                        script.write(f"sleep({self._delay_between_actions * 2})\n")
+                    if row['category'] == "OperatingSystem":
+                        script.write(f"sleep({self._delay_between_actions})\n")
                     else:
                         script.write(f"sleep({self._delay_between_actions})\n")
 
@@ -203,6 +203,7 @@ except WebDriverException as e:
                         # script.write(f"resize_window(GetWindowText(GetForegroundWindow()), {x}, {y}, {width}, {height})\n")                # elif e == "resizeWindow":  # TODO
                     elif MAC and not excelMacOpened:
                         excelMacOpened = True
+                        script.write(f"applescript.tell.app('Microsoft Excel', 'activate')\n")
                         script.write("wb = xw.Book()\n")
                         script.write(f"""
 try:
@@ -259,20 +260,31 @@ except Exception:
                 elif e in ["editCellSheet", "editCell", "editRange"]:
                     script.write(f"print('Writing cell {cell_range}')\n")
                     if WINDOWS:
-                        script.write(f"""
+                        script.write(f'''
 try:
-    excel.write_cell({range_number}, '{cell_value}')
+    excel.write_cell({range_number}, """{cell_value}""")
 except Exception:
     pass
-\n""")
+\n''')
                     elif MAC:
-                        cell_content = row['cell_content'].strip('[]').strip('"').strip()
+                        if not excelMacOpened:
+                            excelMacOpened = True
+                            script.write(f"print('Opening Excel...')\n")
+                            script.write("wb = xw.Book()\n")
                         script.write(f"""
 try:
-    sht.range('{id}').value = '{cell_content}'
+    sht = wb.sheets['{sh}']
+    sht.activate()
 except Exception:
     pass
 \n""")
+                        cell_content = row['cell_content'].strip('[]').strip('"').strip()
+                        script.write(f'''
+try:
+    sht.range('{cell_range}').value = """{cell_content}"""
+except Exception:
+    pass
+\n''')
 
                 elif e == "getRange":
                     script.write(f"print('Reading cell_range {cell_range}')\n")
@@ -410,19 +422,31 @@ except Exception:
                     elif MAC:
                         cb_text = f'"{cb}")'
                         script.write(f"applescript.tell.app('System Events', 'keystroke {cb_text}')")
+
                 elif e == "pressHotkey" and WINDOWS:
-                    hotkey = row["title"]
+                    hotkey = row["id"]
                     hotkey_param = hotkey.split('+')
                     meaning = row["description"]
+
                     script.write(f"print('Pressing hotkey {hotkey} : {meaning}')\n")
                     if len(hotkey_param) == 2:
-                        script.write(f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}')\n")
+                        script.write(f'''
+try:
+    set_window_to_foreground('{row['title']}')
+    press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}')
+except Exception:
+    pass
+\n''')
                     elif len(hotkey_param) == 3:
-                        script.write(
-                            f"press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')\n")
+                        script.write(f'''
+try:
+    set_window_to_foreground('{row['title']}')
+    press_key_combination('{hotkey_param[0]}', '{hotkey_param[1]}', '{hotkey_param[2]}')
+except Exception:
+    pass
+\n''')
 
                 # path and dest_path must be changed according to current user
-
                 elif e == "openFile" and path:
                     script.write(f"print('Opening file {item_name}')\n")
                     script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
@@ -440,7 +464,7 @@ except Exception:
                         event_list = df['event_type'].tolist()
                     except KeyError:
                         event_list = df['concept:name'].tolist()
-                    if (app == "EXCEL.EXE" or app == "Microsoft Excel") and any(
+                    if (app in ["EXCEL.EXE", "Microsoft Excel", "Microsoft Excel (MacOS)"]) and any(
                             i in event_list for i in ["newWorkbook", "selectWorksheet", "WorksheetActivated"]):
                         pass
                     else:
@@ -478,33 +502,34 @@ except Exception:
                     else:
                         script.write(f"print('Removing directory {item_name}')\n")
                         script.write(f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
-                elif (e == "moved" or e == "Unmount") and path:
+                elif e in ["moved", "Unmount"] and path:
 
                     # check if file has been renamed, so source and dest path are the same
                     if os.path.dirname(path) == os.path.dirname(dest_path):
 
                         new_name = ntpath.basename(dest_path)
+                        new_name = utils.utils.unicodeString(new_name)
 
                         # file
                         if os.path.splitext(path)[1]:
-                            script.write(f"print('Renaming file {item_name} to {new_name}')\n")
+                            script.write(f'print("Renaming file {item_name} to {new_name}")\n')
                             script.write(
-                                f"if file_exists(r'{path}'): rename_file(r'{path}', new_name='{new_name}')\n")
+                                f'if file_exists(r"{path}"): rename_file(r"{path}", new_name="{new_name}")\n')
                         # directory
                         else:
-                            script.write(f"print('Renaming directory {item_name}')\n")
+                            script.write(f'print("Renaming directory {item_name} to {new_name}")\n')
                             script.write(
-                                f"if folder_exists(r'{path}'): rename_folder(r'{path}', new_name='{new_name}')\n")
+                                f'if folder_exists(r"{path}"): rename_folder(r"{path}", new_name="{new_name}")\n')
 
                     # else file has been moved to a different folder
                     else:
                         if os.path.splitext(path)[1]:
-                            script.write(f"print('Moving file {item_name}')\n")
-                            script.write(f"if file_exists(r'{path}'): move_file(r'{path}', r'{dest_path}')\n")
-                        # otherwise assume it's a directory
+                            script.write(f'print("Moving file {item_name}")\n')
+                            script.write(f'if file_exists(r"{path}"): move_file(r"{path}", r"{dest_path}")\n')
+                        # otherwise it's a directory
                         else:
-                            script.write(f"print('Moving directory {item_name}')\n")
-                            script.write(f"if folder_exists(r'{path}'): move_folder(r'{path}', r'{dest_path}')\n")
+                            script.write(f'print("Moving directory {item_name}")\n')
+                            script.write(f'if folder_exists(r"{path}"): move_folder(r"{path}", r"{dest_path}")\n')
 
                 ######
                 # Browser

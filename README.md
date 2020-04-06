@@ -65,7 +65,15 @@ npm install
 npm start
 ```
 
-Once installed, choose the `Home` tab in Excel, and then choose the `Show Taskpane` button in the ribbon to open the add-in task pane.
+To activate the Add-in in Excel:
+<ol type="a">
+  <li>Go to <code>Insert</code> tab</li>
+  <li>Click on <code>My Add-ins</code> > <code>OfficeLogger</code></li>
+  <li>Go to <code>Home</code> tab</li>
+  <li>Click the <code>Show Taskpane</code> button in the ribbon</li>
+  <li>Enable the checkbox</li>
+</ol>
+
 
 #### 4. **Run main logger**
 

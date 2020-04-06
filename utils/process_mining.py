@@ -493,6 +493,8 @@ class ProcessMining:
                 return f"[{app}] Rename folder as '{path}'"
         elif e in ["programOpen", "programClose"]:
             return f"Use program '{app}'"
+        elif e in ["hotkey"]:
+            return f"[{app}] Press '{row['description']}' hotkey ({row['id']})"
 
         # excel win
         elif e in ["newWorkbook", "openWorkbook", "activateWorkbook"]:

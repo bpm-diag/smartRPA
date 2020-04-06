@@ -39,39 +39,52 @@ function handleCheckbox(){
 
 function handleEvent(event){
     return Excel.run(function(context) {
-        let worksheet = context.workbook.worksheets.getActiveWorksheet().load("name");
-        let workbook_name = context.workbook.load("name");
-        let range = context.workbook.worksheets
-            .getActiveWorksheet()
-            .getRange(event.address)
-            .load(["address", "values", "name"]);
+        Office.context.document.getFilePropertiesAsync(function (asyncResult) {
 
-        return context.sync().then(function() {
+            let worksheet = context.workbook.worksheets.getActiveWorksheet().load("name");
+            let workbook_name = context.workbook.load("name");
+            let range = context.workbook.worksheets
+                .getActiveWorksheet()
+                .getRange(event.address)
+                .load(["address", "values", "name"]);
 
-            let eventLog = {
-                timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSS"),
-                category: "MSOffice",
-                application: "Microsoft Excel (MacOS)",
-                event_type: event.type,
-                workbook: workbook_name._N,
-                current_worksheet: worksheet.name,
-                id: event.address
-        };
+            // get current workbook path
+            let path = "";
+            // if it's a new document, path is not defined
+            if (typeof(asyncResult.value) !== 'undefined')
+                path = asyncResult.value.url;
 
-            if (event.type === "WorksheetSelectionChanged" || event.type === "WorksheetChanged") {
-                // When I select cells I get an array of arrays containing all the values of the cells,
-                // like [["", "", ""],["", "test", ""], ["", "test", ""]]
-                // I want to get only the non empty strings so I merge all the arrays into one uning concat
-                // and remove the empty strings using filter
-                let cell_content = [].concat.apply([], range.values).filter(cell => cell);
-                let eventType = "editCell";
-                if (event.address.includes(":"))
-                    eventType = "editRange";
-                eventLog.event_type = eventType;
-                eventLog.cell_content = JSON.stringify(cell_content);
-            }
+            return context.sync().then(function() {
 
-            post(eventLog);
+                let eventLog = {
+                    timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSSSSS"),
+                    category: "MSOffice",
+                    application: "Microsoft Excel (MacOS)",
+                    event_type: event.type,
+                    workbook: workbook_name._N,
+                    current_worksheet: worksheet.name,
+                    cell_range: event.address,
+                    event_src_path: path
+                };
+
+                if (event.type === "WorksheetSelectionChanged" || event.type === "WorksheetChanged") {
+                    // When I select cells I get an array of arrays containing all the values of the cells,
+                    // like [["", "", ""],["", "test", ""], ["", "test", ""]]
+                    // I want to get only the non empty strings so I merge all the arrays into one uning concat
+                    // and remove the empty strings using filter
+                    let cell_content = [].concat.apply([], range.values).filter(cell => cell);
+                    if (cell_content.length === 0) cell_content = "";
+                    else if (cell_content.length === 1) cell_content = cell_content[0];
+                    let eventType = "editCell";
+                    if (event.address.includes(":"))
+                        eventType = "editRange";
+                    eventLog.event_type = eventType;
+                    eventLog.cell_content = JSON.stringify(cell_content);
+                }
+
+                post(eventLog);
+
+            });
         });
     }).catch(error => console.log(error));
 }

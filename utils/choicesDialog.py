@@ -5,6 +5,7 @@ import pandas
 import sys
 import ntpath
 from utils import utils
+from utils.utils import WINDOWS
 
 
 class ChoicesDialog(QDialog):
@@ -14,8 +15,12 @@ class ChoicesDialog(QDialog):
                                                   Qt.WindowTitleHint |
                                                   Qt.CustomizeWindowHint)
         self.setWindowTitle("Choices")
-        self.setMaximumWidth(1000)
-        self.setFixedWidth(1000)
+        if WINDOWS:
+            self.setMaximumWidth(1000)
+            self.setFixedWidth(1000)
+        else:
+            self.setMaximumWidth(650)
+            self.setFixedWidth(650)
         self.setMaximumHeight(500)
 
         self.df = df
@@ -135,7 +140,7 @@ class ChoicesDialog(QDialog):
                 elif e in ["copy", "cut", "paste"]:
                     self.df.loc[row_index, 'clipboard_content'] = new_values[i]
             except Exception as exception:
-                print(f"[CHOICESDIALOG] Error: {exception}")
+                # print(f"[CHOICESDIALOG] Error: {exception}")
                 continue
 
     def getDF(self):

@@ -25,7 +25,7 @@ def startLogger(systemLoggerFilesFolder,
                 systemLoggerHotkeys,
                 systemLoggerUSB,
                 systemLoggerEvents,
-                officeFilepath,
+                excelFilepath,
                 officeExcel,
                 officeWord,
                 officePowerpoint,
@@ -108,9 +108,9 @@ def startLogger(systemLoggerFilesFolder,
                 t7.start()
 
         if systemLoggerHotkeys and WINDOWS:
-            t10 = Thread(target=systemEvents.logHotkeys)
-            t10.daemon = True
+            t10 = Process(target=systemEvents.logHotkeys)
             t10.start()
+            processesPID.put(t10.pid)
 
         if systemLoggerUSB and WINDOWS:
             t11 = Thread(target=systemEvents.logUSBDrives)
@@ -126,8 +126,7 @@ def startLogger(systemLoggerFilesFolder,
 
         if officeExcel:
             if WINDOWS:
-                t12 = Process(target=officeEvents.excelEvents, args=(officeFilepath,))
-                # t12.daemon = True
+                t12 = Process(target=officeEvents.excelEvents, args=(status_queue, excelFilepath,))
                 t12.start()
                 processesPID.put(t12.pid)
                 status_queue.put(f"[mainLogger] Loading Excel...")
@@ -137,27 +136,26 @@ def startLogger(systemLoggerFilesFolder,
                 # t14.start()
 
             if MAC:
-                t13 = Thread(target=officeEvents.excelEventsMacServer)
+                if utils.utils.isPortInUse(3000):
+                    os.system("pkill -f node")
+                t13 = Thread(target=officeEvents.excelEventsMacServer, args=[status_queue, excelFilepath])
                 t13.daemon = True
                 t13.start()
 
         if officeWord and WINDOWS:
             t14 = Process(target=officeEvents.wordEvents)
-            # t14.daemon = True
             t14.start()
             processesPID.put(t14.pid)
             status_queue.put(f"[mainLogger] Loading Word...")
 
         if officePowerpoint and WINDOWS:
             t15 = Process(target=officeEvents.powerpointEvents)
-            # t15.daemon = True
             t15.start()
             processesPID.put(t15.pid)
             status_queue.put(f"[mainLogger] Loading PowerPoint...")
 
         if officeOutlook and WINDOWS:
             t16 = Process(target=officeEvents.outlookEvents)
-            # t16.daemon = True
             t16.start()
             processesPID.put(t16.pid)
 

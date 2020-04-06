@@ -3,9 +3,6 @@
 # Build native user interface and start main logger
 # ****************************** #
 import sys
-
-from utils.filenameDialog import getFilenameDialog
-
 sys.path.append('../')  # this way main file is visible from this file
 from PyQt5.QtCore import Qt, QSize, QDir, QTimer
 from PyQt5.QtGui import QFont, QIcon
@@ -18,7 +15,9 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
 import darkdetect
 from multiprocessing import Process, Queue
 import pandas
+import webbrowser
 import time
+from utils.filenameDialog import getFilenameDialog
 from utils.utils import *
 import mainLogger
 import utils.config
@@ -742,7 +741,10 @@ class MainApplication(QMainWindow, QDialog):
             self.runCount += 1
 
         totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
-        self.status_queue.put(f"[GUI] Run {self.runCount} of {totalRunCount}, waiting for next run...")
+        if self.runCount == totalRunCount:
+            self.status_queue.put(f"[GUI] Run {self.runCount} of {totalRunCount}")
+        else:
+            self.status_queue.put(f"[GUI] Run {self.runCount} of {totalRunCount}, waiting for next run...")
 
         # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
         # from these csv
@@ -754,13 +756,20 @@ class MainApplication(QMainWindow, QDialog):
             self.csv_to_join.clear()
 
     def showAboutMessage(self):
-        QMessageBox.about(self, "ComputerLogger", "ComputerLogger allows to record user interaction with the computer "
-                                                  "and perform process discovery analysis on the recorded logs, "
-                                                  "determining the best way to perform a task")
+        msgBox = QMessageBox()
+        msgBox.setWindowTitle("About")
+        msgBox.setText("ComputerLogger allows to record user interaction with the computer "
+                       "and perform process discovery analysis on the recorded logs, "
+                       "determining the best way to perform a task")
+        websiteBtn = QPushButton('Website')
+        websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/marco2012/ComputerLogger'))
+        msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
+        msgBox.addButton(QPushButton('Close'), QMessageBox.AcceptRole)
+        msgBox.exec_()
 
     def excelDialog(self):
         self.officeFilepath = None
-        if self.officeExcel and WINDOWS:
+        if self.officeExcel:
             msgBox = QMessageBox()
             msgBox.setWindowTitle("Excel spreadsheet")
             msgBox.setText("Do you want to open an existing Excel spreadsheet or create a new one?")
@@ -850,7 +859,7 @@ class MainApplication(QMainWindow, QDialog):
                 self.status_queue.put(
                     f"[GUI] Could not locate log file.")
 
-            # kill node server when closing python server, otherwise port remains occupied
+            # kill node server when closing python server, otherwise port remains busy
             if MAC and self.officeExcel:
                 os.system("pkill -f node")
 

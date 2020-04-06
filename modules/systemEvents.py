@@ -457,27 +457,26 @@ def logHotkeys():
     }
 
     def handleH(hotkey):
+        window_name = getActiveWindowName()
+        try:
+            appName = window_name.split('-')[-1].strip()
+        except Exception:
+            appName = "Keyboard"
         meaning = keys_to_detect.get(hotkey)
-        event_type = "pressHotkey"
+        event_type = "hotkey"
         clipboard_content = ""
-        application = "Keyboard"
-        # handle paste and cut events
-        # if hotkey == "ctrl+v":
-        #     event_type = "paste"
-        #     clipboard_content = pyperclip.paste()
-        #     application = "Clipboard"
         if hotkey == "ctrl+x":
             event_type = "cut"
             clipboard_content = pyperclip.paste()
-            application = "Clipboard"
         print(f"{timestamp()} {USER} OperatingSystem {event_type} {hotkey.upper()} {meaning} {clipboard_content}")
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),
             "user": USER,
             "category": "OperatingSystem",
-            "application": application,
+            "application": appName,
             "event_type": event_type,
-            "title": hotkey.upper(),
+            "title": window_name,
+            "id": hotkey.upper(),
             "description": meaning,
             "clipboard_content": clipboard_content,
             "mouse_coord": mouse.position

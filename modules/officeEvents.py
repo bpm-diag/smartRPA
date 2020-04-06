@@ -4,7 +4,6 @@
 # ****************************** #
 
 import sys
-
 sys.path.append('../')  # this way main file is visible from this file
 from re import findall
 import os
@@ -24,7 +23,7 @@ if WINDOWS:
 
 
 # Takes filename as input if user wants to open existing file
-def excelEvents(filepath=None):
+def excelEvents(status_queue, filepath=None):
     # This variable controls OnSheetSelectionChange, if True an actions is logged every time a cell is selected. It's
     # resource expensive, so it's possible to turn it off by setting variable to False
     LOG_EVERY_CELL = True
@@ -629,7 +628,7 @@ def excelEvents(filepath=None):
             e.Workbooks.Add()
 
         runLoop(e)
-        print("[officeEvents] Excel logging started")
+        status_queue.put("[officeEvents] Excel logging started")
         if not CheckSeenEvents(e, ["OnNewWorkbook", "OnWindowActivate"]):
             sys.exit(1)
 
@@ -654,12 +653,24 @@ def excelEvents(filepath=None):
 
 
 # run node server hiding node server output
-def excelEventsMacServer():
-    print("[officeEvents] Excel on Mac logging started")
+def excelEventsMacServer(status_queue, excelFilepath=None):
+    import applescript
+    import xlwings as xw
     macExcelAddinPath = os.path.join(MAIN_DIRECTORY, 'modules', 'excelAddinMac')
-    # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1")
-    os.system(f"cd {macExcelAddinPath} && npm run dev-server")
-    # os.system("pkill -f node")
+    # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1") # hide output
+    if not utils.utils.isPortInUse(3000):
+        print("[officeEvents] Excel logging started")
+        if excelFilepath:
+            app = xw.App(visible=True)
+            book = xw.Book(excelFilepath)
+        else:
+            app = xw.App(visible=True)
+            book = xw.Book()
+        status_queue.put("[officeEvents] Remember to enable OfficeLogger Add-In by clicking 'Insert > My Add-Ins>  "
+                         "OfficeLogger' and then 'Home > Show Taskpane'")
+        os.system(f"cd {macExcelAddinPath} && npm run dev-server")
+    else:
+        print(f"Could not start Excel logging because port 3000 is in use.")
 
 
 def wordEvents(filename=None):

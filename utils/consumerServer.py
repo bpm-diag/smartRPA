@@ -71,6 +71,8 @@ def writeLog():
         # add current user to browser logs (because browser extension can't determine current user)
         if not content.get("user"):
             content["user"] = utils.utils.USER
+        if content.get("cell_content"):
+            content["cell_content"] = content["cell_content"].strip('"')
 
         # convert events to camelCase (already done by browser extension)
         # content["event_type"] = stringcase.camelcase(content["event_type"])
@@ -105,20 +107,14 @@ def add_headers(response):
     return response
 
 
-# check if port is available to start server
-def isPortInUse(port):
-    import socket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
-
-
 # start server thread, run by mainLogger
 def runServer(status_queue):
-    if not isPortInUse(PORT):
-        status_queue.put("[Server] Logging server started...")
+    if not utils.utils.isPortInUse(PORT):
+        status_queue.put("[Server] Logging server started")
         app.run(port=PORT, debug=False, use_reloader=False)
     else:
-        status_queue.put(f"[Server] Could not start logging server, port {PORT} is already in use.")
+        status_queue.put(f"[Server] Could not start logging server because port {PORT} is already in use.")
+
 
 if __name__ == "__main__":
     app.run(port=PORT, debug=True, use_reloader=True)
