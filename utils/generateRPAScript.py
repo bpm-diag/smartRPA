@@ -180,7 +180,7 @@ except WebDriverException as e:
                 if e not in self.eventsToIgnore:
                     script.write(f"# {timestamp} {e}\n")
                     if row['category'] == "OperatingSystem":
-                        script.write(f"sleep({self._delay_between_actions})\n")
+                        script.write(f"sleep({self._delay_between_actions * 2})\n")
                     else:
                         script.write(f"sleep({self._delay_between_actions})\n")
 
