@@ -249,6 +249,23 @@ def toAscii(string):
     return unicodedata.normalize('NFD', string).encode('ascii', 'ignore')
 
 
+# format a given path for current OS
+def formatPathForCurrentOS(path, username_on_source_os):
+    if path:
+        is_windows_path = '\\' in path[:10]
+        if MAC:
+            if is_windows_path:
+                return path.replace('\\', '/').replace(f"C:/Users/{username_on_source_os}", f"/Users/{USER}")
+            else:
+                return path
+        elif WINDOWS:
+            if is_windows_path:
+                return path
+            else:
+                return path.replace(f"/Users/{username_on_source_os}", f"C:/Users/{USER}").replace('/', '\\')
+    else:
+        return ""
+
 def open_file(path):
     try:
         if WINDOWS:

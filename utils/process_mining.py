@@ -94,13 +94,16 @@ class ProcessMining:
             # combine multiple csv into one and then export it to xes
             csv_to_combine = list()
             for i, csv_path in enumerate(self.filepath):
-                # load csv in pandas dataframe, rename columns to match xes standard and replace null values with
-                # empty string
+                # load csv in pandas dataframe,
+                # rename columns to match xes standard,
+                # replace null values with empty string
+                # sort by timestamp
                 df = pandas.read_csv(csv_path, encoding='utf-8-sig') \
                     .rename(columns={'event_type': 'concept:name',
                                      'timestamp': 'time:timestamp',
                                      'user': 'org:resource'}) \
-                    .fillna('')
+                    .fillna('')\
+                    .sort_values(by='time:timestamp')
                 # Each csv should have a separate case ID, so I insert a column to the left of each csv and assign
                 # number i. When I convert the combined csv to xes, all the rows with the same number will belong to a
                 # single trace, so I will have i traces.
@@ -123,7 +126,7 @@ class ProcessMining:
                 csv_to_combine.append(df)
 
             # dataframe of combined csv, sort by timestamp
-            combined_csv = pandas.concat(csv_to_combine)  # .sort_values(by='time:timestamp')
+            combined_csv = pandas.concat(csv_to_combine)
 
             # insert index for each row
             # combined_csv.insert(0, 'row_index', range(0, len(combined_csv)))
@@ -329,6 +332,8 @@ class ProcessMining:
                 f"case {min_duration_trace} is the shortest ({duration} sec)")
 
         case = df.loc[df['case:concept:name'] == min_duration_trace]
+
+        # case = case.sort_values(by='time:timestamp')
 
         return case
 

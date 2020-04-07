@@ -52,7 +52,7 @@ function handleEvent(event){
             let path = "";
             // if it's a new document, path is not defined
             if (typeof(asyncResult.value) !== 'undefined')
-                path = asyncResult.value.url;
+                path = asyncResult.value.url.replace('users', 'Users');
 
             return context.sync().then(function() {
 

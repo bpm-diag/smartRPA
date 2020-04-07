@@ -700,7 +700,7 @@ class MainApplication(QMainWindow, QDialog):
                 choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
                 # when OK button is pressed
                 if choicesDialog.exec_() in [0, 1]:
-                    mostFrequentCase = choicesDialog.df
+                    mostFrequentCase = choicesDialog.df#.sort_values(by='time:timestamp')
 
                     # create RPA based on most frequent path
                     rpa = utils.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
@@ -842,8 +842,18 @@ class MainApplication(QMainWindow, QDialog):
             # kill active processes before closing main
             while not self.processesPID.empty():
                 pid = self.processesPID.get()
-                # print(f"[DEBUG] Killing PID {pid}")
-                os.kill(pid, -9)
+                try:
+                    os.kill(pid, -9)
+                except PermissionError:
+                    print(f"[GUI] Could not kill process {pid}, trying another way")
+                    if WINDOWS:
+                        try:
+                            import subprocess
+                            subprocess.check_output(f"Taskkill /F /PID {pid}")
+                            print(f"[GUI] Process {pid} killed")
+                        except PermissionError:
+                            print(f"[GUI] Could not kill process {pid}")
+                            pass
             # stop main process, automatically closing all daemon threads in main process
             self.mainProcess.terminate()
 
