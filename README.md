@@ -151,13 +151,13 @@ For browser automation, [Google Chrome](https://www.google.com/chrome/) must be 
 The project is composed by the following modules:
 
 -   [x] GUI
--   [x] CSV server logger
+-   [x] Server logger
 -   [x] System logger
 -   [x] Browser logger
 -   [x] Office logger
 -   [x] Clipboard logger
 -   [x] RPA module
 -   [x] CSV to XES converter
--   [x] Process Mining analysis
+-   [x] Process Discovery analysis
 
-A complete list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
+A partial list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)

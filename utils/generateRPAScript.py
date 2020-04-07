@@ -140,7 +140,6 @@ except Exception:
             return False
 
         RPA_filepath = self._createRPAFile(filename)
-        excelOpened = False
         with open(RPA_filepath, 'w') as script:
             script.write(self._createHeader())
             # add browser header if browser is present in event log
