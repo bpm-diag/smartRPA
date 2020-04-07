@@ -108,7 +108,7 @@ document.body.onclick = e => {
 
     // support for gmail
     if (url.includes("mail.google.com")){
-        // email body
+        // gmail new message body
         tag_value = document.querySelector(".Am.Al.editable").innerText
     }
 

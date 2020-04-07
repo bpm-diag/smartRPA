@@ -184,7 +184,8 @@ def watchFolderMac():
         # {'/Users/marco/Desktop/test.txt': 'ItemCreated'}
         # insert key and value in dictionary the first time if doesn't exist
         if path not in logged.keys(): logged[path] = ""
-        if event_type != "UserDropped" and event_type not in logged.get(path) and "~$" not in file_event.name:
+        # ~ means temporary file
+        if event_type != "UserDropped" and event_type not in logged.get(path) and "~" not in file_event.name:
             logged[path] = event_type
             # file_extension = os.path.splitext(path)[1]
             print(f"{timestamp()} {USER} OperatingSystem {event_type} {file_event.name}")

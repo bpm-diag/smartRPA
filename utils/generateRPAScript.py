@@ -477,14 +477,23 @@ except Exception:
                 # path and dest_path must be changed according to current user
                 elif e == "openFile" and path:
                     script.write(f"print('Opening file {item_name}')\n")
-                    script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
+                    script.write(f"""
+try:
+    if file_exists(r'{path}'): 
+        open_file(r'{path}')
+    else:
+        print(f"Can not open file '{item_name}' because it does not exist")
+except Exception:
+    pass
+\n""")
+                    # script.write(f"if file_exists(r'{path}'): open_file(r'{path}')\n")
                 elif e == "openFolder" and path:
                     script.write(f"print('Opening folder {item_name}')\n")
                     if WINDOWS:
                         script.write(f"if folder_exists(r'{path}'): show_folder(r'{path}')\n")
                     elif MAC:
                         script.write(f"if folder_exists(r'{path}'): open_file(r'{path}')\n")
-                elif e == "programOpen" and os.path.exists(path):
+                elif e == "programOpen":
 
                     # do not open excel manually if there are events related to excel in dataframe,
                     # because it is opened automatically above
@@ -496,11 +505,25 @@ except Exception:
                             i in event_list for i in ["newWorkbook", "selectWorksheet", "WorksheetActivated"]):
                         pass
                     else:
-                        script.write(f"print('Opening {app}')\n")
                         if MAC:
-                            script.write(f"applescript.tell.app('{os.path.basename(path)}', 'open')\n")
+                            if app == "notepad.exe":
+                                script.write(f"print('Opening TextEdit')\n")
+                                script.write(f"applescript.tell.app('TextEdit', 'open')\n")
+                            elif os.path.exists(path):
+                                script.write(f"print('Opening {app}')\n")
+                                script.write(f"applescript.tell.app('{os.path.basename(path)}', 'open')\n")
                         elif WINDOWS and ntpath.basename(path) not in modules.systemEvents.programs_to_ignore:
-                            script.write(f"""
+                            if app == "TextEdit":
+                                script.write(f"""
+try:
+    print('Opening Notepad')
+    run(r'C:\\Windows\\System32\\notepad.exe')
+except Exception:
+    pass
+\n""")
+                            elif os.path.exists(path):
+                                script.write(f"print('Opening {app}')\n")
+                                script.write(f"""
 try:
     run(r'{path}')
 except Exception:
