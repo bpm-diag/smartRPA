@@ -65,7 +65,12 @@ npm install
 npm start
 ```
 
-To activate the Add-in in Excel:
+<details>
+<summary>
+    Click to show how to <b>activate the Add-in</b> in Excel
+</summary>
+</br>
+
 <ol type="a">
   <li>Go to <code>Insert</code> tab</li>
   <li>Click on <code>My Add-ins</code> > <code>OfficeLogger</code></li>
@@ -73,6 +78,9 @@ To activate the Add-in in Excel:
   <li>Click the <code>Show Taskpane</code> button in the ribbon</li>
   <li>Enable the checkbox</li>
 </ol>
+
+</details>
+
 
 
 #### 4. **Run main logger**
@@ -160,4 +168,4 @@ The project is composed by the following modules:
 -   [x] CSV to XES converter
 -   [x] Process Discovery analysis
 
-A partial list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
+A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
