@@ -687,7 +687,6 @@ class MainApplication(QMainWindow, QDialog):
                 pm.highLevelDFG()
                 pm.highLevelPetriNet()
                 pm.highLevelBPMN()
-                # pm.save_bpmn()
 
                 # open BPMN
                 utils.utils.open_file(
@@ -700,7 +699,7 @@ class MainApplication(QMainWindow, QDialog):
                 choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
                 # when OK button is pressed
                 if choicesDialog.exec_() in [0, 1]:
-                    mostFrequentCase = choicesDialog.df#.sort_values(by='time:timestamp')
+                    mostFrequentCase = choicesDialog.df
 
                     # create RPA based on most frequent path
                     rpa = utils.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
@@ -728,7 +727,7 @@ class MainApplication(QMainWindow, QDialog):
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
-        print(f"[DEBUG] CSV path: {log_filepath}")
+        # print(f"[DEBUG] CSV path: {log_filepath}")
         if utils.utils.CSVEmpty(log_filepath):
             self.status_queue.put(f"[GUI] Log file {os.path.basename(log_filepath)} is empty, removing")
             os.remove(log_filepath)

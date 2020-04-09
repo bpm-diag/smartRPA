@@ -266,6 +266,7 @@ def formatPathForCurrentOS(path, username_on_source_os):
     else:
         return ""
 
+
 def open_file(path):
     try:
         if WINDOWS:

@@ -66,6 +66,7 @@ class ProcessMining:
         self._log = self._handle_log()
 
         if utils.config.MyConfig.get_instance().perform_process_discovery:
+            print(f"[DEBUG] Performing process discovery")
             # low level trace used for rpa generation
             self.mostFrequentCase = self.selectMostFrequentCase()
 
@@ -236,9 +237,9 @@ class ProcessMining:
             return None
 
         # flattening
-        df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
+        # df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
         df['flattened'] = df[
-            ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook"]].agg(','.join, axis=1)
+            ['concept:name', 'category', 'application', "workbook"]].agg(','.join, axis=1)
         groupby_column = 'flattened' if flattened else 'concept:name'
 
         # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
@@ -323,12 +324,14 @@ class ProcessMining:
                 # some strings are similar, it should be like case below
                 min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
                 self.status_queue.put(
-                    f"[PROCESS MINING] Traces {most_frequent_variants} are similar, "
+                    f"[PROCESS MINING] There are {len(variants)} variants, "
+                    f"traces {most_frequent_variants} are similar, "
                     f"case {min_duration_trace} is the shortest ({duration} sec)")
         else:
             min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
             self.status_queue.put(
-                f"[PROCESS MINING] Traces {most_frequent_variants} are equal, "
+                f"[PROCESS MINING] There are {len(variants)} variants, "
+                f"traces {most_frequent_variants} are equal, "
                 f"case {min_duration_trace} is the shortest ({duration} sec)")
 
         case = df.loc[df['case:concept:name'] == min_duration_trace]
@@ -546,10 +549,8 @@ class ProcessMining:
         for row_index, row in df.iterrows():
             concept_name = row['concept:name']
             cb_content = row['clipboard_content']
-            cat = row['category']
-            if (concept_name in ['cut', 'copy', 'paste']) and \
-                    utils.utils.removeWhitespaces(cb_content) == '':
-                df.drop(row_index, inplace=True)
+            if (concept_name in ['cut', 'copy', 'paste']) and utils.utils.removeWhitespaces(cb_content) == '':
+                df = df.drop(row_index)  # returns a copy, previously was inplace so it returned null and side-effect db
 
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
                           "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit",
