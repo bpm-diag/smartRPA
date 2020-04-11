@@ -850,7 +850,7 @@ class MainApplication(QMainWindow, QDialog):
                             import subprocess
                             subprocess.check_output(f"Taskkill /F /PID {pid}")
                             print(f"[GUI] Process {pid} killed")
-                        except PermissionError:
+                        except Exception:
                             print(f"[GUI] Could not kill process {pid}")
                             pass
             # stop main process, automatically closing all daemon threads in main process

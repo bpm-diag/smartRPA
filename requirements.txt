@@ -10,7 +10,7 @@ pandas==1.0.0
 nativeconfig==3.4.0
 pynput==1.6.7
 selenium==3.7.0
-python-Levenshtein==0.12.0
+python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win because of visual studio
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
 psutil==5.4.6

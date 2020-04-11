@@ -90,19 +90,21 @@ class ProcessMining:
         if self.file_extension == ".csv":
 
             def createCaseID(ts):
-                return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%Y%m%d%H%M%S%f')# [:-3]
+                return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%m%d%H%M%S%f')#[:-3]
 
             # combine multiple csv into one and then export it to xes
             csv_to_combine = list()
             for i, csv_path in enumerate(self.filepath):
                 # load csv in pandas dataframe,
                 # rename columns to match xes standard,
+                # remove rows that don't have timestamp
                 # replace null values with empty string
                 # sort by timestamp
                 df = pandas.read_csv(csv_path, encoding='utf-8-sig') \
                     .rename(columns={'event_type': 'concept:name',
                                      'timestamp': 'time:timestamp',
                                      'user': 'org:resource'}) \
+                    .dropna(subset=["time:timestamp"])\
                     .fillna('')\
                     .sort_values(by='time:timestamp')
                 # Each csv should have a separate case ID, so I insert a column to the left of each csv and assign
@@ -144,7 +146,7 @@ class ProcessMining:
             log = conversion_factory.apply(combined_csv)
 
             # sort by timestamp
-            log = sorting.sort_timestamp(log)
+            # log = sorting.sort_timestamp(log)
 
             # convert csv to xes
             xes_path = os.path.join(self.save_path, 'log', f'{self.filename}.xes')
@@ -198,7 +200,7 @@ class ProcessMining:
             # all the variants contain one case, need to check similarities
 
             # Check similarities between all the strings in the log and return the most frequent one
-            def func(name, threshold=85):
+            def func(name, threshold=90):
                 matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
                 return [i for i, x in enumerate(matches) if x]
 
@@ -284,6 +286,13 @@ class ProcessMining:
                 'case:concept:name'].tolist()[0]
             return min_duration_trace, min(durations)
 
+        def _findMostFrequentTraces(df2: pandas.DataFrame, most_frequent_variants):
+            try:
+                most_frequent_traces = df2.iloc[most_frequent_variants, 1].values.tolist()
+                return list(map(lambda a: a[0], most_frequent_traces))  # flatten the list
+            except Exception:
+                return most_frequent_variants
+
         # get variants as list, each item represents a trace in the log
         # [[0, 1], [2]]
         variants = df2['variants'].tolist()
@@ -323,16 +332,18 @@ class ProcessMining:
             else:
                 # some strings are similar, it should be like case below
                 min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
+                most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
                 self.status_queue.put(
                     f"[PROCESS MINING] There are {len(variants)} variants, "
-                    f"traces {most_frequent_variants} are similar, "
                     f"case {min_duration_trace} is the shortest ({duration} sec)")
+                print(f"Traces {most_frequent_traces} are similar")
         else:
             min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
+            most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
             self.status_queue.put(
                 f"[PROCESS MINING] There are {len(variants)} variants, "
-                f"traces {most_frequent_variants} are equal, "
                 f"case {min_duration_trace} is the shortest ({duration} sec)")
+            print(f"Traces {most_frequent_traces} are equal")
 
         case = df.loc[df['case:concept:name'] == min_duration_trace]
 

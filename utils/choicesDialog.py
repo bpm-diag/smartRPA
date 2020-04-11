@@ -139,8 +139,7 @@ class ChoicesDialog(QDialog):
                     self.df.loc[row_index, path] = new_values[i]
                 elif e in ["copy", "cut", "paste"]:
                     self.df.loc[row_index, 'clipboard_content'] = new_values[i]
-            except Exception as exception:
-                # print(f"[CHOICESDIALOG] Error: {exception}")
+            except Exception:
                 pass
 
     def getDF(self):

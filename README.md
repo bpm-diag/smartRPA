@@ -25,11 +25,14 @@
 
 ## Installation and execution:
 
-Make sure you are using _64bit_ version of Python 3.8.1. You can download it from the official site for [Windows](https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe) or [MacOS](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg). Do not install Python from a package manager like _brew_.
+Make sure you are using _64bit_ version of Python 3.8.1. You can download it from the official site for [Windows](https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe) or [MacOS](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg). 
+Do not install Python from a package manager like _brew_.
+
+On Windows always run cmd as _admin_.
 
 #### 1. **Install dependencies**
 
--   Install project dependencies
+-   Install project dependencies ()
 
     ```bash
     pip3 install -r requirements.txt
@@ -95,11 +98,29 @@ The resulting log csv file will be in `/logs` directory.
 
 _Robotic Process Automation_ scripts are automatically generated for each log in `/RPA` directory
 
+#### Visual Studio (Windows Only)
+
+On Windows [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
+It is vital to install all C++ related development tools like 
+- Windows 10 SDK
+- Visual C++ tools for CMake
+- C++ x64/x86 build tools
+
+If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://www.scivision.co/python-windows-visual-c-14-required/).
+
 #### Automagica
 
 To run the generated RPA scripts you must install `automagica` module.
 
 - On Windows:
+
+    `pip3 install automagica==2.0.25`
+    
+    <details>
+    <summary>
+        Click to show how to <b>fix installation errors</b> on Windows
+    </summary>
+    </br>
 
     1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
     2. Install Win64 OpenSSL v1.1.1 from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
@@ -110,6 +131,8 @@ To run the generated RPA scripts you must install `automagica` module.
     set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
     pip3 install automagica==2.0.25
     ```
+
+    </details>
 
 - On MacOS:
 
@@ -124,7 +147,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
 - On Windows:
 
-    1. Install [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=Community&rel=15).  It is vital to install all C++ related development tools like _Windows 10 SDK, Visual C++ tools for CMake_ and others.
+    1. Make sure you installed [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16).  
     2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
     3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
     4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3` 
@@ -148,6 +171,19 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
     brew install graphviz
     pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3
     ```
+
+#### Python-Levenshtein
+
+This package provides a 4-10x speedup in String Matching.
+
+- On Windows:
+    
+    1.  Make sure you installed [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16)
+    2. `pip3 install python-Levenshtein==0.12.0`
+    
+- On MacOS:
+
+    1. Automatically installed with `requirements.txt`
 
 #### Browser automation
 
