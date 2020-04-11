@@ -335,6 +335,7 @@ class ProcessMining:
                 most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
                 self.status_queue.put(
                     f"[PROCESS MINING] There are {len(variants)} variants, "
+                    f"among the {len(most_frequent_traces)} similar traces, "
                     f"case {min_duration_trace} is the shortest ({duration} sec)")
                 print(f"Traces {most_frequent_traces} are similar")
         else:
@@ -342,6 +343,7 @@ class ProcessMining:
             most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
             self.status_queue.put(
                 f"[PROCESS MINING] There are {len(variants)} variants, "
+                f"among the {len(most_frequent_traces)} equal traces, "
                 f"case {min_duration_trace} is the shortest ({duration} sec)")
             print(f"Traces {most_frequent_traces} are equal")
 

@@ -2,22 +2,22 @@
 <img width="100%" src="docs/readme-header.png"><br/><br/>
     <a href="https://www.python.org/downloads/release/python-381/" alt="Activity">
         <img src="https://img.shields.io/badge/Python-3.8.1(x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
-    <a href="#computerlogger" alt="Activity">
+    <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Javascript-6-blue?style=flat&labelColor=F7DF1E&color=F7DF1E&logo=javascript&logoColor=white" /></a>
-    <a href="#computerlogger" alt="Activity">
+    <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Windows-10-blue?style=flat&labelColor=0078D6&color=0078D6&logo=windows&logoColor=white" /></a>
-    <a href="#computerlogger" alt="Activity">
+    <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/MacOS-10.14-blue?style=flat&labelColor=999999&color=999999&logo=apple&logoColor=white" /></a>
     </br>
-    <a href="#computerlogger" alt="Activity">
+    <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Office-365-blue?style=flat&labelColor=E74025&color=E74025&logo=microsoft-office&logoColor=white" /></a>
-    <a href="#computerlogger" alt="Activity">
+    <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Chrome-80-blue?style=flat&labelColor=EDAD00&color=EDAD00&logo=google-chrome&logoColor=white" /></a>
-    <a href="#computerlogger" alt="Activity">
+    <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Firefox-72-blue?style=flat&labelColor=FF7139&color=FF7139&logo=mozilla-firefox&logoColor=white" /></a>
-    <a href="#computerlogger" alt="Activity">
+    <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Edge-80-blue?style=flat&labelColor=0078D7&color=0078D7&logo=microsoft-edge&logoColor=white" /></a>
-    <a href="#computerlogger" alt="Activity">
+    <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a> <br/><br/>
   <img width="80%" src="docs/gui.jpg"/>
 
@@ -40,7 +40,7 @@ On Windows always run cmd as _admin_.
 
 -   Install RPA dependencies
 
-    [Details here](https://github.com/marco2012/ComputerLogger#rpa)
+    [Details here](https://github.com/marco2012/SmartRPA#rpa)
 
 #### 2. **Install browser extension**
 
@@ -147,7 +147,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
 - On Windows:
 
-    1. Make sure you installed [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16).  
+    1. Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/marco2012/SmartRPA#visual-studio-windows-only).  
     2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
     3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
     4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3` 
@@ -178,7 +178,7 @@ This package provides a 4-10x speedup in String Matching.
 
 - On Windows:
     
-    1.  Make sure you installed [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16)
+    1.  Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/marco2012/SmartRPA#visual-studio-windows-only)
     2. `pip3 install python-Levenshtein==0.12.0`
     
 - On MacOS:
@@ -204,4 +204,4 @@ The project is composed by the following modules:
 -   [x] CSV to XES converter
 -   [x] Process Discovery analysis
 
-A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/marco2012/ComputerLogger/blob/master/docs/Features.pdf)
+A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/marco2012/SmartRPA/blob/master/docs/Features.pdf)

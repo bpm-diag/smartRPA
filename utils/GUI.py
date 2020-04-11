@@ -679,6 +679,7 @@ class MainApplication(QMainWindow, QDialog):
         try:
             # check if library is installed
             import pm4py
+
             # create class, combine all csv into one
             pm = utils.process_mining.ProcessMining(log_filepath, self.status_queue, merged)
 
