@@ -3,15 +3,17 @@
 # Build native user interface and start main logger
 # ****************************** #
 import sys
+
+from utils.GUIThread import Worker
+
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QDir, QTimer
+from PyQt5.QtCore import Qt, QSize, QDir, QTimer, QThreadPool
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
-                             QAbstractItemView, QFileDialog, QRadioButton, QProgressDialog,
-                             QMainWindow, QWidget, QSlider, QLCDNumber, QDialogButtonBox,
-                             QFormLayout, QLineEdit, QMessageBox)
+                             QAbstractItemView, QRadioButton, QProgressDialog,
+                             QMainWindow, QWidget, QSlider, QLCDNumber, QMessageBox)
 import darkdetect
 from multiprocessing import Process, Queue
 import pandas
@@ -140,6 +142,8 @@ class MainApplication(QMainWindow, QDialog):
         self.setWindowTitle("ComputerLogger")
         self.setAppIcon()
         self.setStyle()
+
+        self.threadpool = QThreadPool()
 
         # queue used to send messages to GUI
         self.status_queue = Queue()
@@ -414,24 +418,25 @@ class MainApplication(QMainWindow, QDialog):
         if not utils.config.MyConfig.get_instance().perform_process_discovery:
             self.status_queue.put("[GUI] Process discovery disabled")
 
-    def createProgressDialog(self, title, message, timeout):
+    def createProgressDialog(self, title, message, timeout=1000):
         flags = Qt.WindowTitleHint | Qt.Dialog | Qt.WindowMaximizeButtonHint | Qt.CustomizeWindowHint
-        self.progress_dialog = QProgressDialog(message, None, 0, 0, self, flags)
-        self.progress_dialog.setWindowModality(Qt.WindowModal)
-        self.progress_dialog.setWindowTitle(title)
+        progress_dialog = QProgressDialog(message, None, 0, 0, self, flags)
+        progress_dialog.setWindowModality(Qt.WindowModal)
+        progress_dialog.setWindowTitle(title)
         if WINDOWS:
-            self.progress_dialog.resize(470, 100)
+            progress_dialog.resize(470, 100)
         else:
-            self.progress_dialog.resize(260, 100)
-        self.progress_dialog.show()
-        self.timer = QTimer(self)
-        self.timer.start(timeout)
-        self.timer.timeout.connect(self.cancelProgressDialog)
+            progress_dialog.resize(260, 100)
+        return progress_dialog
+        # self.progress_dialog.show()
+        # self.timer = QTimer(self)
+        # self.timer.start(timeout)
+        # self.timer.timeout.connect(self.cancelProgressDialog)
 
-    def cancelProgressDialog(self):
-        self.progress_dialog.done(0)
-        self.timer.stop()
-        self.timer.deleteLater()
+    # def cancelProgressDialog(self):
+    #     self.progress_dialog.done(0)
+    #     self.timer.stop()
+    #     self.timer.deleteLater()
 
     # display native GUI for each OS
     def setStyle(self):
@@ -617,6 +622,9 @@ class MainApplication(QMainWindow, QDialog):
     def handlePreferences(self):
         self.preferencesDialog.show()
 
+    def handleRunLogAction(self):
+        return self.handleMerge(merged=False, title='Select CSV to run', multipleItems=False)
+
     def handleMerge(self, merged=True, title='Select multiple CSV to merge', multipleItems=True):
         self.statusListWidget.clear()
         csv_to_merge = getFilenameDialog(customDialog=False,
@@ -628,12 +636,19 @@ class MainApplication(QMainWindow, QDialog):
                 self.status_queue.put("[GUI] Merging selected files...")
             else:
                 self.status_queue.put("[GUI] Analyzing selected log...")
-            self.handleProcessMining(sorted(csv_to_merge), merged)
+            self.progress_dialog = self.createProgressDialog("Working...", "Finding most frequent path...")
+            # start PM as thread because it can take some time, I don't want to block the UI
+            worker = Worker(self.handleProcessMining, sorted(csv_to_merge), merged)  # Any other args, kwargs are passed to the run function
+            worker.signals.result.connect(self.PMThreadComplete)
+            self.threadpool.start(worker)
         else:
             self.status_queue.put("[GUI] No csv selected...")
 
-    def handleRunLogAction(self):
-        return self.handleMerge(merged=False, title='Select CSV to run', multipleItems=False)
+    def PMThreadComplete(self, result):
+        self.progress_dialog.done(0)
+        if result:
+            pm, log_filepath = result
+            self.choices(pm, log_filepath)
 
     # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
@@ -679,37 +694,10 @@ class MainApplication(QMainWindow, QDialog):
         try:
             # check if library is installed
             import pm4py
-
             # create class, combine all csv into one
+            # print(f"[PROCESS MINING] Finding most frequent path...")
             pm = utils.process_mining.ProcessMining(log_filepath, self.status_queue, merged)
-
-            if utils.config.MyConfig.get_instance().perform_process_discovery:
-                # create high level DFG model based on all logs
-                pm.highLevelDFG()
-                pm.highLevelPetriNet()
-                pm.highLevelBPMN()
-
-                # open BPMN
-                utils.utils.open_file(
-                    os.path.join(pm.discovery_path,
-                                 f'{utils.utils.getFilename(log_filepath[-1]).strip("_combined")}_BPMN.pdf')
-                )
-
-                # ask if some fields should be changed before generating RPA script
-                # build choices dialog, passing low level most frequent case to analyze
-                choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
-                # when OK button is pressed
-                if choicesDialog.exec_() in [0, 1]:
-                    mostFrequentCase = choicesDialog.df
-
-                    # create RPA based on most frequent path
-                    rpa = utils.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
-                    rpa.generateRPAMostFrequentPath(mostFrequentCase)
-
-                    pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
-                    self.status_queue.put(f"[PROCESS MINING] Generated graphs")
-                    self.status_queue.put(f"[GUI] Done")
-
+            return pm, log_filepath
         except ImportError:
             print(
                 "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
@@ -721,10 +709,41 @@ class MainApplication(QMainWindow, QDialog):
         except PermissionError as e:
             print(f"[GUI] Process mining analysis exited with error: {e}")
             print(f"[GUI] Close the file if it's open and try again.")
+            return False
         except Exception as e:
             print(f"[GUI] Process mining analysis exited with error: {e}")
             traceback.print_exc()
             print(traceback.format_exc())
+            return False
+
+    # it must be in main thread
+    def choices(self, pm, log_filepath):
+        if utils.config.MyConfig.get_instance().perform_process_discovery:
+            # create high level DFG model based on all logs
+            pm.highLevelDFG()
+            pm.highLevelPetriNet()
+            pm.highLevelBPMN()
+
+            # open BPMN
+            utils.utils.open_file(
+                os.path.join(pm.discovery_path,
+                             f'{utils.utils.getFilename(log_filepath[-1]).strip("_combined")}_BPMN.pdf')
+            )
+
+            # ask if some fields should be changed before generating RPA script
+            # build choices dialog, passing low level most frequent case to analyze
+            choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
+            # when OK button is pressed
+            if choicesDialog.exec_() in [0, 1]:
+                mostFrequentCase = choicesDialog.df
+
+                # create RPA based on most frequent path
+                rpa = utils.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
+                rpa.generateRPAMostFrequentPath(mostFrequentCase)
+
+                pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
+                self.status_queue.put(f"[PROCESS MINING] Generated graphs")
+                self.status_queue.put(f"[GUI] Done")
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):

@@ -66,7 +66,7 @@ class ProcessMining:
         self._log = self._handle_log()
 
         if utils.config.MyConfig.get_instance().perform_process_discovery:
-            print(f"[DEBUG] Performing process discovery")
+            print(f"[PROCESS MINING] Performing process discovery")
             # low level trace used for rpa generation
             self.mostFrequentCase = self.selectMostFrequentCase()
 
@@ -337,7 +337,7 @@ class ProcessMining:
                     f"[PROCESS MINING] There are {len(variants)} variants, "
                     f"among the {len(most_frequent_traces)} similar traces, "
                     f"case {min_duration_trace} is the shortest ({duration} sec)")
-                print(f"Traces {most_frequent_traces} are similar")
+                print(f"[PROCESS MINING] Traces {most_frequent_traces} are similar")
         else:
             min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
             most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
@@ -345,11 +345,11 @@ class ProcessMining:
                 f"[PROCESS MINING] There are {len(variants)} variants, "
                 f"among the {len(most_frequent_traces)} equal traces, "
                 f"case {min_duration_trace} is the shortest ({duration} sec)")
-            print(f"Traces {most_frequent_traces} are equal")
+            print(f"[PROCESS MINING] Traces {most_frequent_traces} are equal")
 
         case = df.loc[df['case:concept:name'] == min_duration_trace]
 
-        # case = case.sort_values(by='time:timestamp')
+        # self.selected_trace = min_duration_trace
 
         return case
 
