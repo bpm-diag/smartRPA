@@ -81,6 +81,8 @@ class Preferences(QMainWindow):
         confirmButton.setCheckable(True)
         confirmButton.setChecked(False)
         confirmButton.clicked.connect(self.handleButton)
+        if darkdetect.isDark():
+            confirmButton.setStyleSheet('QPushButton {background-color: #656565;}')
 
         self.process_discovery_cb = QCheckBox("Enable Process Discovery \nanalysis on log file")
         self.process_discovery_cb.setToolTip("If enabled, process discovery analysis is performed automatically\n"
@@ -358,16 +360,15 @@ class MainApplication(QMainWindow, QDialog):
 
     def createStartButton(self):
         self.runButton = QPushButton("Start logger")
+        if darkdetect.isDark():
+            self.runButton.setStyleSheet('QPushButton {background-color: #656565;}')
         self.runButton.setCheckable(True)
         self.runButton.setChecked(False)
         self.runButton.clicked.connect(self.onButtonClick)
         self.runButton.toggled.connect(self.systemGroupBox.setDisabled)
         self.runButton.toggled.connect(self.browserGroupBox.setDisabled)
         self.runButton.toggled.connect(self.checkButton.setDisabled)
-        # if WINDOWS:
         self.runButton.toggled.connect(self.officeGroupBox.setDisabled)
-        if darkdetect.isDark():
-            self.runButton.setStyleSheet('QPushButton {background-color: #656565;}')
 
     def createTopLayout(self):
         self.topLayout = QHBoxLayout()
@@ -396,8 +397,8 @@ class MainApplication(QMainWindow, QDialog):
             monospaceFont = 'Lucida Console'
             fontSize = 8
         elif MAC:
-            monospaceFont = 'Monaco'
-            fontSize = 11
+            monospaceFont = 'Courier'
+            fontSize = 12
         else:
             monospaceFont = 'monospace'
             fontSize = 11
@@ -415,6 +416,10 @@ class MainApplication(QMainWindow, QDialog):
         self.statusListWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.statusListWidget.setWordWrap(True)
         self.statusListWidget.setTextElideMode(Qt.ElideNone)
+
+        # old school green font
+        # if darkdetect.isDark():
+        #     self.statusListWidget.setStyleSheet('QListWidget::item {color: #00FF33;}')
 
         self.statusLayout.addWidget(self.statusListWidget)
         self.statusListWidget.addItem(QListWidgetItem("Ready to log, press Start button..."))
@@ -529,11 +534,11 @@ class MainApplication(QMainWindow, QDialog):
             self.topLayout.setContentsMargins(0, 0, 0, 10)
             self.bottomLayout.setContentsMargins(0, 0, 0, 0)
 
-            # if darkdetect.isLight():
-            #     self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
-            # else:
-            #     self.statusListWidget.setStyleSheet("QListWidget{background: #3A3B3B;}")
-            # self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
+            if darkdetect.isDark():
+                self.statusListWidget.setStyleSheet("QListWidget{background: #3A3B3B;}")
+            else:
+                self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
+
 
         if not CHROME:
             self.browserChromeCB.setEnabled(False)
@@ -790,7 +795,10 @@ class MainApplication(QMainWindow, QDialog):
         websiteBtn = QPushButton('Website')
         websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/marco2012/SmartRPA'))
         msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
-        msgBox.addButton(QPushButton('Close'), QMessageBox.AcceptRole)
+        closeBtn = QPushButton('Close')
+        if darkdetect.isDark():
+            closeBtn.setStyleSheet('QPushButton {background-color: #656565;}')
+        msgBox.addButton(closeBtn, QMessageBox.RejectRole)
         msgBox.exec_()
 
     def excelDialog(self):
@@ -839,6 +847,7 @@ class MainApplication(QMainWindow, QDialog):
             self.excelDialog()
 
             self.status_queue.put("[GUI] Loading, please wait...")
+            self.createProgressDialog("Loading...", "Loading...", 3000)
 
             # start main process with the options selected in gui. It handles all other methods main method is
             # started as a process so it can be terminated once the button is clicked all the methods in the main
@@ -865,8 +874,6 @@ class MainApplication(QMainWindow, QDialog):
             ))
 
             self.mainProcess.start()
-
-            self.createProgressDialog("Loading...", "Loading...", 1000)
 
             self.runButton.setText('Stop logger')
             self.runButton.update()
@@ -929,7 +936,7 @@ def buildGUI():
     palette.setColor(QPalette.Text, Qt.white)
     palette.setColor(QPalette.ToolTipBase, QColor(53, 53, 53))
     palette.setColor(QPalette.ToolTipText, Qt.white)
-    # palette.setColor(QPalette.Button, QColor(0, 0, 0))
+    palette.setColor(QPalette.Button, QColor(0, 0, 0))
     palette.setColor(QPalette.ButtonText, Qt.white)
     palette.setColor(QPalette.BrightText, Qt.red)
     palette.setColor(QPalette.Highlight, QColor(142, 45, 197).lighter())
