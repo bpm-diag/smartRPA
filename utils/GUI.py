@@ -4,16 +4,15 @@
 # ****************************** #
 import sys
 
-from utils.GUIThread import Worker
-
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QDir, QTimer, QThreadPool
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtCore import Qt, QSize, QThreadPool, QTimer
+from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
                              QAbstractItemView, QRadioButton, QProgressDialog,
                              QMainWindow, QWidget, QSlider, QLCDNumber, QMessageBox)
+from utils.GUIThread import Worker
 import darkdetect
 from multiprocessing import Process, Queue
 import pandas
@@ -139,7 +138,7 @@ class MainApplication(QMainWindow, QDialog):
     def __init__(self, parent=None):
         super(MainApplication, self).__init__(parent)
         self.originalPalette = QApplication.palette()
-        self.setWindowTitle("ComputerLogger")
+        self.setWindowTitle("SmartRPA")
         self.setAppIcon()
         self.setStyle()
 
@@ -367,6 +366,8 @@ class MainApplication(QMainWindow, QDialog):
         self.runButton.toggled.connect(self.checkButton.setDisabled)
         # if WINDOWS:
         self.runButton.toggled.connect(self.officeGroupBox.setDisabled)
+        if darkdetect.isDark():
+            self.runButton.setStyleSheet('QPushButton {background-color: #656565;}')
 
     def createTopLayout(self):
         self.topLayout = QHBoxLayout()
@@ -374,6 +375,8 @@ class MainApplication(QMainWindow, QDialog):
 
         self.topLayout.addStretch(1)
         self.checkButton = QPushButton("Enable all")
+        if darkdetect.isDark():
+            self.checkButton.setStyleSheet('QPushButton {color: white;}')
         self.checkButton.setCheckable(True)
         self.checkButton.setChecked(False)
         self.checkButton.setFlat(True)
@@ -418,25 +421,28 @@ class MainApplication(QMainWindow, QDialog):
         if not utils.config.MyConfig.get_instance().perform_process_discovery:
             self.status_queue.put("[GUI] Process discovery disabled")
 
-    def createProgressDialog(self, title, message, timeout=1000):
+    def createProgressDialog(self, title, message, timeout=None):
         flags = Qt.WindowTitleHint | Qt.Dialog | Qt.WindowMaximizeButtonHint | Qt.CustomizeWindowHint
-        progress_dialog = QProgressDialog(message, None, 0, 0, self, flags)
-        progress_dialog.setWindowModality(Qt.WindowModal)
-        progress_dialog.setWindowTitle(title)
+        self.progress_dialog = QProgressDialog(message, None, 0, 0, self, flags)
+        self.progress_dialog.setWindowModality(Qt.WindowModal)
+        self.progress_dialog.setWindowTitle(title)
         if WINDOWS:
-            progress_dialog.resize(470, 100)
+            self.progress_dialog.resize(470, 100)
         else:
-            progress_dialog.resize(260, 100)
-        return progress_dialog
-        # self.progress_dialog.show()
-        # self.timer = QTimer(self)
-        # self.timer.start(timeout)
-        # self.timer.timeout.connect(self.cancelProgressDialog)
+            self.progress_dialog.resize(260, 100)
 
-    # def cancelProgressDialog(self):
-    #     self.progress_dialog.done(0)
-    #     self.timer.stop()
-    #     self.timer.deleteLater()
+        if timeout:
+            self.progress_dialog.show()
+            self.timer = QTimer(self)
+            self.timer.start(timeout)
+            self.timer.timeout.connect(self.cancelProgressDialog)
+
+        return self.progress_dialog
+
+    def cancelProgressDialog(self):
+        self.progress_dialog.done(0)
+        self.timer.stop()
+        self.timer.deleteLater()
 
     # display native GUI for each OS
     def setStyle(self):
@@ -527,7 +533,7 @@ class MainApplication(QMainWindow, QDialog):
             #     self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
             # else:
             #     self.statusListWidget.setStyleSheet("QListWidget{background: #3A3B3B;}")
-            self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
+            # self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
 
         if not CHROME:
             self.browserChromeCB.setEnabled(False)
@@ -638,7 +644,8 @@ class MainApplication(QMainWindow, QDialog):
                 self.status_queue.put("[GUI] Analyzing selected log...")
             self.progress_dialog = self.createProgressDialog("Working...", "Finding most frequent path...")
             # start PM as thread because it can take some time, I don't want to block the UI
-            worker = Worker(self.handleProcessMining, sorted(csv_to_merge), merged)  # Any other args, kwargs are passed to the run function
+            worker = Worker(self.handleProcessMining, sorted(csv_to_merge),
+                            merged)  # Any other args, kwargs are passed to the run function
             worker.signals.result.connect(self.PMThreadComplete)
             self.threadpool.start(worker)
         else:
@@ -701,7 +708,7 @@ class MainApplication(QMainWindow, QDialog):
         except ImportError:
             print(
                 "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
-                "See https://github.com/marco2012/ComputerLogger#PM4PY")
+                "See https://github.com/marco2012/SmartRPA#PM4PY")
             # reset counter and list
             self.runCount = 0
             self.csv_to_join.clear()
@@ -777,11 +784,11 @@ class MainApplication(QMainWindow, QDialog):
     def showAboutMessage(self):
         msgBox = QMessageBox()
         msgBox.setWindowTitle("About")
-        msgBox.setText("ComputerLogger allows to record user interaction with the computer "
+        msgBox.setText("SmartRPA allows to record user interaction with the computer "
                        "and perform process discovery analysis on the recorded logs, "
                        "determining the best way to perform a task")
         websiteBtn = QPushButton('Website')
-        websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/marco2012/ComputerLogger'))
+        websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/marco2012/SmartRPA'))
         msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
         msgBox.addButton(QPushButton('Close'), QMessageBox.AcceptRole)
         msgBox.exec_()
@@ -805,8 +812,24 @@ class MainApplication(QMainWindow, QDialog):
     # Called when start button is clicked by user
     def onButtonClick(self):
 
+        if not any([self.systemLoggerPrograms,
+                    self.systemLoggerClipboard,
+                    self.systemLoggerHotkeys,
+                    self.systemLoggerUSB,
+                    self.systemLoggerEvents,
+                    self.officeFilepath,
+                    self.officeExcel,
+                    self.officeWord,
+                    self.officePowerpoint,
+                    self.officeOutlook,
+                    self.browserChrome,
+                    self.browserFirefox,
+                    self.browserEdge,
+                    self.browserOpera]):
+            self.status_queue.put("[GUI] Select at least one module to start logging")
+
         # start button clicked
-        if not self.running:
+        elif not self.running:
             # set gui parameters
             self.running = True
 
@@ -895,6 +918,25 @@ class MainApplication(QMainWindow, QDialog):
 
 def buildGUI():
     app = QApplication(sys.argv)
+
+    palette = QPalette()
+    palette.setColor(QPalette.Window, QColor(53, 53, 53))
+    palette.setColor(QPalette.WindowText, Qt.white)
+    palette.setColor(QPalette.Base, QColor(15, 15, 15))
+    palette.setColor(QPalette.AlternateBase, QColor(101, 101, 101))
+    palette.setColor(QPalette.ToolTipBase, Qt.white)
+    palette.setColor(QPalette.ToolTipText, Qt.white)
+    palette.setColor(QPalette.Text, Qt.white)
+    palette.setColor(QPalette.ToolTipBase, QColor(53, 53, 53))
+    palette.setColor(QPalette.ToolTipText, Qt.white)
+    # palette.setColor(QPalette.Button, QColor(0, 0, 0))
+    palette.setColor(QPalette.ButtonText, Qt.white)
+    palette.setColor(QPalette.BrightText, Qt.red)
+    palette.setColor(QPalette.Highlight, QColor(142, 45, 197).lighter())
+    palette.setColor(QPalette.HighlightedText, Qt.black)
+    if darkdetect.isDark():
+        app.setPalette(palette)
+
     mainApplication = MainApplication()
     mainApplication.show()
     sys.exit(app.exec_())
