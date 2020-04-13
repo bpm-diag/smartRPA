@@ -286,10 +286,20 @@ class ProcessMining:
                 'case:concept:name'].tolist()[0]
             return min_duration_trace, min(durations)
 
+        # return case:concept:name of most frequent traces
         def _findMostFrequentTraces(df2: pandas.DataFrame, most_frequent_variants):
             try:
+                # list composed by the first column (case:concept:name) of the most frequent rows
+                # (selected by row index, because most_frequent_variants is a list of indices)
                 most_frequent_traces = df2.iloc[most_frequent_variants, 1].values.tolist()
-                return list(map(lambda a: a[0], most_frequent_traces))  # flatten the list
+                # find the longest sublist of case:concept:name
+                max_most_frequent_traces = max(most_frequent_traces, key=len)
+                # if all the sublist have 1 element, I'm in case 2
+                if len(max_most_frequent_traces) == 1:
+                    return list(map(lambda a: a[0], most_frequent_traces))  # flattened list
+                # else there is a sublist with more element, case 3 where there are equal traces
+                else:
+                    return max_most_frequent_traces
             except Exception:
                 return most_frequent_variants
 
