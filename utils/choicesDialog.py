@@ -1,3 +1,4 @@
+import darkdetect
 from PyQt5.QtCore import Qt, QCoreApplication
 from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QFormLayout,
                              QGroupBox, QLabel, QLineEdit, QVBoxLayout, QScrollArea)
@@ -45,6 +46,8 @@ class ChoicesDialog(QDialog):
 
             buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
             buttonBox.accepted.connect(self.handleReturn)
+            if darkdetect.isDark():
+                buttonBox.setStyleSheet('QPushButton {background-color: #656565;}')
 
             formGroupBox = QGroupBox()
             self.layout = QFormLayout()

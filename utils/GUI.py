@@ -647,7 +647,7 @@ class MainApplication(QMainWindow, QDialog):
                 self.status_queue.put("[GUI] Merging selected files...")
             else:
                 self.status_queue.put("[GUI] Analyzing selected log...")
-            self.progress_dialog = self.createProgressDialog("Working...", "Finding most frequent path...")
+            # self.progress_dialogMFP = self.createProgressDialog("Working...", "Finding most frequent path...")
             # start PM as thread because it can take some time, I don't want to block the UI
             worker = Worker(self.handleProcessMining, sorted(csv_to_merge),
                             merged)  # Any other args, kwargs are passed to the run function
@@ -657,7 +657,7 @@ class MainApplication(QMainWindow, QDialog):
             self.status_queue.put("[GUI] No csv selected...")
 
     def PMThreadComplete(self, result):
-        self.progress_dialog.done(0)
+        # self.progress_dialogMFP.done(0)
         if result:
             pm, log_filepath = result
             self.choices(pm, log_filepath)

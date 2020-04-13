@@ -318,7 +318,7 @@ class ProcessMining:
             # Check similarities between all the strings in the log and return the most frequent one
             #  I don't need to check similarities in the other case, because there the strings are exactly the same
             def func(name):
-                matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
+                matches = df2.apply(lambda row: (fuzz.ratio(row[groupby_column], name) >= threshold), axis=1)
                 return [i for i, x in enumerate(matches) if x]
 
             df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
@@ -347,7 +347,7 @@ class ProcessMining:
                     f"[PROCESS MINING] There are {len(variants)} variants, "
                     f"among the {len(most_frequent_traces)} similar traces, "
                     f"case {min_duration_trace} is the shortest ({duration} sec)")
-                print(f"[PROCESS MINING] Traces {most_frequent_traces} are similar")
+                print(f"[PROCESS MINING] Traces {most_frequent_traces} are similar by at least {threshold}%")
         else:
             min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
             most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
