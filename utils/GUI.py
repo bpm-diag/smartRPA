@@ -657,7 +657,6 @@ class MainApplication(QMainWindow, QDialog):
             self.status_queue.put("[GUI] No csv selected...")
 
     def PMThreadComplete(self, result):
-        # self.progress_dialogMFP.done(0)
         if result:
             pm, log_filepath = result
             self.choices(pm, log_filepath)
@@ -702,14 +701,17 @@ class MainApplication(QMainWindow, QDialog):
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
 
-    def handleProcessMining(self, log_filepath: list, merged=False):
+    def handleProcessMining(self, log_filepath: list, merged=False, fromRunCount=False):
         try:
             # check if library is installed
             import pm4py
             # create class, combine all csv into one
             # print(f"[PROCESS MINING] Finding most frequent path...")
             pm = utils.process_mining.ProcessMining(log_filepath, self.status_queue, merged)
-            return pm, log_filepath
+            if fromRunCount:
+                self.PMThreadComplete((pm, log_filepath))
+            else:
+                return pm, log_filepath
         except ImportError:
             print(
                 "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
@@ -730,6 +732,7 @@ class MainApplication(QMainWindow, QDialog):
 
     # it must be in main thread
     def choices(self, pm, log_filepath):
+        print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
             # create high level DFG model based on all logs
             pm.highLevelDFG()
@@ -780,7 +783,7 @@ class MainApplication(QMainWindow, QDialog):
         # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
         # from these csv
         if self.runCount >= totalRunCount and self.csv_to_join:
-            self.handleProcessMining(self.csv_to_join)
+            self.handleProcessMining(self.csv_to_join, fromRunCount=True)
 
             # reset counter and list
             self.runCount = 0

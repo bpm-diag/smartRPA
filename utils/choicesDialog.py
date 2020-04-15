@@ -20,7 +20,7 @@ class ChoicesDialog(QDialog):
             self.setMaximumWidth(1000)
             self.setFixedWidth(1000)
         else:
-            self.setMaximumWidth(650)
+            self.setMaximumWidth(700)
             self.setFixedWidth(650)
         self.setMaximumHeight(500)
 

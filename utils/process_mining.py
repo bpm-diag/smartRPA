@@ -131,6 +131,13 @@ class ProcessMining:
             # dataframe of combined csv, sort by timestamp
             combined_csv = pandas.concat(csv_to_combine)
 
+            # convert timestamp to ISO format
+            try:
+                combined_csv['time:timestamp'] = combined_csv['time:timestamp'] \
+                    .apply((lambda ts: datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").isoformat()))
+            except ValueError:
+                pass
+
             # insert index for each row
             # combined_csv.insert(0, 'row_index', range(0, len(combined_csv)))
 
@@ -151,6 +158,9 @@ class ProcessMining:
             # convert csv to xes
             xes_path = os.path.join(self.save_path, 'log', f'{self.filename}.xes')
             xes_exporter.export_log(log, xes_path)
+            # timestamp in xes file must have attribute date, not string
+            utils.utils.addDateFieldXES(xes_path)
+
             self.status_queue.put(f"[PROCESS MINING] Working directory is {self.save_path}")
             self.status_queue.put(f"[PROCESS MINING] Generated XES file")
 
@@ -239,9 +249,9 @@ class ProcessMining:
             return None
 
         # flattening
-        # df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
+        df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
         df['flattened'] = df[
-            ['concept:name', 'category', 'application', "workbook"]].agg(','.join, axis=1)
+            ['concept:name', 'category', 'browser_url_hostname']].agg(','.join, axis=1)
         groupby_column = 'flattened' if flattened else 'concept:name'
 
         # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
@@ -259,8 +269,8 @@ class ProcessMining:
         # 22.324
         def getDuration(time):
             timestamps = time.split(',')
-            start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%d %H:%M:%S:%f")
-            finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%d %H:%M:%S:%f")
+            start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%dT%H:%M:%S.%f")
+            finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%dT%H:%M:%S.%f")
             duration = finish - start
             return duration.total_seconds()
 
