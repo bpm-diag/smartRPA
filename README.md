@@ -172,6 +172,28 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
     pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3
     ```
 
+    <details>
+    <summary>
+        Click to show how to <b>fix installation errors</b> on MacOS
+    </summary>
+    </br>
+
+    If you get an error while installing the dependency <code>Pillow</code>:
+
+    1. If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then try to install the package again
+
+        ```
+        sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+        ```
+
+    2. If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then try to install the package again
+
+        ```
+        export CPATH=`xcrun --show-sdk-path`/usr/include
+        ```
+
+    </details>
+
 #### Python-Levenshtein
 
 This package provides a 4-10x speedup in String Matching.
