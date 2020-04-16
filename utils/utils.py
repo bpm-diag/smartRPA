@@ -278,7 +278,7 @@ def open_file(path):
         print(f"[UTILS] Could not open file {path}: {e}")
 
 
-def addDateFieldXES(xes_filepath):
+def fixTimestampFieldXES(xes_filepath):
     import fileinput
     with fileinput.FileInput(xes_filepath, inplace=True) as file:
         for line in file:

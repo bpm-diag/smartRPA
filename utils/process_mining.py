@@ -138,6 +138,9 @@ class ProcessMining:
             except ValueError:
                 pass
 
+            # convert case id to string
+            # combined_csv['case:concept:name'] = combined_csv['case:concept:name'].astype(str)
+
             # insert index for each row
             # combined_csv.insert(0, 'row_index', range(0, len(combined_csv)))
 
@@ -159,7 +162,7 @@ class ProcessMining:
             xes_path = os.path.join(self.save_path, 'log', f'{self.filename}.xes')
             xes_exporter.export_log(log, xes_path)
             # timestamp in xes file must have attribute date, not string
-            utils.utils.addDateFieldXES(xes_path)
+            utils.utils.fixTimestampFieldXES(xes_path)
 
             self.status_queue.put(f"[PROCESS MINING] Working directory is {self.save_path}")
             self.status_queue.put(f"[PROCESS MINING] Generated XES file")

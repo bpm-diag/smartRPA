@@ -696,7 +696,7 @@ class MainApplication(QMainWindow, QDialog):
 
     def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
-        rpa = utils.generateRPAScript.RPAScript(log_filepath)
+        rpa = utils.generateRPAScript.RPAScript(log_filepath, self.status_queue)
         rpa_success = rpa.run()
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
