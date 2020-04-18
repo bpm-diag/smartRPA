@@ -117,7 +117,7 @@ class ProcessMining:
                     pass
 
                 try:  # insert this column to create a unique trace for each csv
-                    df.insert(1, 'case:creator', 'CSV2XES by marco2012')
+                    df.insert(1, 'case:creator', 'SmartRPA by marco2012')
                 except ValueError:  # column already present
                     pass
 
