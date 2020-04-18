@@ -288,10 +288,13 @@ class ProcessMining:
 
         # return the concept:case:id of the variant with shortest duration
         # not used when all traces are different
-        def _findVariantWithShortestDuration(df1: pandas.DataFrame, most_frequent_variants):
+        def _findVariantWithShortestDuration(df1: pandas.DataFrame, most_frequent_variants, equal=False):
             #  there are at least 2 equal variants, most_frequent_variants is an array like [0,1]
             # take only the most frequent rows in dataframe, like [0,1]
-            most_frequent_variants_df = df1.iloc[most_frequent_variants, :]
+            if equal:
+                most_frequent_variants_df = df1.loc[df1['case:concept:name'].isin(most_frequent_variants)]
+            else:
+                most_frequent_variants_df = df1.iloc[most_frequent_variants, :]
             # find the row with the smallest duration
             durations = most_frequent_variants_df['duration'].tolist()
             # return the index of the row with the smallest duration
@@ -362,13 +365,19 @@ class ProcessMining:
                     f"case {min_duration_trace} is the shortest ({duration} sec)")
                 print(f"[PROCESS MINING] Traces {most_frequent_traces} are similar by at least {threshold}%")
         else:
-            min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
-            most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
+            # min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
+            # most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
+            # self.status_queue.put(
+            #     f"[PROCESS MINING] There are {len(variants)} variants, "
+            #     f"among the {len(most_frequent_traces)} equal traces, "
+            #     f"case {min_duration_trace} is the shortest ({duration} sec)")
+            # print(f"[PROCESS MINING] Traces {most_frequent_traces} are equal")
+            min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants, equal=True)
             self.status_queue.put(
-                f"[PROCESS MINING] There are {len(variants)} variants, "
-                f"among the {len(most_frequent_traces)} equal traces, "
+                f"[PROCESS MINING] There are {len(df1)} traces and {len(variants)} variants, "
+                f"among the {len(most_frequent_variants)} equal traces, "
                 f"case {min_duration_trace} is the shortest ({duration} sec)")
-            print(f"[PROCESS MINING] Traces {most_frequent_traces} are equal")
+            print(f"[PROCESS MINING] Traces {most_frequent_variants} are equal")
 
         case = df.loc[df['case:concept:name'] == min_duration_trace]
 
