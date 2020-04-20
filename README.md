@@ -25,7 +25,7 @@
 
 ## Installation and execution:
 
-Make sure you are using _64bit_ version of Python 3.8.1. You can download it from the official site for [Windows](https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe) or [MacOS](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg). 
+Make sure you are using _64bit_ version of Python 3.8.1. You can download it from the official site for [Windows](https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe) or [MacOS](https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg).
 Do not install Python from a package manager like _brew_.
 
 On Windows always run cmd as _admin_.
@@ -84,8 +84,6 @@ npm start
 
 </details>
 
-
-
 #### 4. **Run main logger**
 
 ```bash
@@ -101,10 +99,11 @@ _Robotic Process Automation_ scripts are automatically generated for each log in
 #### Visual Studio (Windows Only)
 
 On Windows [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
-It is vital to install all C++ related development tools like 
-- Windows 10 SDK
-- Visual C++ tools for CMake
-- C++ x64/x86 build tools
+It is vital to install all C++ related development tools like
+
+-   Windows 10 SDK
+-   Visual C++ tools for CMake
+-   C++ x64/x86 build tools
 
 If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://www.scivision.co/python-windows-visual-c-14-required/).
 
@@ -112,15 +111,15 @@ If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check her
 
 To run the generated RPA scripts you must install `automagica` module.
 
-- On Windows:
+-   On Windows:
 
     `pip3 install automagica==2.0.25`
-    
-    <details>
-    <summary>
-        Click to show how to <b>fix installation errors</b> on Windows
-    </summary>
-    </br>
+
+      <details>
+      <summary>
+          Click to show how to <b>fix installation errors</b> on Windows
+      </summary>
+      </br>
 
     1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
     2. Install Win64 OpenSSL v1.1.1 from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
@@ -132,9 +131,9 @@ To run the generated RPA scripts you must install `automagica` module.
     pip3 install automagica==2.0.25
     ```
 
-    </details>
+      </details>
 
-- On MacOS:
+-   On MacOS:
 
     ```bash
     pip3 install automagica==2.0.25
@@ -145,25 +144,25 @@ To run the generated RPA scripts you must install `automagica` module.
 
 To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
 
-- On Windows:
+-   On Windows:
 
-    1. Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/marco2012/SmartRPA#visual-studio-windows-only).  
+    1. Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/marco2012/SmartRPA#visual-studio-windows-only).
     2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
     3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
-    4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3` 
+    4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3`
 
-    </br>
-    <details>
-    <summary>
-        Click to show how to <b>fix installation errors</b> on Windows
-    </summary>
-    </br>
+      </br>
+      <details>
+      <summary>
+          Click to show how to <b>fix installation errors</b> on Windows
+      </summary>
+      </br>
 
-    If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>. 
+    If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>.
 
-    </details>
+      </details>
 
-- On MacOS:
+-   On MacOS:
 
     Use [Brew](https://brew.sh/) package manager to install graphviz
 
@@ -172,11 +171,11 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
     pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3
     ```
 
-    <details>
-    <summary>
-        Click to show how to <b>fix installation errors</b> on MacOS
-    </summary>
-    </br>
+      <details>
+      <summary>
+          Click to show how to <b>fix installation errors</b> on MacOS
+      </summary>
+      </br>
 
     If you get an error while installing the dependency <code>Pillow</code>:
 
@@ -192,25 +191,22 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
         export CPATH=`xcrun --show-sdk-path`/usr/include
         ```
 
-    </details>
+      </details>
 
 #### Python-Levenshtein
 
 This package provides a 4-10x speedup in String Matching.
 
-- On Windows:
-    
+-   On Windows:
     1.  Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/marco2012/SmartRPA#visual-studio-windows-only)
-    2. `pip3 install python-Levenshtein==0.12.0`
-    
-- On MacOS:
+    2.  `pip3 install python-Levenshtein==0.12.0`
+-   On MacOS:
 
     1. Automatically installed with `requirements.txt`
 
 #### Browser automation
 
 For browser automation, [Google Chrome](https://www.google.com/chrome/) must be installed.
-
 
 ## Modules
 
@@ -226,4 +222,4 @@ The project is composed by the following modules:
 -   [x] CSV to XES converter
 -   [x] Process Discovery analysis
 
-A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/marco2012/SmartRPA/blob/master/docs/Features.pdf)
+A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)

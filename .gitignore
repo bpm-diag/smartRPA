@@ -50,3 +50,4 @@ Pipfile.lock
 __pypackages__/
 /modules/browserlogger/web-ext-artifacts/
 *.lnk
+/docs/readme-header11.png

@@ -13,7 +13,7 @@ try:
     from automagica import *
 except ImportError as e:
     print("[SETUP] Please install 'automagica' module running 'pip3 install -U automagica' and run this script again.")
-    print("[SETUP] If you get 'openssl' error check here https://github.com/marco2012/ComputerLogger#automagica")
+    print("[SETUP] If you get 'openssl' error check here https://github.com/bpm-diag/smartRPA#automagica")
     sys.exit()
 
 
