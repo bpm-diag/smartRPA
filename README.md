@@ -40,7 +40,7 @@ On Windows always run cmd as _admin_.
 
 -   Install RPA dependencies
 
-    [Details here](https://github.com/marco2012/SmartRPA#rpa)
+    [Details here](https://github.com/bpm-diag/smartRPA/#rpa)
 
 #### 2. **Install browser extension**
 
@@ -146,7 +146,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
 -   On Windows:
 
-    1. Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/marco2012/SmartRPA#visual-studio-windows-only).
+    1. Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/bpm-diag/smartRPA/#visual-studio-windows-only).
     2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
     3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
     4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3`
@@ -198,7 +198,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 This package provides a 4-10x speedup in String Matching.
 
 -   On Windows:
-    1.  Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/marco2012/SmartRPA#visual-studio-windows-only)
+    1.  Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/bpm-diag/smartRPA/#visual-studio-windows-only)
     2.  `pip3 install python-Levenshtein==0.12.0`
 -   On MacOS:
 
