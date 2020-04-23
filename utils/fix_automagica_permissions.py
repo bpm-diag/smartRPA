@@ -6,7 +6,6 @@
 import subprocess
 import sys, os
 from platform import system
-import importlib
 from importlib import util
 
 try:
@@ -19,6 +18,7 @@ except ImportError as e:
 
 # return python module install location
 def getPythonModuleLocation(module_name):
+    import importlib
     module = importlib.util.find_spec(module_name)
     if module:
         return module.submodule_search_locations[0]

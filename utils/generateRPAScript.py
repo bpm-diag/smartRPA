@@ -4,20 +4,21 @@
 # GUI when main process is terminated and csv is available.
 # https://automagica.readthedocs.io/activities.html
 # ******************************
-
 import sys
+sys.path.append('../')  # this way main file is visible from this file
+
+from utils.utils import CHROME, DESKTOP, getActiveWindowInfo, WINDOWS, MAC
+import utils
+import utils.config
+from threading import Thread
+import ntpath
+import os
+import pandas
+
 from multiprocessing.queues import Queue
 
 import modules
 
-sys.path.append('../')  # this way main file is visible from this file
-import pandas
-import os
-import ntpath
-from threading import Thread
-import utils.config
-import utils
-from utils.utils import CHROME, DESKTOP, getActiveWindowInfo, WINDOWS, MAC
 
 
 class RPAScript:
@@ -49,7 +50,8 @@ class RPAScript:
         self.csv_file_path = csv_file_path
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
         try:
-            self._dataframe = pandas.read_csv(csv_file_path, encoding='utf-8-sig')
+            self._dataframe = pandas.read_csv(
+                csv_file_path, encoding='utf-8-sig')
         except UnicodeDecodeError as e:
             print(f"[RPA] Could not decode {csv_file_path}: {e}")
 
@@ -83,8 +85,9 @@ except ImportError as e:
 
     @staticmethod
     def _createBrowserHeader():
-        return """
+        return f"""
 try:
+    import importlib
     from selenium.common.exceptions import *
     from selenium.webdriver.common.keys import Keys
     from selenium.webdriver.common.action_chains import ActionChains
@@ -97,7 +100,14 @@ try:
     browser.get('about:blank') 
 except WebDriverException as e:
     print(e)
-    print("If you get 'Permission denied' you did not set the correct permissions, run 'utils/fix_automagica_permissions.py' first.")
+    if 'Permission denied' in str(e):
+        print("If you get 'Permission denied' you did not set the correct permissions, run 'utils/fix_automagica_permissions.py' first.")
+    if 'version of ChromeDriver' in str(e):
+        try:
+            automagica_path = importlib.util.find_spec('automagica').submodule_search_locations[0] + '/bin'
+        except Exception:
+            automagica_path = 'the Automagica installation path, usually it is: /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/automagica/bin'
+        print('This tool supports Google Chrome versions <= 81. Download the correct ChromeDriver for your system at https://chromedriver.chromium.org/downloads and copy the executable in ' + automagica_path)
     sys.exit()
     \n"""
 
@@ -106,7 +116,8 @@ except WebDriverException as e:
             self.excelOpened = True
             script.write(f"print('Opening Excel...')\n")
             if MAC:
-                script.write(f"applescript.tell.app('Microsoft Excel', 'open')\n")
+                script.write(
+                    f"applescript.tell.app('Microsoft Excel', 'open')\n")
                 script.write("app = xw.App(visible=True)\n")
                 if path and os.path.splitext(path)[1] and os.path.exists(path):
                     script.write(f"wb = xw.Book('{path}')\n")
@@ -120,7 +131,8 @@ except Exception:
 \n""")
             elif WINDOWS:
                 if path and os.path.splitext(path)[1] and os.path.exists(path):
-                    script.write(f"excel = Excel(visible=True, file_path=r'{path}')\n")
+                    script.write(
+                        f"excel = Excel(visible=True, file_path=r'{path}')\n")
                 else:
                     script.write("excel = Excel(visible=True)\n")
 
@@ -130,7 +142,8 @@ except Exception:
         # csv_filename is like 2020-02-25_23-21-57
         utils.utils.createDirectory(self.RPA_directory)
         # RPA_filename is like 2020-02-25_23-21-57_RPA.py
-        RPA_filename = utils.utils.getFilename(self.csv_file_path).strip('_combined') + RPA_type
+        RPA_filename = utils.utils.getFilename(
+            self.csv_file_path).strip('_combined') + RPA_type
         # RPA_filepath is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57/2020-02-25_23-21-57_RPA.py
         RPA_filepath = os.path.join(self.RPA_directory, RPA_filename)
         return RPA_filepath
@@ -146,7 +159,8 @@ except Exception:
             if not df.query('category=="Browser"').empty:
                 script.write(self._createBrowserHeader())
             if WINDOWS:
-                script.write("from win32gui import GetForegroundWindow, GetWindowText\n\n")
+                script.write(
+                    "from win32gui import GetForegroundWindow, GetWindowText\n\n")
 
             for index, row in df.iterrows():
 
@@ -181,7 +195,8 @@ except Exception:
                 if not pandas.isna(row['event_dest_path']) and row['event_dest_path'] != '':
                     dest_path = row['event_dest_path']
                     # dest_path = dest_path.replace(user, utils.utils.USER, 1)
-                    dest_path = utils.utils.formatPathForCurrentOS(dest_path, user)
+                    dest_path = utils.utils.formatPathForCurrentOS(
+                        dest_path, user)
 
                 app = row['application']
                 mouse_coord = row['mouse_coord']
@@ -203,7 +218,8 @@ except Exception:
                 if e not in self.eventsToIgnore:
                     script.write(f"# {timestamp} {e}\n")
                     if row['category'] == "OperatingSystem":
-                        script.write(f"sleep({self._delay_between_actions * 2})\n")
+                        script.write(
+                            f"sleep({self._delay_between_actions * 2})\n")
                     else:
                         script.write(f"sleep({self._delay_between_actions})\n")
 
@@ -302,7 +318,8 @@ except Exception:
                     elif MAC:
                         if not self.excelOpened:
                             self._createOpenExcel(script, path)
-                        cell_content = row['cell_content'].strip('[]').strip('"').strip()
+                        cell_content = row['cell_content'].strip(
+                            '[]').strip('"').strip()
                         script.write(f'''
 try:
     sht.range('{cell_range}').value = """{cell_content}"""
@@ -384,7 +401,8 @@ except Exception:
                     if WINDOWS:
                         script.write("word = Word(visible=True, path=None)\n")
                     elif MAC and os.path.exists('/Applications/Microsoft Word.app'):
-                        script.write(f"applescript.tell.app('Microsoft Word', 'open')\n")
+                        script.write(
+                            f"applescript.tell.app('Microsoft Word', 'open')\n")
 
                 #####
                 # PowerPoint
@@ -393,18 +411,22 @@ except Exception:
                 elif e == "newPresentation":
                     script.write(f"print('Opening Powerpoint...')\n")
                     if WINDOWS:
-                        script.write("powerpoint = Powerpoint(visible=True, path=None)\n")
+                        script.write(
+                            "powerpoint = Powerpoint(visible=True, path=None)\n")
                     elif MAC and os.path.exists('/Applications/Microsoft PowerPoint.app'):
-                        script.write(f"applescript.tell.app('Microsoft PowerPoint', 'make new presentation')\n")
+                        script.write(
+                            f"applescript.tell.app('Microsoft PowerPoint', 'make new presentation')\n")
                 elif e == "newPresentationSlide":
                     script.write(f"print('Adding slide to presentation')\n")
                     if WINDOWS:
                         script.write(f"powerpoint.add_slide()\n")
                     elif MAC:
-                        script.write("applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'set newSlide to make new slide at the end of active presentation')\n")
+                        script.write(
+                            "applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'set newSlide to make new slide at the end of active presentation')\n")
                 elif e == "savePresentation":  # case 2), after case
                     presentation_name = row['title']
-                    script.write(f"print('saving presentation {presentation_name}')\n")
+                    script.write(
+                        f"print('saving presentation {presentation_name}')\n")
                     if WINDOWS:
                         path = os.path.join(DESKTOP, 'presentation.pptx')
                         script.write(f"powerpoint.save_as(r'{path}')\n")
@@ -419,7 +441,8 @@ except Exception:
                     if WINDOWS:
                         script.write("powerpoint.quit()\n")
                     elif MAC:
-                        script.write(f"applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'close active presentation')\n")
+                        script.write(
+                            f"applescript.tell.app('/Applications/Microsoft PowerPoint.app', 'close active presentation')\n")
 
                 ######
                 # System
@@ -438,7 +461,8 @@ except Exception:
                         script.write(f'pyperclip.copy("""{cb}""")\n')
                 # paste in browser is handled elsewhere
                 elif e == "paste" and row['category'] != 'Browser':
-                    script.write(f'print("Pasting clipboard text: {cb} in {row["title"]}")\n')
+                    script.write(
+                        f'print("Pasting clipboard text: {cb} in {row["title"]}")\n')
                     if WINDOWS:
                         script.write(f'''
 try:
@@ -456,7 +480,8 @@ except Exception:
                     hotkey_param = hotkey.split('+')
                     meaning = row["description"]
 
-                    script.write(f"print('Pressing hotkey {hotkey} : {meaning}')\n")
+                    script.write(
+                        f"print('Pressing hotkey {hotkey} : {meaning}')\n")
                     if len(hotkey_param) == 2:
                         script.write(f'''
 try:
@@ -490,9 +515,11 @@ except Exception:
                 elif e == "openFolder" and path:
                     script.write(f"print('Opening folder {item_name}')\n")
                     if WINDOWS:
-                        script.write(f"if folder_exists(r'{path}'): show_folder(r'{path}')\n")
+                        script.write(
+                            f"if folder_exists(r'{path}'): show_folder(r'{path}')\n")
                     elif MAC:
-                        script.write(f"if folder_exists(r'{path}'): open_file(r'{path}')\n")
+                        script.write(
+                            f"if folder_exists(r'{path}'): open_file(r'{path}')\n")
                 elif e == "programOpen":
 
                     # do not open excel manually if there are events related to excel in dataframe,
@@ -508,10 +535,12 @@ except Exception:
                         if MAC:
                             if app == "notepad.exe":
                                 script.write(f"print('Opening TextEdit')\n")
-                                script.write(f"applescript.tell.app('TextEdit', 'open')\n")
+                                script.write(
+                                    f"applescript.tell.app('TextEdit', 'open')\n")
                             elif os.path.exists(path):
                                 script.write(f"print('Opening {app}')\n")
-                                script.write(f"applescript.tell.app('{os.path.basename(path)}', 'open')\n")
+                                script.write(
+                                    f"applescript.tell.app('{os.path.basename(path)}', 'open')\n")
                         elif WINDOWS and ntpath.basename(path) not in modules.systemEvents.programs_to_ignore:
                             if app == "TextEdit":
                                 script.write(f"""
@@ -532,7 +561,8 @@ except Exception:
                 elif e == "programClose" and os.path.exists(path):
                     script.write(f"print('Closing {app}')\n")
                     if MAC:
-                        script.write(f"applescript.tell.app('{os.path.basename(path)}', 'quit')\n")
+                        script.write(
+                            f"applescript.tell.app('{os.path.basename(path)}', 'quit')\n")
                     else:
                         script.write(f"kill_process(r'{path}')\n")
                 elif e == "created" and path:
@@ -542,17 +572,21 @@ except Exception:
                         script.write(f"open(r'{path}', 'w')\n")
                     # otherwise assume it's a directory
                     else:
-                        script.write(f"print('Creating directory {item_name}')\n")
+                        script.write(
+                            f"print('Creating directory {item_name}')\n")
                         script.write(f"create_folder(r'{path}')\n")
                 elif e == "deleted" and path and os.path.exists(path):
                     # check if i have a file (with extension)
                     if os.path.splitext(path)[1]:
                         script.write(f"print('Removing file {item_name}')\n")
-                        script.write(f"if file_exists(r'{path}'): remove_file(r'{path}')\n")
+                        script.write(
+                            f"if file_exists(r'{path}'): remove_file(r'{path}')\n")
                     # otherwise assume it's a directory
                     else:
-                        script.write(f"print('Removing directory {item_name}')\n")
-                        script.write(f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
+                        script.write(
+                            f"print('Removing directory {item_name}')\n")
+                        script.write(
+                            f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
                 elif e in ["moved", "Unmount"] and path:
 
                     # check if file has been renamed, so source and dest path are the same
@@ -563,12 +597,14 @@ except Exception:
 
                         # file
                         if os.path.splitext(path)[1]:
-                            script.write(f'print("Renaming file {item_name} to {new_name}")\n')
+                            script.write(
+                                f'print("Renaming file {item_name} to {new_name}")\n')
                             script.write(
                                 f'if file_exists(r"{path}"): rename_file(r"{path}", new_name="{new_name}")\n')
                         # directory
                         else:
-                            script.write(f'print("Renaming directory {item_name} to {new_name}")\n')
+                            script.write(
+                                f'print("Renaming directory {item_name} to {new_name}")\n')
                             script.write(
                                 f'if folder_exists(r"{path}"): rename_folder(r"{path}", new_name="{new_name}")\n')
 
@@ -576,11 +612,14 @@ except Exception:
                     else:
                         if os.path.splitext(path)[1]:
                             script.write(f'print("Moving file {item_name}")\n')
-                            script.write(f'if file_exists(r"{path}"): move_file(r"{path}", r"{dest_path}")\n')
+                            script.write(
+                                f'if file_exists(r"{path}"): move_file(r"{path}", r"{dest_path}")\n')
                         # otherwise it's a directory
                         else:
-                            script.write(f'print("Moving directory {item_name}")\n')
-                            script.write(f'if folder_exists(r"{path}"): move_folder(r"{path}", r"{dest_path}")\n')
+                            script.write(
+                                f'print("Moving directory {item_name}")\n')
+                            script.write(
+                                f'if folder_exists(r"{path}"): move_folder(r"{path}", r"{dest_path}")\n')
 
                 ######
                 # Browser
@@ -687,7 +726,8 @@ except Exception:
 \n''')
 
                 elif e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
-                    script.write(f"print('Clicking button {row['tag_name']}')\n")
+                    script.write(
+                        f"print('Clicking button {row['tag_name']}')\n")
                     script.write(f"""
 try:
     browser.find_element_by_xpath('{xpath}').click()
@@ -725,10 +765,10 @@ except Exception:
                     mouse_coord = row['mouse_coord']
                     script.write(f"print('Mouse click')\n")
                     script.write(f"actions = ActionChains(browser)\n")
-                    script.write(f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
+                    script.write(
+                        f"actions.move_to_element(browser.find_element_by_tag_name('body'))\n")
                     script.write(f"actions.moveByOffset({mouse_coord})\n")
                     script.write(f"actions.click().build().perform()\n")
-
 
         # self.status_queue.put(f"[RPA] Generated RPA script {ntpath.basename(RPA_filepath)}")
         self.status_queue.put(f"[RPA] Generated RPA script")
@@ -741,7 +781,8 @@ except Exception:
     def generateRPAScript(self):
         # check if given csv log file exists
         if not os.path.exists(self.csv_file_path):
-            print(f"[RPA] Can't find specified csv_file_path {self.csv_file_path}")
+            print(
+                f"[RPA] Can't find specified csv_file_path {self.csv_file_path}")
             return False
         else:
             self._generateUnifiedRPA(self._dataframe)

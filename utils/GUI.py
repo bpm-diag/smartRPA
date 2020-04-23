@@ -3,30 +3,29 @@
 # Build native user interface and start main logger
 # ****************************** #
 import sys
-
 sys.path.append('../')  # this way main file is visible from this file
-from PyQt5.QtCore import Qt, QSize, QThreadPool, QTimer
-from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
+import traceback
+import utils.utils
+import utils.process_mining
+import utils.xesConverter
+import utils.generateRPAScript
+import utils.config
+import mainLogger
+from utils.utils import *
+from utils.filenameDialog import getFilenameDialog
+import time
+import webbrowser
+import pandas
+from multiprocessing import Process, Queue
+import darkdetect
+from utils.GUIThread import Worker
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
                              QAbstractItemView, QRadioButton, QProgressDialog,
                              QMainWindow, QWidget, QSlider, QLCDNumber, QMessageBox)
-from utils.GUIThread import Worker
-import darkdetect
-from multiprocessing import Process, Queue
-import pandas
-import webbrowser
-import time
-from utils.filenameDialog import getFilenameDialog
-from utils.utils import *
-import mainLogger
-import utils.config
-import utils.generateRPAScript
-import utils.xesConverter
-import utils.process_mining
-import utils.utils
-import traceback
+from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
+from PyQt5.QtCore import Qt, QSize, QThreadPool, QTimer
 
 
 # Preferences window
@@ -34,10 +33,10 @@ class Preferences(QMainWindow):
     def __init__(self, parent, status_queue):
         super(Preferences, self).__init__(parent,
                                           flags=Qt.Window |
-                                                Qt.WindowTitleHint |
-                                                Qt.CustomizeWindowHint |
-                                                Qt.WindowCloseButtonHint |
-                                                Qt.WindowMinimizeButtonHint
+                                          Qt.WindowTitleHint |
+                                          Qt.CustomizeWindowHint |
+                                          Qt.WindowCloseButtonHint |
+                                          Qt.WindowMinimizeButtonHint
                                           )
 
         self.status_queue = status_queue
@@ -54,7 +53,8 @@ class Preferences(QMainWindow):
         self.sld = QSlider(Qt.Horizontal, self)
         self.sld.setMinimum(slider_minimum)
         self.sld.setMaximum(slider_maximum)
-        self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
+        self.sld.setValue(
+            utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
         self.sld.valueChanged.connect(self.handle_slider)
 
         if WINDOWS:
@@ -68,10 +68,13 @@ class Preferences(QMainWindow):
             fontSize = 13
 
         font = QFont(monospaceFont, fontSize, QFont.Normal)
-        label_minimum = QLabel(str(slider_minimum), alignment=Qt.AlignLeft, font=font)
-        label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
+        label_minimum = QLabel(str(slider_minimum),
+                               alignment=Qt.AlignLeft, font=font)
+        label_maximum = QLabel(str(slider_maximum),
+                               alignment=Qt.AlignRight, font=font)
 
-        self.slider_label = QLabel("Number of runs after which \nXES file is generated:")
+        self.slider_label = QLabel(
+            "Number of runs after which \nXES file is generated:")
         self.slider_label.setToolTip(
             "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file "
             "is automatically generated, to be used for process mining techniques")
@@ -82,14 +85,17 @@ class Preferences(QMainWindow):
         confirmButton.setChecked(False)
         confirmButton.clicked.connect(self.handleButton)
         if darkdetect.isDark():
-            confirmButton.setStyleSheet('QPushButton {background-color: #656565;}')
+            confirmButton.setStyleSheet(
+                'QPushButton {background-color: #656565;}')
 
-        self.process_discovery_cb = QCheckBox("Enable Process Discovery \nanalysis on log file")
+        self.process_discovery_cb = QCheckBox(
+            "Enable Process Discovery \nanalysis on log file")
         self.process_discovery_cb.setToolTip("If enabled, process discovery analysis is performed automatically\n"
                                              "after selecting log file, otherwise only log file is generated")
         self.process_discovery_cb.tag = "process_discovery_cb"
         self.process_discovery_cb.stateChanged.connect(self.handle_cb)
-        self.process_discovery_cb.setChecked(utils.config.MyConfig.get_instance().perform_process_discovery)
+        self.process_discovery_cb.setChecked(
+            utils.config.MyConfig.get_instance().perform_process_discovery)
 
         processDiscoveryGroupBox = QGroupBox()
         vbox = QVBoxLayout()
@@ -235,7 +241,8 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerFilesFolderCB.tag = "systemLoggerFilesFolder"
         self.systemLoggerFilesFolderCB.stateChanged.connect(
             self.handleCheckBox)
-        self.systemLoggerFilesFolderCB.setToolTip("Log edits on files and folder like create, modify, delete and more")
+        self.systemLoggerFilesFolderCB.setToolTip(
+            "Log edits on files and folder like create, modify, delete and more")
 
         self.systemLoggerClipboardCB = QCheckBox("Clipboard")
         self.systemLoggerClipboardCB.tag = "systemLoggerClipboard"
@@ -245,7 +252,8 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerProgramsCB = QCheckBox("Programs")
         self.systemLoggerProgramsCB.tag = "systemLoggerPrograms"
         self.systemLoggerProgramsCB.stateChanged.connect(self.handleCheckBox)
-        self.systemLoggerProgramsCB.setToolTip("Log opening and closing of programs")
+        self.systemLoggerProgramsCB.setToolTip(
+            "Log opening and closing of programs")
 
         self.systemLoggerHotkeysCB = QCheckBox("Hotkeys")
         self.systemLoggerHotkeysCB.tag = "systemLoggerHotkeys"
@@ -255,7 +263,8 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerUSBCB = QCheckBox("USB Drives")
         self.systemLoggerUSBCB.tag = "systemLoggerUSB"
         self.systemLoggerUSBCB.stateChanged.connect(self.handleCheckBox)
-        self.systemLoggerUSBCB.setToolTip("Log insertion and removal of usb drives")
+        self.systemLoggerUSBCB.setToolTip(
+            "Log insertion and removal of usb drives")
 
         self.systemLoggerEventsCB = QCheckBox("Events")
         self.systemLoggerEventsCB.tag = "systemLoggerEvents"
@@ -361,7 +370,8 @@ class MainApplication(QMainWindow, QDialog):
     def createStartButton(self):
         self.runButton = QPushButton("Start logger")
         if darkdetect.isDark():
-            self.runButton.setStyleSheet('QPushButton {background-color: #656565;}')
+            self.runButton.setStyleSheet(
+                'QPushButton {background-color: #656565;}')
         self.runButton.setCheckable(True)
         self.runButton.setChecked(False)
         self.runButton.clicked.connect(self.onButtonClick)
@@ -406,14 +416,16 @@ class MainApplication(QMainWindow, QDialog):
         self.statusLayout = QVBoxLayout()
 
         self.statusListWidget = QListWidget()
-        self.statusListWidget.setFont(QFont(monospaceFont, fontSize, QFont.Normal))
+        self.statusListWidget.setFont(
+            QFont(monospaceFont, fontSize, QFont.Normal))
         self.statusListWidget.setSelectionMode(QAbstractItemView.NoSelection)
         if WINDOWS:
             self.statusListWidget.setFixedHeight(200)
         else:
             self.statusListWidget.setFixedHeight(140)
         # self.statusListWidget.setMinimumWidth(self.statusListWidget.sizeHintForColumn(0))
-        self.statusListWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.statusListWidget.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarAlwaysOff)
         self.statusListWidget.setWordWrap(True)
         self.statusListWidget.setTextElideMode(Qt.ElideNone)
 
@@ -422,13 +434,15 @@ class MainApplication(QMainWindow, QDialog):
         #     self.statusListWidget.setStyleSheet('QListWidget::item {color: #00FF33;}')
 
         self.statusLayout.addWidget(self.statusListWidget)
-        self.statusListWidget.addItem(QListWidgetItem("Ready to log, press Start button..."))
+        self.statusListWidget.addItem(QListWidgetItem(
+            "Ready to log, press Start button..."))
         if not utils.config.MyConfig.get_instance().perform_process_discovery:
             self.status_queue.put("[GUI] Process discovery disabled")
 
     def createProgressDialog(self, title, message, timeout=None):
         flags = Qt.WindowTitleHint | Qt.Dialog | Qt.WindowMaximizeButtonHint | Qt.CustomizeWindowHint
-        self.progress_dialog = QProgressDialog(message, None, 0, 0, self, flags)
+        self.progress_dialog = QProgressDialog(
+            message, None, 0, 0, self, flags)
         self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.progress_dialog.setWindowTitle(title)
         if WINDOWS:
@@ -504,7 +518,8 @@ class MainApplication(QMainWindow, QDialog):
                 self.officePowerpoint = False
                 self.officeOutlook = False
 
-            self.statusListWidget.setStyleSheet("QListWidget{background: #F0F0F0;}")
+            self.statusListWidget.setStyleSheet(
+                "QListWidget{background: #F0F0F0;}")
 
         elif MAC or LINUX:
 
@@ -535,10 +550,11 @@ class MainApplication(QMainWindow, QDialog):
             self.bottomLayout.setContentsMargins(0, 0, 0, 0)
 
             if darkdetect.isDark():
-                self.statusListWidget.setStyleSheet("QListWidget{background: #3A3B3B;}")
+                self.statusListWidget.setStyleSheet(
+                    "QListWidget{background: #3A3B3B;}")
             else:
-                self.statusListWidget.setStyleSheet("QListWidget{background: #ECECEC;}")
-
+                self.statusListWidget.setStyleSheet(
+                    "QListWidget{background: #ECECEC;}")
 
         if not CHROME:
             self.browserChromeCB.setEnabled(False)
@@ -565,17 +581,23 @@ class MainApplication(QMainWindow, QDialog):
     def compatibilityCheckMessage(self):
         self.statusListWidget.clear()
         if MAC:
-            self.statusListWidget.addItem(QListWidgetItem("- Office module not available on MacOS"))
+            self.statusListWidget.addItem(QListWidgetItem(
+                "- Office module not available on MacOS"))
         if WINDOWS and not OFFICE:
-            self.statusListWidget.addItem(QListWidgetItem("- Office not installed"))
+            self.statusListWidget.addItem(
+                QListWidgetItem("- Office not installed"))
         if not CHROME:
-            self.statusListWidget.addItem(QListWidgetItem("- Chrome not installed"))
+            self.statusListWidget.addItem(
+                QListWidgetItem("- Chrome not installed"))
         if not FIREFOX:
-            self.statusListWidget.addItem(QListWidgetItem("- Firefox not installed"))
+            self.statusListWidget.addItem(
+                QListWidgetItem("- Firefox not installed"))
         if not EDGE:
-            self.statusListWidget.addItem(QListWidgetItem("- Edge (chromium) not installed"))
+            self.statusListWidget.addItem(
+                QListWidgetItem("- Edge (chromium) not installed"))
         if not OPERA:
-            self.statusListWidget.addItem(QListWidgetItem("- Opera not installed"))
+            self.statusListWidget.addItem(
+                QListWidgetItem("- Opera not installed"))
 
     # triggered by "enable all" button on top of the UI
     # in some cases the checkbox should be enabled only if the program is installed in the system
@@ -696,7 +718,8 @@ class MainApplication(QMainWindow, QDialog):
 
     def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
-        rpa = utils.generateRPAScript.RPAScript(log_filepath, self.status_queue)
+        rpa = utils.generateRPAScript.RPAScript(
+            log_filepath, self.status_queue)
         rpa_success = rpa.run()
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
@@ -707,7 +730,8 @@ class MainApplication(QMainWindow, QDialog):
             import pm4py
             # create class, combine all csv into one
             # print(f"[PROCESS MINING] Finding most frequent path...")
-            pm = utils.process_mining.ProcessMining(log_filepath, self.status_queue, merged)
+            pm = utils.process_mining.ProcessMining(
+                log_filepath, self.status_queue, merged)
             if fromRunCount:
                 self.PMThreadComplete((pm, log_filepath))
             else:
@@ -732,7 +756,8 @@ class MainApplication(QMainWindow, QDialog):
 
     # it must be in main thread
     def choices(self, pm, log_filepath):
-        print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
+        print(
+            f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
             # create high level DFG model based on all logs
             pm.highLevelDFG()
@@ -747,13 +772,15 @@ class MainApplication(QMainWindow, QDialog):
 
             # ask if some fields should be changed before generating RPA script
             # build choices dialog, passing low level most frequent case to analyze
-            choicesDialog = utils.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
+            choicesDialog = utils.choicesDialog.ChoicesDialog(
+                pm.mostFrequentCase)
             # when OK button is pressed
             if choicesDialog.exec_() in [0, 1]:
                 mostFrequentCase = choicesDialog.df
 
                 # create RPA based on most frequent path
-                rpa = utils.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
+                rpa = utils.generateRPAScript.RPAScript(
+                    log_filepath[-1], self.status_queue)
                 rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
                 pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
@@ -764,21 +791,25 @@ class MainApplication(QMainWindow, QDialog):
     def handleRunCount(self, log_filepath):
         # print(f"[DEBUG] CSV path: {log_filepath}")
         if utils.utils.CSVEmpty(log_filepath):
-            self.status_queue.put(f"[GUI] Log file {os.path.basename(log_filepath)} is empty, removing")
+            self.status_queue.put(
+                f"[GUI] Log file {os.path.basename(log_filepath)} is empty, removing")
             os.remove(log_filepath)
             return False
         else:
             # contains paths of csv to join
             self.csv_to_join.append(log_filepath)
-            self.status_queue.put(f"[GUI] Log saved as {os.path.basename(log_filepath)}")
+            self.status_queue.put(
+                f"[GUI] Log saved as {os.path.basename(log_filepath)}")
 
             self.runCount += 1
 
         totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
         if self.runCount == totalRunCount:
-            self.status_queue.put(f"[GUI] Run {self.runCount} of {totalRunCount}")
+            self.status_queue.put(
+                f"[GUI] Run {self.runCount} of {totalRunCount}")
         else:
-            self.status_queue.put(f"[GUI] Run {self.runCount} of {totalRunCount}, waiting for next run...")
+            self.status_queue.put(
+                f"[GUI] Run {self.runCount} of {totalRunCount}, waiting for next run...")
 
         # after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created
         # from these csv
@@ -796,7 +827,8 @@ class MainApplication(QMainWindow, QDialog):
                        "and perform process discovery analysis on the recorded logs, "
                        "determining the best way to perform a task")
         websiteBtn = QPushButton('Website')
-        websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/marco2012/SmartRPA'))
+        websiteBtn.clicked.connect(lambda: webbrowser.open(
+            'https://github.com/marco2012/SmartRPA'))
         msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
         closeBtn = QPushButton('Close')
         if darkdetect.isDark():
@@ -809,9 +841,16 @@ class MainApplication(QMainWindow, QDialog):
         if self.officeExcel:
             msgBox = QMessageBox()
             msgBox.setWindowTitle("Excel spreadsheet")
-            msgBox.setText("Do you want to open an existing Excel spreadsheet or create a new one?")
-            msgBox.addButton(QPushButton('Open existing spreadsheet'), QMessageBox.YesRole)
-            msgBox.addButton(QPushButton('Create new spreadsheet'), QMessageBox.NoRole)
+            msgBox.setText(
+                "Do you want to open an existing Excel spreadsheet or create a new one?")
+            existing = QPushButton('Open existing spreadsheet')
+            new = QPushButton('Create new spreadsheet')
+            if darkdetect.isDark():
+                existing.setStyleSheet(
+                    'QPushButton {background-color: #656565;}')
+                new.setStyleSheet('QPushButton {background-color: #656565;}')
+            msgBox.addButton(existing, QMessageBox.YesRole)
+            msgBox.addButton(new, QMessageBox.NoRole)
             ret = msgBox.exec_()
             if ret == 0:
                 path = getFilenameDialog(customDialog=False,
@@ -837,7 +876,8 @@ class MainApplication(QMainWindow, QDialog):
                     self.browserFirefox,
                     self.browserEdge,
                     self.browserOpera]):
-            self.status_queue.put("[GUI] Select at least one module to start logging")
+            self.status_queue.put(
+                "[GUI] Select at least one module to start logging")
 
         # start button clicked
         elif not self.running:
@@ -897,7 +937,8 @@ class MainApplication(QMainWindow, QDialog):
                 try:
                     os.kill(pid, -9)
                 except PermissionError:
-                    print(f"[GUI] Could not kill process {pid}, trying another way")
+                    print(
+                        f"[GUI] Could not kill process {pid}, trying another way")
                     if WINDOWS:
                         try:
                             import subprocess
