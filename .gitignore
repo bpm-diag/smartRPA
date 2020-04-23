@@ -1,5 +1,6 @@
 /dist/
 /node_modules/
+/case_study/
 RPA_UILogger/
 logs/
 stuff_to_delete/
