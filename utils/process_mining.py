@@ -111,6 +111,13 @@ class ProcessMining:
                 # number i. When I convert the combined csv to xes, all the rows with the same number will belong to a
                 # single trace, so I will have i traces.
 
+                # convert timestamp to ISO format
+                try:
+                    df['time:timestamp'] = df['time:timestamp'] \
+                        .apply((lambda ts: datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").isoformat()))
+                except ValueError:
+                    pass
+
                 try:  # insert this column to create a unique trace for each csv
                     df.insert(0, 'case:concept:name', createCaseID(df['time:timestamp'][0]))
                 except ValueError:  # column already present, replace case id values so they are sequential
@@ -128,15 +135,8 @@ class ProcessMining:
 
                 csv_to_combine.append(df)
 
-            # dataframe of combined csv, sort by timestamp
+            # dataframe of combined csv, sorted by timestamp
             combined_csv = pandas.concat(csv_to_combine)
-
-            # convert timestamp to ISO format
-            try:
-                combined_csv['time:timestamp'] = combined_csv['time:timestamp'] \
-                    .apply((lambda ts: datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").isoformat()))
-            except ValueError:
-                pass
 
             # convert case id to string
             # combined_csv['case:concept:name'] = combined_csv['case:concept:name'].astype(str)
@@ -246,7 +246,7 @@ class ProcessMining:
 
         return case
 
-    def selectMostFrequentCase(self, flattened=False, threshold=85):
+    def selectMostFrequentCase(self, flattened=False, threshold=90):
         df = self.dataframe
         if df.empty:
             return None
@@ -272,8 +272,12 @@ class ProcessMining:
         # 22.324
         def getDuration(time):
             timestamps = time.split(',')
-            start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%dT%H:%M:%S.%f")
-            finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%dT%H:%M:%S.%f")
+            try:
+                start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%dT%H:%M:%S.%f")
+                finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%dT%H:%M:%S.%f")
+            except ValueError:
+                start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%d %H:%M:%S:%f")
+                finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%d %H:%M:%S:%f")
             duration = finish - start
             return duration.total_seconds()
 

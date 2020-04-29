@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, QCoreApplication
 from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QFormLayout,
                              QGroupBox, QLabel, QLineEdit, QVBoxLayout, QScrollArea)
 import pandas
+pandas.options.mode.chained_assignment = None
 import sys
 import ntpath
 from utils import utils
@@ -16,13 +17,13 @@ class ChoicesDialog(QDialog):
                                                   Qt.WindowTitleHint |
                                                   Qt.CustomizeWindowHint)
         self.setWindowTitle("Choices")
+
+        self.setMaximumWidth(1000)
+        self.setMaximumHeight(600)
         if WINDOWS:
-            self.setMaximumWidth(1000)
             self.setFixedWidth(1000)
         else:
-            self.setMaximumWidth(700)
-            self.setFixedWidth(650)
-        self.setMaximumHeight(500)
+            self.setFixedWidth(750)
 
         self.df = df
 
@@ -65,9 +66,9 @@ class ChoicesDialog(QDialog):
             mainLayout.addWidget(buttonBox)
 
             self.setLayout(mainLayout)
-            self.resize(self.sizeHint())
-            QApplication.processEvents()
-            self.adjustSize()
+            # self.resize(self.sizeHint())
+            # QApplication.processEvents()
+            # self.adjustSize()
 
         else:
             buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
@@ -77,9 +78,9 @@ class ChoicesDialog(QDialog):
                                     "Press OK to generate RPA script."))
             layout.addWidget(buttonBox)
             self.setLayout(layout)
-            self.resize(self.sizeHint())
-            QApplication.processEvents()
-            self.adjustSize()
+            # self.resize(self.sizeHint())
+            # QApplication.processEvents()
+            # self.adjustSize()
 
     def addRows(self):
         for row_index, row in self.filtered_df.iterrows():
