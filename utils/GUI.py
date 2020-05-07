@@ -756,8 +756,7 @@ class MainApplication(QMainWindow, QDialog):
 
     # it must be in main thread
     def choices(self, pm, log_filepath):
-        print(
-            f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
+        # print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
             # create high level DFG model based on all logs
             pm.highLevelDFG()

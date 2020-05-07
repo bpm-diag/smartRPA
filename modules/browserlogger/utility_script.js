@@ -39,7 +39,7 @@ const toCamelCase = (s) => {
 
 // return attributes of given target element
 function getTargetAttributes(target){
-    if (typeof(target) === "undefined") return "";
+    if (typeof(target) === "undefined") return {};
     let attributesDict = {};
     let attr = target.attributes;
     for (let i = 0; i < attr.length; i++)

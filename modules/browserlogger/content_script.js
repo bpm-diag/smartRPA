@@ -102,15 +102,10 @@ document.body.onclick = e => {
     let html = target.innerHTML;
     let innerText = target.innerText.substring(0,80) || "";
     let tag_value = target.value;
-
-    // remove html if clicking on youtube
-    if (url.includes("youtube")) html = "";
-
-    // support for gmail
-    if (url.includes("mail.google.com")){
-        // gmail new message body
-        tag_value = document.querySelector(".Am.Al.editable").innerText
-    }
+    let parent_title = target.parentNode.title  || "";
+    let title = target.title;
+    let attributes = getTargetAttributes(target) || {};
+    attributes.parentNodeTitle = parent_title;
 
     // Set this variable to true if you want to log clicks on text elements like paragraphs, headers, div, span
     const LOG_TEXT_ELEMENTS = false;
@@ -149,6 +144,20 @@ document.body.onclick = e => {
         eventType = "selectOptions";
     }
 
+    // remove html if clicking on youtube
+    if (url.includes("youtube")) html = "";
+
+    // support for gmail
+    if (url.includes("mail.google.com")){
+        // gmail new message body
+        tag_value = document.querySelector(".Am.Al.editable").innerText
+    }
+    if (url.includes("https://dl.acm.org/")) {
+        eventType = "clickLink";
+        if (title === "") title = parent_title;
+        if (innerText === "") innerText = parent_title;
+    }
+
     let eventLog = {
         timestamp: timestamp(),
         category: "Browser",
@@ -160,13 +169,13 @@ document.body.onclick = e => {
         tag_category: tag,
         tag_type: type,
         tag_name: target.name,
-        tag_title: target.title,
+        tag_title: title,
         tag_value: tag_value,
         tag_html: html.substring(0,50) || "", //take only the first 50 characters otherwise it's too long
         tag_href: target.href || "",
         tag_innerText: innerText, //take only the first 80 characters otherwise it's too long
         tag_option: target.option,
-        tag_attributes: getTargetAttributes(target) || "",
+        tag_attributes: attributes,
         xpath: getXPath(target)
     };
 
