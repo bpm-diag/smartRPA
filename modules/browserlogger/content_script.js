@@ -153,9 +153,11 @@ document.body.onclick = e => {
         tag_value = document.querySelector(".Am.Al.editable").innerText
     }
     if (url.includes("https://dl.acm.org/")) {
-        eventType = "clickLink";
-        if (title === "") title = parent_title;
-        if (innerText === "") innerText = parent_title;
+        if (target.className === "icon-section_arrow_d"){
+            eventType = "clickLink";
+            title = parent_title;
+            innerText = parent_title;
+        }
     }
 
     let eventLog = {
