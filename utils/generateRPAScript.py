@@ -45,7 +45,7 @@ class RPAScript:
                                "newWindow", "startPage", "activateWorkbook", "openWindow", "click",
                                "clickTextField", "newTab", "disableBrowserExtension", "installBrowserExtension",
                                "logonComplete", "deleted", "programClose", "afterCalculate",
-                               "resizeWindow", "selectText"]
+                               "resizeWindow", "selectText", "Mount"]
 
         self.csv_file_path = csv_file_path
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
@@ -153,6 +153,8 @@ except Exception:
             return False
 
         RPA_filepath = self._createRPAFile(filename)
+        mac_source_filepath = ""
+        mac_dest_filepath = ""
         with open(RPA_filepath, 'w') as script:
             script.write(self._createHeader())
             # add browser header if browser is present in event log
@@ -575,19 +577,14 @@ except Exception:
                         script.write(
                             f"print('Creating directory {item_name}')\n")
                         script.write(f"create_folder(r'{path}')\n")
-                elif e == "deleted" and path and os.path.exists(path):
-                    # check if i have a file (with extension)
-                    if os.path.splitext(path)[1]:
-                        script.write(f"print('Removing file {item_name}')\n")
-                        script.write(
-                            f"if file_exists(r'{path}'): remove_file(r'{path}')\n")
-                    # otherwise assume it's a directory
-                    else:
-                        script.write(
-                            f"print('Removing directory {item_name}')\n")
-                        script.write(
-                            f"if folder_exists(r'{path}'): remove_folder(r'{path}')\n")
+                elif e == "Mount":
+                    mac_source_filepath = path
                 elif e in ["moved", "Unmount"] and path:
+
+                    if MAC:
+                        path = mac_source_filepath
+                        dest_path = item_name
+                        mac_dest_filepath = item_name
 
                     # check if file has been renamed, so source and dest path are the same
                     if os.path.dirname(path) == os.path.dirname(dest_path):
@@ -620,7 +617,20 @@ except Exception:
                                 f'print("Moving directory {item_name}")\n')
                             script.write(
                                 f'if folder_exists(r"{path}"): move_folder(r"{path}", r"{dest_path}")\n')
-
+                elif e == "deleted" and path:
+                    if MAC and mac_dest_filepath:
+                        path = mac_dest_filepath
+                    # check if i have a file (with extension)
+                    if os.path.splitext(path)[1]:
+                        script.write(f'print("Removing file {item_name}")\n')
+                        script.write(
+                            f'if file_exists(r"{path}"): remove_file(r"{path}")\n')
+                    # otherwise assume it's a directory
+                    else:
+                        script.write(
+                            f'print("Removing directory {item_name}")\n')
+                        script.write(
+                            f'if folder_exists(r"{path}"): remove_folder(r"{path}")\n')
                 ######
                 # Browser
                 ######

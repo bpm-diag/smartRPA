@@ -20,8 +20,8 @@ WMI==1.4.9; platform_system == "Windows"
 # MacOS specific dependencies
 applescript==2019.4.13; platform_system == "Darwin"
 MacFSEvents==0.8.1; platform_system == "Darwin"
-pyobjc-core==6.1; platform_system == "Darwin"
 xlwings==0.18.0; platform_system == "Darwin"
+# pyobjc-core==6.1; platform_system == "Darwin"
 # Not used, to remove
 opyenxes==0.3.0
 networkx==2.4

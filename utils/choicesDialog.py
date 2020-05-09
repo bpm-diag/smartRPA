@@ -87,7 +87,6 @@ class ChoicesDialog(QDialog):
             e = row["concept:name"]
             url = utils.getHostname(row['browser_url'])
             app = row['application']
-
             label = ""
             value = ""
 
@@ -115,6 +114,9 @@ class ChoicesDialog(QDialog):
                 lineEdit = QLineEdit(value)
                 lineEdit.setMinimumWidth(270)
                 self.layout.addRow(QLabel(label), lineEdit)
+            else:
+                # remove rows with empty fields from filtered dataframe so it's equal to the dialog shown
+                self.filtered_df = self.filtered_df.drop(row_index)
 
     def handleReturn(self):
         # close dialog
@@ -125,7 +127,6 @@ class ChoicesDialog(QDialog):
         # get list of values inserted in QLineEdit, like ['aspirapolvere', 'tavolo', 'sedie']
         widgets = (self.layout.itemAt(i).widget() for i in range(self.layout.count()))
         new_values = [widget.text() for widget in widgets if isinstance(widget, QLineEdit)]
-
         # To know which lines I need to change in the dataframe, I loop in a subset of the current dataframe
         # I take only the rows that may have been modified above, like the ones where changeField is, into filtered_df
         # Then I iterate through these rows, taking note also of the current iteration
@@ -145,6 +146,8 @@ class ChoicesDialog(QDialog):
                     self.df.loc[row_index, 'clipboard_content'] = new_values[i]
             except Exception:
                 pass
+
+        # self.df.to_csv('/Users/marco/Desktop/temp2.csv', encoding='utf-8-sig', index=False)
 
     def getDF(self):
         # self.df.to_csv('/Users/marco/Desktop/temp.csv', encoding='utf-8-sig', index=False)
