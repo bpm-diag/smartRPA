@@ -223,3 +223,5 @@ The project is composed by the following modules:
 -   [x] Process Discovery analysis
 
 A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
+
+A screencast of the tool is available on [Vimeo](https://vimeo.com/416764213)
