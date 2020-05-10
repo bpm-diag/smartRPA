@@ -224,4 +224,4 @@ The project is composed by the following modules:
 
 A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
 
-A screencast of the tool is available on [Vimeo](https://vimeo.com/416764213)
+A screencast of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA)
