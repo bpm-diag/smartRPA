@@ -822,12 +822,10 @@ class MainApplication(QMainWindow, QDialog):
     def showAboutMessage(self):
         msgBox = QMessageBox()
         msgBox.setWindowTitle("About")
-        msgBox.setText("SmartRPA allows to record user interaction with the computer "
-                       "and perform process discovery analysis on the recorded logs, "
-                       "determining the best way to perform a task")
+        msgBox.setText("SmartRPA allows to train RPA routines in order to automatically find the best way "
+                       "to perform a specific user task.")
         websiteBtn = QPushButton('Website')
-        websiteBtn.clicked.connect(lambda: webbrowser.open(
-            'https://github.com/marco2012/SmartRPA'))
+        websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/bpm-diag/smartRPA'))
         msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
         closeBtn = QPushButton('Close')
         if darkdetect.isDark():
