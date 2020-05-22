@@ -14,6 +14,7 @@ python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win because 
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
 psutil==5.4.6
+chromedriver-binary
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"
 WMI==1.4.9; platform_system == "Windows"
@@ -22,7 +23,5 @@ applescript==2019.4.13; platform_system == "Darwin"
 MacFSEvents==0.8.1; platform_system == "Darwin"
 xlwings==0.18.0; platform_system == "Darwin"
 # pyobjc-core==6.1; platform_system == "Darwin"
-# Not used, to remove
 opyenxes==0.3.0
 networkx==2.4
-# lxml==4.5.0

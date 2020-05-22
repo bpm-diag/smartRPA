@@ -783,7 +783,7 @@ class MainApplication(QMainWindow, QDialog):
                 rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
                 pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
-                self.status_queue.put(f"[PROCESS MINING] Generated graphs")
+                self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
                 self.status_queue.put(f"[GUI] Done")
 
     # Generate xes file from multiple csv, each csv corresponds to a trace

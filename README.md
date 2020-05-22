@@ -111,34 +111,25 @@ If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check her
 
 To run the generated RPA scripts you must install `automagica` module.
 
--   On Windows:
+`pip3 install automagica==2.0.25`
 
-    `pip3 install automagica==2.0.25`
+  <details>
+  <summary>
+      Click to show how to <b>fix installation errors</b> on Windows
+  </summary>
+  </br>
 
-      <details>
-      <summary>
-          Click to show how to <b>fix installation errors</b> on Windows
-      </summary>
-      </br>
+1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
+2. Install `Win64 OpenSSL v1.1.1` from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
+3. Open CMD as <i>admin</i> and type (one command per line):
 
-    1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
-    2. Install Win64 OpenSSL v1.1.1 from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
-    3. Open CMD as <i>admin</i> and type (one command per line):
+```cmd
+set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
+set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
+pip3 install automagica==2.0.25
+```
 
-    ```cmd
-    set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
-    set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
-    pip3 install automagica==2.0.25
-    ```
-
-      </details>
-
--   On MacOS:
-
-    ```bash
-    pip3 install automagica==2.0.25
-    python3 utils/fix_automagica_permissions.py
-    ```
+</details>
 
 #### PM4PY
 

@@ -88,6 +88,8 @@ except ImportError as e:
         return f"""
 try:
     import importlib
+    from selenium import webdriver
+    import chromedriver_binary  # Adds chromedriver binary to path
     from selenium.common.exceptions import *
     from selenium.webdriver.common.keys import Keys
     from selenium.webdriver.common.action_chains import ActionChains
@@ -96,18 +98,10 @@ try:
     from selenium.webdriver.support import expected_conditions
     from selenium.webdriver.common.by import By
     print("Opening Chrome...")
-    browser = Chrome(incognito=False, focus_window=True)
+    browser = webdriver.Chrome()
     browser.get('about:blank') 
 except WebDriverException as e:
     print(e)
-    if 'Permission denied' in str(e):
-        print("If you get 'Permission denied' you did not set the correct permissions, run 'utils/fix_automagica_permissions.py' first.")
-    if 'version of ChromeDriver' in str(e):
-        try:
-            automagica_path = importlib.util.find_spec('automagica').submodule_search_locations[0] + '/bin'
-        except Exception:
-            automagica_path = 'the Automagica installation path, usually it is: /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/automagica/bin'
-        print('This tool supports Google Chrome versions <= 81. Download the correct ChromeDriver for your system at https://chromedriver.chromium.org/downloads and copy the executable in ' + automagica_path)
     sys.exit()
     \n"""
 
