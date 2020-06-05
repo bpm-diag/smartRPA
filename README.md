@@ -1,7 +1,7 @@
 <p align="center">
 <img width="100%" src="docs/readme-header.png"><br/><br/>
     <a href="https://www.python.org/downloads/release/python-381/" alt="Activity">
-        <img src="https://img.shields.io/badge/Python-3.8.1(x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/Python-3.8 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
     <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Javascript-6-blue?style=flat&labelColor=F7DF1E&color=F7DF1E&logo=javascript&logoColor=white" /></a>
     <a href="#SmartRPA" alt="Activity">
@@ -32,27 +32,27 @@ On Windows always run cmd as _admin_.
 
 #### 1. **Install dependencies**
 
--   Install project dependencies ()
+- Install project dependencies ()
 
-    ```bash
-    pip3 install -r requirements.txt
-    ```
+  ```bash
+  pip3 install -r requirements.txt
+  ```
 
--   Install RPA dependencies
+- Install RPA dependencies
 
-    [Details here](https://github.com/bpm-diag/smartRPA/#rpa)
+  [Details here](https://github.com/bpm-diag/smartRPA/#rpa)
 
 #### 2. **Install browser extension**
 
-The browser extension supports 4 major browsers (<a href="https://gs.statcounter.com/browser-market-share/desktop/" target="_blank">80% market share combined</a>).
+The browser extension supports 4 major browsers:
 
--   [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
+- [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 
--   [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox`
+- [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): load unpacked `browserlogger` directory in `about:debugging#/runtime/this-firefox`
 
--   [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
+- [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
 
--   [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
+- [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
 Once main logger is running, **you must click** on the browser extension to enable it.
 
@@ -96,18 +96,18 @@ The resulting log csv file will be in `/logs` directory.
 
 _Robotic Process Automation_ scripts are automatically generated for each log in `/RPA` directory
 
-#### Visual Studio (Windows Only)
+#### 0) Visual Studio (Windows Only)
 
 On Windows [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
-It is vital to install all C++ related development tools like
+It is vital to install all C++ related development tools like:
 
--   Windows 10 SDK
--   Visual C++ tools for CMake
--   C++ x64/x86 build tools
+- Windows 10 SDK
+- Visual C++ tools for CMake
+- C++ x64/x86 build tools
 
 If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://www.scivision.co/python-windows-visual-c-14-required/).
 
-#### Automagica
+#### 1) Automagica
 
 To run the generated RPA scripts you must install `automagica` module.
 
@@ -131,87 +131,112 @@ pip3 install automagica==2.0.25
 
 </details>
 
-#### PM4PY
+#### 2) PM4PY
 
 To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
 
--   On Windows:
+- On Windows:
 
-    1. Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/bpm-diag/smartRPA/#visual-studio-windows-only).
-    2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
-    3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
-    4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3`
+  1. Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/bpm-diag/smartRPA/#visual-studio-windows-only).
+  2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
+  3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
+  4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3`
 
-      </br>
-      <details>
-      <summary>
-          Click to show how to <b>fix installation errors</b> on Windows
-      </summary>
-      </br>
+    </br>
+    <details>
+    <summary>
+        Click to show how to <b>fix installation errors</b> on Windows
+    </summary>
+    </br>
 
-    If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>.
+  If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>.
 
-      </details>
+    </details>
 
--   On MacOS:
+- On MacOS:
 
-    Use [Brew](https://brew.sh/) package manager to install graphviz
+  Use [Brew](https://brew.sh/) package manager to install graphviz
 
-    ```bash
-    brew install graphviz
-    pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3
-    ```
+  ```bash
+  brew install graphviz
+  pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3
+  ```
 
-      <details>
-      <summary>
-          Click to show how to <b>fix installation errors</b> on MacOS
-      </summary>
-      </br>
+    <details>
+    <summary>
+        Click to show how to <b>fix installation errors</b> on MacOS
+    </summary>
+    </br>
 
-    If you get an error while installing the dependency <code>Pillow</code>:
+  If you get an error while installing the dependency <code>Pillow</code>:
 
-    1. If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then try to install the package again
+  1. If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, try to install the package again
 
-        ```
-        sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-        ```
+     ```
+     sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+     ```
 
-    2. If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then try to install the package again
+  2. If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, try to install the package again
 
-        ```
-        export CPATH=`xcrun --show-sdk-path`/usr/include
-        ```
+     ```
+     export CPATH=`xcrun --show-sdk-path`/usr/include
+     ```
 
-      </details>
+    </details>
 
-#### Python-Levenshtein
+#### 3) Python-Levenshtein
 
 This package provides a 4-10x speedup in String Matching.
 
--   On Windows:
-    1.  Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/bpm-diag/smartRPA/#visual-studio-windows-only)
-    2.  `pip3 install python-Levenshtein==0.12.0`
--   On MacOS:
+- On Windows:
+  1.  Make sure you installed [Visual Studio C/C++ Build Tools](https://github.com/bpm-diag/smartRPA/#visual-studio-windows-only)
+  2.  `pip3 install python-Levenshtein==0.12.0`
+- On MacOS:
 
-    1. Automatically installed with `requirements.txt`
+  1. Automatically installed with `requirements.txt`
 
-#### Browser automation
+#### 4) Chromedriver
 
-For browser automation, [Google Chrome](https://www.google.com/chrome/) must be installed.
+Install the following package to enable automation in Google Chrome:
+
+```bash
+pip3 install chromedriver-binary
+```
+
+<details>
+<summary>
+    Click to show how to <b>fix installation errors</b> on MacOS
+</summary>
+
+If you get the error <code>RuntimeError: Failed to download chromedriver archive</code>, navigate to `/Applications/Python 3.8` folder and run `Install Certificates.command` file, as explained <a href="https://stackoverflow.com/a/42107877">in this post</a>.
+
+</details>
+
+### Recap
+
+At this point you should have installed:
+
+0. [Visual Studio C/C++ Build tools](#visual-studio-windows-only) _if you're on Windows_
+1. [Automagica](#automagica)
+2. [PM4PY](#pm4py)
+3. [Python-Levenstein](#python-levenshtein) _if you're on Windows_
+4. [Chromedriver](#chromedriver)
+
+If you have everything installed you can [run the tool](#4-run-main-logger).
 
 ## Modules
 
 The project is composed by the following modules:
 
--   [x] GUI
--   [x] Server logger
--   [x] System logger
--   [x] Browser logger
--   [x] Office logger
--   [x] Clipboard logger
--   [x] RPA module
--   [x] CSV to XES converter
--   [x] Process Discovery analysis
+- [x] GUI
+- [x] Server logger
+- [x] System logger
+- [x] Browser logger
+- [x] Office logger
+- [x] Clipboard logger
+- [x] RPA module
+- [x] CSV to XES converter
+- [x] Process Discovery analysis
 
 A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
 

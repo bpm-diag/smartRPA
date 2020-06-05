@@ -2,6 +2,7 @@
 /node_modules/
 /case_study/
 RPA_UILogger/
+terminal.command
 logs/
 stuff_to_delete/
 PythonProgrammingOnWin32.pdf
@@ -25,6 +26,7 @@ node_modules
 build/
 develop-eggs/
 dist/
+venv/
 downloads/
 lib/
 lib64/

@@ -14,7 +14,6 @@ python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win because 
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
 psutil==5.4.6
-chromedriver-binary
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"
 WMI==1.4.9; platform_system == "Windows"
