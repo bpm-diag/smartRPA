@@ -40,7 +40,7 @@ On Windows always run cmd as _admin_.
 
 - Install RPA dependencies
 
-  [Details here](https://github.com/bpm-diag/smartRPA/#rpa)
+  [Details here](#rpa)
 
 #### 2. **Install browser extension**
 
@@ -193,7 +193,7 @@ This package provides a 4-10x speedup in String Matching.
   2.  `pip3 install python-Levenshtein==0.12.0`
 - On MacOS:
 
-  1. Automatically installed with `requirements.txt`
+  1. No action needed, automatically installed with `requirements.txt`
 
 #### 4) Chromedriver
 
@@ -216,11 +216,12 @@ If you get the error <code>RuntimeError: Failed to download chromedriver archive
 
 At this point you should have installed:
 
-0. [Visual Studio C/C++ Build tools](#visual-studio-windows-only) _if you're on Windows_
-1. [Automagica](#automagica)
-2. [PM4PY](#pm4py)
-3. [Python-Levenstein](#python-levenshtein) _if you're on Windows_
-4. [Chromedriver](#chromedriver)
+0. [Requirements](#1-install-dependencies)
+1. [Visual Studio C/C++ Build tools](#0-visual-studio-windows-only) _if you're on Windows_
+2. [Automagica](#1-automagica)
+3. [PM4PY](#2-pm4py)
+4. [Python-Levenstein](#3-python-levenshtein) _if you're on Windows_
+5. [Chromedriver](#4-chromedriver)
 
 If you have everything installed you can [run the tool](#4-run-main-logger).
 
