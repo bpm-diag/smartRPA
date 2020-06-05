@@ -32,7 +32,7 @@ On Windows always run cmd as _admin_.
 
 #### 1. **Install dependencies**
 
-- Install project dependencies ()
+- Install project dependencies
 
   ```bash
   pip3 install -r requirements.txt
@@ -216,11 +216,11 @@ If you get the error <code>RuntimeError: Failed to download chromedriver archive
 
 At this point you should have installed:
 
-0. [Requirements](#1-install-dependencies)
-1. [Visual Studio C/C++ Build tools](#0-visual-studio-windows-only) _if you're on Windows_
+0. [requirements](#1-install-dependencies)
+1. [Visual Studio C/C++ Build tools](#0-visual-studio-windows-only) (_if you're on Windows_)
 2. [Automagica](#1-automagica)
 3. [PM4PY](#2-pm4py)
-4. [Python-Levenstein](#3-python-levenshtein) _if you're on Windows_
+4. [Python-Levenstein](#3-python-levenshtein) (_if you're on Windows_)
 5. [Chromedriver](#4-chromedriver)
 
 If you have everything installed you can [run the tool](#4-run-main-logger).
