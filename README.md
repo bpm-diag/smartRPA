@@ -207,8 +207,16 @@ pip3 install chromedriver-binary
 <summary>
     Click to show how to <b>fix installation errors</b> on MacOS
 </summary>
+<br>
+If you get the error <code>RuntimeError: Failed to download chromedriver archive</code>
 
-If you get the error <code>RuntimeError: Failed to download chromedriver archive</code>, navigate to `/Applications/Python 3.8` folder and run `Install Certificates.command` file, as explained <a href="https://stackoverflow.com/a/42107877">in this post</a>.
+1. Navigate to `/Applications/Python 3.8/` folder
+2. Run `Install Certificates.command` file
+3. `pip3 install chromedriver-binary`
+
+<a href="https://stackoverflow.com/a/42107877">Reference</a>
+
+If you don't find the `Python 3.8` folder under `/Applications`, make sure you installed it using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg">the official installer</a> .
 
 </details>
 
