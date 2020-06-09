@@ -41,7 +41,7 @@ Make sure you are using _64bit_ version of Python 3 (tested on Python 3.8.1 and 
 
 #### 2. **Install browser extension**
 
-The browser extension supports 4 major browsers:
+The browser extension, available in `modules/browserlogger`, supports 4 major browsers:
 
 - [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 
@@ -91,11 +91,13 @@ The resulting event log will be saved in `/logs` directory.
 
 ## RPA
 
-_Robotic Process Automation_ scripts are automatically generated for each event log in `/RPA` directory. The following dependencies must be installed.
+_Robotic Process Automation_ scripts are automatically generated for each event log in `/RPA` directory.
+
+The following dependencies must be installed.
 
 #### 0) Visual Studio (Windows Only)
 
-<img width="80%" src="docs/visual_studio.png">
+<img width="50%" src="docs/visual_studio.png">
 
 On Windows [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
 It is vital to install all C++ related development tools like:
@@ -167,15 +169,15 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
     </summary>
     </br>
 
-  If you get an error while installing the dependency <code>Pillow</code>:
+  If you get an error during installation:
 
-  1. If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, try to install the package again
+  1. If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, try to install the packages again
 
      ```
      sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
      ```
 
-  2. If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, try to install the package again
+  2. If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, try to install the packages again
 
      ```
      export CPATH=`xcrun --show-sdk-path`/usr/include
@@ -215,7 +217,7 @@ If you get the error <code>RuntimeError: Failed to download chromedriver archive
 
 <a href="https://stackoverflow.com/a/42107877">Reference</a>
 
-If you don't find the `Python 3.8` folder under `/Applications`, make sure you installed Python using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg">the official installer</a> and not a package manager like brew.
+If you don't find the `Python 3.8` folder under `/Applications`, make sure you installed Python using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg">the official installer</a> and not from a package manager like brew.
 
 </details>
 
@@ -224,10 +226,10 @@ If you don't find the `Python 3.8` folder under `/Applications`, make sure you i
 At this point you should have installed:
 
 0. [requirements](#1-install-dependencies)
-1. [Visual Studio C/C++ Build tools](#0-visual-studio-windows-only) (_if you're on Windows_)
+1. [Visual Studio C/C++ Build tools](#0-visual-studio-windows-only) (_only on Windows_)
 2. [Automagica](#1-automagica)
 3. [PM4PY](#2-pm4py)
-4. [Python-Levenstein](#3-python-levenshtein) (_if you're on Windows_)
+4. [Python-Levenstein](#3-python-levenshtein) (_only on Windows_)
 5. [Chromedriver](#4-chromedriver)
 
 If you have everything installed you can [run the tool](#4-run-main-logger).
