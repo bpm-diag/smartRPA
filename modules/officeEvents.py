@@ -658,18 +658,18 @@ def excelEventsMacServer(status_queue, excelFilepath=None):
     macExcelAddinPath = os.path.join(MAIN_DIRECTORY, 'modules', 'excelAddinMac')
     # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1") # hide output
     if not utils.utils.isPortInUse(3000):
-        print("[officeEvents] Excel logging started")
         if excelFilepath:
             app = xw.App(visible=True)
             book = xw.Book(excelFilepath)
         else:
             app = xw.App(visible=True)
             book = xw.Book()
+        print("[officeEvents] Excel logging started")
         status_queue.put("[officeEvents] Remember to enable OfficeLogger Add-In by clicking 'Insert > My Add-Ins > "
                          "OfficeLogger' and then 'Home > Show Taskpane'")
         os.system(f"cd {macExcelAddinPath} && npm run dev-server")
     else:
-        print(f"Could not start Excel logging because port 3000 is in use.")
+        print(f"[officeEvents] Could not start Excel logging because port 3000 is in use.")
 
 
 def wordEvents(filename=None):

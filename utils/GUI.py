@@ -784,7 +784,7 @@ class MainApplication(QMainWindow, QDialog):
 
                 pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
                 self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
-                self.status_queue.put(f"[GUI] Done")
+                self.status_queue.put(f"[GUI] Done\n")
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):

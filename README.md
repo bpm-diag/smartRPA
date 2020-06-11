@@ -63,6 +63,7 @@ The excel addin is required to enable logging <u>only on MacOS</u>.
 cd modules/excelAddinMac
 npm install
 npm start
+npm stop
 ```
 
 <details>
@@ -73,11 +74,13 @@ npm start
 
 <ol type="a">
   <li>Go to <code>Insert</code> tab</li>
-  <li>Click on <code>My Add-ins</code> > <code>OfficeLogger</code></li>
+  <li>Click on the small down-arrow to the right of <code>My Add-ins</code> > <code>OfficeLogger</code></li>
   <li>Go to <code>Home</code> tab</li>
   <li>Click the <code>Show Taskpane</code> button in the ribbon</li>
   <li>Enable the checkbox</li>
 </ol>
+
+If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy <code>modules/excelAddinMac/manifest.xml</code> into <code>~/Library/Containers/com.microsoft.Excel/Data/Documents/wef</code>, as described <a href="https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-an-office-add-in-on-ipad-and-mac#sideload-an-add-in-in-office-on-mac">here</a>.
 
 </details>
 
@@ -89,7 +92,7 @@ python3 mainLogger.py
 
 The resulting event log will be saved in `/logs` directory.
 
-## RPA
+## RPA dependencies
 
 _Robotic Process Automation_ scripts are automatically generated for each event log in `/RPA` directory.
 
