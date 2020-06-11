@@ -201,10 +201,12 @@ This package provides a 4-10x speedup in String Matching.
 
 #### 4) Chromedriver
 
-Install the following package to enable automation in Google Chrome:
+Install chromedriver to enable automation in Google Chrome.
+
+Make sure to install the release that matches your Google Chrome version. A complete list can be found [here](https://pypi.org/project/chromedriver-binary/#history). The command below is for Chrome 83.
 
 ```bash
-pip3 install chromedriver-binary
+pip3 install chromedriver-binary==83.0.4103.39.0
 ```
 
 <details>
@@ -216,7 +218,7 @@ If you get the error <code>RuntimeError: Failed to download chromedriver archive
 
 1. Navigate to `/Applications/Python 3.8/` folder
 2. Run `Install Certificates.command` file
-3. `pip3 install chromedriver-binary`
+3. Install the package again
 
 <a href="https://stackoverflow.com/a/42107877">Reference</a>
 
