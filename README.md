@@ -37,7 +37,7 @@ Make sure you are using _64bit_ version of Python 3 (tested on Python 3.8.1 and 
 
 - Install RPA dependencies
 
-  [Details here](#rpa)
+  [Details here](#rpa-dependencies)
 
 #### 2. **Install browser extension**
 
@@ -61,9 +61,9 @@ The excel addin is required to enable logging <u>only on MacOS</u>.
 
 ```bash
 cd modules/excelAddinMac
-npm install
-npm start
-npm stop
+npm install # install dependencies
+npm start   # sideload Add-in
+npm stop    # stop server
 ```
 
 <details>
@@ -75,6 +75,7 @@ npm stop
 <ol type="a">
   <li>Go to <code>Insert</code> tab</li>
   <li>Click on the small down-arrow to the right of <code>My Add-ins</code> > <code>OfficeLogger</code></li>
+  <img width="50%" src="docs/excel_logger.png">
   <li>Go to <code>Home</code> tab</li>
   <li>Click the <code>Show Taskpane</code> button in the ribbon</li>
   <li>Enable the checkbox</li>
@@ -188,16 +189,13 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
     </details>
 
-#### 3) Python-Levenshtein
+#### 3) Python-Levenshtein (Windows Only)
 
 This package provides a 4-10x speedup in String Matching.
 
 - On Windows:
   1.  Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only)
   2.  `pip3 install python-Levenshtein==0.12.0`
-- On MacOS:
-
-  1. No action needed, automatically installed with `requirements.txt`
 
 #### 4) Chromedriver
 
@@ -234,7 +232,7 @@ At this point you should have installed:
 1. [Visual Studio C/C++ Build tools](#0-visual-studio-windows-only) (_only on Windows_)
 2. [Automagica](#1-automagica)
 3. [PM4PY](#2-pm4py)
-4. [Python-Levenstein](#3-python-levenshtein) (_only on Windows_)
+4. [Python-Levenstein](#3-python-levenshtein-windows-only) (_only on Windows_)
 5. [Chromedriver](#4-chromedriver)
 
 If you have everything installed you can [run the tool](#4-run-main-logger).
