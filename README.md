@@ -7,7 +7,7 @@
     <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Windows-10-blue?style=flat&labelColor=0078D6&color=0078D6&logo=windows&logoColor=white" /></a>
     <a href="#SmartRPA" alt="Activity">
-        <img src="https://img.shields.io/badge/MacOS-10.14-blue?style=flat&labelColor=999999&color=999999&logo=apple&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/MacOS-10.15-blue?style=flat&labelColor=999999&color=999999&logo=apple&logoColor=white" /></a>
     </br>
     <a href="#SmartRPA" alt="Activity">
         <img src="https://img.shields.io/badge/Office-365-blue?style=flat&labelColor=E74025&color=E74025&logo=microsoft-office&logoColor=white" /></a>
@@ -101,7 +101,7 @@ The following dependencies must be installed.
 
 #### 0) Visual Studio (Windows Only)
 
-<img width="50%" src="docs/visual_studio.png">
+<img width="40%" src="docs/visual_studio.png">
 
 On Windows [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
 It is vital to install all C++ related development tools like:
