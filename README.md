@@ -73,6 +73,7 @@ npm stop    # stop server
 </br>
 
 <ol type="a">
+  <li>Start the Action Logger selecting Excel module</li>
   <li>Go to <code>Insert</code> tab</li>
   <li>Click on the small down-arrow to the right of <code>My Add-ins</code> > <code>OfficeLogger</code></li>
   <img width="50%" src="docs/excel_logger.png">
@@ -154,7 +155,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
     </summary>
     </br>
 
-  If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>.
+  If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/downloads/windows/">64bit version of Python3</a>.
 
     </details>
 
@@ -220,7 +221,7 @@ If you get the error <code>RuntimeError: Failed to download chromedriver archive
 
 <a href="https://stackoverflow.com/a/42107877">Reference</a>
 
-If you don't find the `Python 3.8` folder under `/Applications`, make sure you installed Python using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-macosx10.9.pkg">the official installer</a> and not from a package manager like brew.
+If you don't find the `Python 3.8` folder under `/Applications`, make sure you installed Python using <a href="https://www.python.org/downloads/mac-osx/">the official installer</a> and not from a package manager like brew.
 
 </details>
 
