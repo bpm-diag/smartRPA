@@ -1,23 +1,23 @@
 <p align="center">
 <img width="100%" src="docs/readme-header.png"><br/><br/>
-    <a href="https://www.python.org/downloads/release/python-381/" alt="Activity">
+    <a href="https://www.python.org/downloads/" alt="Activity">
         <img src="https://img.shields.io/badge/Python-3.8 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
-    <a href="#SmartRPA" alt="Activity">
-        <img src="https://img.shields.io/badge/Javascript-6-blue?style=flat&labelColor=F7DF1E&color=F7DF1E&logo=javascript&logoColor=white" /></a>
-    <a href="#SmartRPA" alt="Activity">
+    <a href="#" alt="Activity">
+        <img src="https://img.shields.io/badge/Javascript-ES6-blue?style=flat&labelColor=F7DF1E&color=F7DF1E&logo=javascript&logoColor=white" /></a>
+    <a href="#" alt="Activity">
         <img src="https://img.shields.io/badge/Windows-10-blue?style=flat&labelColor=0078D6&color=0078D6&logo=windows&logoColor=white" /></a>
-    <a href="#SmartRPA" alt="Activity">
+    <a href="#" alt="Activity">
         <img src="https://img.shields.io/badge/MacOS-10.15-blue?style=flat&labelColor=999999&color=999999&logo=apple&logoColor=white" /></a>
     </br>
-    <a href="#SmartRPA" alt="Activity">
+    <a href="https://www.office.com/" alt="Activity">
         <img src="https://img.shields.io/badge/Office-365-blue?style=flat&labelColor=E74025&color=E74025&logo=microsoft-office&logoColor=white" /></a>
-    <a href="#SmartRPA" alt="Activity">
-        <img src="https://img.shields.io/badge/Chrome-80-blue?style=flat&labelColor=EDAD00&color=EDAD00&logo=google-chrome&logoColor=white" /></a>
-    <a href="#SmartRPA" alt="Activity">
+    <a href="https://www.google.com/chrome/" alt="Activity">
+        <img src="https://img.shields.io/badge/Chrome-83-blue?style=flat&labelColor=EDAD00&color=EDAD00&logo=google-chrome&logoColor=white" /></a>
+    <a href="https://www.mozilla.org/en-US/firefox" alt="Activity">
         <img src="https://img.shields.io/badge/Firefox-72-blue?style=flat&labelColor=FF7139&color=FF7139&logo=mozilla-firefox&logoColor=white" /></a>
-    <a href="#SmartRPA" alt="Activity">
+    <a href="https://www.microsoft.com/en-us/edge" alt="Activity">
         <img src="https://img.shields.io/badge/Edge-80-blue?style=flat&labelColor=0078D7&color=0078D7&logo=microsoft-edge&logoColor=white" /></a>
-    <a href="#SmartRPA" alt="Activity">
+    <a href="https://www.opera.com/" alt="Activity">
         <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a> <br/><br/>
   <img width="80%" src="docs/gui.jpg"/>
 
@@ -202,7 +202,7 @@ This package provides a 4-10x speedup in String Matching.
 
 Install chromedriver to enable automation in Google Chrome.
 
-Make sure to install the release that matches your Google Chrome version. A complete list can be found [here](https://pypi.org/project/chromedriver-binary/#history). The command below is for Chrome 83.
+Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history). The command below is for Chrome version 83.
 
 ```bash
 pip3 install chromedriver-binary==83.0.4103.39.0
