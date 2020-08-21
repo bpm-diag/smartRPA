@@ -202,10 +202,10 @@ This package provides a 4-10x speedup in String Matching.
 
 Install chromedriver to enable automation in Google Chrome.
 
-Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history). The command below is for Chrome version 83.
+Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history). The command below is for Chrome version 84.
 
 ```bash
-pip3 install chromedriver-binary==83.0.4103.39.0
+pip3 install chromedriver-binary==84.0.4147.30.0
 ```
 
 <details>
