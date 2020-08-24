@@ -26,6 +26,12 @@ class UIPathXAML:
         self.click_id = 0
         self.setToClipboard = 0
         self.browserScope = 0
+        self.sendHotkey = 0
+        self.navigateTo = 0
+        self.comment = 0
+        self.openApplication = 0
+        self.excelApplication = 0
+        self.writeCell = 0
 
     def __createRoot(self):  # https://stackoverflow.com/a/31074030
         self.xmlns = "http://schemas.microsoft.com/netfx/2009/xaml/activities"
@@ -141,7 +147,7 @@ class UIPathXAML:
         self.mainSequence.append(state)
         self.root.append(self.mainSequence)
 
-    def __createSequence(self, children: [etree.Element], displayName: str = "Do"):
+    def __createSequence(self, children: list, displayName: str = "Do"):
         self.sequence_id += 1
         sequence = etree.Element(
             etree.QName(None, "Sequence"),
@@ -182,9 +188,11 @@ class UIPathXAML:
                                         pretty_print=True))
             writer.write(etree.tostring(etree.Comment('Developed at DIAG - Sapienza University of Rome'),
                                         pretty_print=True))
+            writer.write(etree.tostring(etree.Comment(f'Generated from {self.filename}'),
+                                        pretty_print=True))
             writer.write(etree.tostring(self.root, pretty_print=True))
 
-    def __openBrowser(self, url: str):
+    def __openBrowser(self, url: str, activities: list):
         openBrowser = etree.Element(
             etree.QName(self.ui, "OpenBrowser"),
             {
@@ -219,29 +227,25 @@ class UIPathXAML:
         activityActionArgument.append(delegateinargument)
         activityAction.append(activityActionArgument)
 
-        typeInto = self.__typeInto("salve sono salvatore", "/html/body/div/div[2]/form/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input")
-        click = self.__click("/html/body/div/div[2]/form/div[2]/div/div[2]/div[3]/div/div/div[2]/div[1]/div/span/div/div[1]/label/div/div[1]/div/div[3]/div")
-        sequence = self.__createSequence([typeInto, click])
+        activityAction.append(self.__createSequence(activities))
 
-        activityAction.append(sequence)
         body.append(activityAction)
         openBrowser.append(body)
         self.mainSequence.append(openBrowser)
 
-    def __attachBrowser(self, url: str):
+    def __attachBrowser(self, activities: list):
         self.browserScope += 1
         attachBrowser = etree.Element(
             etree.QName(self.ui, "BrowserScope"),
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"BrowserScope_{self.browserScope}",
-                etree.QName(None, "Browser"): "{x:Null}",
+                etree.QName(None, "Browser"): "[currentBrowser]",
                 etree.QName(None, "BrowserType"): "Chrome",
                 etree.QName(None, "SearchScope"): "{x:Null}",
                 etree.QName(None, "Selector"): "{x:Null}",
                 etree.QName(None, "TimeoutMS"): "{x:Null}",
                 etree.QName(None, "DisplayName"): "Attach Browser",
                 etree.QName(None, "UiBrowser"): "[currentBrowser]",
-                etree.QName(None, "Url"): url,
             },
         )
         body = etree.Element(
@@ -264,16 +268,14 @@ class UIPathXAML:
         activityActionArgument.append(delegateinargument)
         activityAction.append(activityActionArgument)
 
-        typeInto = self.__typeInto("salve sono salvatore", "/html/body/div/div[2]/form/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input")
-        click = self.__click("/html/body/div/div[2]/form/div[2]/div/div[2]/div[3]/div/div/div[2]/div[1]/div/span/div/div[1]/label/div/div[1]/div/div[3]/div")
-        sequence = self.__createSequence([typeInto, click])
+        sequence = self.__createSequence(activities)
 
         activityAction.append(sequence)
         body.append(activityAction)
         attachBrowser.append(body)
         self.mainSequence.append(attachBrowser)
 
-    def __target(self, selector: str):
+    def __target(self, selector: str = "{x:Null}"):
         target = etree.Element(
             etree.QName(self.ui, "Target"),
             {
@@ -392,7 +394,7 @@ class UIPathXAML:
         css = re.sub(r'\[(.)\]', '', xpath.replace('/html/', '').replace('/', '&gt;'))
         return f"<webctrl css-selector='{css}'/>"
 
-    def __setToClipboard(self, text: str, displayName: str="Set to clipboard"):
+    def __setToClipboard(self, text: str, displayName: str = "Set to clipboard"):
         self.setToClipboard += 1
         clipboard = etree.Element(
             etree.QName(self.ui, "SetToClipboard"),
@@ -404,9 +406,164 @@ class UIPathXAML:
         )
         return clipboard
 
+    def __sendHotkey(self, key: str = "{x:Null}", modifiers: str = "None", displayName: str = "Send Hotkey"):
+        self.sendHotkey += 1
+        hotkey = etree.Element(
+            etree.QName(self.ui, "SendHotkey"),
+            {
+                etree.QName(None, "ClickBeforeTyping"): "{x:Null}",
+                etree.QName(None, "DelayBefore"): "{x:Null}",
+                etree.QName(None, "DelayBetweenKeys"): "{x:Null}",
+                etree.QName(None, "DelayMS"): "{x:Null}",
+                etree.QName(None, "EmptyField"): "{x:Null}",
+                etree.QName(None, "SendWindowMessages"): "{x:Null}",
+                etree.QName(None, "SpecialKey"): "{x:Null}",
+                etree.QName(None, "Activate"): "True",
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "Key"): key,
+                etree.QName(None, "KeyModifiers"): modifiers,
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SendHotkey_{self.sendHotkey}",
+            }
+        )
+        sendHotkeyTarget = etree.Element(
+            etree.QName(self.ui, "SendHotkey.Target"),
+        )
+        sendHotkeyTarget.append(self.__target())
+        hotkey.append(sendHotkeyTarget)
+        return hotkey
+
+    def __navigateTo(self, url: str, displayName: str = "Navigate To"):
+        self.navigateTo += 1
+        navigateTo = etree.Element(
+            etree.QName(self.ui, "NavigateTo"),
+            {
+                etree.QName(None, "Browser"): "[currentBrowser]",
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"NavigateTo_{self.navigateTo}",
+                etree.QName(None, "Url"): url,
+            },
+        )
+        return navigateTo
+
+    def __comment(self, text: str):
+        self.comment += 1
+        navigateTo = etree.Element(
+            etree.QName(self.ui, "Comment"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Comment_{self.comment}",
+                etree.QName(None, "Text"): text,
+            },
+        )
+        return navigateTo
+
+    def __openApplication(self, arguments: str = "{x:Null}", path="{x:Null}", selector="{x:Null}", displayName: str = "Open Application", activities: list = None):
+        self.openApplication += 1
+        openApplication = etree.Element(
+            etree.QName(self.ui, "OpenApplication"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"OpenApplication_{self.openApplication}",
+                etree.QName(None, "ApplicationWindow"): "{x:Null}",
+                etree.QName(None, "TimeoutMS"): "{x:Null}",
+                etree.QName(None, "WorkingDirectory"): "{x:Null}",
+                etree.QName(None, "Arguments"): arguments,
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "FileName"): path,
+                etree.QName(None, "Selector"): selector,
+            },
+        )
+        body = etree.Element(
+            etree.QName(self.ui, "OpenApplication.Body"),
+        )
+        activityAction = etree.Element(
+            etree.QName(None, "ActivityAction"),
+            {etree.QName(self.x, "TypeArguments"): "x:Object"},
+        )
+        activityActionArgument = etree.Element(
+            etree.QName(None, "ActivityAction.Argument"),
+        )
+        delegateinargument = etree.Element(
+            etree.QName(None, "DelegateInArgument"),
+            {
+                etree.QName(self.x, "TypeArguments"): "x:Object",
+                etree.QName(None, "Name"): "ContextTarget"
+            },
+        )
+        activityActionArgument.append(delegateinargument)
+        activityAction.append(activityActionArgument)
+
+        if activities:
+            activityAction.append(self.__createSequence(activities))
+
+        body.append(activityAction)
+        openApplication.append(body)
+        return openApplication
+
+    def __navigateToInNewTab(self, url: str, activities: list = None):
+        return self.__openApplication(arguments=f"-new-tab {url}", path="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", selector="<wnd app='chrome.exe'/>", displayName="Navigate in New Tab", activities=activities)
+
+    def __openExistingSpreadsheet(self, password: str = "{x:Null}", workbookPath: str = "{x:Null}", displayName: str = "Excel Application Scope", activities: list = None):
+        self.openApplication += 1
+        excelApplication = etree.Element(
+            etree.QName(self.ui, "ExcelApplicationScope"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelApplicationScope_{self.openApplication}",
+                etree.QName(None, "Password"): password,
+                etree.QName(None, "WorkbookPath"): workbookPath,
+                etree.QName(None, "DisplayName"): displayName,
+            },
+        )
+        body = etree.Element(
+            etree.QName(self.ui, "ExcelApplicationScope.Body"),
+        )
+        activityAction = etree.Element(
+            etree.QName(None, "ActivityAction"),
+            {etree.QName(self.x, "TypeArguments"): "ui:WorkbookApplication"},
+        )
+        activityActionArgument = etree.Element(
+            etree.QName(None, "ActivityAction.Argument"),
+        )
+        delegateinargument = etree.Element(
+            etree.QName(None, "DelegateInArgument"),
+            {
+                etree.QName(self.x, "TypeArguments"): "ui:WorkbookApplication",
+                etree.QName(None, "Name"): "ExcelWorkbookScope"
+            },
+        )
+        activityActionArgument.append(delegateinargument)
+        activityAction.append(activityActionArgument)
+
+        if activities:
+            activityAction.append(self.__createSequence(activities))
+
+        body.append(activityAction)
+        excelApplication.append(body)
+        return excelApplication
+
+    def __writeCell(self, cell: str, sheetName: str, text: str):
+        self.writeCell += 1
+        displayName = f"Write Cell {cell}"
+        writeCell = etree.Element(
+            etree.QName(self.ui, "ExcelWriteCell"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelWriteCell_{self.writeCell}",
+                etree.QName(None, "Cell"): cell,
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "SheetName"): sheetName,
+                etree.QName(None, "Text"): text,
+            },
+        )
+        return writeCell
+
     def buildTestFile(self):
-        self.__openBrowser("https://docs.google.com/forms/d/e/1FAIpQLSeI8_vYyaJgM7SJM4Y9AWfLq-tglWZh6yt7bEXEOJr_L-hV1A/viewform?formkey=dGx0b1ZrTnoyZDgtYXItMWVBdVlQQWc6MQ")
-        self.__attachBrowser("https://docs.google.com/forms/d/e/1FAIpQLSeI8_vYyaJgM7SJM4Y9AWfLq-tglWZh6yt7bEXEOJr_L-hV1A/viewform?formkey=dGx0b1ZrTnoyZDgtYXItMWVBdVlQQWc6MQ")
+        self.__openBrowser("https://docs.google.com/forms/d/e/1FAIpQLSeI8_vYyaJgM7SJM4Y9AWfLq-tglWZh6yt7bEXEOJr_L-hV1A/viewform?formkey=dGx0b1ZrTnoyZDgtYXItMWVBdVlQQWc6MQ", [
+            self.__typeInto("salve sono salvatore",
+                            "/html/body/div/div[2]/form/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input"),
+            self.__click(
+                "/html/body/div/div[2]/form/div[2]/div/div[2]/div[3]/div/div/div[2]/div[1]/div/span/div/div[1]/label/div/div[1]/div/div[3]/div")
+        ])
+        self.__attachBrowser([
+            self.__navigateToInNewTab("https://apple.com")
+        ])
 
 
 if __name__ == '__main__':
