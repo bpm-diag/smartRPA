@@ -27,7 +27,7 @@
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.1",
     "moment": "^2.24.0",
     "pretty-checkbox": "^3.0.3"
   },
@@ -55,7 +55,7 @@
     "typescript": "^3.6.3",
     "webpack": "^4.40.2",
     "webpack-cli": "^3.3.8",
-    "webpack-dev-server": "^3.8.0"
+    "webpack-dev-server": "^3.11.0"
   },
   "prettier": "office-addin-prettier-config"
 }
