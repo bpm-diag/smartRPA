@@ -10,7 +10,10 @@ import os
 import re
 from lxml import etree
 import uuid
+import pandas
+from multiprocessing.queues import Queue
 from distutils.dir_util import copy_tree
+import utils
 
 # from utils.utils import MAIN_DIRECTORY
 MAIN_DIRECTORY = "/Users/marco/Desktop/RPA/smartRPA"  # TEST
@@ -18,9 +21,13 @@ MAIN_DIRECTORY = "/Users/marco/Desktop/RPA/smartRPA"  # TEST
 
 class UIPathXAML:
 
-    def __init__(self):
+    def __init__(self, XAMLFilename="Main", status_queue: Queue = None):
+        self.status_queue = status_queue
+        self.RPA_directory = os.path.join(MAIN_DIRECTORY, 'RPA', '2020-test')  # test
+        self.filename = XAMLFilename
+        self.excelOpened = False
+        self.BrowserOpened = False
         self.root = None
-        self.filename = "Main"
         self.sequence_id = 0
         self.typeInto_id = 0
         self.click_id = 0
@@ -178,10 +185,9 @@ class UIPathXAML:
         self.__createMainSequence()
 
     def writeXmlToFile(self):
-        RPA_directory = os.path.join(MAIN_DIRECTORY, 'RPA', '2020-test')  # test
-        uipath_template = os.path.join(MAIN_DIRECTORY, 'utils', 'UiPath_Template')
+        # uipath_template = os.path.join(MAIN_DIRECTORY, 'utils', 'UiPath_Template')
         # copy_tree(uipath_template, os.path.join(RPA_directory, 'UiPath'))
-        filename = os.path.join(RPA_directory, 'UiPath', f"{self.filename}.xaml")
+        filename = os.path.join(self.RPA_directory, 'UiPath', f"{self.filename}.xaml")
         with open(filename, "wb") as writer:
             # etree.indent(self.root, space="	")
             writer.write(etree.tostring(etree.Comment('SmartRPA by marco2012 https://github.com/marco2012/smartRPA'),
@@ -456,7 +462,8 @@ class UIPathXAML:
         )
         return navigateTo
 
-    def __openApplication(self, arguments: str = "{x:Null}", path="{x:Null}", selector="{x:Null}", displayName: str = "Open Application", activities: list = None):
+    def __openApplication(self, arguments: str = "{x:Null}", path="{x:Null}", selector="{x:Null}",
+                          displayName: str = "Open Application", activities: list = None):
         self.openApplication += 1
         openApplication = etree.Element(
             etree.QName(self.ui, "OpenApplication"),
@@ -499,10 +506,16 @@ class UIPathXAML:
         return openApplication
 
     def __navigateToInNewTab(self, url: str, activities: list = None):
-        return self.__openApplication(arguments=f"-new-tab {url}", path="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", selector="<wnd app='chrome.exe'/>", displayName="Navigate in New Tab", activities=activities)
+        return self.__openApplication(arguments=f"-new-tab {url}",
+                                      path="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                                      selector="<wnd app='chrome.exe'/>", displayName="Navigate in New Tab",
+                                      activities=activities)
 
-    def __openExistingSpreadsheet(self, password: str = "{x:Null}", workbookPath: str = "{x:Null}", displayName: str = "Excel Application Scope", activities: list = None):
+    def __excelSpreadsheet(self, password: str = "{x:Null}", workbookPath: str = None,
+                           displayName: str = "Excel Application Scope", activities: list = None):
         self.openApplication += 1
+        if not workbookPath:
+            workbookPath = os.path.join(self.RPA_directory, "UiPathSpreadsheet.xlsx")
         excelApplication = etree.Element(
             etree.QName(self.ui, "ExcelApplicationScope"),
             {
@@ -555,16 +568,90 @@ class UIPathXAML:
         return writeCell
 
     def buildTestFile(self):
-        self.__openBrowser("https://docs.google.com/forms/d/e/1FAIpQLSeI8_vYyaJgM7SJM4Y9AWfLq-tglWZh6yt7bEXEOJr_L-hV1A/viewform?formkey=dGx0b1ZrTnoyZDgtYXItMWVBdVlQQWc6MQ", [
-            self.__typeInto("salve sono salvatore",
-                            "/html/body/div/div[2]/form/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input"),
-            self.__click(
-                "/html/body/div/div[2]/form/div[2]/div/div[2]/div[3]/div/div/div[2]/div[1]/div/span/div/div[1]/label/div/div[1]/div/div[3]/div")
-        ])
+        self.__openBrowser(
+            "https://docs.google.com/forms/d/e/1FAIpQLSeI8_vYyaJgM7SJM4Y9AWfLq-tglWZh6yt7bEXEOJr_L-hV1A/viewform?formkey=dGx0b1ZrTnoyZDgtYXItMWVBdVlQQWc6MQ",
+            [
+                self.__typeInto("salve sono salvatore",
+                                "/html/body/div/div[2]/form/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input"),
+                self.__click(
+                    "/html/body/div/div[2]/form/div[2]/div/div[2]/div[3]/div/div/div[2]/div[1]/div/span/div/div[1]/label/div/div[1]/div/div[3]/div")
+            ])
         self.__attachBrowser([
             self.__navigateToInNewTab("https://apple.com")
         ])
 
+    def __generateRPA(self, df: pandas.DataFrame):
+        if df.empty:
+            return False
+
+        for index, row in df.iterrows():
+            ######
+            # Variables
+            ######
+            try:
+                e = row['event_type']
+                timestamp = row['timestamp']
+                user = row['user']
+            except KeyError:
+                e = row['concept:name']
+                timestamp = row['time:timestamp']
+                user = row['org:resource']
+
+            wb = row['workbook']
+            sh = row['current_worksheet']
+            cell_value = utils.utils.unicodeString(row['cell_content'])
+            cell_range = row['cell_range']
+            range_number = row['cell_range_number']
+            app = row['application']
+            cb = utils.utils.processClipboard(row['clipboard_content'])
+            path = ""
+            if not pandas.isna(row['event_src_path']) and row['event_src_path'] != '':
+                path = row['event_src_path']
+                path = utils.utils.formatPathForCurrentOS(path, user)
+                item_name = path.replace('\\', r'\\')
+            dest_path = ""
+            if not pandas.isna(row['event_dest_path']) and row['event_dest_path'] != '':
+                dest_path = row['event_dest_path']
+                dest_path = utils.utils.formatPathForCurrentOS(
+                    dest_path, user)
+            url = "about:blank"
+            if not pandas.isna(row['browser_url']):
+                url = row['browser_url']
+            id = ""
+            if not pandas.isna(row['id']):
+                id = row['id']
+            xpath = ""
+            if not pandas.isna(row['xpath']):
+                xpath = row['xpath']
+            value = utils.utils.unicodeString(row['tag_value'])
+
+            ######
+            # Browser
+            ######
+
+            # When a window is opened, a new tab is automatically created at index 0
+            # so I don't need to create it again
+            # if e == "newTab" and int(id) != 0:
+            #     new_tab = f'window.open("''");'
+            #     script.write(f"browser.execute_script('{new_tab}')\n")
+            #     script.write(f"""
+            #         try:
+            #             if 0 <= {id} < len(browser.window_handles):
+            #                 browser.switch_to.window(browser.window_handles[{id}])
+            #             else:
+            #                 for i in range(0, {id}):
+            #                     browser.execute_script('window.open("");')
+            #                 browser.switch_to.window(browser.window_handles[{id}])
+            #         except Exception:
+            #             pass
+            #         \n""")
+
+        self.status_queue.put(f"[RPA] Generated UiPath RPA script")
+
+    def generateUiPathRPA(self, df: pandas.DataFrame):
+        self.createBaseFile()
+        self.__generateRPA(df)
+        self.writeXmlToFile()
 
 if __name__ == '__main__':
     UIPathXAML = UIPathXAML()
