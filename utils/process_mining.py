@@ -2,6 +2,8 @@
 # Process mining techniques
 # https://pm4py.fit.fraunhofer.de/documentation#discovery
 # ******************************
+import sys
+sys.path.append('../')  # this way main file is visible from this file
 try:
     import ntpath
 except ModuleNotFoundError:
@@ -37,13 +39,14 @@ try:
     from pm4py.visualization.dfg import factory as dfg_vis_factory
     from pm4py.objects.log.util import sorting
     from pm4py.objects.petri.exporter import factory as pnml_factory
-    from pm4pybpmn.visualization.bpmn import factory as bpmn_vis_factory
     # BPMN
-    from pm4pybpmn.objects.conversion.petri_to_bpmn import factory as bpmn_converter
-    from pm4pybpmn.objects.bpmn.util import bpmn_diagram_layouter
+    from libraries.pm4pybpmn.visualization.bpmn import factory as bpmn_vis_factory
+    from libraries.pm4pybpmn.objects.conversion.petri_to_bpmn import factory as bpmn_converter
+    from libraries.pm4pybpmn.objects.bpmn.util import bpmn_diagram_layouter
 except ImportError as e:
     print("[PROCESS MINING] Process mining analysis has been disabled because 'pm4py' module is not installed."
           "See https://github.com/bpm-diag/smartRPA#2-pm4py")
+    print(e)
 
 
 class ProcessMining:

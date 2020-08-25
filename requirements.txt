@@ -25,3 +25,9 @@ xlwings==0.18.0; platform_system == "Darwin"
 # pyobjc-core==6.1; platform_system == "Darwin"
 opyenxes==0.3.0
 networkx==2.4
+#pm4py-bpmn
+bpmn_python==0.0.18
+intervaltree
+lime
+joblib
+pydotplus

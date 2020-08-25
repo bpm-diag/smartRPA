@@ -146,7 +146,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
   1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
   2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
   3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
-  4. `pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3`
+  4. `pip3 install pm4py==1.2.12`
 
     </br>
     <details>
@@ -165,7 +165,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
   ```bash
   brew install graphviz
-  pip3 install pm4py==1.2.12 pm4pybpmn==0.1.3
+  pip3 install pm4py==1.2.12
   ```
 
     <details>
