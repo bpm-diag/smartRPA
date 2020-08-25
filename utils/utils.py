@@ -20,6 +20,7 @@ import utils.consumerServer
 import unicodedata
 import pandas
 from unidecode import unidecode
+from itertools import tee, islice, chain
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
 
@@ -283,6 +284,14 @@ def fixTimestampFieldXES(xes_filepath):
     with fileinput.FileInput(xes_filepath, inplace=True) as file:
         for line in file:
             print(line.replace('<string key="time:timestamp"', '<date key="time:timestamp"'), end='')
+
+
+# loop accessing the previous, current, and next items https://stackoverflow.com/a/1012089/1440037
+def previous_and_next(some_iterable):
+    prevs, items, nexts = tee(some_iterable, 3)
+    prevs = chain([None], prevs)
+    nexts = chain(islice(nexts, 1, None), [None])
+    return zip(prevs, items, nexts)
 
 
 # ************

@@ -39,6 +39,7 @@ class UIPathXAML:
         self.openApplication = 0
         self.excelApplication = 0
         self.writeCell = 0
+        self.closeTab = 0
 
     def __createRoot(self):  # https://stackoverflow.com/a/31074030
         self.xmlns = "http://schemas.microsoft.com/netfx/2009/xaml/activities"
@@ -198,7 +199,7 @@ class UIPathXAML:
                                         pretty_print=True))
             writer.write(etree.tostring(self.root, pretty_print=True))
 
-    def __openBrowser(self, url: str, activities: list):
+    def __openBrowser(self, url: str = "", activities: list = None):
         openBrowser = etree.Element(
             etree.QName(self.ui, "OpenBrowser"),
             {
@@ -233,7 +234,8 @@ class UIPathXAML:
         activityActionArgument.append(delegateinargument)
         activityAction.append(activityActionArgument)
 
-        activityAction.append(self.__createSequence(activities))
+        if activities:
+            activityAction.append(self.__createSequence(activities))
 
         body.append(activityAction)
         openBrowser.append(body)
@@ -397,7 +399,7 @@ class UIPathXAML:
         return click
 
     def __xpathToCssSelector(self, xpath: str):
-        css = re.sub(r'\[(.)\]', '', xpath.replace('/html/', '').replace('/', '&gt;'))
+        css = re.sub(r'\[(.)\]', '', xpath.replace('/html/', '').replace('/', '>'))
         return f"<webctrl css-selector='{css}'/>"
 
     def __setToClipboard(self, text: str, displayName: str = "Set to clipboard"):
@@ -450,6 +452,17 @@ class UIPathXAML:
             },
         )
         return navigateTo
+
+    def __closeTab(self):
+        self.closeTab += 1
+        return etree.Element(
+            etree.QName(self.ui, "CloseTab"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"CloseTab_{self.comment}",
+                etree.QName(None, "Browser"): "{x:Null}",
+                etree.QName(None, "DisplayName"): "Close tab",
+            },
+        )
 
     def __comment(self, text: str):
         self.comment += 1
@@ -570,19 +583,33 @@ class UIPathXAML:
     def buildTestFile(self):
         self.__openBrowser(
             "https://docs.google.com/forms/d/e/1FAIpQLSeI8_vYyaJgM7SJM4Y9AWfLq-tglWZh6yt7bEXEOJr_L-hV1A/viewform?formkey=dGx0b1ZrTnoyZDgtYXItMWVBdVlQQWc6MQ",
-            [
+            activities=[
                 self.__typeInto("salve sono salvatore",
                                 "/html/body/div/div[2]/form/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input"),
                 self.__click(
                     "/html/body/div/div[2]/form/div[2]/div/div[2]/div[3]/div/div/div[2]/div[1]/div/span/div/div[1]/label/div/div[1]/div/div[3]/div")
-            ])
+            ],
+            )
         self.__attachBrowser([
             self.__navigateToInNewTab("https://apple.com")
         ])
 
+    def __generateRPAHelper(self, previousCategory):
+        # if previousCategory is None:
+        #     previousCategory = row['category']
+        # elif previousCategory != row['category']:
+        #     pass
+        pass
+
     def __generateRPA(self, df: pandas.DataFrame):
         if df.empty:
             return False
+        if not df.query('category=="Browser"').empty:
+            self.__openBrowser()
+
+        browserActivities = []
+        excelActivities = []
+        previousCategory = None
 
         for index, row in df.iterrows():
             ######
@@ -628,25 +655,27 @@ class UIPathXAML:
             ######
             # Browser
             ######
+            if e == "newTab" and int(id) != 0:
+                browserActivities.append(self.__navigateToInNewTab(""))
+            if e == "selectTab":
+                browserActivities.append(self.__sendHotkey(id, "Ctrl", f"Select tab {id}"))
+            if e == "closeTab":
+                browserActivities.append(self.__closeTab())
+            if (e == "clickLink" or e == "typed") and ('chrome-extension' not in url):
+                browserActivities.append(self.__navigateTo(url))
+            if e == "mouseClick" or e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
+                browserActivities.append(self.__click(xpath, displayName=f"Clicking button {row['tag_name']}"))
+            if e == "doubleClick" and xpath != '':
+                browserActivities.append(self.__click(xpath, clickType="CLICK_DOUBLE"))
+            if e == "changeField":
+                if row['tag_category'] == "SELECT":
+                    pass
+                else:
+                    browserActivities.append(self.__typeInto(value, xpath))
 
-            # When a window is opened, a new tab is automatically created at index 0
-            # so I don't need to create it again
-            # if e == "newTab" and int(id) != 0:
-            #     new_tab = f'window.open("''");'
-            #     script.write(f"browser.execute_script('{new_tab}')\n")
-            #     script.write(f"""
-            #         try:
-            #             if 0 <= {id} < len(browser.window_handles):
-            #                 browser.switch_to.window(browser.window_handles[{id}])
-            #             else:
-            #                 for i in range(0, {id}):
-            #                     browser.execute_script('window.open("");')
-            #                 browser.switch_to.window(browser.window_handles[{id}])
-            #         except Exception:
-            #             pass
-            #         \n""")
+        self.__attachBrowser(activities=browserActivities)
 
-        self.status_queue.put(f"[RPA] Generated UiPath RPA script")
+        # self.status_queue.put(f"[RPA] Generated UiPath RPA script")
 
     def generateUiPathRPA(self, df: pandas.DataFrame):
         self.createBaseFile()
@@ -655,7 +684,9 @@ class UIPathXAML:
 
 
 if __name__ == '__main__':
-    df = pandas.read_csv("/Users/marco/Desktop/RPA/smartRPA/RPA/2020-08-25_10-50-43/log/2020-08-25_10-50-43_combined.csv", encoding='utf-8-sig')
+    df = pandas.read_csv(
+        "/Users/marco/Desktop/RPA/smartRPA/RPA/2020-08-25_10-50-43/log/2020-08-25_10-50-43_combined.csv",
+        encoding='utf-8-sig')
     UIPathXAML = UIPathXAML()
     UIPathXAML.generateUiPathRPA(df)
     # UIPathXAML.createBaseFile()
