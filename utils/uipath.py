@@ -653,8 +653,11 @@ class UIPathXAML:
         self.__generateRPA(df)
         self.writeXmlToFile()
 
+
 if __name__ == '__main__':
+    df = pandas.read_csv("/Users/marco/Desktop/RPA/smartRPA/RPA/2020-08-25_10-50-43/log/2020-08-25_10-50-43_combined.csv", encoding='utf-8-sig')
     UIPathXAML = UIPathXAML()
-    UIPathXAML.createBaseFile()
-    UIPathXAML.buildTestFile()
-    UIPathXAML.writeXmlToFile()
+    UIPathXAML.generateUiPathRPA(df)
+    # UIPathXAML.createBaseFile()
+    # UIPathXAML.buildTestFile()
+    # UIPathXAML.writeXmlToFile()
