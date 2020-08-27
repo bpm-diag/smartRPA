@@ -82,7 +82,8 @@ document.body.oncontextmenu = e => {
         application: getBrowser(),
         event_type: "contextMenu",
         browser_url: document.URL,
-        xpath: getXPath(target)
+        xpath: getXPath(target),
+        xpath_full: getXPathFull(target)
     };
     // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
@@ -178,7 +179,8 @@ document.body.onclick = e => {
         tag_innerText: innerText, //take only the first 80 characters otherwise it's too long
         tag_option: target.option,
         tag_attributes: attributes,
-        xpath: getXPath(target)
+        xpath: getXPath(target),
+        xpath_full: getXPathFull(target),
     };
 
     if (type === "checkbox" || type === "radio") {
@@ -207,7 +209,8 @@ document.body.onmouseup = e => {
             browser_url: document.URL,
             mouse_coord: click_coord,
             tag_value: selection,
-            xpath: getXPath(target)
+            xpath: getXPath(target),
+            xpath_full: getXPathFull(target)
         };
         // console.log(JSON.stringify(eventLog));
         sendToBackgroundForPost(eventLog);
@@ -228,7 +231,8 @@ document.body.onsubmit = e => {
         application: getBrowser(),
         event_type: "submit",
         browser_url: document.URL,
-        xpath: getXPath(target)
+        xpath: getXPath(target),
+        xpath_full: getXPathFull(target)
     };
     // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
@@ -261,7 +265,8 @@ document.body.onchange = e => {
         tag_name: target.name,
         tag_value: target.value,
         tag_attributes: getTargetAttributes(target) || "",
-        xpath: getXPath(target)
+        xpath: getXPath(target),
+        xpath_full: getXPathFull(target)
     };
 
     sendToBackgroundForPost(eventLog);
@@ -280,7 +285,8 @@ document.body.ondblclick = e => {
         application: getBrowser(),
         event_type: "doubleClick",
         browser_url: document.URL,
-        xpath: getXPath(target)
+        xpath: getXPath(target),
+        xpath_full: getXPathFull(target)
     };
     // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);
@@ -300,7 +306,8 @@ document.body.ondragstart = e => {
         event_type: "dragElement",
         browser_url: document.URL,
         tag_value: event.dataTransfer.getData("text/plain"),
-        xpath: getXPath(target)
+        xpath: getXPath(target),
+        xpath_full: getXPathFull(target)
     };
     // console.log(JSON.stringify(eventLog));
     sendToBackgroundForPost(eventLog);

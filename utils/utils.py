@@ -268,6 +268,16 @@ def formatPathForCurrentOS(path, username_on_source_os):
         return ""
 
 
+def convertToWindowsPath(path, username_on_source_os):
+    if path:
+        if '\\' in path[:10]:  # already windows path
+            return path
+        else:
+            return path.replace(f"/Users/{username_on_source_os}", f"C:/Users/{USER}").replace('/', '\\')
+    else:
+        return ""
+
+
 def open_file(path):
     try:
         if WINDOWS:

@@ -610,13 +610,14 @@ class ProcessMining:
                 df = df.drop(row_index)  # returns a copy, previously was inplace so it returned null and side-effect db
 
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
-                          "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit",
+                          "selectTab", "moveTab", "zoomTab", "typed", "submit", "formSubmit",
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "closePresentation", "SlideSelectionChanged", "closeWorkbook",
                           "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile",
-                          "manualSubframe", "copy", "KernelDropped"]
+                          "manualSubframe", "copy", "KernelDropped", "startDownload"]  # mouseclick
+
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level

@@ -130,14 +130,30 @@ class UIPathXAML:
             },
         )
         variables = etree.Element("Sequence.Variables")
-        variable = etree.Element(
-            etree.QName(None, "Variable"),
-            {
-                etree.QName(self.x, "TypeArguments"): "ui:Browser",
-                etree.QName(None, "Name"): "currentBrowser"
-            },
-        )
-        variables.append(variable)
+        # variable = etree.Element(
+        #     etree.QName(None, "Variable"),
+        #     {
+        #         etree.QName(self.x, "TypeArguments"): "ui:Browser",
+        #         etree.QName(None, "Name"): "browserReference"
+        #     },
+        # )
+        # variables.append(variable)
+        variables.extend([
+            etree.Element(
+                etree.QName(None, "Variable"),
+                {
+                    etree.QName(self.x, "TypeArguments"): "ui:Browser",
+                    etree.QName(None, "Name"): "browserReference"
+                },
+            ),
+            etree.Element(
+                etree.QName(None, "Variable"),
+                {
+                    etree.QName(self.x, "TypeArguments"): "ui:WorkbookApplication",
+                    etree.QName(None, "Name"): "spreadsheetReference"
+                },
+            )
+        ])
         state = etree.Element(etree.QName(self.sap, "WorkflowViewStateService.ViewState"))
         dictionary = etree.Element(
             etree.QName(self.scg, "Dictionary"),
@@ -210,7 +226,7 @@ class UIPathXAML:
                 etree.QName(None, "Hidden"): "False",
                 etree.QName(None, "NewSession"): "True",
                 etree.QName(None, "Private"): "False",
-                etree.QName(None, "UiBrowser"): "[currentBrowser]",
+                etree.QName(None, "UiBrowser"): "[browserReference]",
                 etree.QName(None, "Url"): url,
             },
         )
@@ -247,13 +263,13 @@ class UIPathXAML:
             etree.QName(self.ui, "BrowserScope"),
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"BrowserScope_{self.browserScope}",
-                etree.QName(None, "Browser"): "[currentBrowser]",
+                etree.QName(None, "Browser"): "[browserReference]",
                 etree.QName(None, "BrowserType"): "Chrome",
                 etree.QName(None, "SearchScope"): "{x:Null}",
                 etree.QName(None, "Selector"): "{x:Null}",
                 etree.QName(None, "TimeoutMS"): "{x:Null}",
                 etree.QName(None, "DisplayName"): "Attach Browser",
-                etree.QName(None, "UiBrowser"): "[currentBrowser]",
+                etree.QName(None, "UiBrowser"): "[browserReference]",
             },
         )
         body = etree.Element(
@@ -283,14 +299,21 @@ class UIPathXAML:
         attachBrowser.append(body)
         self.mainSequence.append(attachBrowser)
 
-    def __target(self, selector: str = "{x:Null}"):
+    def __target(self, xpath: str, xpath_full: str):
+        css_selector = f"css-selector='{self.__xpathToCssSelector(xpath_full)}'"
+        if len(xpath.split(')/')) == 1:
+            id = f"id='{self.__getIdFromXpath(xpath)}'"
+        else:
+            id = f"parentid='{self.__getIdFromXpath(xpath)}'"
+        selector = f"<html app='chrome.exe' /><webctrl {css_selector} {id}/>"
+
         target = etree.Element(
             etree.QName(self.ui, "Target"),
             {
                 etree.QName(None, "ClippingRegion"): "{x:Null}",
                 etree.QName(None, "Element"): "{x:Null}",
                 etree.QName(None, "Id"): str(uuid.uuid1()),
-                etree.QName(None, "Selector"): self.__xpathToCssSelector(selector),
+                etree.QName(None, "Selector"): selector,
             }
         )
         target_timeout = etree.Element(
@@ -315,17 +338,17 @@ class UIPathXAML:
         target.append(waitForReady)
         return target
 
-    def __typeInto(self, text: str, selector: str, displayName: str = "Type into 'INPUT'"):
+    def __typeInto(self, text: str, xpath: str, xpath_full: str, displayName: str = "Type into 'INPUT'"):
         self.typeInto_id += 1
         typeInto = etree.Element(
             etree.QName(self.ui, "TypeInto"),
             {
                 etree.QName(None, "AlterIfDisabled"): "{x:Null}",
-                etree.QName(None, "ClickBeforeTyping"): "{x:Null}",
+                etree.QName(None, "ClickBeforeTyping"): "True",
                 etree.QName(None, "DelayBefore"): "{x:Null}",
                 etree.QName(None, "DelayBetweenKeys"): "{x:Null}",
                 etree.QName(None, "DelayMS"): "{x:Null}",
-                etree.QName(None, "EmptyField"): "{x:Null}",
+                etree.QName(None, "EmptyField"): "True",
                 etree.QName(None, "SendWindowMessages"): "{x:Null}",
                 etree.QName(None, "SimulateType"): "{x:Null}",
                 etree.QName(None, "Activate"): "True",
@@ -337,12 +360,12 @@ class UIPathXAML:
         typeIntoTarget = etree.Element(
             etree.QName(self.ui, "TypeInto.Target"),
         )
-        target = self.__target(selector)
-        typeIntoTarget.append(target)
+        typeIntoTarget.append(self.__target(xpath, xpath_full))
         typeInto.append(typeIntoTarget)
         return typeInto
 
-    def __click(self, selector: str, clickType="CLICK_SINGLE", mouseButton="BTN_LEFT", displayName: str = "Click Item"):
+    def __click(self, xpath: str, xpath_full: str, clickType="CLICK_SINGLE", mouseButton="BTN_LEFT",
+                displayName: str = "Click Item"):
         self.click_id += 1
         click = etree.Element(
             etree.QName(self.ui, "Click"),
@@ -391,67 +414,38 @@ class UIPathXAML:
         clickTarget = etree.Element(
             etree.QName(self.ui, "Click.Target"),
         )
-        target = self.__target(selector)
-        clickTarget.append(target)
+        clickTarget.append(self.__target(xpath, xpath_full))
 
         click.append(clickCursorPosition)
         click.append(clickTarget)
         return click
 
     def __xpathToCssSelector(self, xpath: str):
-        css = re.sub(r'\[(.)\]', '', xpath.replace('/html/', '').replace('/', '>'))
-        return f"<webctrl css-selector='{css}'/>"
+        css = re.sub(r'\[(.)\]', '', xpath.lower())
+        css = css.replace('/html/', '').replace('/', '>')
+        return css
 
-    def __setToClipboard(self, text: str, displayName: str = "Set to clipboard"):
-        self.setToClipboard += 1
-        clipboard = etree.Element(
-            etree.QName(self.ui, "SetToClipboard"),
-            {
-                etree.QName(None, "DisplayName"): displayName,
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SetToClipboard_{self.setToClipboard}",
-                etree.QName(None, "Text"): text,
-            },
-        )
-        return clipboard
-
-    def __sendHotkey(self, key: str = "{x:Null}", modifiers: str = "None", displayName: str = "Send Hotkey"):
-        self.sendHotkey += 1
-        hotkey = etree.Element(
-            etree.QName(self.ui, "SendHotkey"),
-            {
-                etree.QName(None, "ClickBeforeTyping"): "{x:Null}",
-                etree.QName(None, "DelayBefore"): "{x:Null}",
-                etree.QName(None, "DelayBetweenKeys"): "{x:Null}",
-                etree.QName(None, "DelayMS"): "{x:Null}",
-                etree.QName(None, "EmptyField"): "{x:Null}",
-                etree.QName(None, "SendWindowMessages"): "{x:Null}",
-                etree.QName(None, "SpecialKey"): "{x:Null}",
-                etree.QName(None, "Activate"): "True",
-                etree.QName(None, "DisplayName"): displayName,
-                etree.QName(None, "Key"): key,
-                etree.QName(None, "KeyModifiers"): modifiers,
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SendHotkey_{self.sendHotkey}",
-            }
-        )
-        sendHotkeyTarget = etree.Element(
-            etree.QName(self.ui, "SendHotkey.Target"),
-        )
-        sendHotkeyTarget.append(self.__target())
-        hotkey.append(sendHotkeyTarget)
-        return hotkey
+    def __getIdFromXpath(self, xpath: str):
+        return xpath[xpath.find("(") + 1:xpath.find(")")].replace('"', '')
 
     def __navigateTo(self, url: str, displayName: str = "Navigate To"):
         self.navigateTo += 1
         navigateTo = etree.Element(
             etree.QName(self.ui, "NavigateTo"),
             {
-                etree.QName(None, "Browser"): "[currentBrowser]",
+                etree.QName(None, "Browser"): "[browserReference]",
                 etree.QName(None, "DisplayName"): displayName,
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"NavigateTo_{self.navigateTo}",
                 etree.QName(None, "Url"): url,
             },
         )
         return navigateTo
+
+    def __navigateToInNewTab(self, url: str, activities: list = None):
+        return self.__openApplication(arguments=f"-new-tab {url}",
+                                      path="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                                      selector="<wnd app='chrome.exe'/>", displayName="Navigate in New Tab",
+                                      activities=activities)
 
     def __closeTab(self):
         self.closeTab += 1
@@ -518,25 +512,65 @@ class UIPathXAML:
         openApplication.append(body)
         return openApplication
 
-    def __navigateToInNewTab(self, url: str, activities: list = None):
-        return self.__openApplication(arguments=f"-new-tab {url}",
-                                      path="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-                                      selector="<wnd app='chrome.exe'/>", displayName="Navigate in New Tab",
-                                      activities=activities)
+    def __setToClipboard(self, text: str, displayName: str = "Set to clipboard"):
+        self.setToClipboard += 1
+        clipboard = etree.Element(
+            etree.QName(self.ui, "SetToClipboard"),
+            {
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SetToClipboard_{self.setToClipboard}",
+                etree.QName(None, "Text"): text,
+            },
+        )
+        return clipboard
 
-    def __excelSpreadsheet(self, password: str = "{x:Null}", workbookPath: str = None,
+    def __sendHotkey(self, key: str = "{x:Null}", modifiers: str = "None", displayName: str = "Send Hotkey"):
+        self.sendHotkey += 1
+        hotkey = etree.Element(
+            etree.QName(self.ui, "SendHotkey"),
+            {
+                etree.QName(None, "ClickBeforeTyping"): "{x:Null}",
+                etree.QName(None, "DelayBefore"): "{x:Null}",
+                etree.QName(None, "DelayBetweenKeys"): "{x:Null}",
+                etree.QName(None, "DelayMS"): "{x:Null}",
+                etree.QName(None, "EmptyField"): "{x:Null}",
+                etree.QName(None, "SendWindowMessages"): "{x:Null}",
+                etree.QName(None, "SpecialKey"): "{x:Null}",
+                etree.QName(None, "Activate"): "True",
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "Key"): key,
+                etree.QName(None, "KeyModifiers"): modifiers,
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SendHotkey_{self.sendHotkey}",
+            }
+        )
+        sendHotkeyTarget = etree.Element(
+            etree.QName(self.ui, "SendHotkey.Target"),
+        )
+        sendHotkeyTarget.append(self.__target())
+        hotkey.append(sendHotkeyTarget)
+        return hotkey
+
+    def __excelSpreadsheet(self, workbookPath: str = "", password: str = "{x:Null}", attach=True,
                            displayName: str = "Excel Application Scope", activities: list = None):
         self.openApplication += 1
         if not workbookPath:
-            workbookPath = os.path.join(self.RPA_directory, "UiPathSpreadsheet.xlsx")
+            # TODO
+            #workbookPath = os.path.join(self.RPA_directory, "UiPathSpreadsheet.xlsx")
+            desktop = os.path.normpath(os.path.expanduser("~/Desktop"))
+            workbookPath = r"C:\Users\marco\Desktop"
+        params = {
+            etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelApplicationScope_{self.openApplication}",
+            etree.QName(None, "Password"): password,
+        }
+        if attach:
+            params[etree.QName(None, "ExistingWorkbook")] = "[spreadsheetReference]"
+        else:
+            params[etree.QName(None, "Workbook")] = "[spreadsheetReference]"
+            params[etree.QName(None, "WorkbookPath")] = workbookPath
+
         excelApplication = etree.Element(
             etree.QName(self.ui, "ExcelApplicationScope"),
-            {
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelApplicationScope_{self.openApplication}",
-                etree.QName(None, "Password"): password,
-                etree.QName(None, "WorkbookPath"): workbookPath,
-                etree.QName(None, "DisplayName"): displayName,
-            },
+            params
         )
         body = etree.Element(
             etree.QName(self.ui, "ExcelApplicationScope.Body"),
@@ -563,7 +597,7 @@ class UIPathXAML:
 
         body.append(activityAction)
         excelApplication.append(body)
-        return excelApplication
+        self.mainSequence.append(excelApplication)
 
     def __writeCell(self, cell: str, sheetName: str, text: str):
         self.writeCell += 1
@@ -589,27 +623,37 @@ class UIPathXAML:
                 self.__click(
                     "/html/body/div/div[2]/form/div[2]/div/div[2]/div[3]/div/div/div[2]/div[1]/div/span/div/div[1]/label/div/div[1]/div/div[3]/div")
             ],
-            )
+        )
         self.__attachBrowser([
             self.__navigateToInNewTab("https://apple.com")
         ])
 
-    def __generateRPAHelper(self, previousCategory):
-        # if previousCategory is None:
-        #     previousCategory = row['category']
-        # elif previousCategory != row['category']:
-        #     pass
-        pass
+    def __generateRPAHelper(self, previousCategory, row):
+        if previousCategory is None or previousCategory == row['category']:
+            return row['category']
 
     def __generateRPA(self, df: pandas.DataFrame):
+        # check if dataframe contains values
         if df.empty:
             return False
+
+        # if dataframe contains browser related events add openBrowser element
         if not df.query('category=="Browser"').empty:
-            self.__openBrowser()
+            url = df.loc[df['category'] == 'Browser', 'browser_url'].iloc[0]
+            self.__openBrowser(url=url)
+
+        # if dataframe contains excel events, add excel scope element
+        v = df['concept:name'].values
+        if 'newWorkbook' in v:
+            self.__excelSpreadsheet(workbookPath="", attach=False)
+        if 'openWorkbook' in v:
+            ow = df.loc[df['concept:name'] == 'openWorkbook']
+            path = utils.utils.convertToWindowsPath(ow['event_src_path'], ow['org:resource'])
+            self.__excelSpreadsheet(workbookPath=path, attach=False)
 
         browserActivities = []
         excelActivities = []
-        previousCategory = None
+        previousCategory = df.loc[0, 'category']
 
         for index, row in df.iterrows():
             ######
@@ -632,14 +676,15 @@ class UIPathXAML:
             app = row['application']
             cb = utils.utils.processClipboard(row['clipboard_content'])
             path = ""
+            currentCategory = row["category"]
             if not pandas.isna(row['event_src_path']) and row['event_src_path'] != '':
                 path = row['event_src_path']
-                path = utils.utils.formatPathForCurrentOS(path, user)
+                path = utils.utils.convertToWindowsPath(path, user)
                 item_name = path.replace('\\', r'\\')
             dest_path = ""
             if not pandas.isna(row['event_dest_path']) and row['event_dest_path'] != '':
                 dest_path = row['event_dest_path']
-                dest_path = utils.utils.formatPathForCurrentOS(
+                dest_path = utils.utils.convertToWindowsPath(
                     dest_path, user)
             url = "about:blank"
             if not pandas.isna(row['browser_url']):
@@ -650,7 +695,20 @@ class UIPathXAML:
             xpath = ""
             if not pandas.isna(row['xpath']):
                 xpath = row['xpath']
+            xpath_full = row['xpath_full']
             value = utils.utils.unicodeString(row['tag_value'])
+
+            ######
+            # Check sequence
+            ######
+            if previousCategory != currentCategory:
+                previousCategory = currentCategory
+                if browserActivities:
+                    self.__attachBrowser(activities=browserActivities)
+                    browserActivities.clear()
+                if excelActivities:
+                    self.__excelSpreadsheet(activities=excelActivities)
+                    excelActivities.clear()
 
             ######
             # Browser
@@ -661,19 +719,40 @@ class UIPathXAML:
                 browserActivities.append(self.__sendHotkey(id, "Ctrl", f"Select tab {id}"))
             if e == "closeTab":
                 browserActivities.append(self.__closeTab())
-            if (e == "clickLink" or e == "typed") and ('chrome-extension' not in url):
+            if (e in ["clickLink", "typed", "reload"]) and ('chrome-extension' not in url):
                 browserActivities.append(self.__navigateTo(url))
             if e == "mouseClick" or e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
-                browserActivities.append(self.__click(xpath, displayName=f"Clicking button {row['tag_name']}"))
+                browserActivities.append(
+                    self.__click(xpath, xpath_full, displayName=f"Clicking {row['tag_category'].lower()}"))
             if e == "doubleClick" and xpath != '':
-                browserActivities.append(self.__click(xpath, clickType="CLICK_DOUBLE"))
+                browserActivities.append(self.__click(xpath, xpath_full, clickType="CLICK_DOUBLE"))
             if e == "changeField":
                 if row['tag_category'] == "SELECT":
                     pass
                 else:
-                    browserActivities.append(self.__typeInto(value, xpath))
+                    browserActivities.append(self.__typeInto(value, xpath, xpath_full))
 
-        self.__attachBrowser(activities=browserActivities)
+            ######
+            # Excel
+            ######
+            # if e in ["newWorkbook", "openWorkbook"]:
+            #     excelActivities.append(self.__excelSpreadsheet(workbookPath=path, attach=False))
+            if e in ["addWorksheet", "WorksheetAdded"]:
+                pass
+            if e in ["selectWorksheet", "WorksheetActivated"]:
+                pass
+            if e == "getCell":
+                pass
+            if e in ["editCellSheet", "editCell", "editRange"]:
+                excelActivities.append(self.__writeCell(cell=cell_range, sheetName=sh, text=cell_value))
+            if e == "getRange":
+                pass
+            if e == "saveWorkbook":
+                pass
+            if e == "printWorkbook":
+                pass
+            if e == "closeWindow":
+                pass
 
         # self.status_queue.put(f"[RPA] Generated UiPath RPA script")
 
