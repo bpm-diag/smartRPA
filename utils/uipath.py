@@ -40,6 +40,8 @@ class UIPathXAML:
         self.excelApplication = 0
         self.writeCell = 0
         self.closeTab = 0
+        self.saveWorkbook = 0
+        self.closeWorkbook = 0
 
     def __createRoot(self):  # https://stackoverflow.com/a/31074030
         self.xmlns = "http://schemas.microsoft.com/netfx/2009/xaml/activities"
@@ -299,7 +301,7 @@ class UIPathXAML:
         attachBrowser.append(body)
         self.mainSequence.append(attachBrowser)
 
-    def __target(self, xpath: str, xpath_full: str):
+    def __target(self, xpath: str, xpath_full: str, timeout: str = ""):
         css_selector = f"css-selector='{self.__xpathToCssSelector(xpath_full)}'"
         if len(xpath.split(')/')) == 1:
             id = f"id='{self.__getIdFromXpath(xpath)}'"
@@ -307,14 +309,18 @@ class UIPathXAML:
             id = f"parentid='{self.__getIdFromXpath(xpath)}'"
         selector = f"<html app='chrome.exe' /><webctrl {css_selector} {id}/>"
 
-        target = etree.Element(
-            etree.QName(self.ui, "Target"),
-            {
+        props = {
                 etree.QName(None, "ClippingRegion"): "{x:Null}",
                 etree.QName(None, "Element"): "{x:Null}",
                 etree.QName(None, "Id"): str(uuid.uuid1()),
                 etree.QName(None, "Selector"): selector,
             }
+        if timeout:
+            props[etree.QName(None, "TimeoutMS")] = timeout
+
+        target = etree.Element(
+            etree.QName(self.ui, "Target"),
+            props
         )
         target_timeout = etree.Element(
             etree.QName(self.ui, "Target.TimeoutMS"),
@@ -325,6 +331,8 @@ class UIPathXAML:
                 {etree.QName(self.x, "TypeArguments"): "x:Int32"}
             )
         )
+        if not timeout:
+            target.append(target_timeout)
         waitForReady = etree.Element(
             etree.QName(self.ui, "Target.WaitForReady"),
         )
@@ -334,7 +342,6 @@ class UIPathXAML:
                 {etree.QName(self.x, "TypeArguments"): "ui:WaitForReady"}
             )
         )
-        target.append(target_timeout)
         target.append(waitForReady)
         return target
 
@@ -373,13 +380,14 @@ class UIPathXAML:
                 etree.QName(None, "AlterIfDisabled"): "{x:Null}",
                 etree.QName(None, "DelayBefore"): "{x:Null}",
                 etree.QName(None, "DelayMS"): "{x:Null}",
-                etree.QName(None, "SendWindowMessages"): "{x:Null}",
-                etree.QName(None, "SimulateClick"): "{x:Null}",
                 etree.QName(None, "ClickType"): clickType,
+                etree.QName(None, "ContinueOnError"): "True",
                 etree.QName(None, "DisplayName"): displayName,
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Click_{self.click_id}",
                 etree.QName(None, "KeyModifiers"): "None",
                 etree.QName(None, "MouseButton"): mouseButton,
+                etree.QName(None, "SendWindowMessages"): "{x:Null}",
+                etree.QName(None, "SimulateClick"): "{x:Null}",
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Click_{self.click_id}",
             },
         )
 
@@ -414,7 +422,7 @@ class UIPathXAML:
         clickTarget = etree.Element(
             etree.QName(self.ui, "Click.Target"),
         )
-        clickTarget.append(self.__target(xpath, xpath_full))
+        clickTarget.append(self.__target(xpath, xpath_full, timeout="800"))
 
         click.append(clickCursorPosition)
         click.append(clickTarget)
@@ -460,14 +468,13 @@ class UIPathXAML:
 
     def __comment(self, text: str):
         self.comment += 1
-        navigateTo = etree.Element(
+        return etree.Element(
             etree.QName(self.ui, "Comment"),
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Comment_{self.comment}",
                 etree.QName(None, "Text"): text,
             },
         )
-        return navigateTo
 
     def __openApplication(self, arguments: str = "{x:Null}", path="{x:Null}", selector="{x:Null}",
                           displayName: str = "Open Application", activities: list = None):
@@ -557,7 +564,7 @@ class UIPathXAML:
             # TODO
             #workbookPath = os.path.join(self.RPA_directory, "UiPathSpreadsheet.xlsx")
             desktop = os.path.normpath(os.path.expanduser("~/Desktop"))
-            workbookPath = r"C:\Users\marco\Desktop"
+            workbookPath = r"C:\Users\marco\Desktop\excelDemo.xlsx"
         params = {
             etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelApplicationScope_{self.openApplication}",
             etree.QName(None, "Password"): password,
@@ -614,6 +621,27 @@ class UIPathXAML:
         )
         return writeCell
 
+    def __saveWorkbook(self, displayName: str = "Save Workbook"):
+        self.saveWorkbook += 1
+        return etree.Element(
+            etree.QName(self.ui, "ExcelSaveWorkbook"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelSaveWorkbook_{self.saveWorkbook}",
+                etree.QName(None, "DisplayName"): displayName,
+            },
+        )
+
+    def __closeWorkbook(self, displayName: str = "Close Workbook"):
+        self.closeWorkbook += 1
+        return etree.Element(
+            etree.QName(self.ui, "ExcelCloseWorkbook"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelSaveWorkbook_{self.closeWorkbook}",
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "Workbook"): "[spreadsheetReference]",
+            },
+        )
+
     def buildTestFile(self):
         self.__openBrowser(
             "https://docs.google.com/forms/d/e/1FAIpQLSeI8_vYyaJgM7SJM4Y9AWfLq-tglWZh6yt7bEXEOJr_L-hV1A/viewform?formkey=dGx0b1ZrTnoyZDgtYXItMWVBdVlQQWc6MQ",
@@ -637,6 +665,8 @@ class UIPathXAML:
         if df.empty:
             return False
 
+        self.mainSequence.append(self.__comment("// Generated using SmartRPA https://github.com/bpm-diag/smartRPA"))
+
         # if dataframe contains browser related events add openBrowser element
         if not df.query('category=="Browser"').empty:
             url = df.loc[df['category'] == 'Browser', 'browser_url'].iloc[0]
@@ -653,6 +683,7 @@ class UIPathXAML:
 
         browserActivities = []
         excelActivities = []
+        systemActivities = []
         previousCategory = df.loc[0, 'category']
 
         for index, row in df.iterrows():
@@ -738,7 +769,7 @@ class UIPathXAML:
             # if e in ["newWorkbook", "openWorkbook"]:
             #     excelActivities.append(self.__excelSpreadsheet(workbookPath=path, attach=False))
             if e in ["addWorksheet", "WorksheetAdded"]:
-                pass
+                excelActivities.append(self.__writeCell(cell="", sheetName=sh, text=""))
             if e in ["selectWorksheet", "WorksheetActivated"]:
                 pass
             if e == "getCell":
@@ -748,11 +779,16 @@ class UIPathXAML:
             if e == "getRange":
                 pass
             if e == "saveWorkbook":
-                pass
+                excelActivities.append(self.__saveWorkbook(displayName=f"Save {wb}"))
             if e == "printWorkbook":
                 pass
             if e == "closeWindow":
-                pass
+                excelActivities.append(self.__closeWorkbook(displayName=f"Close {wb}"))
+
+            ######
+            # System
+            ######
+
 
         # self.status_queue.put(f"[RPA] Generated UiPath RPA script")
 
