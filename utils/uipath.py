@@ -13,6 +13,7 @@ import uuid
 import pandas
 from multiprocessing.queues import Queue
 from distutils.dir_util import copy_tree
+import string
 import utils
 
 # from utils.utils import MAIN_DIRECTORY
@@ -43,6 +44,7 @@ class UIPathXAML:
         self.saveWorkbook = 0
         self.closeWorkbook = 0
 
+    # base
     def __createRoot(self):  # https://stackoverflow.com/a/31074030
         self.xmlns = "http://schemas.microsoft.com/netfx/2009/xaml/activities"
         self.mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -217,6 +219,17 @@ class UIPathXAML:
                                         pretty_print=True))
             writer.write(etree.tostring(self.root, pretty_print=True))
 
+    def __comment(self, text: str):
+        self.comment += 1
+        return etree.Element(
+            etree.QName(self.ui, "Comment"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Comment_{self.comment}",
+                etree.QName(None, "Text"): text,
+            },
+        )
+
+    # browser
     def __openBrowser(self, url: str = "", activities: list = None):
         openBrowser = etree.Element(
             etree.QName(self.ui, "OpenBrowser"),
@@ -466,97 +479,7 @@ class UIPathXAML:
             },
         )
 
-    def __comment(self, text: str):
-        self.comment += 1
-        return etree.Element(
-            etree.QName(self.ui, "Comment"),
-            {
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Comment_{self.comment}",
-                etree.QName(None, "Text"): text,
-            },
-        )
-
-    def __openApplication(self, arguments: str = "{x:Null}", path="{x:Null}", selector="{x:Null}",
-                          displayName: str = "Open Application", activities: list = None):
-        self.openApplication += 1
-        openApplication = etree.Element(
-            etree.QName(self.ui, "OpenApplication"),
-            {
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"OpenApplication_{self.openApplication}",
-                etree.QName(None, "ApplicationWindow"): "{x:Null}",
-                etree.QName(None, "TimeoutMS"): "{x:Null}",
-                etree.QName(None, "WorkingDirectory"): "{x:Null}",
-                etree.QName(None, "Arguments"): arguments,
-                etree.QName(None, "DisplayName"): displayName,
-                etree.QName(None, "FileName"): path,
-                etree.QName(None, "Selector"): selector,
-            },
-        )
-        body = etree.Element(
-            etree.QName(self.ui, "OpenApplication.Body"),
-        )
-        activityAction = etree.Element(
-            etree.QName(None, "ActivityAction"),
-            {etree.QName(self.x, "TypeArguments"): "x:Object"},
-        )
-        activityActionArgument = etree.Element(
-            etree.QName(None, "ActivityAction.Argument"),
-        )
-        delegateinargument = etree.Element(
-            etree.QName(None, "DelegateInArgument"),
-            {
-                etree.QName(self.x, "TypeArguments"): "x:Object",
-                etree.QName(None, "Name"): "ContextTarget"
-            },
-        )
-        activityActionArgument.append(delegateinargument)
-        activityAction.append(activityActionArgument)
-
-        if activities:
-            activityAction.append(self.__createSequence(activities))
-
-        body.append(activityAction)
-        openApplication.append(body)
-        return openApplication
-
-    def __setToClipboard(self, text: str, displayName: str = "Set to clipboard"):
-        self.setToClipboard += 1
-        clipboard = etree.Element(
-            etree.QName(self.ui, "SetToClipboard"),
-            {
-                etree.QName(None, "DisplayName"): displayName,
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SetToClipboard_{self.setToClipboard}",
-                etree.QName(None, "Text"): text,
-            },
-        )
-        return clipboard
-
-    def __sendHotkey(self, key: str = "{x:Null}", modifiers: str = "None", displayName: str = "Send Hotkey"):
-        self.sendHotkey += 1
-        hotkey = etree.Element(
-            etree.QName(self.ui, "SendHotkey"),
-            {
-                etree.QName(None, "ClickBeforeTyping"): "{x:Null}",
-                etree.QName(None, "DelayBefore"): "{x:Null}",
-                etree.QName(None, "DelayBetweenKeys"): "{x:Null}",
-                etree.QName(None, "DelayMS"): "{x:Null}",
-                etree.QName(None, "EmptyField"): "{x:Null}",
-                etree.QName(None, "SendWindowMessages"): "{x:Null}",
-                etree.QName(None, "SpecialKey"): "{x:Null}",
-                etree.QName(None, "Activate"): "True",
-                etree.QName(None, "DisplayName"): displayName,
-                etree.QName(None, "Key"): key,
-                etree.QName(None, "KeyModifiers"): modifiers,
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SendHotkey_{self.sendHotkey}",
-            }
-        )
-        sendHotkeyTarget = etree.Element(
-            etree.QName(self.ui, "SendHotkey.Target"),
-        )
-        sendHotkeyTarget.append(self.__target())
-        hotkey.append(sendHotkeyTarget)
-        return hotkey
-
+    # excel
     def __excelSpreadsheet(self, workbookPath: str = "", password: str = "{x:Null}", attach=True,
                            displayName: str = "Excel Application Scope", activities: list = None):
         self.openApplication += 1
@@ -642,23 +565,93 @@ class UIPathXAML:
             },
         )
 
-    def buildTestFile(self):
-        self.__openBrowser(
-            "https://docs.google.com/forms/d/e/1FAIpQLSeI8_vYyaJgM7SJM4Y9AWfLq-tglWZh6yt7bEXEOJr_L-hV1A/viewform?formkey=dGx0b1ZrTnoyZDgtYXItMWVBdVlQQWc6MQ",
-            activities=[
-                self.__typeInto("salve sono salvatore",
-                                "/html/body/div/div[2]/form/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input"),
-                self.__click(
-                    "/html/body/div/div[2]/form/div[2]/div/div[2]/div[3]/div/div/div[2]/div[1]/div/span/div/div[1]/label/div/div[1]/div/div[3]/div")
-            ],
+    # system
+    def __openApplication(self, arguments: str = "{x:Null}", fileName: str = "{x:Null}", selector: str = "{x:Null}",
+                          displayName: str = "Open Application", activities: list = None):
+        self.openApplication += 1
+        openApplication = etree.Element(
+            etree.QName(self.ui, "OpenApplication"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"OpenApplication_{self.openApplication}",
+                etree.QName(None, "ApplicationWindow"): "{x:Null}",
+                etree.QName(None, "TimeoutMS"): "{x:Null}",
+                etree.QName(None, "WorkingDirectory"): "{x:Null}",
+                etree.QName(None, "Arguments"): arguments,
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "FileName"): fileName,
+                etree.QName(None, "Selector"): selector,
+            },
         )
-        self.__attachBrowser([
-            self.__navigateToInNewTab("https://apple.com")
-        ])
+        body = etree.Element(
+            etree.QName(self.ui, "OpenApplication.Body"),
+        )
+        activityAction = etree.Element(
+            etree.QName(None, "ActivityAction"),
+            {etree.QName(self.x, "TypeArguments"): "x:Object"},
+        )
+        activityActionArgument = etree.Element(
+            etree.QName(None, "ActivityAction.Argument"),
+        )
+        delegateinargument = etree.Element(
+            etree.QName(None, "DelegateInArgument"),
+            {
+                etree.QName(self.x, "TypeArguments"): "x:Object",
+                etree.QName(None, "Name"): "ContextTarget"
+            },
+        )
+        activityActionArgument.append(delegateinargument)
+        activityAction.append(activityActionArgument)
 
-    def __generateRPAHelper(self, previousCategory, row):
-        if previousCategory is None or previousCategory == row['category']:
-            return row['category']
+        if activities:
+            activityAction.append(self.__createSequence(activities))
+
+        body.append(activityAction)
+        openApplication.append(body)
+        return openApplication
+
+    def __openFileFolder(self, path: str, itemName: str):
+        return self.__openApplication(arguments=path,
+                                      displayName=f"Opening {itemName}",
+                                      fileName="C:\\Windows\\explorer.exe",
+                                      selector="<wnd app='explorer.exe' cls='CabinetWClass' />")
+
+    def __setToClipboard(self, text: str, displayName: str = "Set to clipboard"):
+        self.setToClipboard += 1
+        clipboard = etree.Element(
+            etree.QName(self.ui, "SetToClipboard"),
+            {
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SetToClipboard_{self.setToClipboard}",
+                etree.QName(None, "Text"): text,
+            },
+        )
+        return clipboard
+
+    def __sendHotkey(self, key: str = "{x:Null}", modifiers: str = "None", displayName: str = "Send Hotkey"):
+        self.sendHotkey += 1
+        hotkey = etree.Element(
+            etree.QName(self.ui, "SendHotkey"),
+            {
+                etree.QName(None, "ClickBeforeTyping"): "{x:Null}",
+                etree.QName(None, "DelayBefore"): "{x:Null}",
+                etree.QName(None, "DelayBetweenKeys"): "{x:Null}",
+                etree.QName(None, "DelayMS"): "{x:Null}",
+                etree.QName(None, "EmptyField"): "{x:Null}",
+                etree.QName(None, "SendWindowMessages"): "{x:Null}",
+                etree.QName(None, "SpecialKey"): "{x:Null}",
+                etree.QName(None, "Activate"): "True",
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "Key"): key,
+                etree.QName(None, "KeyModifiers"): modifiers,
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"SendHotkey_{self.sendHotkey}",
+            }
+        )
+        sendHotkeyTarget = etree.Element(
+            etree.QName(self.ui, "SendHotkey.Target"),
+        )
+        sendHotkeyTarget.append(self.__target())
+        hotkey.append(sendHotkeyTarget)
+        return hotkey
 
     def __generateRPA(self, df: pandas.DataFrame):
         # check if dataframe contains values
@@ -707,6 +700,7 @@ class UIPathXAML:
             app = row['application']
             cb = utils.utils.processClipboard(row['clipboard_content'])
             path = ""
+            item_name = ""
             currentCategory = row["category"]
             if not pandas.isna(row['event_src_path']) and row['event_src_path'] != '':
                 path = row['event_src_path']
@@ -740,6 +734,9 @@ class UIPathXAML:
                 if excelActivities:
                     self.__excelSpreadsheet(activities=excelActivities)
                     excelActivities.clear()
+                if systemActivities:
+                    self.__createSequence(systemActivities)
+                    systemActivities.clear()
 
             ######
             # Browser
@@ -766,8 +763,6 @@ class UIPathXAML:
             ######
             # Excel
             ######
-            # if e in ["newWorkbook", "openWorkbook"]:
-            #     excelActivities.append(self.__excelSpreadsheet(workbookPath=path, attach=False))
             if e in ["addWorksheet", "WorksheetAdded"]:
                 excelActivities.append(self.__writeCell(cell="", sheetName=sh, text=""))
             if e in ["selectWorksheet", "WorksheetActivated"]:
@@ -788,6 +783,17 @@ class UIPathXAML:
             ######
             # System
             ######
+            if (e == "copy" or e == "cut") and not pandas.isna(cb):
+                systemActivities.append(self.__setToClipboard(cb))
+            if e == "paste" and row['category'] != 'Browser':
+                pass
+            if e == "pressHotkey":
+                hotkey = row["id"]
+                meaning = row["description"]
+                modifiers = ', '.join(list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
+                systemActivities.append(self.__sendHotkey(key=hotkey[-1], modifiers=modifiers, displayName=f"Press {hotkey.upper()} - {meaning}"))
+            if e in ["openFile", "openFolder"] and path:
+                systemActivities.append(self.__openFileFolder(path, item_name))
 
 
         # self.status_queue.put(f"[RPA] Generated UiPath RPA script")
@@ -804,6 +810,3 @@ if __name__ == '__main__':
         encoding='utf-8-sig')
     UIPathXAML = UIPathXAML()
     UIPathXAML.generateUiPathRPA(df)
-    # UIPathXAML.createBaseFile()
-    # UIPathXAML.buildTestFile()
-    # UIPathXAML.writeXmlToFile()
