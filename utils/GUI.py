@@ -746,7 +746,8 @@ class MainApplication(QMainWindow, QDialog):
             return False
         except PermissionError as e:
             print(f"[GUI] Process mining analysis exited with error: {e}")
-            print(f"[GUI] Close the file if it's open and try again.")
+            print(f"[GUI] Maybe the file is opened in another program. Close it and try again.")
+            self.status_queue.put(f"Unable to open the file. Maybe it is opened in another program.")
             return False
         except Exception as e:
             print(f"[GUI] Process mining analysis exited with error: {e}")
@@ -784,6 +785,11 @@ class MainApplication(QMainWindow, QDialog):
 
                 pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
                 self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
+
+                # create UiPath RPA script
+                UIPathXAML = utils.uipath.UIPathXAML(log_filepath[-1], self.status_queue)
+                UIPathXAML.generateUiPathRPA(mostFrequentCase)
+
                 self.status_queue.put(f"[GUI] Done\n")
 
     # Generate xes file from multiple csv, each csv corresponds to a trace

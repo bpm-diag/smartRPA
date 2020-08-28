@@ -251,7 +251,8 @@ The project is composed by the following modules:
 - [x] RPA module
 - [x] CSV to XES converter
 - [x] Process Discovery analysis
+- [x] UiPath exporter
 
-A _partial_ list of features for each module is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
+A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
 
 A screencast of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA)

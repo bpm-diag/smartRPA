@@ -41,7 +41,8 @@ programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHo
                       "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
                       "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
                       "software_reporter_tool.exe", "chrome.exe", "OUTLOOK.EXE", "WMIADAP.exe", "audiodg.exe",
-                      "'OfficeC2RClient.exe", "FileCoAuth.exe", "setup.exe", "MicrosoftEdgeUpdate.exe", "MpCmdRun.exe"]
+                      "OfficeC2RClient.exe", "FileCoAuth.exe", "setup.exe", "MicrosoftEdgeUpdate.exe", "MpCmdRun.exe",
+                      "cmd.exe", "WmiPrvSE.exe"]
 
 
 #  monitor file/folder changes on windows
