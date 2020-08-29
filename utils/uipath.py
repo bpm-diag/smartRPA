@@ -43,6 +43,8 @@ class UIPathXAML:
         self.startProcess = 0
         self.createFile = 0
         self.moveFile = 0
+        self.powerpointApplicationCard = 0
+        self.insertSlide = 0
 
     # base
     def __createRoot(self):  # https://stackoverflow.com/a/31074030
@@ -55,6 +57,8 @@ class UIPathXAML:
         self.sco = "clr-namespace:System.Collections.ObjectModel;assembly=mscorlib"
         self.x = "http://schemas.microsoft.com/winfx/2006/xaml"
         self.ui = "http://schemas.uipath.com/workflow/activities"
+        self.upab = "clr-namespace:UiPath.PowerPoint.Activities.Business;assembly=UiPath.PowerPoint.Activities"
+        self.upadb = "clr-namespace:UiPath.PowerPoint.Activities.Design.Business;assembly=UiPath.PowerPoint.Activities"
 
         etree.register_namespace("mc", self.mc)
         etree.register_namespace("mva", self.mva)
@@ -64,6 +68,8 @@ class UIPathXAML:
         etree.register_namespace("sco", self.sco)
         etree.register_namespace("x", self.x)
         etree.register_namespace("ui", self.ui)
+        etree.register_namespace("upab", self.upab)
+        etree.register_namespace("upadb", self.upadb)
 
         nsmap = {
             None: self.xmlns,
@@ -74,6 +80,8 @@ class UIPathXAML:
             "scg": self.scg,
             "x": self.x,
             "ui": self.ui,
+            "upab": self.upab,
+            "upadb": self.upadb,
         }
 
         qnames = {
@@ -99,7 +107,8 @@ class UIPathXAML:
                  "System.Activities.Validation", "System.Activities.XamlIntegration", "Microsoft.VisualBasic",
                  "Microsoft.VisualBasic.Activities", "System", "System.Collections", "System.Collections.Generic",
                  "System.Data", "System.Diagnostics", "System.Drawing", "System.IO", "System.Linq", "System.Net.Mail",
-                 "System.Xml", "System.Xml.Linq", "UiPath.Core", "UiPath.Core.Activities", "System.Windows.Markup"]
+                 "System.Xml", "System.Xml.Linq", "UiPath.Core", "UiPath.Core.Activities", "System.Windows.Markup",
+                 "UiPath.Excel", "UiPath.PowerPoint.Activities", "UiPath.CV"]
         for text in props:
             s = etree.Element(etree.QName(self.x, "String"))
             s.text = text
@@ -116,7 +125,7 @@ class UIPathXAML:
                  "System.Core", "System.Xml", "System.Xml.Linq", "PresentationFramework", "WindowsBase",
                  "PresentationCore", "System.Xaml", "UiPath.System.Activities", "UiPath.UiAutomation.Activities",
                  "UiPath.System.Activities.Design", "System.ValueTuple", "System.ServiceModel", "UiPath.Excel",
-                 "UiPath.Mail", "UiPath.CV"]
+                 "UiPath.CV", "UiPath.PowerPoint.Activities"]
         for text in props:
             s = etree.Element("AssemblyReference")
             s.text = text
@@ -134,14 +143,6 @@ class UIPathXAML:
             },
         )
         variables = etree.Element("Sequence.Variables")
-        # variable = etree.Element(
-        #     etree.QName(None, "Variable"),
-        #     {
-        #         etree.QName(self.x, "TypeArguments"): "ui:Browser",
-        #         etree.QName(None, "Name"): "browserReference"
-        #     },
-        # )
-        # variables.append(variable)
         variables.extend([
             etree.Element(
                 etree.QName(None, "Variable"),
@@ -308,13 +309,18 @@ class UIPathXAML:
         attachBrowser.append(body)
         self.mainSequence.append(attachBrowser)
 
-    def __target(self, xpath: str, xpath_full: str, timeout: str = ""):
-        css_selector = f"css-selector='{self.__xpathToCssSelector(xpath_full)}'"
-        if len(xpath.split(')/')) == 1:
-            id = f"id='{self.__getIdFromXpath(xpath)}'"
-        else:
-            id = f"parentid='{self.__getIdFromXpath(xpath)}'"
-        selector = f"<html app='chrome.exe' /><webctrl {css_selector} {id}/>"
+    def __target(self, xpath: str = "", xpath_full: str = "", app: str = "", title: str = "", timeout: str = ""):
+
+        selector = "{x:Null}"
+        if xpath and xpath_full:
+            css_selector = f"css-selector='{self.__xpathToCssSelector(xpath_full)}'"
+            if len(xpath.split(')/')) == 1:
+                id = f"id='{self.__getIdFromXpath(xpath)}'"
+            else:
+                id = f"parentid='{self.__getIdFromXpath(xpath)}'"
+            selector = f"<html app='chrome.exe' /><webctrl {css_selector} {id}/>"
+        elif app and title:
+            selector = f"<wnd app='{app}' title='{title}' />"
 
         props = {
                 etree.QName(None, "ClippingRegion"): "{x:Null}",
@@ -352,7 +358,7 @@ class UIPathXAML:
         target.append(waitForReady)
         return target
 
-    def __typeInto(self, text: str, xpath: str, xpath_full: str, displayName: str = "Type into 'INPUT'"):
+    def __typeInto(self, text: str, xpath: str = "", xpath_full: str = "", app: str = "", title: str = "", displayName: str = "Type into 'INPUT'"):
         self.typeInto_id += 1
         typeInto = etree.Element(
             etree.QName(self.ui, "TypeInto"),
@@ -374,7 +380,13 @@ class UIPathXAML:
         typeIntoTarget = etree.Element(
             etree.QName(self.ui, "TypeInto.Target"),
         )
-        typeIntoTarget.append(self.__target(xpath, xpath_full))
+        if xpath and xpath_full:
+            target = self.__target(xpath=xpath, xpath_full=xpath_full)
+        elif app and title:
+            target = self.__target(app=app, title=title)
+        else:
+            target = self.__target()
+        typeIntoTarget.append(target)
         typeInto.append(typeIntoTarget)
         return typeInto
 
@@ -696,6 +708,61 @@ class UIPathXAML:
             },
         )
 
+    # powerpoint
+    def __powerpointScope(self, path: str = "", position: int = 1, insertSlide: bool = False, displayName: str = "PowerPoint Presentation"):
+        self.powerpointApplicationCard += 1
+        if not path:
+            path = os.path.join(self.RPA_directory, 'UiPath', "presentation.xlsx")
+        powerpointApplication = etree.Element(
+            etree.QName(self.upadb, "PowerPointApplicationCard"),
+            {
+                etree.QName(self.sap2010,
+                            "WorkflowViewState.IdRef"): f"PowerPointApplicationCard_{self.openApplication}",
+                etree.QName(None, "Password"): "{x:Null}",
+                etree.QName(None, "CreateIfNotExists"): "True",
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "PresentationPath"): path,
+            }
+        )
+        body = etree.Element(
+            etree.QName(self.upadb, "PowerPointApplicationCard.Body"),
+        )
+        activityAction = etree.Element(
+            etree.QName(None, "ActivityAction"),
+            {etree.QName(self.x, "TypeArguments"): "ui:IPresentationQuickHandle"},
+        )
+        activityActionArgument = etree.Element(
+            etree.QName(None, "ActivityAction.Argument"),
+        )
+        delegateinargument = etree.Element(
+            etree.QName(None, "DelegateInArgument"),
+            {
+                etree.QName(self.x, "TypeArguments"): "ui:IPresentationQuickHandle",
+                etree.QName(None, "Name"): "powerpointReference"
+            },
+        )
+        activityActionArgument.append(delegateinargument)
+        activityAction.append(activityActionArgument)
+
+        self.insertSlide += 1
+        insertSlide = etree.Element(
+            etree.QName(self.ui, "Delete"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"InsertSlideX_{self.insertSlide}",
+                etree.QName(None, "LayoutName"): "{x:Null}",
+                etree.QName(None, "SlideMasterName"): "{x:Null}",
+                etree.QName(None, "DisplayName"): "Insert Slide",
+                etree.QName(None, "InsertPosition"): position,
+                etree.QName(None, "Presentation"): "[powerpointReference]",
+            },
+        )
+        if insertSlide:
+            activityAction.append(self.__createSequence([insertSlide], displayName="Powerpoint events"))
+
+        body.append(activityAction)
+        powerpointApplication.append(body)
+        self.mainSequence.append(powerpointApplication)
+
     # generate RPA
     def __generateRPA(self, df: pandas.DataFrame):
         # check if dataframe contains values
@@ -762,9 +829,7 @@ class UIPathXAML:
             id = ""
             if not pandas.isna(row['id']):
                 id = row['id']
-            xpath = ""
-            if not pandas.isna(row['xpath']):
-                xpath = row['xpath']
+            xpath = row['xpath']
             xpath_full = row['xpath_full']
             value = utils.utils.unicodeString(row['tag_value'])
 
@@ -831,7 +896,7 @@ class UIPathXAML:
             if (e == "copy" or e == "cut") and not pandas.isna(cb):
                 systemActivities.append(self.__setToClipboard(cb))
             if e == "paste" and row['category'] != 'Browser':
-                pass
+                systemActivities.append(self.__typeInto(text=cb, app=app, title=row["title"], displayName=f"Paste into {row['title']}"))
             if e == "pressHotkey":
                 hotkey = row["id"]
                 modifiers = ', '.join(list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
@@ -854,12 +919,11 @@ class UIPathXAML:
             if e == "created" and path:
                 systemActivities.append(self.__createFile(path, displayName=f"Create {item_name}"))
             if e in ["moved", "Unmount"] and path:
-                new_name = ntpath.basename(dest_path)
-                new_name = utils.utils.unicodeString(new_name)
+                new_name = utils.utils.unicodeString(ntpath.basename(dest_path))
                 if os.path.dirname(path) == os.path.dirname(dest_path):
-                    displayName = f"Rename file"
+                    displayName = f"Rename file as {new_name}"
                 else:
-                    displayName = f"Move file"
+                    displayName = f"Move file to {new_name}"
                 systemActivities.append(self.__moveFile(path, dest_path, displayName))
             if e == "deleted" and path:
                 systemActivities.append(self.__delete(path, displayName=f"Delete {item_name}"))
@@ -871,9 +935,11 @@ class UIPathXAML:
                 pass
             # powerpoint
             if e == "newPresentation":
-                pass
+                presPath = path if path else ""
+                self.__powerpointScope(path=presPath, insertSlide=False)
             if e == "newPresentationSlide":
-                pass
+                presPath = path if path else ""
+                self.__powerpointScope(path=presPath, insertSlide=True)
             if e == "savePresentation":
                 pass
             if e == "closePresentation":
