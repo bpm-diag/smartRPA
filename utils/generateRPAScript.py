@@ -14,11 +14,8 @@ from threading import Thread
 import ntpath
 import os
 import pandas
-
 from multiprocessing.queues import Queue
-
 import modules
-
 
 
 class RPAScript:
@@ -139,7 +136,7 @@ except Exception:
         RPA_filename = utils.utils.getFilename(
             self.csv_file_path).strip('_combined') + RPA_type
         # RPA_filepath is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57/2020-02-25_23-21-57_RPA.py
-        RPA_filepath = os.path.join(self.RPA_directory, RPA_filename)
+        RPA_filepath = os.path.join(self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, RPA_filename)
         return RPA_filepath
 
     def _generateUnifiedRPA(self, df: pandas.DataFrame, filename="_UnifiedRPA.py"):
@@ -775,7 +772,7 @@ except Exception:
                     script.write(f"actions.click().build().perform()\n")
 
         # self.status_queue.put(f"[RPA] Generated RPA script {ntpath.basename(RPA_filepath)}")
-        self.status_queue.put(f"[RPA] Generated RPA script")
+        self.status_queue.put(f"[RPA] Generated Python RPA script")
         return True
 
     def generateRPAMostFrequentPath(self, df: pandas.DataFrame):

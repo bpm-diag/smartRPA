@@ -209,8 +209,8 @@ class UIPathXAML:
     def writeXmlToFile(self):
         RPA_filename = utils.utils.getFilename(self.csv_file_path).strip('_combined')
         uipath_template = os.path.join(utils.utils.MAIN_DIRECTORY, 'utils', 'UiPath_Template')
-        copy_tree(uipath_template, os.path.join(self.RPA_directory, 'UiPath'))
-        filename = os.path.join(self.RPA_directory, 'UiPath', f"{RPA_filename}.xaml")
+        copy_tree(uipath_template, os.path.join(self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, 'UiPath'))
+        filename = os.path.join(self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, 'UiPath', f"{RPA_filename}.xaml")
         with open(filename, "wb") as writer:
             writer.write(etree.tostring(etree.Comment('SmartRPA by marco2012 https://github.com/marco2012/smartRPA'),
                                         pretty_print=True))
@@ -470,7 +470,7 @@ class UIPathXAML:
 
     def __navigateToInNewTab(self, url: str, activities: list = None):
         return self.__openApplication(arguments=f"-new-tab {url}",
-                                      path="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                                      fileName="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
                                       selector="<wnd app='chrome.exe'/>", displayName="Navigate in New Tab",
                                       activities=activities)
 
@@ -711,6 +711,7 @@ class UIPathXAML:
     # powerpoint
     def __powerpointScope(self, path: str = "", position: int = 1, insertSlide: bool = False, displayName: str = "PowerPoint Presentation"):
         self.powerpointApplicationCard += 1
+        position = self.powerpointApplicationCard
         if not path:
             path = os.path.join(self.RPA_directory, 'UiPath', "presentation.xlsx")
         powerpointApplication = etree.Element(
@@ -745,19 +746,19 @@ class UIPathXAML:
         activityAction.append(activityActionArgument)
 
         self.insertSlide += 1
-        insertSlide = etree.Element(
+        insertSlideElem = etree.Element(
             etree.QName(self.ui, "Delete"),
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"InsertSlideX_{self.insertSlide}",
                 etree.QName(None, "LayoutName"): "{x:Null}",
                 etree.QName(None, "SlideMasterName"): "{x:Null}",
                 etree.QName(None, "DisplayName"): "Insert Slide",
-                etree.QName(None, "InsertPosition"): position,
+                etree.QName(None, "InsertPosition"): str(position),
                 etree.QName(None, "Presentation"): "[powerpointReference]",
             },
         )
         if insertSlide:
-            activityAction.append(self.__createSequence([insertSlide], displayName="Powerpoint events"))
+            activityAction.append(self.__createSequence([insertSlideElem], displayName="Powerpoint events"))
 
         body.append(activityAction)
         powerpointApplication.append(body)
@@ -936,10 +937,10 @@ class UIPathXAML:
             # powerpoint
             if e == "newPresentation":
                 presPath = path if path else ""
-                self.__powerpointScope(path=presPath, insertSlide=False)
+                # self.__powerpointScope(path=presPath, insertSlide=False)
             if e == "newPresentationSlide":
                 presPath = path if path else ""
-                self.__powerpointScope(path=presPath, insertSlide=True)
+                # self.__powerpointScope(path=presPath, insertSlide=True)
             if e == "savePresentation":
                 pass
             if e == "closePresentation":

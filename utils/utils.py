@@ -63,17 +63,20 @@ DESKTOP = os.path.join(HOME_FOLDER, "Desktop")
 DOCUMENTS = os.path.join(HOME_FOLDER, "Documents")
 DOWNLOADS = os.path.join(HOME_FOLDER, "Downloads")
 MAIN_DIRECTORY = os.getcwd()  # main file path
-
+EVENT_LOG_FOLDER = "event_log"
+PROCESS_DISCOVERY_FOLDER = "process_discovery"
+SW_ROBOT_FOLDER = "SW_Robot"
 
 # ************
 # Functions
 # ************
 
 
-# return current timestamp in the format '2020-02-12 17:11:14:465'
+# return current timestamp in the format '2020-08-29T16:42:30.690'
 # used by multiple modules
 def timestamp():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")  # [:-3]
+    #return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")  # [:-3]
+    return datetime.now().isoformat(timespec='milliseconds')
 
 
 # Create directory with the given path if it does not exist

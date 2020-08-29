@@ -3,7 +3,8 @@
 // ********************
 
 function timestamp(){
-    return moment().format("YYYY-MM-DD HH:mm:ss:SSSSSS")
+    //return moment().format("YYYY-MM-DD HH:mm:ss:SSSSSS")
+    return moment().toISOString().replace('Z', '');
 }
 
 function userAgent(string){
