@@ -12,20 +12,43 @@
     <a href="https://www.office.com/" alt="Activity">
         <img src="https://img.shields.io/badge/Office-365-blue?style=flat&labelColor=E74025&color=E74025&logo=microsoft-office&logoColor=white" /></a>
     <a href="https://www.google.com/chrome/" alt="Activity">
-        <img src="https://img.shields.io/badge/Chrome-83-blue?style=flat&labelColor=EDAD00&color=EDAD00&logo=google-chrome&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/Chrome-85-blue?style=flat&labelColor=EDAD00&color=EDAD00&logo=google-chrome&logoColor=white" /></a>
     <a href="https://www.mozilla.org/en-US/firefox" alt="Activity">
         <img src="https://img.shields.io/badge/Firefox-72-blue?style=flat&labelColor=FF7139&color=FF7139&logo=mozilla-firefox&logoColor=white" /></a>
     <a href="https://www.microsoft.com/en-us/edge" alt="Activity">
         <img src="https://img.shields.io/badge/Edge-80-blue?style=flat&labelColor=0078D7&color=0078D7&logo=microsoft-edge&logoColor=white" /></a>
     <a href="https://www.opera.com/" alt="Activity">
-        <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a> <br/><br/>
+        <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a> 
+    <br/><img src="https://img.shields.io/badge/Sapienza University of Rome-blue?style=flat&labelColor=781A2D&color=781A2D&logoColor=white" /> 
+  <br/><br/>
   <img width="80%" src="docs/gui.jpg"/>
 
 </p>
 
+## What is SmartRPA
+
+Robotic Process Automation (RPA) is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
+RPA tools available in the market are not able to automatically learn to automate such routines, thus requiring the support of skilled human experts.
+
+SmartRPA is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
+
+The related paper is available here.
+
+A screencast of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA).
+
+## Architecture
+
+The architecture of SmartRPA integrates five main SW components.
+
+<p align="center">
+  <img width="60%" src="docs/architecture.png"/>
+</p>
+
+A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
+
 ## Installation and execution:
 
-Make sure you are using _64bit_ version of Python 3 (tested on Python 3.8.1 and Python 3.7.7). Download it from the [official site](https://www.python.org/downloads/), do not install Python from a package manager like _brew_.
+Make sure you are using _64bit_ version of Python 3.7 or greater. Download it from the [official site](https://www.python.org/downloads/), do not install Python from a package manager like _brew_.
 
 #### 1. **Install dependencies**
 
@@ -94,7 +117,7 @@ python3 mainLogger.py
 
 The resulting event log will be saved in `/logs` directory.
 
-## RPA dependencies
+### RPA dependencies
 
 _Robotic Process Automation_ scripts are automatically generated for each event log in `/RPA` directory.
 
@@ -202,10 +225,10 @@ This package provides a 4-10x speedup in String Matching.
 
 Install chromedriver to enable automation in Google Chrome.
 
-Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history). The command below is for Chrome version 84.
+Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history). The command below is for Chrome version 85.
 
 ```bash
-pip3 install chromedriver-binary==84.0.4147.30.0
+pip3 install chromedriver-binary==85.0.4183.83.0
 ```
 
 <details>
@@ -237,22 +260,3 @@ At this point you should have installed:
 5. [Chromedriver](#4-chromedriver)
 
 If you have everything installed you can [run the tool](#4-run-main-logger).
-
-## Modules
-
-The project is composed by the following modules:
-
-- [x] GUI
-- [x] Server logger
-- [x] System logger
-- [x] Browser logger
-- [x] Office logger
-- [x] Clipboard logger
-- [x] RPA module
-- [x] CSV to XES converter
-- [x] Process Discovery analysis
-- [x] UiPath exporter
-
-A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
-
-A screencast of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA)
