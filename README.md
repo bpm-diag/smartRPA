@@ -25,7 +25,7 @@
 
 </p>
 
-## What is SmartRPA
+## What is SmartRPA
 
 Robotic Process Automation (RPA) is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
 RPA tools available in the market are not able to automatically learn to automate such routines, thus requiring the support of skilled human experts.
