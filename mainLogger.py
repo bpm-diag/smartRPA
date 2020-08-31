@@ -191,6 +191,5 @@ def startLogger(systemLoggerFilesFolder,
 
 
 if __name__ == "__main__":
-    print("Loading SmartRPA...")
-    #  launch gui
+    # launch gui
     utils.GUI.buildGUI()

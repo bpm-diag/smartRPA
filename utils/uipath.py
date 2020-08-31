@@ -4,6 +4,7 @@
 # GUI when main process is terminated and csv is available.
 # ******************************
 import sys
+
 sys.path.append('../')  # this way main file is visible from this file
 import os
 import re
@@ -323,11 +324,11 @@ class UIPathXAML:
             selector = f"<wnd app='{app}' title='{title}' />"
 
         props = {
-                etree.QName(None, "ClippingRegion"): "{x:Null}",
-                etree.QName(None, "Element"): "{x:Null}",
-                etree.QName(None, "Id"): str(uuid.uuid1()),
-                etree.QName(None, "Selector"): selector,
-            }
+            etree.QName(None, "ClippingRegion"): "{x:Null}",
+            etree.QName(None, "Element"): "{x:Null}",
+            etree.QName(None, "Id"): str(uuid.uuid1()),
+            etree.QName(None, "Selector"): selector,
+        }
         if timeout:
             props[etree.QName(None, "TimeoutMS")] = timeout
 
@@ -358,7 +359,8 @@ class UIPathXAML:
         target.append(waitForReady)
         return target
 
-    def __typeInto(self, text: str, xpath: str = "", xpath_full: str = "", app: str = "", title: str = "", displayName: str = "Type into 'INPUT'"):
+    def __typeInto(self, text: str, xpath: str = "", xpath_full: str = "", app: str = "", title: str = "",
+                   displayName: str = "Type into 'INPUT'"):
         self.typeInto_id += 1
         typeInto = etree.Element(
             etree.QName(self.ui, "TypeInto"),
@@ -709,7 +711,8 @@ class UIPathXAML:
         )
 
     # powerpoint
-    def __powerpointScope(self, path: str = "", position: int = 1, insertSlide: bool = False, displayName: str = "PowerPoint Presentation"):
+    def __powerpointScope(self, path: str = "", position: int = 1, insertSlide: bool = False,
+                          displayName: str = "PowerPoint Presentation"):
         self.powerpointApplicationCard += 1
         position = self.powerpointApplicationCard
         if not path:
@@ -718,7 +721,7 @@ class UIPathXAML:
             etree.QName(self.upadb, "PowerPointApplicationCard"),
             {
                 etree.QName(self.sap2010,
-                            "WorkflowViewState.IdRef"): f"PowerPointApplicationCard_{self.openApplication}",
+                            "WorkflowViewState.IdRef"): f"PowerPointApplicationCard_{self.powerpointApplicationCard}",
                 etree.QName(None, "Password"): "{x:Null}",
                 etree.QName(None, "CreateIfNotExists"): "True",
                 etree.QName(None, "DisplayName"): displayName,
@@ -747,7 +750,7 @@ class UIPathXAML:
 
         self.insertSlide += 1
         insertSlideElem = etree.Element(
-            etree.QName(self.ui, "Delete"),
+            etree.QName(self.upab, "InsertSlideX"),
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"InsertSlideX_{self.insertSlide}",
                 etree.QName(None, "LayoutName"): "{x:Null}",
@@ -897,11 +900,13 @@ class UIPathXAML:
             if (e == "copy" or e == "cut") and not pandas.isna(cb):
                 systemActivities.append(self.__setToClipboard(cb))
             if e == "paste" and row['category'] != 'Browser':
-                systemActivities.append(self.__typeInto(text=cb, app=app, title=row["title"], displayName=f"Paste into {row['title']}"))
+                systemActivities.append(
+                    self.__typeInto(text=cb, app=app, title=row["title"], displayName=f"Paste into {row['title']}"))
             if e == "pressHotkey":
                 hotkey = row["id"]
                 modifiers = ', '.join(list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
-                systemActivities.append(self.__sendHotkey(key=hotkey[-1], modifiers=modifiers, displayName=f"Press {hotkey.upper()} - {row['description']}"))
+                systemActivities.append(self.__sendHotkey(key=hotkey[-1], modifiers=modifiers,
+                                                          displayName=f"Press {hotkey.upper()} - {row['description']}"))
             if e in ["openFile", "openFolder"] and path:
                 systemActivities.append(self.__openFileFolder(path, item_name))
             if e == "programOpen":
@@ -931,16 +936,18 @@ class UIPathXAML:
 
             # word
             if e == "newDocument":
-                systemActivities.append(self.__startProcess(r"C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.exe", displayName="Open Word"))
+                systemActivities.append(
+                    self.__startProcess(r"C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.exe",
+                                        displayName="Open Word"))
             if e == "saveDocument":
                 pass
             # powerpoint
             if e == "newPresentation":
                 presPath = path if path else ""
-                # self.__powerpointScope(path=presPath, insertSlide=False)
+                self.__powerpointScope(path=presPath, insertSlide=False)
             if e == "newPresentationSlide":
                 presPath = path if path else ""
-                # self.__powerpointScope(path=presPath, insertSlide=True)
+                self.__powerpointScope(path=presPath, insertSlide=True)
             if e == "savePresentation":
                 pass
             if e == "closePresentation":
@@ -953,10 +960,12 @@ class UIPathXAML:
         self.__generateRPA(df)
         self.writeXmlToFile()
 
+    def test(self):
+        self.createBaseFile()
+        presPath = r"C:\Users\marco\Desktop\pres.pptx"
+        self.__powerpointScope(path=presPath, insertSlide=False)
+        self.__powerpointScope(path=presPath, insertSlide=True)
+        filename = r"/Users/marco/Desktop/RPA/ppt.xaml"
+        with open(filename, "wb") as writer:
+            writer.write(etree.tostring(self.root, pretty_print=True))
 
-if __name__ == '__main__':
-    df = pandas.read_csv(
-        "/Users/marco/Desktop/RPA/smartRPA/RPA/2020-08-25_10-50-43/log/2020-08-25_10-50-43_combined.csv",
-        encoding='utf-8-sig')
-    UIPathXAML = UIPathXAML()
-    UIPathXAML.generateUiPathRPA(df)
