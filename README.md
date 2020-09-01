@@ -267,3 +267,22 @@ If you don't find the `Python 3.8` folder under `/Applications`, make sure you i
 ### UiPath (Windows Only)
 
 The generated UiPath file requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
+
+# Recap
+
+To sum up, you should have installed:
+
+- Requirements (`pip3 install -r requirements.txt`)
+- [Process Discovery dependencies](#process-discovery-dependencies)
+  - [Visual Studio C/C++ Build Tools (Windows Only)](#0-visual-studio-windows-only)
+  - [PM4PY](#1-pm4py)
+  - [Python Levenshtein (Windows Only)](#2-python-levenshtein-windows-only)
+- [RPA dependencies](#rpa-dependencies)
+  - [Python script](#python-script])
+    - [Automagica](#1-automagica)
+    - [Chromedriver](#2-chromedriver)
+  - [UiPath](#uipath-windows-only)
+- [Browser extension](#2-install-browser-extension)
+- [Excel AddIn (MacOS Only)](#3-install-excel-addin-macos-only)
+
+If you have everything installed, you can [run the tool](#4-run-main-logger) (`python3 mainLogger.py`).
