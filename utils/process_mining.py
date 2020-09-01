@@ -46,7 +46,7 @@ try:
     from libraries.pm4pybpmn.objects.bpmn.util import bpmn_diagram_layouter
 except ImportError as e:
     print("[PROCESS MINING] Process mining analysis has been disabled because 'pm4py' module is not installed."
-          "See https://github.com/bpm-diag/smartRPA#2-pm4py")
+          "See https://github.com/bpm-diag/smartRPA#1-pm4py")
     print(e)
 
 

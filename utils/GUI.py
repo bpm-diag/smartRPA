@@ -739,7 +739,7 @@ class MainApplication(QMainWindow, QDialog):
         except ImportError:
             print(
                 "[GUI] Can't apply process mining techniques because 'pm4py' module is not installed."
-                "See https://github.com/bpm-diag/smartRPA#2-pm4py")
+                "See https://github.com/bpm-diag/smartRPA#1-pm4py")
             # reset counter and list
             self.runCount = 0
             self.csv_to_join.clear()

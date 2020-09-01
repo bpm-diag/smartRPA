@@ -19,52 +19,57 @@
         <img src="https://img.shields.io/badge/Edge-80-blue?style=flat&labelColor=0078D7&color=0078D7&logo=microsoft-edge&logoColor=white" /></a>
     <a href="https://www.opera.com/" alt="Activity">
         <img src="https://img.shields.io/badge/Opera-66-blue?style=flat&labelColor=FF1B2D&color=FF1B2D&logo=opera&logoColor=white" /></a> 
-    <br/><img src="https://img.shields.io/badge/Sapienza University of Rome-blue?style=flat&labelColor=781A2D&color=781A2D&logoColor=white" /> 
+    <br/>
+    <a href="#"><img src="https://img.shields.io/badge/Sapienza University of Rome-blue?style=flat&labelColor=781A2D&color=781A2D&logoColor=white" /></a> 
   <br/><br/>
   <img width="80%" src="docs/gui.jpg"/>
 
 </p>
 
-## What is SmartRPA
+# What is SmartRPA
 
 Robotic Process Automation (RPA) is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
 RPA tools available in the market are not able to automatically learn to automate such routines, thus requiring the support of skilled human experts.
 
 SmartRPA is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
 
-The related paper is available here.
+The related **paper** is available here.
 
-A screencast of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA).
+A **screencast** of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA).
 
-## Architecture
+# Architecture
 
 The architecture of SmartRPA integrates five main SW components.
 
 <p align="center">
-  <img width="60%" src="docs/architecture.png"/>
+  <img width="55%" src="docs/architecture.png"/>
 </p>
 
 A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
 
-## Installation and execution:
+# Installation and execution:
 
-Make sure you are using _64bit_ version of Python 3.7 or greater. Download it from the [official site](https://www.python.org/downloads/), do not install Python from a package manager like _brew_.
+Make sure you are using _64bit_ version of Python 3.7 or greater installed from the [official website](https://www.python.org/downloads/).
 
 #### 1. **Install dependencies**
 
-- Install project dependencies
+- Install **project** dependencies
 
   ```bash
   pip3 install -r requirements.txt
   ```
 
-- Install RPA dependencies
+- Install **Process Discovery** dependencies
+
+  [Details here](#process-discovery-dependencies)
+
+- Install **RPA** dependencies
 
   [Details here](#rpa-dependencies)
 
 #### 2. **Install browser extension**
 
-The browser extension, available in `modules/browserlogger`, supports 4 major browsers:
+The browser extension is required to log browser events. It is available in `modules/browserlogger` and supports 4 major browsers:
 
 - [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 
@@ -78,9 +83,9 @@ Once main logger is running, **you must click** on the browser extension to enab
 
 #### 3. **Install Excel Addin (MacOS Only)**
 
-The excel addin is required to enable logging <u>only on MacOS</u>.
+The excel addin is required to log Excel events <u>only on MacOS</u>.
 
-[`NodeJS`](https://nodejs.org/en/download/) must be installed to run this addin.
+[`Node.js`](https://nodejs.org/en/download/) must be installed to run this addin.
 
 ```bash
 cd modules/excelAddinMac
@@ -117,54 +122,28 @@ python3 mainLogger.py
 
 The resulting event log will be saved in `/logs` directory.
 
-### RPA dependencies
+## Process Discovery dependencies
 
-_Robotic Process Automation_ scripts are automatically generated for each event log in `/RPA` directory.
-
-The following dependencies must be installed.
+The following dependencies are required to enable process discovery analysis, a key component of the tool.
 
 #### 0) Visual Studio (Windows Only)
 
 <img width="40%" src="docs/visual_studio.png">
 
-On Windows [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
-It is vital to install all C++ related development tools like:
+- On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
+  It is vital to install all C++ related development tools like:
 
-- Windows 10 SDK
-- Visual C++ tools for CMake
-- C++ x64/x86 build tools
+  - Windows 10 SDK
+  - Visual C++ tools for CMake
+  - C++ x64/x86 build tools
 
-If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://www.scivision.co/python-windows-visual-c-14-required/).
+  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://www.scivision.co/python-windows-visual-c-14-required/).
 
-#### 1) Automagica
-
-To run the generated RPA scripts you must install `automagica` module.
-
-`pip3 install automagica==2.0.25`
-
-  <details>
-  <summary>
-      Click to show how to <b>fix installation errors</b> on Windows
-  </summary>
-  </br>
-
-1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
-2. Install `Win64 OpenSSL v1.1.1` from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
-3. Open CMD as <i>admin</i> and type (one command per line):
-
-```cmd
-set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
-set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
-pip3 install automagica==2.0.25
-```
-
-</details>
-
-#### 2) PM4PY
+#### 1) PM4PY
 
 To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
 
-- On Windows:
+- On **Windows**:
 
   1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
   2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
@@ -182,7 +161,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
     </details>
 
-- On MacOS:
+- On **MacOS**:
 
   Use [brew package manager](https://brew.sh/) to install graphviz
 
@@ -213,15 +192,52 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
     </details>
 
-#### 3) Python-Levenshtein (Windows Only)
+#### 2) Python-Levenshtein (Windows Only)
 
 This package provides a 4-10x speedup in String Matching.
 
-- On Windows:
+- On **Windows**:
   1.  Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only)
   2.  `pip3 install python-Levenshtein==0.12.0`
 
-#### 4) Chromedriver
+## RPA dependencies
+
+SmartRPA generates two types of SW Robots in the `/RPA` directory:
+
+1. a cross-platform executable **Python script**, available on both Windows and MacOS
+2. a **UiPath file**, available only on Windows
+
+The advantages of the UiPath integration is that the generated SW Robot can be easily customized.
+
+### Python script
+
+The cross-platform python script requires the following dependencies to work.
+
+#### 1) Automagica
+
+To run the generated RPA scripts you must install `automagica` module.
+
+`pip3 install automagica==2.0.25`
+
+  <details>
+  <summary>
+      Click to show how to <b>fix installation errors</b> on Windows
+  </summary>
+  </br>
+
+1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
+2. Install `Win64 OpenSSL v1.1.1` from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
+3. Open CMD as <i>admin</i> and type (one command per line):
+
+```cmd
+set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
+set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
+pip3 install automagica==2.0.25
+```
+
+</details>
+
+#### 2) Chromedriver
 
 Install chromedriver to enable automation in Google Chrome.
 
@@ -248,15 +264,6 @@ If you don't find the `Python 3.8` folder under `/Applications`, make sure you i
 
 </details>
 
-### Recap
+### UiPath (Windows Only)
 
-At this point you should have installed:
-
-0. [requirements](#1-install-dependencies)
-1. [Visual Studio C/C++ Build tools](#0-visual-studio-windows-only) (_only on Windows_)
-2. [Automagica](#1-automagica)
-3. [PM4PY](#2-pm4py)
-4. [Python-Levenstein](#3-python-levenshtein-windows-only) (_only on Windows_)
-5. [Chromedriver](#4-chromedriver)
-
-If you have everything installed you can [run the tool](#4-run-main-logger).
+The generated UiPath file requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
