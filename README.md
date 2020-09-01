@@ -28,10 +28,10 @@
 
 # What is SmartRPA
 
-Robotic Process Automation (RPA) is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
+**Robotic Process Automation (RPA)** is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
 RPA tools available in the market are not able to automatically learn to automate such routines, thus requiring the support of skilled human experts.
 
-SmartRPA is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
+**SmartRPA** is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
 
 The related **paper** is available here.
 
@@ -49,9 +49,9 @@ A _partial_ list of features for each module of the Action Logger is available i
 
 # Installation and execution:
 
-Make sure you are using _64bit_ version of Python 3.7 or greater installed from the [official website](https://www.python.org/downloads/).
+Make sure you are using **_64bit_ version of Python 3.7 or greater** installed from the [official website](https://www.python.org/downloads/).
 
-#### 1. **Install dependencies**
+### 1. **Install dependencies**
 
 - Install **project** dependencies
 
@@ -67,7 +67,7 @@ Make sure you are using _64bit_ version of Python 3.7 or greater installed from 
 
   [Details here](#rpa-dependencies)
 
-#### 2. **Install browser extension**
+### 2. **Install browser extension**
 
 The browser extension is required to log browser events. It is available in `modules/browserlogger` and supports 4 major browsers:
 
@@ -81,7 +81,7 @@ The browser extension is required to log browser events. It is available in `mod
 
 Once main logger is running, **you must click** on the browser extension to enable it.
 
-#### 3. **Install Excel Addin (MacOS Only)**
+### 3. **Install Excel Addin (MacOS Only)**
 
 The excel addin is required to log Excel events <u>only on MacOS</u>.
 
@@ -114,7 +114,7 @@ If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy 
 
 </details>
 
-#### 4. **Run main logger**
+### 4. **Run main logger**
 
 ```bash
 python3 mainLogger.py
