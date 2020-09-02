@@ -31,7 +31,7 @@
 **Robotic Process Automation (RPA)** is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
 RPA tools available in the market are not able to automatically learn to automate such routines, thus requiring the support of skilled human experts.
 
-**SmartRPA** is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
+**SmartRPA** is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ most frequent observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
 
 The related **paper** is available here.
 
