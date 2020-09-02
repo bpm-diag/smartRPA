@@ -16,7 +16,7 @@ from threading import Thread
 from platform import system
 from urllib.parse import urlparse
 import utils.config
-import utils.consumerServer
+import modules.consumerServer
 import unicodedata
 import pandas
 from unidecode import unidecode
@@ -107,7 +107,7 @@ def createLogFile():
     # create HEADER
     with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
-        f.writerow(utils.consumerServer.HEADER)
+        f.writerow(modules.consumerServer.HEADER)
     return log_filepath
 
 

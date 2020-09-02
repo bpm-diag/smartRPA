@@ -6,19 +6,18 @@ import sys
 sys.path.append('../')  # this way main file is visible from this file
 import traceback
 import utils.utils
-import utils.process_mining
+import modules.process_mining
 import utils.xesConverter
-import utils.generateRPAScript
+import modules.RPA.generateRPAScript
 import utils.config
-import mainLogger
+import main
 from utils.utils import *
-from utils.filenameDialog import getFilenameDialog
+from modules.GUI.filenameDialog import getFilenameDialog
 import time
 import webbrowser
-import pandas
 from multiprocessing import Process, Queue
 import darkdetect
-from utils.GUIThread import Worker
+from modules.GUI.GUIThread import Worker
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
@@ -641,7 +640,7 @@ class MainApplication(QMainWindow, QDialog):
 
         # Create a dialog to select a file and return its path
         # Used if the user wants to select an existing file for logging excel
-        # (not implemented in gui)
+        # (not implemented in GUI)
 
     # Reads queue and updates list widget
     def updateListWidget(self):
@@ -718,7 +717,7 @@ class MainApplication(QMainWindow, QDialog):
 
     def handleRPA(self, log_filepath):
         # generate RPA actions from log file just saved.
-        rpa = utils.generateRPAScript.RPAScript(
+        rpa = modules.RPA.generateRPAScript.RPAScript(
             log_filepath, self.status_queue)
         rpa_success = rpa.run()
         msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
@@ -730,7 +729,7 @@ class MainApplication(QMainWindow, QDialog):
             import pm4py
             # create class, combine all csv into one
             # print(f"[PROCESS MINING] Finding most frequent path...")
-            pm = utils.process_mining.ProcessMining(
+            pm = modules.process_mining.ProcessMining(
                 log_filepath, self.status_queue, merged)
             if fromRunCount:
                 self.PMThreadComplete((pm, log_filepath))
@@ -772,14 +771,14 @@ class MainApplication(QMainWindow, QDialog):
 
             # ask if some fields should be changed before generating RPA script
             # build choices dialog, passing low level most frequent case to analyze
-            choicesDialog = utils.choicesDialog.ChoicesDialog(
+            choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(
                 pm.mostFrequentCase)
             # when OK button is pressed
             if choicesDialog.exec_() in [0, 1]:
                 mostFrequentCase = choicesDialog.df
 
                 # create RPA based on most frequent path
-                rpa = utils.generateRPAScript.RPAScript(
+                rpa = modules.RPA.generateRPAScript.RPAScript(
                     log_filepath[-1], self.status_queue)
                 rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
@@ -787,8 +786,8 @@ class MainApplication(QMainWindow, QDialog):
                 self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
 
                 # create UiPath RPA script
-                UIPathXAML = utils.uipath.UIPathXAML(log_filepath[-1], self.status_queue)
-                UIPathXAML.generateUiPathRPA(mostFrequentCase)
+                UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue)
+                UiPath.generateUiPathRPA(mostFrequentCase)
 
                 self.status_queue.put(f"[GUI] Done\n")
 
@@ -884,7 +883,7 @@ class MainApplication(QMainWindow, QDialog):
 
         # start button clicked
         elif not self.running:
-            # set gui parameters
+            # set GUI parameters
             self.running = True
 
             self.statusListWidget.clear()
@@ -895,10 +894,10 @@ class MainApplication(QMainWindow, QDialog):
             self.status_queue.put("[GUI] Loading, please wait...")
             self.createProgressDialog("Loading...", "Loading...", 3000)
 
-            # start main process with the options selected in gui. It handles all other methods main method is
+            # start main process with the options selected in GUI. It handles all other methods main method is
             # started as a process so it can be terminated once the button is clicked all the methods in the main
             # process are started as daemon threads so they are closed automatically when the main process is closed
-            self.mainProcess = Process(target=mainLogger.startLogger, args=(
+            self.mainProcess = Process(target=main.startLogger, args=(
                 self.systemLoggerFilesFolder,
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
@@ -926,7 +925,7 @@ class MainApplication(QMainWindow, QDialog):
 
         # stop button clicked
         else:
-            # set gui parameters
+            # set GUI parameters
             self.running = False
 
             # self.createProgressDialog("Stopping...", "Stopping server...", 1500)

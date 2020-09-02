@@ -8,17 +8,15 @@ import sys
 import time
 from threading import Thread
 from multiprocessing import Process
-from utils.utils import WINDOWS, MAC, LINUX
-import utils.GUI
-import utils.config
-import utils.consumerServer
 import utils.utils
-from modules import systemEvents, mouseEvents
-from modules import officeEvents
-from modules import clipboardEvents
+import modules.GUI.GUI
+import utils.config
+import modules.consumerServer
+import utils.utils
+from modules.events import systemEvents, officeEvents, clipboardEvents
 
 
-#  this method is called by GUI when the user presses "start logger" button
+# this method is called by GUI when the user presses "start logger" button
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
                 systemLoggerClipboard,
@@ -48,11 +46,11 @@ def startLogger(systemLoggerFilesFolder,
         # return log file to GUI so it can be processed
         LOG_FILEPATH.put(log_filepath)
 
-        t0 = Thread(target=utils.consumerServer.runServer, args=[status_queue])
+        t0 = Thread(target=modules.consumerServer.runServer, args=[status_queue])
         t0.daemon = True
         t0.start()
 
-        utils.consumerServer.log_filepath = log_filepath
+        modules.consumerServer.log_filepath = log_filepath
 
         # ************
         # system logger
@@ -66,7 +64,7 @@ def startLogger(systemLoggerFilesFolder,
 
             # only way to log paste event is to detect ctrl + v, but it should be started as process instead of thread
             # otherwise some events are lost
-            if WINDOWS:
+            if utils.utils.WINDOWS:
                 t9 = Process(target=systemEvents.logPasteHotkey)
                 # t9.daemon = True
                 t9.start()
@@ -74,7 +72,7 @@ def startLogger(systemLoggerFilesFolder,
 
         if systemLoggerFilesFolder:
 
-            if WINDOWS:
+            if utils.utils.WINDOWS:
                 t1 = Thread(target=systemEvents.watchFolder)
                 t1.daemon = True
                 t1.start()
@@ -92,27 +90,27 @@ def startLogger(systemLoggerFilesFolder,
                 # t4.daemon = True
                 # t4.start()
 
-            elif MAC:
+            elif utils.utils.MAC:
                 t5 = Thread(target=systemEvents.watchFolderMac)
                 t5.daemon = True
                 t5.start()
 
         if systemLoggerPrograms:
-            if WINDOWS:
+            if utils.utils.WINDOWS:
                 t6 = Thread(target=systemEvents.logProcessesWin)
                 t6.daemon = True
                 t6.start()
-            elif MAC:
+            elif utils.utils.MAC:
                 t7 = Thread(target=systemEvents.logProcessesMac)
                 t7.daemon = True
                 t7.start()
 
-        if systemLoggerHotkeys and WINDOWS:
+        if systemLoggerHotkeys and utils.utils.WINDOWS:
             t10 = Process(target=systemEvents.logHotkeys)
             t10.start()
             processesPID.put(t10.pid)
 
-        if systemLoggerUSB and WINDOWS:
+        if systemLoggerUSB and utils.utils.WINDOWS:
             t11 = Thread(target=systemEvents.logUSBDrives)
             t11.daemon = True
             t11.start()
@@ -127,7 +125,7 @@ def startLogger(systemLoggerFilesFolder,
         if officeExcel:
             status_queue.put(f"[mainLogger] Loading Excel...")
 
-            if WINDOWS:
+            if utils.utils.WINDOWS:
                 t12 = Process(target=officeEvents.excelEvents, args=(status_queue, excelFilepath,))
                 t12.start()
                 processesPID.put(t12.pid)
@@ -136,26 +134,26 @@ def startLogger(systemLoggerFilesFolder,
                 # t14.daemon = True
                 # t14.start()
 
-            if MAC:
+            if utils.utils.MAC:
                 if utils.utils.isPortInUse(3000):
                     os.system("pkill -f node")
                 t13 = Thread(target=officeEvents.excelEventsMacServer, args=[status_queue, excelFilepath])
                 t13.daemon = True
                 t13.start()
 
-        if officeWord and WINDOWS:
+        if officeWord and utils.utils.WINDOWS:
             t14 = Process(target=officeEvents.wordEvents)
             t14.start()
             processesPID.put(t14.pid)
             status_queue.put(f"[mainLogger] Loading Word...")
 
-        if officePowerpoint and WINDOWS:
+        if officePowerpoint and utils.utils.WINDOWS:
             t15 = Process(target=officeEvents.powerpointEvents)
             t15.start()
             processesPID.put(t15.pid)
             status_queue.put(f"[mainLogger] Loading PowerPoint...")
 
-        if officeOutlook and WINDOWS:
+        if officeOutlook and utils.utils.WINDOWS:
             t16 = Process(target=officeEvents.outlookEvents)
             t16.start()
             processesPID.put(t16.pid)
@@ -165,16 +163,16 @@ def startLogger(systemLoggerFilesFolder,
         # ************
 
         if browserChrome:
-            utils.consumerServer.log_chrome = True
+            modules.consumerServer.log_chrome = True
 
         if browserFirefox:
-            utils.consumerServer.log_firefox = True
+            modules.consumerServer.log_firefox = True
 
         if browserEdge:
-            utils.consumerServer.log_edge = True
+            modules.consumerServer.log_edge = True
 
         if browserOpera:
-            utils.consumerServer.log_opera = True
+            modules.consumerServer.log_opera = True
 
         # status_queue.put(f"[mainLogger] Logging started")
 
@@ -191,5 +189,5 @@ def startLogger(systemLoggerFilesFolder,
 
 
 if __name__ == "__main__":
-    # launch gui
-    utils.GUI.buildGUI()
+    # launch GUI
+    modules.GUI.GUI.buildGUI()

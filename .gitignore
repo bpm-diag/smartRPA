@@ -1,8 +1,6 @@
 /dist/
 /node_modules/
 /case_study/
-RPA_UILogger/
-terminal.command
 logs/
 stuff_to_delete/
 PythonProgrammingOnWin32.pdf
@@ -51,6 +49,6 @@ ipython_config.py
 .python-version
 Pipfile.lock
 __pypackages__/
-/modules/browserlogger/web-ext-artifacts/
+/extensions/browserlogger/web-ext-artifacts/
 *.lnk
 /docs/readme-header11.png

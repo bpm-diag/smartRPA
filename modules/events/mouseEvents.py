@@ -1,8 +1,8 @@
 from sys import path
-path.append('../')  # this way main file is visible from this file
+path.append('../../')  # this way main file is visible from this file
 from pynput import mouse
-from utils.utils import timestamp, USER, session, getActiveWindowInfo
-from utils import consumerServer
+import utils.utils
+from modules import consumerServer
 
 
 def logMouse():
@@ -10,12 +10,12 @@ def logMouse():
 
     def _on_click(x, y, button, pressed):
         try:
-            if 'Excel' in getActiveWindowInfo('name') and pressed:
+            if 'Excel' in utils.utils.getActiveWindowInfo('name') and pressed:
                 coord = f"{x},{y}"
-                print(f"{timestamp()} {USER} OperatingSystem click {coord}")
-                session.post(consumerServer.SERVER_ADDR, json={
-                    "timestamp": timestamp(),
-                    "user": USER,
+                print(f"{utils.utils.timestamp()} {utils.utils.USER} OperatingSystem click {coord}")
+                utils.utils.session.post(consumerServer.SERVER_ADDR, json={
+                    "timestamp": utils.utils.timestamp(),
+                    "user": utils.utils.USER,
                     "category": "MouseClick",
                     "application": "OperatingSystem",
                     "event_type": "click",

@@ -14,7 +14,7 @@
   "scripts": {
     "build": "webpack -p --mode production --https false",
     "build:dev": "webpack --mode development --https false",
-    "build-dev": "webpack --mode development --https false && echo . && echo . && echo . && echo Please use 'build:dev' instead of 'build-dev'.",
+    "build-dev": "webpack --mode development --https false && echo  && echo . && echo . && echo Please use 'build:dev' instead of 'build-dev'.",
     "dev-server": "webpack-dev-server --mode development",
     "lint": "office-addin-lint check",
     "lint:fix": "office-addin-lint fix",

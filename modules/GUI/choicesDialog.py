@@ -1,8 +1,9 @@
 import darkdetect
-from PyQt5.QtCore import Qt, QCoreApplication
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QFormLayout,
                              QGroupBox, QLabel, QLineEdit, QVBoxLayout, QScrollArea)
 import pandas
+
 pandas.options.mode.chained_assignment = None
 import sys
 import ntpath

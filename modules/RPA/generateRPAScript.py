@@ -127,7 +127,7 @@ except Exception:
                 else:
                     script.write("excel = Excel(visible=True)\n")
 
-    # Create and return rpa directory and file for each specific RPA
+    # Create and return RPA directory and file for each specific RPA
     def _createRPAFile(self, RPA_type):
         # csv_file_path is like /Users/marco/Desktop/ComputerLogger/logs/2020-02-25_23-21-57.csv
         # csv_filename is like 2020-02-25_23-21-57
@@ -534,7 +534,7 @@ except Exception:
                                 script.write(f"print('Opening {app}')\n")
                                 script.write(
                                     f"applescript.tell.app('{os.path.basename(path)}', 'open')\n")
-                        elif WINDOWS and ntpath.basename(path) not in modules.systemEvents.programs_to_ignore:
+                        elif WINDOWS and ntpath.basename(path) not in modules.events.systemEvents.programs_to_ignore:
                             if app == "TextEdit":
                                 script.write(f"""
 try:

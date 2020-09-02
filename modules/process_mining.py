@@ -13,7 +13,7 @@ from threading import Thread
 import pandas
 import utils.config
 import utils.utils
-from utils.utils import EVENT_LOG_FOLDER, PROCESS_DISCOVERY_FOLDER, SW_ROBOT_FOLDER
+import utils.utils
 from fuzzywuzzy import fuzz
 from datetime import datetime
 from multiprocessing.queues import Queue
@@ -71,7 +71,7 @@ class ProcessMining:
 
         if utils.config.MyConfig.get_instance().perform_process_discovery:
             print(f"[PROCESS MINING] Performing process discovery")
-            # low level trace used for rpa generation
+            # low level trace used for RPA generation
             self.mostFrequentCase = self.selectMostFrequentCase()
 
     def _create_directories(self):
@@ -82,13 +82,13 @@ class ProcessMining:
             self.save_path = utils.utils.getRPADirectory(self.filename)
         utils.utils.createDirectory(self.save_path)
 
-        self.RPA_log_path = os.path.join(self.save_path, EVENT_LOG_FOLDER)
+        self.RPA_log_path = os.path.join(self.save_path, utils.utils.EVENT_LOG_FOLDER)
         utils.utils.createDirectory(self.RPA_log_path)
 
-        self.discovery_path = os.path.join(self.save_path, PROCESS_DISCOVERY_FOLDER)
+        self.discovery_path = os.path.join(self.save_path, utils.utils.PROCESS_DISCOVERY_FOLDER)
         utils.utils.createDirectory(self.discovery_path)
 
-        utils.utils.createDirectory(os.path.join(self.save_path, SW_ROBOT_FOLDER))
+        utils.utils.createDirectory(os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER))
 
     def _handle_log(self):
 
@@ -171,7 +171,7 @@ class ProcessMining:
             # log = sorting.sort_timestamp(log)
 
             # convert csv to xes
-            xes_path = os.path.join(self.save_path, EVENT_LOG_FOLDER, f'{self.filename}.xes')
+            xes_path = os.path.join(self.save_path, utils.utils.EVENT_LOG_FOLDER, f'{self.filename}.xes')
             xes_exporter.export_log(log, xes_path)
             # timestamp in xes file must have attribute date, not string
             utils.utils.fixTimestampFieldXES(xes_path)

@@ -6,7 +6,7 @@
 
 from sys import path
 
-path.append('../')  # this way main file is visible from this file
+path.append('../../')  # this way main file is visible from this file
 import keyboard
 import pyperclip
 from time import sleep
@@ -15,7 +15,7 @@ from threading import Thread
 from queue import Queue
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-from utils import consumerServer
+from modules import consumerServer
 from utils.utils import *
 import psutil
 import pynput
@@ -103,7 +103,7 @@ def watchFolder():
         my_observer.join()
 
 
-#  monitor file/folder changes on mac
+# monitor file/folder changes on mac
 def watchFolderMac():
     from _fsevents import (
         loop,

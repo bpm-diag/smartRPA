@@ -69,7 +69,7 @@ Make sure you are using **_64bit_ version of Python 3.7 or greater** installed f
 
 ### 2. **Install browser extension**
 
-The browser extension is required to log browser events. It is available in `modules/browserlogger` and supports 4 major browsers:
+The browser extension is required to log browser events. It is available in `extensions/browserlogger` and supports 4 major browsers:
 
 - [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 
@@ -88,7 +88,7 @@ The excel addin is required to log Excel events <u>only on MacOS</u>.
 [`Node.js`](https://nodejs.org/en/download/) must be installed to run this addin.
 
 ```bash
-cd modules/excelAddinMac
+cd extensions/excelAddinMac
 npm install # install dependencies
 npm start   # sideload Add-in
 npm stop    # stop server
@@ -110,14 +110,14 @@ npm stop    # stop server
   <li>Enable the checkbox</li>
 </ol>
 
-If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy <code>modules/excelAddinMac/manifest.xml</code> into <code>~/Library/Containers/com.microsoft.Excel/Data/Documents/wef</code>, as described <a href="https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-an-office-add-in-on-ipad-and-mac#sideload-an-add-in-in-office-on-mac">here</a>.
+If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy <code>extensions/excelAddinMac/manifest.xml</code> into <code>~/Library/Containers/com.microsoft.Excel/Data/Documents/wef</code>, as described <a href="https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-an-office-add-in-on-ipad-and-mac#sideload-an-add-in-in-office-on-mac">here</a>.
 
 </details>
 
 ### 4. **Run main logger**
 
 ```bash
-python3 mainLogger.py
+python3 main.py
 ```
 
 The resulting event log will be saved in `/logs` directory.
@@ -285,4 +285,4 @@ To sum up, you should have installed:
 - [Browser extension](#2-install-browser-extension)
 - [Excel AddIn (MacOS Only)](#3-install-excel-addin-macos-only)
 
-If you have everything installed, you can [run the tool](#4-run-main-logger) (`python3 mainLogger.py`).
+If you have everything installed, you can [run the tool](#4-run-main-logger) (`python3 main.py`).
