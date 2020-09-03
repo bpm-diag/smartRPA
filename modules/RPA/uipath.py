@@ -236,13 +236,14 @@ class UIPathXAML:
 
     def __comment(self, text: str):
         self.comment += 1
-        return etree.Element(
+        c = etree.Element(
             etree.QName(self.ui, "Comment"),
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Comment_{self.comment}",
                 etree.QName(None, "Text"): text,
             },
         )
+        self.mainSequence.append(c)
 
     # browser
     def __openBrowser(self, url: str = "", activities: list = None):
@@ -344,6 +345,8 @@ class UIPathXAML:
             selector = f"<html app='chrome.exe' /><webctrl {css_selector} {id} {elemIndex}/>"
         elif app and title:
             selector = f"<wnd app='{app}' title='{title}' />"
+        elif app:
+            selector = f"<wnd app='{app}' />"
 
         props = {
             etree.QName(None, "ClippingRegion"): "{x:Null}",
@@ -514,7 +517,7 @@ class UIPathXAML:
         return etree.Element(
             etree.QName(self.ui, "CloseTab"),
             {
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"CloseTab_{self.comment}",
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"CloseTab_{self.closeTab}",
                 etree.QName(None, "Browser"): "{x:Null}",
                 etree.QName(None, "DisplayName"): "Close tab",
             },
@@ -524,7 +527,7 @@ class UIPathXAML:
     def __excelSpreadsheet(self, workbookPath: str = "", password: str = "{x:Null}", attach=True,
                            displayName: str = "Excel Application Scope", activities: list = None):
         self.openApplication += 1
-        if not workbookPath:
+        if workbookPath == "":
             workbookPath = os.path.join(self.UiPath_directory, "UiPathSpreadsheet.xlsx")
         params = {
             etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelApplicationScope_{self.openApplication}",
@@ -773,8 +776,7 @@ class UIPathXAML:
         )
 
     # powerpoint
-    def __powerpointScope(self, path: str = "", position: int = 1, insertSlide: bool = False,
-                          displayName: str = "PowerPoint Presentation"):
+    def __powerpointScope(self, num_slides: int, path: str = "", displayName: str = "PowerPoint Presentation"):
         self.powerpointApplicationCard += 1
         position = self.powerpointApplicationCard
         if not path:
@@ -810,8 +812,8 @@ class UIPathXAML:
         activityActionArgument.append(delegateinargument)
         activityAction.append(activityActionArgument)
 
-        if insertSlide:
-            activityAction.append(self.__createSequence([self.__insertSlide(position)], displayName="Powerpoint events"))
+        slides = [self.__insertSlide(position) for position in range(1, num_slides + 1)]
+        activityAction.append(self.__createSequence(slides, displayName="Powerpoint events"))
 
         body.append(activityAction)
         powerpointApplication.append(body)
@@ -837,8 +839,8 @@ class UIPathXAML:
         if df.empty:
             return False
 
-        self.mainSequence.append(self.__comment("// Generated using SmartRPA available at "
-                                                "https://github.com/bpm-diag/smartRPA"))
+        self.__comment("// Generated using SmartRPA available at "
+                       "https://github.com/bpm-diag/smartRPA")
 
         # if dataframe contains browser related events add openBrowser element
         if not df.query('category=="Browser"').empty:
@@ -850,15 +852,16 @@ class UIPathXAML:
         if 'newWorkbook' in v:
             self.__excelSpreadsheet(workbookPath="", attach=False)
         if 'openWorkbook' in v:
-            ow = df.loc[df['concept:name'] == 'openWorkbook']
-            path = utils.utils.convertToWindowsPath(ow['event_src_path'], ow['org:resource'])
+            wb_path = df.loc[df['concept:name'] == 'openWorkbook', 'event_src_path'].iloc[0]
+            os_user = df['org:resource'].iloc[0]
+            path = utils.utils.convertToWindowsPath(wb_path, os_user)
             self.__excelSpreadsheet(workbookPath=path, attach=False)
 
         browserActivities = []
         excelActivities = []
         systemActivities = []
         previousCategory = df.loc[0, 'category']
-        currentUrl = ""
+        ppt_slides_inserted = False
 
         for index, row in df.iterrows():
             ######
@@ -883,12 +886,16 @@ class UIPathXAML:
             path = ""
             item_name = ""
             currentCategory = row["category"]
-            if not pandas.isna(row['event_src_path']) and row['event_src_path'] != '':
+            if not pandas.isna(row['event_src_path']) \
+                    and row['event_src_path'] != '' \
+                    and '.tmp' not in row['event_src_path']:
                 path = row['event_src_path']
                 path = utils.utils.convertToWindowsPath(path, user)
                 item_name = path.replace('\\', r'\\')
             dest_path = ""
-            if not pandas.isna(row['event_dest_path']) and row['event_dest_path'] != '':
+            if not pandas.isna(row['event_dest_path']) \
+                    and row['event_dest_path'] != ''\
+                    and '.tmp' not in row['event_dest_path']:
                 dest_path = row['event_dest_path']
                 dest_path = utils.utils.convertToWindowsPath(
                     dest_path, user)
@@ -908,7 +915,7 @@ class UIPathXAML:
             ######
             # Check sequence
             ######
-            # print(f"[DEBUG] {index}) Previous={previousCategory}, Current={currentCategory}")
+            # print(f"[DEBUG] {index}) Event={e} PreviousCat={previousCategory}, CurrentCat={currentCategory}")
             # OperatingSystem and Clipboard should be in the same sequence
             if (previousCategory != currentCategory) \
                     and not ((previousCategory == 'OperatingSystem' and currentCategory == 'Clipboard') or
@@ -929,6 +936,7 @@ class UIPathXAML:
             ######
             if e == "newTab" and int(id) != 0:
                 # browserActivities.append(self.__navigateToInNewTab(""))
+                self.__comment("new tab event not supported by UiPath")
                 continue
             if e == "selectTab":
                 # browserActivities.append(self.__sendHotkey(id, "Ctrl", f"Select tab {id}"))
@@ -997,19 +1005,20 @@ class UIPathXAML:
             if e in ["openFile", "openFolder"] and path:
                 systemActivities.append(self.__openFileFolder(path, item_name))
             if e == "programOpen":
-                # don't open excel if there are events related to excel in dataframe because it is handled already
+                # don't open excel or powerpoint if there are events related to them in dataframe because it is already handled
                 try:
                     event_list = df['event_type'].tolist()
                 except KeyError:
                     event_list = df['concept:name'].tolist()
-                if (app in ["EXCEL.EXE", "Microsoft Excel", "Microsoft Excel (MacOS)"]) and any(
-                        i in event_list for i in ["newWorkbook", "selectWorksheet", "WorksheetActivated"]):
+                if (app in ["EXCEL.EXE", "Microsoft Excel", "Microsoft Excel (MacOS)", "Microsoft Powerpoint", "POWERPNT.EXE"]) and any(
+                        i in event_list for i in ["newWorkbook", "selectWorksheet", "WorksheetActivated", "newPresentation"]):
                     continue
                 if path and ntpath.basename(path) not in modules.events.systemEvents.programs_to_ignore:
                     systemActivities.append(self.__startProcess(path, displayName=f"Open {app}"))
             if e == "programClose":
                 systemActivities.append(self.__closeApplication(app=app + '*', title=row["title"], displayName=f"Close {row['title']}"))
-            if e == "created" and path and '.tmp' not in path:
+
+            if e == "created" and path:
                 if os.path.splitext(path)[1]:  # file
                     systemActivities.append(self.__createFile(path, displayName=f"Create {item_name}"))
                 else:  # directory
@@ -1034,11 +1043,14 @@ class UIPathXAML:
 
             # powerpoint
             if e == "newPresentation":
+                # presPath = path if path else ""
+                # self.__powerpointScope(path=presPath, insertSlide=False)
+                continue
+            if e == "newPresentationSlide" and not ppt_slides_inserted:
+                ppt_slides_inserted = True
                 presPath = path if path else ""
-                self.__powerpointScope(path=presPath, insertSlide=False)
-            if e == "newPresentationSlide":
-                presPath = path if path else ""
-                self.__powerpointScope(path=presPath, insertSlide=True)
+                num_slides = len(df[df['concept:name'] == 'newPresentationSlide'])
+                self.__powerpointScope(num_slides, path=presPath)
             if e == "savePresentation":
                 continue
             if e == "closePresentation":

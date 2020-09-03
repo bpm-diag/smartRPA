@@ -272,7 +272,7 @@ def formatPathForCurrentOS(path, username_on_source_os):
 
 
 def convertToWindowsPath(path, username_on_source_os):
-    if path:
+    if path != "":
         if '\\' in path[:10]:  # already windows path
             return path
         else:
