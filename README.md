@@ -29,7 +29,7 @@
 # What is SmartRPA
 
 **Robotic Process Automation (RPA)** is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
-RPA tools available in the market are not able to automatically learn to automate such routines, thus requiring the support of skilled human experts.
+The current generation of RPA tools is driven by predefined rules and manual configurations made by expert users rather than automated techniques.
 
 **SmartRPA** is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ most frequent observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
 
@@ -45,7 +45,15 @@ The architecture of SmartRPA integrates five main SW components.
   <img width="55%" src="docs/architecture.png"/>
 </p>
 
-A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf)
+**Key features** include:
+
+- [x] **Action Logger**, log user behaviour, cross-platform, modular, supports wide range of applications;
+- [x] **Log Processing**, generates both CSV and XES event log;
+- [x] **Event abstraction**, abstracts events to a high level;
+- [x] **Process Discovery**, selects the most frequent routine to automate and generates high-level flowchart diagram of such routine thus skipping completely manual modeling;
+- [x] **RPA**, implements and enacts a SW robot emulating the best (most frequent) routine reflecting the observed behavior. Available both as a cross-platform Python script and as a UiPath project.
+
+A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf).
 
 # Installation and execution:
 
@@ -205,9 +213,9 @@ This package provides a 4-10x speedup in String Matching.
 SmartRPA generates two types of SW Robots in the `/RPA` directory:
 
 1. a cross-platform executable **Python script**, available on both Windows and MacOS
-2. a **UiPath file**, available only on Windows
+2. a **UiPath project**, available only on Windows
 
-The advantages of the UiPath integration is that the generated SW Robot can be easily customized.
+The advantages of the UiPath integration is that the generated SW Robot can be easily customized by the end user.
 
 ### Python script
 
@@ -266,13 +274,16 @@ If you don't find the `Python 3.8` folder under `/Applications`, make sure you i
 
 ### UiPath (Windows Only)
 
-The generated UiPath file requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
+The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
 
 # Recap
 
 To sum up, you should have installed:
 
-- Requirements (`pip3 install -r requirements.txt`)
+- Action Logger dependencies
+  - `pip3 install -r requirements.txt`
+  - [Browser extension](#2-install-browser-extension)
+  - [Excel AddIn (MacOS Only)](#3-install-excel-addin-macos-only)
 - [Process Discovery dependencies](#process-discovery-dependencies)
   - [Visual Studio C/C++ Build Tools (Windows Only)](#0-visual-studio-windows-only)
   - [PM4PY](#1-pm4py)
@@ -282,7 +293,5 @@ To sum up, you should have installed:
     - [Automagica](#1-automagica)
     - [Chromedriver](#2-chromedriver)
   - [UiPath](#uipath-windows-only)
-- [Browser extension](#2-install-browser-extension)
-- [Excel AddIn (MacOS Only)](#3-install-excel-addin-macos-only)
 
 If you have everything installed, you can [run the tool](#4-run-main-logger) (`python3 main.py`).

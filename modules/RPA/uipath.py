@@ -19,6 +19,7 @@ import modules
 import ntpath
 import difflib
 
+
 class UIPathXAML:
 
     def __init__(self, csv_file_path: str, status_queue: Queue):
@@ -329,7 +330,7 @@ class UIPathXAML:
         self.mainSequence.append(attachBrowser)
 
     def __target(self, xpath: str = "", xpath_full: str = "", idx: str = "",
-                 app: str = "", title: str = "", timeout: str = ""):
+                 app: str = "", title: str = "", timeout: str = "1000"):
 
         selector = "{x:Null}"
         if xpath and xpath_full:
@@ -384,8 +385,12 @@ class UIPathXAML:
         target.append(waitForReady)
         return target
 
-    def __typeInto(self, text: str, xpath: str = "", xpath_full: str = "", idx: str = "",
-                   app: str = "", title: str = "", displayName: str = "Type into 'INPUT'"):
+    def __typeInto(self,
+                   text: str,
+                   xpath: str = "", xpath_full: str = "", idx: str = "",
+                   app: str = "", title: str = "",
+                   displayName: str = "Type into 'INPUT'", emptyField: bool = True,
+                   timeout: str = "1000", newLine: bool = False):
         self.typeInto_id += 1
         typeInto = etree.Element(
             etree.QName(self.ui, "TypeInto"),
@@ -396,7 +401,7 @@ class UIPathXAML:
                 etree.QName(None, "DelayBefore"): "{x:Null}",
                 etree.QName(None, "DelayBetweenKeys"): "{x:Null}",
                 etree.QName(None, "DelayMS"): "{x:Null}",
-                etree.QName(None, "EmptyField"): "True",
+                etree.QName(None, "EmptyField"): str(emptyField),
                 etree.QName(None, "SendWindowMessages"): "{x:Null}",
                 etree.QName(None, "SimulateType"): "{x:Null}",
                 etree.QName(None, "Activate"): "True",
@@ -409,11 +414,11 @@ class UIPathXAML:
             etree.QName(self.ui, "TypeInto.Target"),
         )
         if xpath and xpath_full:
-            target = self.__target(xpath=xpath, xpath_full=xpath_full, idx=idx)
+            target = self.__target(xpath=xpath, xpath_full=xpath_full, idx=idx, timeout=timeout)
         elif app and title:
-            target = self.__target(app=app, title=title, timeout="800")
+            target = self.__target(app=app, title=title, timeout=timeout)
         else:
-            target = self.__target(timeout="800")
+            target = self.__target(timeout=timeout)
         typeIntoTarget.append(target)
         typeInto.append(typeIntoTarget)
         return typeInto
@@ -615,7 +620,8 @@ class UIPathXAML:
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"OpenApplication_{self.openApplication}",
                 etree.QName(None, "ApplicationWindow"): "{x:Null}",
-                etree.QName(None, "TimeoutMS"): "{x:Null}",
+                etree.QName(None, "TimeoutMS"): "1000",
+                etree.QName(None, "ContinueOnError"): "True",
                 etree.QName(None, "WorkingDirectory"): "{x:Null}",
                 etree.QName(None, "Arguments"): arguments,
                 etree.QName(None, "DisplayName"): displayName,
@@ -663,6 +669,7 @@ class UIPathXAML:
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"CloseApplication_{self.closeApplication}",
                 etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "ContinueOnError"): "True",
             },
 
         )
@@ -680,6 +687,7 @@ class UIPathXAML:
             {
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"StartProcess_{self.startProcess}",
                 etree.QName(None, "Arguments"): "{x:Null}",
+                etree.QName(None, "ContinueOnError"): "True",
                 etree.QName(None, "FileName"): path,
                 etree.QName(None, "WorkingDirectory"): "{x:Null}",
                 etree.QName(None, "DisplayName"): displayName,
@@ -967,7 +975,7 @@ class UIPathXAML:
                     # compare current xpath to previous one to find differences
                     # pass index of current xpath because if it's 0, previous is None so idx is empty
                     idx = self.__getIdxFromXpath(a, b, list_index)
-                    browserActivities.append(self.__typeInto(text=value, xpath=xpath, xpath_full=xpath_full, idx=idx))
+                    browserActivities.append(self.__typeInto(text=value, xpath=xpath, xpath_full=xpath_full, idx=idx, timeout="2000"))
 
             ######
             # Excel
@@ -994,9 +1002,10 @@ class UIPathXAML:
             ######
             if (e == "copy" or e == "cut") and not pandas.isna(cb):
                 systemActivities.append(self.__setToClipboard(cb))
-            if e == "paste" and row['category'] != 'Browser':
+            if e == "paste" and row['category'] != 'Browser' and app != 'Excel':
                 systemActivities.append(
-                    self.__typeInto(text=cb, app=app+'*', title=row["title"], displayName=f"Paste into {row['title']}"))
+                    self.__typeInto(text=cb, app=app+'*', title=row["title"],
+                                    displayName=f"Paste into {row['title']}", emptyField=False, newLine=True))
             if e == "pressHotkey":
                 hotkey = row["id"]
                 modifiers = ', '.join(list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
@@ -1015,8 +1024,10 @@ class UIPathXAML:
                     continue
                 if path and ntpath.basename(path) not in modules.events.systemEvents.programs_to_ignore:
                     systemActivities.append(self.__startProcess(path, displayName=f"Open {app}"))
-            if e == "programClose":
-                systemActivities.append(self.__closeApplication(app=app + '*', title=row["title"], displayName=f"Close {row['title']}"))
+            if e == "programClose" and app not in modules.events.systemEvents.programs_to_ignore:
+                title = row['title']
+                displayName = f"Close {title}" if title else f"Close {app}"
+                systemActivities.append(self.__closeApplication(app=app + '*', title=row["title"], displayName=displayName))
 
             if e == "created" and path:
                 if os.path.splitext(path)[1]:  # file
