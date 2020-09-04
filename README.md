@@ -289,7 +289,7 @@ To sum up, you should have installed:
   - [PM4PY](#1-pm4py)
   - [Python Levenshtein (Windows Only)](#2-python-levenshtein-windows-only)
 - [RPA dependencies](#rpa-dependencies)
-  - [Python script](#python-script])
+  - [Python script](#python-script)
     - [Automagica](#1-automagica)
     - [Chromedriver](#2-chromedriver)
   - [UiPath](#uipath-windows-only)
