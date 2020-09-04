@@ -3,7 +3,8 @@
 // ********************
 
 function timestamp(){
-    return moment().format("YYYY-MM-DD HH:mm:ss:SSSSSS")
+    //return moment().format("YYYY-MM-DD HH:mm:ss:SSSSSS")
+    return moment().toISOString().replace('Z', '');
 }
 
 function userAgent(string){
@@ -48,8 +49,7 @@ function getTargetAttributes(target){
 }
 
 // get element xpath for easier selection during RPA
-
-function getXPathOld(node) {
+function getXPathFull(node) {
     let comp, comps = [];
     let xpath = '';
     let getPos = function(node) {

@@ -16,10 +16,11 @@ from threading import Thread
 from platform import system
 from urllib.parse import urlparse
 import utils.config
-import utils.consumerServer
+import modules.consumerServer
 import unicodedata
 import pandas
 from unidecode import unidecode
+from itertools import tee, islice, chain
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
 
@@ -62,17 +63,20 @@ DESKTOP = os.path.join(HOME_FOLDER, "Desktop")
 DOCUMENTS = os.path.join(HOME_FOLDER, "Documents")
 DOWNLOADS = os.path.join(HOME_FOLDER, "Downloads")
 MAIN_DIRECTORY = os.getcwd()  # main file path
-
+EVENT_LOG_FOLDER = "event_log"
+PROCESS_DISCOVERY_FOLDER = "process_discovery"
+SW_ROBOT_FOLDER = "SW_Robot"
 
 # ************
 # Functions
 # ************
 
 
-# return current timestamp in the format '2020-02-12 17:11:14:465'
+# return current timestamp in the format '2020-08-29T16:42:30.690'
 # used by multiple modules
 def timestamp():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")  # [:-3]
+    #return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")  # [:-3]
+    return datetime.now().isoformat(timespec='milliseconds')
 
 
 # Create directory with the given path if it does not exist
@@ -103,7 +107,7 @@ def createLogFile():
     # create HEADER
     with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
-        f.writerow(utils.consumerServer.HEADER)
+        f.writerow(modules.consumerServer.HEADER)
     return log_filepath
 
 
@@ -267,6 +271,16 @@ def formatPathForCurrentOS(path, username_on_source_os):
         return ""
 
 
+def convertToWindowsPath(path, username_on_source_os):
+    if path != "":
+        if '\\' in path[:10]:  # already windows path
+            return path
+        else:
+            return path.replace(f"/Users/{username_on_source_os}", f"C:/Users/{USER}").replace('/', '\\')
+    else:
+        return ""
+
+
 def open_file(path):
     try:
         if WINDOWS:
@@ -283,6 +297,14 @@ def fixTimestampFieldXES(xes_filepath):
     with fileinput.FileInput(xes_filepath, inplace=True) as file:
         for line in file:
             print(line.replace('<string key="time:timestamp"', '<date key="time:timestamp"'), end='')
+
+
+# loop accessing the previous, current, and next items https://stackoverflow.com/a/1012089/1440037
+def previous_and_next(some_iterable):
+    prevs, items, nexts = tee(some_iterable, 3)
+    prevs = chain([None], prevs)
+    nexts = chain(islice(nexts, 1, None), [None])
+    return zip(prevs, items, nexts)
 
 
 # ************

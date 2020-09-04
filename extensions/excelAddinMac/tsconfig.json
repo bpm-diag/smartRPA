@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "allowJs": true,
-        "baseUrl": ".",
+        "baseUrl": "./",
         "experimentalDecorators": true,
         "jsx": "react",
         "noEmitOnError": true,

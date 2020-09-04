@@ -13,6 +13,7 @@ from threading import Thread
 import pandas
 import utils.config
 import utils.utils
+import utils.utils
 from fuzzywuzzy import fuzz
 from datetime import datetime
 from multiprocessing.queues import Queue
@@ -45,7 +46,7 @@ try:
     from libraries.pm4pybpmn.objects.bpmn.util import bpmn_diagram_layouter
 except ImportError as e:
     print("[PROCESS MINING] Process mining analysis has been disabled because 'pm4py' module is not installed."
-          "See https://github.com/bpm-diag/smartRPA#2-pm4py")
+          "See https://github.com/bpm-diag/smartRPA#1-pm4py")
     print(e)
 
 
@@ -70,7 +71,7 @@ class ProcessMining:
 
         if utils.config.MyConfig.get_instance().perform_process_discovery:
             print(f"[PROCESS MINING] Performing process discovery")
-            # low level trace used for rpa generation
+            # low level trace used for RPA generation
             self.mostFrequentCase = self.selectMostFrequentCase()
 
     def _create_directories(self):
@@ -79,14 +80,15 @@ class ProcessMining:
             self.save_path = utils.utils.getRPADirectory(self.filename + '_merged')
         else:
             self.save_path = utils.utils.getRPADirectory(self.filename)
-
         utils.utils.createDirectory(self.save_path)
 
-        self.RPA_log_path = os.path.join(self.save_path, 'log')
+        self.RPA_log_path = os.path.join(self.save_path, utils.utils.EVENT_LOG_FOLDER)
         utils.utils.createDirectory(self.RPA_log_path)
 
-        self.discovery_path = os.path.join(self.save_path, 'discovery')
+        self.discovery_path = os.path.join(self.save_path, utils.utils.PROCESS_DISCOVERY_FOLDER)
         utils.utils.createDirectory(self.discovery_path)
+
+        utils.utils.createDirectory(os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER))
 
     def _handle_log(self):
 
@@ -94,7 +96,8 @@ class ProcessMining:
 
             def createCaseID(ts):
                 try:
-                    caseID = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%f").strftime('%m%d%H%M%S%f')  # [:-3]
+                    # caseID = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%f").strftime('%m%d%H%M%S%f')  # [:-3]
+                    caseID = datetime.fromisoformat(ts).strftime('%m%d%H%M%S%f')
                     return caseID
                 except Exception:
                     caseID = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%m%d%H%M%S%f')  # [:-3]
@@ -108,7 +111,8 @@ class ProcessMining:
                 # remove rows that don't have timestamp
                 # replace null values with empty string
                 # sort by timestamp
-                df = pandas.read_csv(csv_path, encoding='utf-8-sig') \
+                df = pandas\
+                    .read_csv(csv_path, encoding='utf-8-sig') \
                     .rename(columns={'event_type': 'concept:name',
                                      'timestamp': 'time:timestamp',
                                      'user': 'org:resource'}) \
@@ -120,11 +124,11 @@ class ProcessMining:
                 # single trace, so I will have i traces.
 
                 # convert timestamp to ISO format
-                try:
-                    df['time:timestamp'] = df['time:timestamp'] \
-                        .apply((lambda ts: datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").isoformat()))
-                except ValueError:
-                    pass
+                # try:
+                #     df['time:timestamp'] = df['time:timestamp'] \
+                #         .apply((lambda ts: datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").isoformat()))
+                # except ValueError:
+                #     pass
 
                 try:  # insert this column to create a unique trace for each csv
                     df.insert(0, 'case:concept:name', createCaseID(df['time:timestamp'][0]))
@@ -167,7 +171,7 @@ class ProcessMining:
             # log = sorting.sort_timestamp(log)
 
             # convert csv to xes
-            xes_path = os.path.join(self.save_path, 'log', f'{self.filename}.xes')
+            xes_path = os.path.join(self.save_path, utils.utils.EVENT_LOG_FOLDER, f'{self.filename}.xes')
             xes_exporter.export_log(log, xes_path)
             # timestamp in xes file must have attribute date, not string
             utils.utils.fixTimestampFieldXES(xes_path)
@@ -185,74 +189,74 @@ class ProcessMining:
             return False
 
     # return most frequent case in log in order to build RPA script
-    def selectMostFrequentCaseWithoutDuration(self, flattened=False):
-        df = self.dataframe
-        if df.empty:
-            return None
-
-        # flattening
-        df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
-        df['flattened'] = df[
-            ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook", "cell_content",
-             "cell_range", "cell_range_number", "slides"]].agg(','.join, axis=1)
-        groupby_column = 'flattened' if flattened else 'concept:name'
-
-        # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
-        # For example I get
-        # ID  Trace   Action
-        # 0   1   Create Fine, Send Fine
-        # 1   2   Insert Fine Notification, Add penalty, Payment
-        df1 = df.groupby('case:concept:name')[groupby_column].agg(', '.join).reset_index()
-
-        # calculate variants, grouping the previous dataframe
-        # concept:name  variants
-        # typed, clickTextField, changeField, mouseClick...	    [0]
-        # typed, changeField, mouseClick, formSubmit, li...	    [1]
-        df2 = df1.groupby(groupby_column, sort=False)['case:concept:name'].agg(list).reset_index(name='variants')
-
-        # get variants as list, each item represents a trace in the log
-        # [[0], [1], [2], [3], [4,5]]
-        variants = df2['variants'].tolist()
-
-        # longest variant is selected because it's the most frequent
-        longest_variants = max(variants, key=len)
-
-        if len(longest_variants) == 1:
-            # all the variants contain one case, need to check similarities
-
-            # Check similarities between all the strings in the log and return the most frequent one
-            def func(name, threshold=90):
-                matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
-                return [i for i, x in enumerate(matches) if x]
-
-            df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
-
-            # In this example, elements 2 and 4 in variants list are similar to element 0 and so on
-            # [[0, 2, 4], [1], [0, 2], [3], [0, 4]]
-            match_id_list = df3.tolist()
-
-            # longest variant is selected because it's the most frequent
-            longest_variants = max(match_id_list, key=len)
-            longest_variant = longest_variants[0]
-
-            if len(longest_variants) == 1:
-                self.status_queue.put(f"[PROCESS MINING] There is 1 variant, selecting first case")
-            else:
-                self.status_queue.put(
-                    f"[PROCESS MINING] There are {len(variants)} variants available, all with 1 case. "
-                    f"Variants {list(map(lambda x: x + 1, longest_variants))} are similar, "
-                    f"selecting the first case of variant {longest_variant + 1}")
-        else:
-            # there is a frequent variant, pick first case
-            self.status_queue.put(
-                f"[PROCESS MINING] There are {len(variants)} variants available, "
-                f"the most frequent one contains {len(longest_variants)} cases, selecting the first case")
-            longest_variant = longest_variants[0]
-
-        # return rows corresponding to selected trace
-        case = df.loc[df['case:concept:name'] == longest_variant]
-
-        return case
+    # def selectMostFrequentCaseWithoutDuration(self, flattened=False):
+    #     df = self.dataframe
+    #     if df.empty:
+    #         return None
+    #
+    #     # flattening
+    #     df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
+    #     df['flattened'] = df[
+    #         ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook", "cell_content",
+    #          "cell_range", "cell_range_number", "slides"]].agg(','.join, axis=1)
+    #     groupby_column = 'flattened' if flattened else 'concept:name'
+    #
+    #     # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
+    #     # For example I get
+    #     # ID  Trace   Action
+    #     # 0   1   Create Fine, Send Fine
+    #     # 1   2   Insert Fine Notification, Add penalty, Payment
+    #     df1 = df.groupby('case:concept:name')[groupby_column].agg(', '.join).reset_index()
+    #
+    #     # calculate variants, grouping the previous dataframe
+    #     # concept:name  variants
+    #     # typed, clickTextField, changeField, mouseClick...	    [0]
+    #     # typed, changeField, mouseClick, formSubmit, li...	    [1]
+    #     df2 = df1.groupby(groupby_column, sort=False)['case:concept:name'].agg(list).reset_index(name='variants')
+    #
+    #     # get variants as list, each item represents a trace in the log
+    #     # [[0], [1], [2], [3], [4,5]]
+    #     variants = df2['variants'].tolist()
+    #
+    #     # longest variant is selected because it's the most frequent
+    #     longest_variants = max(variants, key=len)
+    #
+    #     if len(longest_variants) == 1:
+    #         # all the variants contain one case, need to check similarities
+    #
+    #         # Check similarities between all the strings in the log and return the most frequent one
+    #         def func(name, threshold=90):
+    #             matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
+    #             return [i for i, x in enumerate(matches) if x]
+    #
+    #         df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
+    #
+    #         # In this example, elements 2 and 4 in variants list are similar to element 0 and so on
+    #         # [[0, 2, 4], [1], [0, 2], [3], [0, 4]]
+    #         match_id_list = df3.tolist()
+    #
+    #         # longest variant is selected because it's the most frequent
+    #         longest_variants = max(match_id_list, key=len)
+    #         longest_variant = longest_variants[0]
+    #
+    #         if len(longest_variants) == 1:
+    #             self.status_queue.put(f"[PROCESS MINING] There is 1 variant, selecting first case")
+    #         else:
+    #             self.status_queue.put(
+    #                 f"[PROCESS MINING] There are {len(variants)} variants available, all with 1 case. "
+    #                 f"Variants {list(map(lambda x: x + 1, longest_variants))} are similar, "
+    #                 f"selecting the first case of variant {longest_variant + 1}")
+    #     else:
+    #         # there is a frequent variant, pick first case
+    #         self.status_queue.put(
+    #             f"[PROCESS MINING] There are {len(variants)} variants available, "
+    #             f"the most frequent one contains {len(longest_variants)} cases, selecting the first case")
+    #         longest_variant = longest_variants[0]
+    #
+    #     # return rows corresponding to selected trace
+    #     case = df.loc[df['case:concept:name'] == longest_variant]
+    #
+    #     return case
 
     def selectMostFrequentCase(self, flattened=False, threshold=90):
         df = self.dataframe
@@ -281,8 +285,10 @@ class ProcessMining:
         def getDuration(time):
             timestamps = time.split(',')
             try:
-                start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%dT%H:%M:%S.%f")
-                finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%dT%H:%M:%S.%f")
+                start = datetime.fromisoformat(timestamps[0].strip())
+                finish = datetime.fromisoformat(timestamps[-1].strip())
+                # start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%dT%H:%M:%S.%f")
+                # finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%dT%H:%M:%S.%f")
             except ValueError:
                 start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%d %H:%M:%S:%f")
                 finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%d %H:%M:%S:%f")
@@ -610,13 +616,14 @@ class ProcessMining:
                 df = df.drop(row_index)  # returns a copy, previously was inplace so it returned null and side-effect db
 
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
-                          "selectTab", "moveTab", "zoomTab", "typed", "mouseClick", "submit", "formSubmit",
+                          "selectTab", "moveTab", "zoomTab", "typed", "submit", "formSubmit",
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "closePresentation", "SlideSelectionChanged", "closeWorkbook",
                           "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile",
-                          "manualSubframe", "copy", "KernelDropped"]
+                          "manualSubframe", "copy", "KernelDropped", "startDownload"]  # mouseclick
+
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
         # convert each row of events to high level

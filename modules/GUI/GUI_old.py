@@ -4,11 +4,12 @@
 # ****************************** #
 
 from multiprocessing import Process
-import mainLogger
+import main
 from tkinter import *
 from tkinter import messagebox
 from platform import system
 from sys import path
+import utils
 
 path.append('../')  # this way main file is visible from this file
 
@@ -16,7 +17,7 @@ path.append('../')  # this way main file is visible from this file
 class LoggerGUI(Frame):
     def __init__(self, parent, geometry):
 
-        # gui inizialization
+        # GUI inizialization
         Frame.__init__(self, parent)
         self.parent = parent
         self.TG_BLUE = '#1A222C'
@@ -119,15 +120,15 @@ class LoggerGUI(Frame):
     def onclick(self):
 
         if not self.running:  # start button clicked
-            # set gui parameters
+            # set GUI parameters
             self.running = True
             self.statusLabel.config(text='Logger running...')
             self.runButton.config(text='Stop logger')
 
-            # start main process with the options selected in gui. It handles all other methods
+            # start main process with the options selected in GUI. It handles all other methods
             # main method is started as a process so it can be terminated once the button is clicked
             # all the methods in the main process are started as daemon threads so they are closed automatically when the main process is closed
-            self.mainProcess = Process(target=mainLogger.startLogger, args=[
+            self.mainProcess = Process(target=main.startLogger, args=[
                 self.systemLoggerFilesFolder.get(),
                 self.systemLoggerPrograms.get(),
                 self.systemLoggerClipboard.get(),
@@ -142,7 +143,7 @@ class LoggerGUI(Frame):
             print("Logger started, selected threads activated...")
 
         else:  # stop button clicked
-            # set gui parameters
+            # set GUI parameters
             self.running = False
             self.statusLabel.config(text='')
             self.runButton.config(text='Start logger')
@@ -165,7 +166,7 @@ def buildGUI():
         print("You're running an old version of python. Please download the latest version from http://python.org")
         return -1
     # Fix blurry UI on windows
-    if (utils.WINDOWS):
+    if (utils.utils.WINDOWS):
         import ctypes
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
         geometry = '600x900'

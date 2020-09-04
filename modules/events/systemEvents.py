@@ -6,7 +6,7 @@
 
 from sys import path
 
-path.append('../')  # this way main file is visible from this file
+path.append('../../')  # this way main file is visible from this file
 import keyboard
 import pyperclip
 from time import sleep
@@ -15,7 +15,7 @@ from threading import Thread
 from queue import Queue
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-from utils import consumerServer
+from modules import consumerServer
 from utils.utils import *
 import psutil
 import pynput
@@ -41,7 +41,8 @@ programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHo
                       "printfilterpipelinesvc.exe", "smartscreen.exe", "HxTsr.exe", "GoogleCrashHandler.exe",
                       "WmiApSrv.exe", "ChromeNativeMessaging.exe", "chromenativemessaging.exe", "wmiapsrv.exe",
                       "software_reporter_tool.exe", "chrome.exe", "OUTLOOK.EXE", "WMIADAP.exe", "audiodg.exe",
-                      "'OfficeC2RClient.exe", "FileCoAuth.exe", "setup.exe", "MicrosoftEdgeUpdate.exe", "MpCmdRun.exe"]
+                      "OfficeC2RClient.exe", "FileCoAuth.exe", "setup.exe", "MicrosoftEdgeUpdate.exe", "MpCmdRun.exe",
+                      "cmd.exe", "WmiPrvSE.exe", "AppHostRegistrationVerifier.exe"]
 
 
 #  monitor file/folder changes on windows
@@ -102,7 +103,7 @@ def watchFolder():
         my_observer.join()
 
 
-#  monitor file/folder changes on mac
+# monitor file/folder changes on mac
 def watchFolderMac():
     from _fsevents import (
         loop,
@@ -508,7 +509,7 @@ def logPasteHotkey():
             except Exception:
                 appName = "Clipboard"
             # remove milliseconds from timestamp so duplicated events are easier to remove
-            ts = timestamp()[:-6] + '000000'
+            ts = timestamp()[:-3] + '000'
             print(f"{ts} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": ts,

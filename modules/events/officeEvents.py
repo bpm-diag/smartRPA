@@ -4,18 +4,16 @@
 # ****************************** #
 
 import sys
-sys.path.append('../')  # this way main file is visible from this file
+sys.path.append('../../')  # this way main file is visible from this file
 from re import findall
 import os
 from shutil import rmtree
 from itertools import chain
-import subprocess
-from utils.utils import timestamp, session, WINDOWS, USER, MAIN_DIRECTORY, getActiveWindowInfo
-from utils.consumerServer import SERVER_ADDR
+import utils.utils
+from modules.consumerServer import SERVER_ADDR
 import utils.config
-from pynput import mouse
 
-if WINDOWS:
+if utils.utils.WINDOWS:
     from win32com.client import DispatchWithEvents
     import pythoncom
     from win32com import __gen_path__
@@ -60,10 +58,10 @@ def excelEvents(status_queue, filepath=None):
             self.seen_events["OnWindowActivate"] = None
 
             print(
-                f"{timestamp()} {USER} openWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} openWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "openWindow",
@@ -77,10 +75,10 @@ def excelEvents(status_queue, filepath=None):
         def OnWindowDeactivate(self, Wb, Wn):
             self.seen_events["OnWindowDeactivate"] = None
             print(
-                f"{timestamp()} {USER} closeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} closeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "closeWindow",
@@ -92,12 +90,12 @@ def excelEvents(status_queue, filepath=None):
             })
 
         def OnWindowResize(self, Wb, Wn):
-            x, y, width, height = getActiveWindowInfo('size')
+            x, y, width, height = utils.utils.getActiveWindowInfo('size')
             print(
-                f"{timestamp()} {USER} resizeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} size {x},{y},{width},{height} ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} resizeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} size {x},{y},{width},{height} ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "resizeWindow",
@@ -117,12 +115,12 @@ def excelEvents(status_queue, filepath=None):
         def OnNewWorkbook(self, Wb):
             self.seen_events["OnNewWorkbook"] = None
             # get excel window size
-            x, y, width, height = getActiveWindowInfo('size')
+            x, y, width, height = utils.utils.getActiveWindowInfo('size')
             print(
-                f"{timestamp()} {USER} newWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path} window_size {x},{y},{width},{height}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} newWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path} window_size {x},{y},{width},{height}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "newWorkbook",
@@ -136,10 +134,10 @@ def excelEvents(status_queue, filepath=None):
         def OnWorkbookOpen(self, Wb):
             path = os.path.join(Wb.Path, Wb.Name)
             print(
-                f"{timestamp()} {USER} openWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} openWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "openWorkbook",
@@ -151,10 +149,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookNewSheet(self, Wb, Sh):
             print(
-                f"{timestamp()} {USER} addWorksheet workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} addWorksheet workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "addWorksheet",
@@ -167,14 +165,14 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
             print(
-                f"{timestamp()} {USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} saveAs dialog {SaveAsUI}")
+                f"{utils.utils.timestamp()} {utils.utils.USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} saveAs dialog {SaveAsUI}")
             if SaveAsUI:
                 description = "SaveAs dialog box displayed"
             else:
                 description = "SaveAs dialog box not displayed"
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "beforeSaveWorkbook",
@@ -188,10 +186,10 @@ def excelEvents(status_queue, filepath=None):
         def OnWorkbookAfterSave(self, Wb, Success):
             savedPath = os.path.join(Wb.Path, Wb.Name)
             print(
-                f"{timestamp()} {USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {savedPath}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {savedPath}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "saveWorkbook",
@@ -204,10 +202,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookAddinInstall(self, Wb):
             print(
-                f"{timestamp()} {USER} addinInstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} addinInstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "addinInstalledWorkbook",
@@ -219,10 +217,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookAddinUninstall(self, Wb):
             print(
-                f"{timestamp()} {USER} addinUninstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} addinUninstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "addinUninstalledWorkbook",
@@ -234,10 +232,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookAfterXmlImport(self, Wb, Map, Url, Result):
             print(
-                f"{timestamp()} {USER} XMLImportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} XMLImportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "XMLImportWOrkbook",
@@ -249,10 +247,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookAfterXmlExport(self, Wb, Map, Url, Result):
             print(
-                f"{timestamp()} {USER} XMLExportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} XMLExportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "XMLExportWOrkbook",
@@ -264,10 +262,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookBeforePrint(self, Wb, Cancel):
             print(
-                f"{timestamp()} {USER} printWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} printWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "printWorkbook",
@@ -280,10 +278,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookBeforeClose(self, Wb, Cancel):
             print(
-                f"{timestamp()} {USER} closeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} closeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "closeWorkbook",
@@ -296,10 +294,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookActivate(self, Wb):
             print(
-                f"{timestamp()} {USER} activateWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} activateWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "activateWorkbook",
@@ -312,10 +310,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookDeactivate(self, Wb):
             print(
-                f"{timestamp()} {USER} deactivateWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} deactivateWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "deactivateWorkbook",
@@ -328,10 +326,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookModelChange(self, Wb, Changes):
             print(
-                f"{timestamp()} {USER} modelChangeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} modelChangeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "modelChangeWorkbook",
@@ -343,10 +341,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnWorkbookNewChart(self, Wb, Ch):
             print(
-                f"{timestamp()} {USER} newChartWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} newChartWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "newChartWorkbook",
@@ -359,10 +357,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnAfterCalculate(self):
             print(
-                f"{timestamp()} {USER} afterCalculate")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} afterCalculate")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "afterCalculate",
@@ -392,10 +390,10 @@ def excelEvents(status_queue, filepath=None):
         def OnSheetActivate(self, Sh):
             # to get the list of active worksheet names, I cycle through the parent which is the workbook
             print(
-                f"{timestamp()} {USER} Microsoft Excel selectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel selectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "selectWorksheet",
@@ -408,10 +406,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnSheetBeforeDelete(self, Sh):
             print(
-                f"{timestamp()} {USER} Microsoft Excel deleteWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel deleteWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "deleteWorksheet",
@@ -429,10 +427,10 @@ def excelEvents(status_queue, filepath=None):
                 value = Target.Value
 
             print(
-                f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": event_type,
@@ -450,10 +448,10 @@ def excelEvents(status_queue, filepath=None):
                 event_type = "rightClickCellWithValue"
                 value = Target.Value
             print(
-                f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": event_type,
@@ -466,10 +464,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnSheetCalculate(self, Sh):
             print(
-                f"{timestamp()} {USER} Microsoft Excel sheetCalculate {Sh.Name} {Sh.Parent.Name} ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel sheetCalculate {Sh.Name} {Sh.Parent.Name} ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "sheetCalculate",
@@ -507,10 +505,10 @@ def excelEvents(status_queue, filepath=None):
                     pass
 
             print(
-                f"{timestamp()} {USER} Microsoft Excel editCellSheet {Sh.Name} {Sh.Parent.Name} {cell_range} ({cell_range_number}) {value}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel editCellSheet {Sh.Name} {Sh.Parent.Name} {cell_range} ({cell_range_number}) {value}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": event_type,
@@ -525,10 +523,10 @@ def excelEvents(status_queue, filepath=None):
         def OnSheetDeactivate(self, Sh):
             self.seen_events["OnSheetDeactivate"] = None
             print(
-                f"{timestamp()} {USER} Microsoft Excel deselectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel deselectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "deselectWorksheet",
@@ -541,10 +539,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnSheetFollowHyperlink(self, Sh, Target):
             print(
-                f"{timestamp()} {USER} Microsoft Excel followHiperlinkSheet {Sh.Name} {Sh.Parent.Name} {Target.Range.Address.replace('$', '')} {Target.Address}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel followHiperlinkSheet {Sh.Name} {Sh.Parent.Name} {Target.Range.Address.replace('$', '')} {Target.Address}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "followHiperlinkSheet",
@@ -557,10 +555,10 @@ def excelEvents(status_queue, filepath=None):
 
         def OnSheetPivotTableAfterValueChange(self, Sh, TargetPivotTable, TargetRange):
             print(
-                f"{timestamp()} {USER} Microsoft Excel pivotTableValueChangeSheet {Sh.Name} {Sh.Parent.Name} {TargetRange.Address.replace('$', '')} {TargetRange.Value}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel pivotTableValueChangeSheet {Sh.Name} {Sh.Parent.Name} {TargetRange.Address.replace('$', '')} {TargetRange.Value}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "pivotTableValueChangeSheet",
@@ -586,10 +584,10 @@ def excelEvents(status_queue, filepath=None):
             # If LOG_EVERY_CELL is False and a user selects a single cell the event is not logged
             if rangeSelected or LOG_EVERY_CELL:
                 print(
-                    f"{timestamp()} {USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} ({cell_range_number}) {value}")
-                session.post(SERVER_ADDR, json={
-                    "timestamp": timestamp(),
-                    "user": USER,
+                    f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} ({cell_range_number}) {value}")
+                utils.utils.session.post(SERVER_ADDR, json={
+                    "timestamp": utils.utils.timestamp(),
+                    "user": utils.utils.USER,
                     "category": "MicrosoftOffice",
                     "application": "Microsoft Excel",
                     "event_type": event_type,
@@ -602,10 +600,10 @@ def excelEvents(status_queue, filepath=None):
                 })
 
         def OnSheetTableUpdate(self, Sh, Target):
-            print(f"{timestamp()} {USER} Microsoft Excel worksheetTableUpdated {Sh.Name} {Sh.Parent.Name} ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel worksheetTableUpdated {Sh.Name} {Sh.Parent.Name} ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Excel",
                 "event_type": "worksheetTableUpdated",
@@ -655,9 +653,9 @@ def excelEvents(status_queue, filepath=None):
 # run node server hiding node server output
 def excelEventsMacServer(status_queue, excelFilepath=None):
     import xlwings as xw
-    macExcelAddinPath = os.path.join(MAIN_DIRECTORY, 'modules', 'excelAddinMac')
+    macExcelAddinPath = os.path.join(utils.utils.MAIN_DIRECTORY, 'extensions', 'excelAddinMac')
     # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1") # hide output
-    if not utils.utils.isPortInUse(3000):
+    if not utils.utils.utils.utils.isPortInUse(3000):
         if excelFilepath:
             app = xw.App(visible=True)
             book = xw.Book(excelFilepath)
@@ -690,10 +688,10 @@ def wordEvents(filename=None):
         def OnWindowActivate(self, Doc, Wn):
             self.seen_events["OnWindowActivate"] = None
             print(
-                f"{timestamp()} {USER} activateWindow")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} activateWindow")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "activateWindow",
@@ -703,10 +701,10 @@ def wordEvents(filename=None):
             self.seen_events["OnWindowDeactivate"] = None
             self.seen_events["OnWindowActivate"] = None
             print(
-                f"{timestamp()} {USER} deactivateWindow")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} deactivateWindow")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "deactivateWindow",
@@ -715,20 +713,20 @@ def wordEvents(filename=None):
         def OnWindowBeforeDoubleClick(self, Sel, Cancel):
             # https://docs.microsoft.com/en-us/office/vba/api/word.selection#properties
             print(
-                f"{timestamp()} {USER} doubleClickWindow")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} doubleClickWindow")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "doubleClickWindow",
             })
 
         def OnWindowBeforeRightClick(self, Sel, Cancel):
-            print(f"{timestamp()} {USER} rightClickWindow")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} rightClickWindow")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "rightClickWindow",
@@ -736,10 +734,10 @@ def wordEvents(filename=None):
 
         # Too much spam
         # def OnWindowSelectionChange(self, Sel):
-        #     print(f"{timestamp()} {USER} selectionChangeWindow")
-        #     session.post(SERVER_ADDR, json={
-        #         "timestamp": timestamp(),
-        #         "user": USER,
+        #     print(f"{utils.utils.timestamp()} {utils.utils.USER} selectionChangeWindow")
+        #     utils.utils.session.post(SERVER_ADDR, json={
+        #         "timestamp": utils.utils.timestamp(),
+        #         "user": utils.utils.USER,
         #         "category": "MicrosoftOffice",
         #         "application": "Microsoft Word",
         #         "event_type": "selectionChangeWindow",
@@ -751,20 +749,20 @@ def wordEvents(filename=None):
 
         def OnNewDocument(self, Doc):
             self.seen_events["OnNewDocument"] = None
-            print(f"{timestamp()} {USER} newDocument")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} newDocument")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "newDocument",
             })
 
         def OnDocumentOpen(self, Doc):
-            print(f"{timestamp()} {USER} openDocument")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} openDocument")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "openDocument",
@@ -772,30 +770,30 @@ def wordEvents(filename=None):
 
         def OnDocumentChange(self):
             self.seen_events["OnDocumentChange"] = None
-            print(f"{timestamp()} {USER} changeDocument")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} changeDocument")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "changeDocument",
             })
 
         def OnDocumentBeforeSave(self, Doc, SaveAsUI, Cancel):
-            print(f"{timestamp()} {USER} saveDocument")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} saveDocument")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "saveDocument",
             })
 
         def OnDocumentBeforePrint(self, Doc, Cancel):
-            print(f"{timestamp()} {USER} printDocument")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} printDocument")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Word",
                 "event_type": "printDocument",
@@ -863,10 +861,10 @@ def powerpointEvents(filename=None):
         # ************
 
         def OnWindowActivate(self, Pres, Wn):
-            print(f"{timestamp()} {USER} Powerpoint activateWindow {Pres.Name} {Pres.Path} ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint activateWindow {Pres.Name} {Pres.Path} ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "activateWindow",
@@ -876,10 +874,10 @@ def powerpointEvents(filename=None):
             })
 
         def OnWindowDeactivate(self, Pres, Wn):
-            print(f"{timestamp()} {USER} Powerpoint deactivateWindow {Pres.Name} {Pres.Path} ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint deactivateWindow {Pres.Name} {Pres.Path} ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "deactivateWindow",
@@ -891,10 +889,10 @@ def powerpointEvents(filename=None):
         def OnWindowBeforeRightClick(self, Sel, Cancel):
             print(Sel.SlideRange)
             print(Sel.TextRange)
-            print(f"{timestamp()} {USER} Powerpoint rightClickPresentation ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint rightClickPresentation ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "rightClickPresentation",
@@ -904,10 +902,10 @@ def powerpointEvents(filename=None):
         def OnWindowBeforeDoubleClick(self, Sel, Cancel):
             print(Sel.SlideRange)
             print(Sel.TextRange)
-            print(f"{timestamp()} {USER} Powerpoint doubleClickPresentation ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint doubleClickPresentation ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "doubleClickPresentation",
@@ -920,10 +918,10 @@ def powerpointEvents(filename=None):
 
         def OnNewPresentation(self, Pres):
             self.presentationSlides.clear()
-            print(f"{timestamp()} {USER} Powerpoint newPresentation {Pres.Name} {Pres.Path}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint newPresentation {Pres.Name} {Pres.Path}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "newPresentation",
@@ -935,10 +933,10 @@ def powerpointEvents(filename=None):
         def OnPresentationNewSlide(self, Sld):
             self.addSlide(Sld)
             print(
-                f"{timestamp()} {USER} Powerpoint newPresentationSlide {Sld.Name} {Sld.SlideNumber} {self.getSlides()}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+                f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint newPresentationSlide {Sld.Name} {Sld.SlideNumber} {self.getSlides()}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "newPresentationSlide",
@@ -949,10 +947,10 @@ def powerpointEvents(filename=None):
             })
 
         def OnPresentationBeforeClose(self, Pres, Cancel):
-            print(f"{timestamp()} {USER} Powerpoint closePresentation {Pres.Name} {self.getSlides()}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint closePresentation {Pres.Name} {self.getSlides()}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "closePresentation",
@@ -964,10 +962,10 @@ def powerpointEvents(filename=None):
             self.presentationSlides.clear()
 
         def OnPresentationBeforeSave(self, Pres, Cancel):
-            print(f"{timestamp()} {USER} Powerpoint savePresentation {Pres.Name} {self.getSlides()}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint savePresentation {Pres.Name} {self.getSlides()}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "savePresentation",
@@ -979,10 +977,10 @@ def powerpointEvents(filename=None):
 
         def OnAfterPresentationOpen(self, Pres):
             self.presentationSlides.clear()
-            print(f"{timestamp()} {USER} Powerpoint openPresentation {Pres.Name} {self.getSlides()}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint openPresentation {Pres.Name} {self.getSlides()}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "openPresentation",
@@ -993,10 +991,10 @@ def powerpointEvents(filename=None):
 
         def OnAfterShapeSizeChange(self, shp):
             self.presentationSlides.clear()
-            print(f"{timestamp()} {USER} Powerpoint shapeSizeChangePresentation {shp.Type} ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint shapeSizeChangePresentation {shp.Type} ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "shapeSizeChangePresentation",
@@ -1004,10 +1002,10 @@ def powerpointEvents(filename=None):
             })
 
         def OnPresentationPrint(self, Pres):
-            print(f"{timestamp()} {USER} Powerpoint printPresentation {Pres.Name} {self.getSlides()}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint printPresentation {Pres.Name} {self.getSlides()}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "printPresentation",
@@ -1018,10 +1016,10 @@ def powerpointEvents(filename=None):
 
         # Wn is a slideshowview https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview
         def OnSlideShowBegin(self, Wn):
-            print(f"{timestamp()} {USER} Powerpoint slideshowBegin ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint slideshowBegin ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "slideshowBegin",
@@ -1033,10 +1031,10 @@ def powerpointEvents(filename=None):
             })
 
         def OnSlideShowOnNext(self, Wn):
-            print(f"{timestamp()} {USER} Powerpoint nextSlideshow ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint nextSlideshow ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "nextSlideshow",
@@ -1049,10 +1047,10 @@ def powerpointEvents(filename=None):
 
         # https://docs.microsoft.com/en-us/office/vba/api/powerpoint.effect#properties
         def OnSlideShowNextClick(self, Wn, nEffect):
-            print(f"{timestamp()} {USER} Powerpoint clickNextSlideshow ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint clickNextSlideshow ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "clickNextSlideshow",
@@ -1065,10 +1063,10 @@ def powerpointEvents(filename=None):
             })
 
         def OnSlideShowOnPrevious(self, Wn):
-            print(f"{timestamp()} {USER} Powerpoint previousSlideshow ")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint previousSlideshow ")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "previousSlideshow",
@@ -1080,10 +1078,10 @@ def powerpointEvents(filename=None):
             })
 
         def OnSlideShowEnd(self, Pres):
-            print(f"{timestamp()} {USER} Powerpoint slideshowEnd {Pres.Name} {self.getSlides()}")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint slideshowEnd {Pres.Name} {self.getSlides()}")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "slideshowEnd",
@@ -1093,10 +1091,10 @@ def powerpointEvents(filename=None):
             })
 
         def OnSlideSelectionChanged(self, SldRange):
-            print(f"{timestamp()} {USER} Powerpoint SlideSelectionChanged")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint SlideSelectionChanged")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Powerpoint",
                 "event_type": "SlideSelectionChanged",
@@ -1142,10 +1140,10 @@ def outlookEvents():
                     print(message.Subject)
 
         def OnStartup(self):
-            print(f"{timestamp()} {USER} Outlook startupOutlook")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook startupOutlook")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "startupOutlook",
@@ -1153,10 +1151,10 @@ def outlookEvents():
 
         def OnQuit(self):
             self.seen_events["OnQuit"] = None
-            print(f"{timestamp()} {USER} Outlook quitOutlook")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook quitOutlook")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "quitOutlook",
@@ -1167,10 +1165,10 @@ def outlookEvents():
             #     ctypes.windll.user32.PostQuitMessage(0)
 
         def OnNewMailEx(self, receivedItemsIDs):
-            print(f"{timestamp()} {USER} Outlook receiveMail")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook receiveMail")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "receiveMail",
@@ -1184,30 +1182,30 @@ def outlookEvents():
 
         def OnItemSend(self, Item, Cancel):
             print(Item)
-            print(f"{timestamp()} {USER} Outlook sendMail")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook sendMail")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "sendMail",
             })
 
         def OnMAPILogonComplete(self):
-            print(f"{timestamp()} {USER} Outlook logonComplete")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook logonComplete")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "logonComplete",
             })
 
         def OnReminder(self, Item):
-            print(f"{timestamp()} {USER} Outlook newReminder")
-            session.post(SERVER_ADDR, json={
-                "timestamp": timestamp(),
-                "user": USER,
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook newReminder")
+            utils.utils.session.post(SERVER_ADDR, json={
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
                 "application": "Microsoft Outlook",
                 "event_type": "newReminder",

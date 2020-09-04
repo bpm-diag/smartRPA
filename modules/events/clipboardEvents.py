@@ -4,10 +4,10 @@
 # ****************************** #
 
 from sys import path
-path.append('../')  # this way main file is visible from this file
+path.append('../../')  # this way main file is visible from this file
 import pyperclip
 from time import sleep
-from utils import consumerServer
+from modules import consumerServer
 from utils.utils import *
 
 
