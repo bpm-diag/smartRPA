@@ -481,7 +481,7 @@ class UIPathXAML:
         return click
 
     def __xpathToCssSelector(self, xpath: str):
-        css = re.sub(r'\[(.)\]', '', xpath.lower())
+        css = re.sub(r'\[([0-9]+)\]', '', xpath.lower())
         css = css.replace('/html/', '').replace('/', '>')
         return css
 
@@ -493,10 +493,16 @@ class UIPathXAML:
         # to be comparable, xpath should have the same parent but they should not be equal,
         # otherwise difference would be 0
         if list_index > 0 and a != b and self.__getIdFromXpath(a) == self.__getIdFromXpath(b):
-            for s in difflib.ndiff(a, b):
-                if s[0] == '+':
-                    return s[-1]
-        return ""
+            # list of numbers
+            aa = re.findall(r"\[\s*\+?(-?\d+)\s*\]", a)
+            bb = re.findall(r"\[\s*\+?(-?\d+)\s*\]", b)
+            idx = [j for i,j in zip(aa, bb) if i != j]
+            try:
+                return idx[0]
+            except IndexError:
+                return ""
+        else:
+            return ""
 
     def __navigateTo(self, url: str, displayName: str = "Navigate To"):
         self.navigateTo += 1
