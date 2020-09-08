@@ -33,7 +33,7 @@ The current generation of RPA tools is driven by predefined rules and manual con
 
 **SmartRPA** is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ most frequent observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
 
-The related **paper** is available on [Springer](http://link-springer-com-443.webvpn.fjmu.edu.cn/chapter/10.1007%2F978-3-030-58779-6_8).
+The related **paper** is available [here](https://doi.org/10.1007/978-3-030-58779-6_8).
 
 A **screencast** of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA).
 
