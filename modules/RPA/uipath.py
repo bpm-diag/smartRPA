@@ -3,21 +3,21 @@
 # Automatically generate RPA script compatible with UiPath. Called by
 # GUI when main process is terminated and csv is available.
 # ******************************
+import difflib
+import ntpath
+import modules
+import utils
+import string
+from distutils.dir_util import copy_tree
+from multiprocessing.queues import Queue
+import pandas
+import uuid
+from lxml import etree
+import re
+import os
 import sys
 
 sys.path.append('../')  # this way main file is visible from this file
-import os
-import re
-from lxml import etree
-import uuid
-import pandas
-from multiprocessing.queues import Queue
-from distutils.dir_util import copy_tree
-import string
-import utils
-import modules
-import ntpath
-import difflib
 
 
 class UIPathXAML:
@@ -26,7 +26,8 @@ class UIPathXAML:
         self.csv_file_path = csv_file_path
         self.status_queue = status_queue
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
-        self.UiPath_directory = os.path.join(self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, 'UiPath')
+        self.UiPath_directory = os.path.join(
+            self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, 'UiPath')
         # xaml attributes
         self.root = None
         self.sequence_id = 0
@@ -50,6 +51,7 @@ class UIPathXAML:
         self.moveFile = 0
         self.powerpointApplicationCard = 0
         self.insertSlide = 0
+        self.switch = 0
 
     # base
     def __createRoot(self):  # https://stackoverflow.com/a/31074030
@@ -103,7 +105,8 @@ class UIPathXAML:
         )
 
     def __createTextExpression(self):
-        textExpression = etree.Element('TextExpression.NamespacesForImplementation')
+        textExpression = etree.Element(
+            'TextExpression.NamespacesForImplementation')
         collection = etree.Element(
             etree.QName(self.sco, "Collection"),
             {etree.QName(self.x, "TypeArguments"): "x:String"},
@@ -121,7 +124,8 @@ class UIPathXAML:
         textExpression.append(collection)
         self.root.append(textExpression)
 
-        textExpression = etree.Element('TextExpression.ReferencesForImplementation')
+        textExpression = etree.Element(
+            'TextExpression.ReferencesForImplementation')
         collection = etree.Element(
             etree.QName(self.sco, "Collection"),
             {etree.QName(self.x, "TypeArguments"): "AssemblyReference"},
@@ -178,7 +182,8 @@ class UIPathXAML:
             #     },
             # )
         ])
-        state = etree.Element(etree.QName(self.sap, "WorkflowViewStateService.ViewState"))
+        state = etree.Element(etree.QName(
+            self.sap, "WorkflowViewStateService.ViewState"))
         dictionary = etree.Element(
             etree.QName(self.scg, "Dictionary"),
             {etree.QName(self.x, "TypeArguments"): "x:String, x:Object"},
@@ -195,16 +200,20 @@ class UIPathXAML:
         self.mainSequence.append(state)
         self.root.append(self.mainSequence)
 
-    def __createSequence(self, children: list, displayName: str = "Do"):
+    def __createSequence(self, children: list, displayName: str = "Do", key=None):
         self.sequence_id += 1
+        props = {
+            etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Sequence_{self.sequence_id}",
+            etree.QName(None, "DisplayName"): displayName
+        }
+        if key:
+            props[etree.QName(self.x, "Key")] = str(key)
         sequence = etree.Element(
             etree.QName(None, "Sequence"),
-            {
-                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Sequence_{self.sequence_id}",
-                etree.QName(None, "DisplayName"): displayName
-            },
+            props
         )
-        state = etree.Element(etree.QName(self.sap, "WorkflowViewStateService.ViewState"))
+        state = etree.Element(etree.QName(
+            self.sap, "WorkflowViewStateService.ViewState"))
         dictionary = etree.Element(
             etree.QName(self.scg, "Dictionary"),
             {etree.QName(self.x, "TypeArguments"): "x:String, x:Object"},
@@ -226,8 +235,10 @@ class UIPathXAML:
         self.__createMainSequence()
 
     def writeXmlToFile(self):
-        RPA_filename = utils.utils.getFilename(self.csv_file_path).strip('_combined')
-        uipath_template = os.path.join(utils.utils.MAIN_DIRECTORY, 'utils', 'UiPath_Template')
+        RPA_filename = utils.utils.getFilename(
+            self.csv_file_path).strip('_combined')
+        uipath_template = os.path.join(
+            utils.utils.MAIN_DIRECTORY, 'utils', 'UiPath_Template')
         copy_tree(uipath_template, self.UiPath_directory)
         filename = os.path.join(self.UiPath_directory, f"{RPA_filename}.xaml")
         with open(filename, "wb") as writer:
@@ -245,6 +256,31 @@ class UIPathXAML:
             },
         )
         self.mainSequence.append(c)
+
+    def __switch(self, condition, displayName: str = "Switch", activities: list = None, defaulActivity=None):
+        self.switch += 1
+        switcher = {
+            int: "x:Int32",
+            str: "x:String",
+            bool: "x:Boolean",
+        }
+        switch = etree.Element(
+            etree.QName(None, "Switch"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Switch`1_{self.switch}",
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(self.x, "TypeArguments"): switcher.get(type(condition), "x:Object"),
+                etree.QName(None, "Expression"): f"[{condition}]",
+            },
+        )
+        default = etree.Element(
+            etree.QName(None, "Switch.Default"),
+        )
+        if defaulActivity:
+            default.append(self.__createSequence([defaulActivity]))
+        switch.append(default)
+        switch.append(self.__createSequence(children=activities, key=""))
+        self.mainSequence.append(switch)
 
     # browser
     def __openBrowser(self, url: str = "", activities: list = None):
@@ -324,7 +360,8 @@ class UIPathXAML:
         activityActionArgument.append(delegateinargument)
         activityAction.append(activityActionArgument)
 
-        activityAction.append(self.__createSequence(activities, displayName="Browser events"))
+        activityAction.append(self.__createSequence(
+            activities, displayName="Browser events"))
         body.append(activityAction)
         attachBrowser.append(body)
         self.mainSequence.append(attachBrowser)
@@ -414,7 +451,8 @@ class UIPathXAML:
             etree.QName(self.ui, "TypeInto.Target"),
         )
         if xpath and xpath_full:
-            target = self.__target(xpath=xpath, xpath_full=xpath_full, idx=idx, timeout=timeout)
+            target = self.__target(
+                xpath=xpath, xpath_full=xpath_full, idx=idx, timeout=timeout)
         elif app and title:
             target = self.__target(app=app, title=title, timeout=timeout)
         else:
@@ -496,7 +534,7 @@ class UIPathXAML:
             # list of numbers
             aa = re.findall(r"\[\s*\+?(-?\d+)\s*\]", a)
             bb = re.findall(r"\[\s*\+?(-?\d+)\s*\]", b)
-            idx = [j for i,j in zip(aa, bb) if i != j]
+            idx = [j for i, j in zip(aa, bb) if i != j]
             try:
                 return idx[0]
             except IndexError:
@@ -539,13 +577,15 @@ class UIPathXAML:
                            displayName: str = "Excel Application Scope", activities: list = None):
         self.openApplication += 1
         if workbookPath == "":
-            workbookPath = os.path.join(self.UiPath_directory, "UiPathSpreadsheet.xlsx")
+            workbookPath = os.path.join(
+                self.UiPath_directory, "UiPathSpreadsheet.xlsx")
         params = {
             etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"ExcelApplicationScope_{self.openApplication}",
             etree.QName(None, "Password"): password,
         }
         if attach:
-            params[etree.QName(None, "ExistingWorkbook")] = "[spreadsheetReference]"
+            params[etree.QName(None, "ExistingWorkbook")
+            ] = "[spreadsheetReference]"
         else:
             params[etree.QName(None, "Workbook")] = "[spreadsheetReference]"
             params[etree.QName(None, "WorkbookPath")] = workbookPath
@@ -575,7 +615,8 @@ class UIPathXAML:
         activityAction.append(activityActionArgument)
 
         if activities:
-            activityAction.append(self.__createSequence(activities, displayName="Excel events"))
+            activityAction.append(self.__createSequence(
+                activities, displayName="Excel events"))
 
         body.append(activityAction)
         excelApplication.append(body)
@@ -682,7 +723,8 @@ class UIPathXAML:
         closeApplicationTarget = etree.Element(
             etree.QName(self.ui, "CloseApplication.Target"),
         )
-        closeApplicationTarget.append(self.__target(app=app, title=title, timeout="1000"))
+        closeApplicationTarget.append(self.__target(
+            app=app, title=title, timeout="1000"))
         close.append(closeApplicationTarget)
         return close
 
@@ -811,7 +853,8 @@ class UIPathXAML:
         )
         activityAction = etree.Element(
             etree.QName(None, "ActivityAction"),
-            {etree.QName(self.x, "TypeArguments"): "ui:IPresentationQuickHandle"},
+            {etree.QName(self.x, "TypeArguments")
+             : "ui:IPresentationQuickHandle"},
         )
         activityActionArgument = etree.Element(
             etree.QName(None, "ActivityAction.Argument"),
@@ -826,8 +869,10 @@ class UIPathXAML:
         activityActionArgument.append(delegateinargument)
         activityAction.append(activityActionArgument)
 
-        slides = [self.__insertSlide(position) for position in range(1, num_slides + 1)]
-        activityAction.append(self.__createSequence(slides, displayName="Powerpoint events"))
+        slides = [self.__insertSlide(position)
+                  for position in range(1, num_slides + 1)]
+        activityAction.append(self.__createSequence(
+            slides, displayName="Powerpoint events"))
 
         body.append(activityAction)
         powerpointApplication.append(body)
@@ -866,7 +911,8 @@ class UIPathXAML:
         if 'newWorkbook' in v:
             self.__excelSpreadsheet(workbookPath="", attach=False)
         if 'openWorkbook' in v:
-            wb_path = df.loc[df['concept:name'] == 'openWorkbook', 'event_src_path'].iloc[0]
+            wb_path = df.loc[df['concept:name'] ==
+                             'openWorkbook', 'event_src_path'].iloc[0]
             os_user = df['org:resource'].iloc[0]
             path = utils.utils.convertToWindowsPath(wb_path, os_user)
             self.__excelSpreadsheet(workbookPath=path, attach=False)
@@ -908,7 +954,7 @@ class UIPathXAML:
                 item_name = path.replace('\\', r'\\')
             dest_path = ""
             if not pandas.isna(row['event_dest_path']) \
-                    and row['event_dest_path'] != ''\
+                    and row['event_dest_path'] != '' \
                     and '.tmp' not in row['event_dest_path']:
                 dest_path = row['event_dest_path']
                 dest_path = utils.utils.convertToWindowsPath(
@@ -942,7 +988,8 @@ class UIPathXAML:
                     self.__excelSpreadsheet(activities=excelActivities)
                     excelActivities.clear()
                 if systemActivities:
-                    self.mainSequence.append(self.__createSequence(systemActivities, displayName="System events"))
+                    self.mainSequence.append(self.__createSequence(
+                        systemActivities, displayName="System events"))
                     systemActivities.clear()
 
             ######
@@ -958,20 +1005,23 @@ class UIPathXAML:
             if e == "closeTab":
                 # browserActivities.append(self.__closeTab())
                 continue
-            if (e in ["clickLink", "typed", "reload", "link"]) and not (any([x in url for x in ['chrome-extension', 'chrome-search://']])):
+            if (e in ["clickLink", "typed", "reload", "link"]) and not (
+            any([x in url for x in ['chrome-extension', 'chrome-search://']])):
                 browserActivities.append(self.__navigateTo(url))
             if e == "mouseClick" or e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
                 browserActivities.append(
                     self.__click(xpath, xpath_full, displayName=f"Clicking {row['tag_category'].lower()}"))
             if e == "doubleClick" and xpath != '':
-                browserActivities.append(self.__click(xpath, xpath_full, clickType="CLICK_DOUBLE"))
+                browserActivities.append(self.__click(
+                    xpath, xpath_full, clickType="CLICK_DOUBLE"))
             if e == "changeField":
                 if row['tag_category'] == "SELECT":
                     continue
                 else:
                     # list of all xpaths in the dataframe having changeField as concept name
                     # so the user inserted text in an input
-                    list_of_xpaths = df.loc[df['concept:name'] == 'changeField']['xpath'].tolist()
+                    list_of_xpaths = df.loc[df['concept:name']
+                                            == 'changeField']['xpath'].tolist()
                     # current xpath
                     b = xpath
                     # index of current xpath
@@ -981,27 +1031,32 @@ class UIPathXAML:
                     # compare current xpath to previous one to find differences
                     # pass index of current xpath because if it's 0, previous is None so idx is empty
                     idx = self.__getIdxFromXpath(a, b, list_index)
-                    browserActivities.append(self.__typeInto(text=value, xpath=xpath, xpath_full=xpath_full, idx=idx, timeout="2000"))
+                    browserActivities.append(self.__typeInto(
+                        text=value, xpath=xpath, xpath_full=xpath_full, idx=idx, timeout="2000"))
 
             ######
             # Excel
             ######
             if e in ["addWorksheet", "WorksheetAdded"]:
-                excelActivities.append(self.__writeCell(cell="", sheetName=sh, text=""))
+                excelActivities.append(self.__writeCell(
+                    cell="", sheetName=sh, text=""))
             if e in ["selectWorksheet", "WorksheetActivated"]:
                 continue
             if e == "getCell":
                 continue
             if e in ["editCellSheet", "editCell", "editRange"]:
-                excelActivities.append(self.__writeCell(cell=cell_range, sheetName=sh, text=cell_value))
+                excelActivities.append(self.__writeCell(
+                    cell=cell_range, sheetName=sh, text=cell_value))
             if e == "getRange":
                 continue
             if e == "saveWorkbook":
-                excelActivities.append(self.__saveWorkbook(displayName=f"Save {wb}"))
+                excelActivities.append(
+                    self.__saveWorkbook(displayName=f"Save {wb}"))
             if e == "printWorkbook":
                 continue
             if e == "closeWindow":
-                excelActivities.append(self.__closeWorkbook(displayName=f"Close {wb}"))
+                excelActivities.append(
+                    self.__closeWorkbook(displayName=f"Close {wb}"))
 
             ######
             # System
@@ -1010,11 +1065,12 @@ class UIPathXAML:
                 systemActivities.append(self.__setToClipboard(cb))
             if e == "paste" and row['category'] != 'Browser' and app != 'Excel':
                 systemActivities.append(
-                    self.__typeInto(text=cb, app=app+'*', title=row["title"],
+                    self.__typeInto(text=cb, app=app + '*', title=row["title"],
                                     displayName=f"Paste into {row['title']}", emptyField=False, newLine=True))
             if e == "pressHotkey":
                 hotkey = row["id"]
-                modifiers = ', '.join(list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
+                modifiers = ', '.join(
+                    list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
                 systemActivities.append(self.__sendHotkey(key=hotkey[-1], modifiers=modifiers,
                                                           displayName=f"Press {hotkey.upper()} - {row['description']}"))
             if e in ["openFile", "openFolder"] and path:
@@ -1025,30 +1081,39 @@ class UIPathXAML:
                     event_list = df['event_type'].tolist()
                 except KeyError:
                     event_list = df['concept:name'].tolist()
-                if (app in ["EXCEL.EXE", "Microsoft Excel", "Microsoft Excel (MacOS)", "Microsoft Powerpoint", "POWERPNT.EXE"]) and any(
-                        i in event_list for i in ["newWorkbook", "selectWorksheet", "WorksheetActivated", "newPresentation"]):
+                if (app in ["EXCEL.EXE", "Microsoft Excel", "Microsoft Excel (MacOS)", "Microsoft Powerpoint",
+                            "POWERPNT.EXE"]) and any(
+                        i in event_list for i in
+                        ["newWorkbook", "selectWorksheet", "WorksheetActivated", "newPresentation"]):
                     continue
                 if path and ntpath.basename(path) not in modules.events.systemEvents.programs_to_ignore:
-                    systemActivities.append(self.__startProcess(path, displayName=f"Open {app}"))
+                    systemActivities.append(self.__startProcess(
+                        path, displayName=f"Open {app}"))
             if e == "programClose" and app not in modules.events.systemEvents.programs_to_ignore:
                 title = row['title']
                 displayName = f"Close {title}" if title else f"Close {app}"
-                systemActivities.append(self.__closeApplication(app=app + '*', title=row["title"], displayName=displayName))
+                systemActivities.append(self.__closeApplication(
+                    app=app + '*', title=row["title"], displayName=displayName))
 
             if e == "created" and path:
                 if os.path.splitext(path)[1]:  # file
-                    systemActivities.append(self.__createFile(path, displayName=f"Create {item_name}"))
+                    systemActivities.append(self.__createFile(
+                        path, displayName=f"Create {item_name}"))
                 else:  # directory
-                    systemActivities.append(self.__createDirectory(path, displayName=f"Create {item_name}"))
+                    systemActivities.append(self.__createDirectory(
+                        path, displayName=f"Create {item_name}"))
             if e in ["moved", "Unmount"] and path:
-                new_name = utils.utils.unicodeString(ntpath.basename(dest_path))
+                new_name = utils.utils.unicodeString(
+                    ntpath.basename(dest_path))
                 if os.path.dirname(path) == os.path.dirname(dest_path):
                     displayName = f"Rename file as {new_name}"
                 else:
                     displayName = f"Move file to {new_name}"
-                systemActivities.append(self.__moveFile(path, dest_path, displayName))
+                systemActivities.append(
+                    self.__moveFile(path, dest_path, displayName))
             if e == "deleted" and path:
-                systemActivities.append(self.__delete(path, displayName=f"Delete {item_name}"))
+                systemActivities.append(self.__delete(
+                    path, displayName=f"Delete {item_name}"))
 
             # word
             if e == "newDocument":
@@ -1066,7 +1131,8 @@ class UIPathXAML:
             if e == "newPresentationSlide" and not ppt_slides_inserted:
                 ppt_slides_inserted = True
                 presPath = path if path else ""
-                num_slides = len(df[df['concept:name'] == 'newPresentationSlide'])
+                num_slides = len(
+                    df[df['concept:name'] == 'newPresentationSlide'])
                 self.__powerpointScope(num_slides, path=presPath)
             if e == "savePresentation":
                 continue
@@ -1080,7 +1146,8 @@ class UIPathXAML:
             self.__excelSpreadsheet(activities=excelActivities)
             excelActivities.clear()
         if systemActivities:
-            self.mainSequence.append(self.__createSequence(systemActivities, displayName="System events"))
+            self.mainSequence.append(self.__createSequence(
+                systemActivities, displayName="System events"))
             systemActivities.clear()
 
         self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
@@ -1098,4 +1165,3 @@ class UIPathXAML:
         filename = r"/Users/marco/Desktop/RPA/ppt.xaml"
         with open(filename, "wb") as writer:
             writer.write(etree.tostring(self.root, pretty_print=True))
-
