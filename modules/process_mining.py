@@ -622,7 +622,7 @@ class ProcessMining:
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "closePresentation", "SlideSelectionChanged", "closeWorkbook",
                           "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile",
-                          "manualSubframe", "copy", "KernelDropped", "startDownload"]  # mouseclick
+                          "manualSubframe", "copy", "KernelDropped", "startDownload", "keyword"]  # mouseclick
 
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
