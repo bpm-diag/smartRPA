@@ -786,8 +786,8 @@ class MainApplication(QMainWindow, QDialog):
                 self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
 
                 # create UiPath RPA script
-                UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue)
-                UiPath.generateUiPathRPA(mostFrequentCase)
+                UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, mostFrequentCase)
+                UiPath.generateUiPathRPA()
 
                 self.status_queue.put(f"[GUI] Done\n")
 

@@ -23,12 +23,15 @@ sys.path.append('../')  # this way main file is visible from this file
 
 class UIPathXAML:
 
-    def __init__(self, csv_file_path: str, status_queue: Queue):
-        self.csv_file_path = csv_file_path
+    def __init__(self, csv_file_path: str, status_queue: Queue, df: pandas.DataFrame):
+        # either most frequent dataframe or original dataframe
+        self.df = df
+        self.df1 = self.__df_without_duplicates()
         self.status_queue = status_queue
+        # directories
+        self.csv_file_path = csv_file_path
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
-        self.UiPath_directory = os.path.join(
-            self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, 'UiPath')
+        self.UiPath_directory = os.path.join(self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, 'UiPath')
         # xaml attributes
         self.root = None
         self.sequence_id = 0
@@ -53,6 +56,31 @@ class UIPathXAML:
         self.powerpointApplicationCard = 0
         self.insertSlide = 0
         self.switch = 0
+        self.inputDialog = 0
+
+    # dataframe utils
+    def __df_without_duplicates(self):
+        # add hostname column to dataframe
+        self.df['browser_url_hostname'] = self.df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
+        # add duplicated column to dataframe, boolean indicating if each row is duplicated
+        # The rows with duplicated = True are unique, the other ones should run in separate cases of a switch
+        duplication_subset = ['concept:name', 'category', 'application', 'browser_url_hostname', 'xpath']
+        self.df['duplicated'] = self.df.duplicated(subset=duplication_subset, keep=False)
+        # dataframe without duplicates and with 'duplicated' column indicated if the row should go to main sequence or switch
+        return self.df.drop_duplicates(subset=duplication_subset, ignore_index=False, keep='first')
+
+    def __howManyDecisionVariables(self):
+        # return number of groups that will be converted into switch statements in UiPath
+        # used to determine how many variables should be added to main sequence
+
+        # group rows based on 'duplicated' value
+        # rows with duplicated=True should go to main sequence, otherwise they should go in a switch case
+        # https://towardsdatascience.com/pandas-dataframe-group-by-consecutive-same-values-128913875dba
+        g = self.df1.groupby((self.df1['duplicated'].shift() != self.df1['duplicated']).cumsum())
+        # create list of groups
+        gl = [g.get_group(x)['duplicated'].iloc[0] for x in g.groups]
+        # return number of groups with duplicated = False
+        return gl.count(False)
 
     # base
     def __createRoot(self):  # https://stackoverflow.com/a/31074030
@@ -153,7 +181,7 @@ class UIPathXAML:
             },
         )
         variables = etree.Element("Sequence.Variables")
-        variables.extend([
+        variablesList = [
             etree.Element(
                 etree.QName(None, "Variable"),
                 {
@@ -168,21 +196,18 @@ class UIPathXAML:
                     etree.QName(None, "Name"): "spreadsheetReference"
                 },
             ),
-            # etree.Element(
-            #     etree.QName(None, "Variable"),
-            #     {
-            #         etree.QName(self.x, "TypeArguments"): "x:String",
-            #         etree.QName(None, "Name"): "currentUrl"
-            #     },
-            # ),
-            # etree.Element(
-            #     etree.QName(None, "Variable"),
-            #     {
-            #         etree.QName(self.x, "TypeArguments"): "ui:IPresentationQuickHandle",
-            #         etree.QName(None, "Name"): "powerpointReference"
-            #     },
-            # )
-        ])
+        ]
+        for i in range(self.__howManyDecisionVariables()):
+            variablesList.append(
+                etree.Element(
+                    etree.QName(None, "Variable"),
+                    {
+                        etree.QName(self.x, "TypeArguments"): "x:String",
+                        etree.QName(None, "Name"): f"decision{i}"
+                    },
+                ),
+            )
+        variables.extend(variablesList)
         state = etree.Element(etree.QName(
             self.sap, "WorkflowViewStateService.ViewState"))
         dictionary = etree.Element(
@@ -258,7 +283,41 @@ class UIPathXAML:
         )
         self.mainSequence.append(c)
 
-    def __switch(self, caseActivities: dict, defaulActivity=None, condition="lucapuma", displayName: str = "Switch"):
+    def __inputDialog(self, options: list, label: str = "Which path should I take?", title: str = "Decision point", displayName: str = "Decision point"):
+        formattedOptions = '[{' + ', '.join(['"%s"' % x for x in options]) + '}]'
+        self.inputDialog += 1
+        inputDialog = etree.Element(
+            etree.QName(self.ui, "InputDialog"),
+            {
+                etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"InputDialog_{self.inputDialog}",
+                etree.QName(None, "DisplayName"): displayName,
+                etree.QName(None, "IsPassword"): "False",
+                etree.QName(None, "Label"): label,
+                etree.QName(None, "Title"): title,
+                etree.QName(None, "Options"): formattedOptions,
+            },
+        )
+        result = etree.Element(
+            etree.QName(self.ui, "InputDialog.Result")
+        )
+        outArgument = etree.Element(
+                etree.QName(None, "OutArgument"),
+                {
+                    etree.QName(self.x, "TypeArguments"): "x:String",
+                }
+            )
+        outArgument.text = f"[decision{self.switch}]"
+        result.append(outArgument)
+        inputDialog.append(result)
+        return inputDialog
+
+    def __switch(self, caseActivities: dict, defaulActivity=None, condition=None, displayName: str = "Switch"):
+        # before each switch, an input dialog is needed to ask the user which case to choose
+        self.mainSequence.append(
+            self.__inputDialog(options=list(caseActivities.keys()))
+        )
+        if not condition:
+            condition = f"decision{self.switch}"
         self.switch += 1
         switcher = {
             int: "x:Int32",
@@ -1155,7 +1214,7 @@ class UIPathXAML:
         self.__handleActivitiesLists()
         self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
-    def __generateRPA_decision(self, df: pandas.DataFrame):
+    def __generateRPA_decision_first(self, df: pandas.DataFrame):
 
         # this works if there are at least 2 traces of execution
         assert len(df['case:concept:name'].drop_duplicates()) >= 2
@@ -1277,15 +1336,53 @@ class UIPathXAML:
 
         self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
+    def __generateRPA_decision(self, df: pandas.DataFrame):
+
+        # at least 2 traces are needed
+        assert len(df['case:concept:name'].drop_duplicates()) >= 2
+
+        self.__comment("// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA")
+
+        def equal(g, a: int, b: int, duplication_subset: list):
+            return g.get_group(a)[duplication_subset].reset_index(drop=True).equals(
+                g.get_group(b)[duplication_subset].reset_index(drop=True))
+
+        self.__createOpenBrowser(df)
+        self.__createOpenExcel(df)
+
+        self.browserActivities = []
+        self.excelActivities = []
+        self.systemActivities = []
+        self.caseActivities = defaultdict(list)
+        self.ppt_slides_inserted = False
+        self.previousCategory = df.loc[0, 'category']
+
+        for index, row in df.iterrows():
+            self.__generateActivities(df, row)
+            if row['duplicated']:
+                if self.browserActivities:
+                    ab = self.__attachBrowser(activities=self.browserActivities)
+                    self.mainSequence.append(ab)
+                    self.browserActivities.clear()
+            else:
+                if self.browserActivities:
+                    ab = self.__attachBrowser(activities=self.browserActivities)
+                    caseid = row['case:concept:name']
+                    self.caseActivities[caseid].append(ab)
+                    self.browserActivities.clear()
+
+        self.__switch(caseActivities=self.caseActivities)
+        # self.__handleActivitiesLists()
+
     # SW robot based on the most frequent selcted routine
-    def generateUiPathRPA(self, df: pandas.DataFrame):
+    def generateUiPathRPA(self):
         self.createBaseFile()
-        self.__generateRPA(df)
+        self.__generateRPA(self.df)
         self.writeXmlToFile()
 
     # SW robot based on all recorded routines
-    def generateUiPathRPA_decision(self, df: pandas.DataFrame):
+    def generateUiPathRPA_decision(self):
         self.createBaseFile()
-        self.__generateRPA_decision(df)
+        self.__generateRPA_decision(self.df)
         self.writeXmlToFile()
 
