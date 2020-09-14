@@ -283,8 +283,30 @@ class UIPathXAML:
         )
         self.mainSequence.append(c)
 
-    def __inputDialog(self, options: list, label: str = "Which path should I take?", title: str = "Decision point", displayName: str = "Decision point"):
+    def __generateTraceKeywords(self, options):
+        keywords = defaultdict(str)
+        for trace in options:
+            df2 = self.df.loc[(self.df['case:concept:name'] == trace) & (~self.df['duplicated'])]
+            category = ','.join(df2['category'].unique())
+            keywords[trace] += f"- {trace} -> category: {category}"
+            if 'Browser' in category:
+                hostname = ','.join(df2['browser_url_hostname'].unique())
+                keywords[trace] += f", url: {hostname}"
+                tag_value = ','.join(filter(None, df2['tag_value'].unique()))
+                keywords[trace] += f", keywords: {tag_value}"
+            if 'OperatingSystem' in category:
+                continue  # TODO
+            if 'MicrosoftOffice' in category:
+                continue  # TODO
+        return list(keywords.values())
+
+    def __inputDialog(self, options: list, label: str = None, title: str = "Decision point", displayName: str = "Decision point"):
         formattedOptions = '[{' + ', '.join(['"%s"' % x for x in options]) + '}]'
+        if not label:
+            keywords = self.__generateTraceKeywords(options)
+            n = "+Environment.NewLine+Environment.NewLine+"
+            label = '"Select which trace to execute:"' + n + \
+                    n.join(['"%s"' % x for x in keywords])
         self.inputDialog += 1
         inputDialog = etree.Element(
             etree.QName(self.ui, "InputDialog"),
@@ -292,7 +314,7 @@ class UIPathXAML:
                 etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"InputDialog_{self.inputDialog}",
                 etree.QName(None, "DisplayName"): displayName,
                 etree.QName(None, "IsPassword"): "False",
-                etree.QName(None, "Label"): label,
+                etree.QName(None, "Label"): f"[{label}]",
                 etree.QName(None, "Title"): title,
                 etree.QName(None, "Options"): formattedOptions,
             },
@@ -316,8 +338,14 @@ class UIPathXAML:
         self.mainSequence.append(
             self.__inputDialog(options=list(caseActivities.keys()))
         )
+        # if a specific condition is not provided, I use the decision variable previously declared in the main sequence
+        # and used by the input variable to store the user choice.
+        # there are N decision variables based on how many switches there will be, named decision0 to decisionN
+        # each time the __switch function is called, the self.switch that starts from 0 number is incremented
+        # as well as the decision variable
         if not condition:
             condition = f"decision{self.switch}"
+
         self.switch += 1
         switcher = {
             int: "x:Int32",
