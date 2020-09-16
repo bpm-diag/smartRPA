@@ -82,6 +82,27 @@ class UIPathXAML:
         # return number of groups with duplicated = False
         return gl.count(False)
 
+    def __equalGroups(self, g: pandas.DataFrameGroupBy, a: int, b: int, duplication_subset: list):
+        return g.get_group(a)[duplication_subset].reset_index(drop=True).equals(
+            g.get_group(b)[duplication_subset].reset_index(drop=True))
+
+    def __generateTraceKeywords(self, options):
+        keywords = defaultdict(str)
+        for trace in options:
+            df2 = self.df.loc[(self.df['case:concept:name'] == trace) & (~self.df['duplicated'])]
+            category = ','.join(df2['category'].unique())
+            keywords[trace] += f"- {trace} -> category: {category}"
+            if 'Browser' in category:
+                hostname = ','.join(df2['browser_url_hostname'].unique())
+                keywords[trace] += f", url: {hostname}"
+                tag_value = ','.join(filter(None, df2['tag_value'].unique()))
+                keywords[trace] += f", keywords: {tag_value}"
+            if 'OperatingSystem' in category:
+                continue  # TODO
+            if 'MicrosoftOffice' in category:
+                continue  # TODO
+        return list(keywords.values())
+
     # base
     def __createRoot(self):  # https://stackoverflow.com/a/31074030
         self.xmlns = "http://schemas.microsoft.com/netfx/2009/xaml/activities"
@@ -283,25 +304,10 @@ class UIPathXAML:
         )
         self.mainSequence.append(c)
 
-    def __generateTraceKeywords(self, options):
-        keywords = defaultdict(str)
-        for trace in options:
-            df2 = self.df.loc[(self.df['case:concept:name'] == trace) & (~self.df['duplicated'])]
-            category = ','.join(df2['category'].unique())
-            keywords[trace] += f"- {trace} -> category: {category}"
-            if 'Browser' in category:
-                hostname = ','.join(df2['browser_url_hostname'].unique())
-                keywords[trace] += f", url: {hostname}"
-                tag_value = ','.join(filter(None, df2['tag_value'].unique()))
-                keywords[trace] += f", keywords: {tag_value}"
-            if 'OperatingSystem' in category:
-                continue  # TODO
-            if 'MicrosoftOffice' in category:
-                continue  # TODO
-        return list(keywords.values())
-
-    def __inputDialog(self, options: list, label: str = None, title: str = "Decision point", displayName: str = "Decision point"):
+    def __inputDialog(self, options: list, label: str = None, title: str = "Decision point", displayName: str = None):
         formattedOptions = '[{' + ', '.join(['"%s"' % x for x in options]) + '}]'
+        if not displayName:
+            displayName = f"Decision point {self.switch + 1}"
         if not label:
             keywords = self.__generateTraceKeywords(options)
             n = "+Environment.NewLine+Environment.NewLine+"
@@ -1371,10 +1377,6 @@ class UIPathXAML:
 
         self.__comment("// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA")
 
-        def equal(g, a: int, b: int, duplication_subset: list):
-            return g.get_group(a)[duplication_subset].reset_index(drop=True).equals(
-                g.get_group(b)[duplication_subset].reset_index(drop=True))
-
         self.__createOpenBrowser(df)
         self.__createOpenExcel(df)
 
@@ -1386,7 +1388,9 @@ class UIPathXAML:
         self.previousCategory = df.loc[0, 'category']
 
         for index, row in df.iterrows():
+
             self.__generateActivities(df, row)
+
             if row['duplicated']:
                 if self.browserActivities:
                     ab = self.__attachBrowser(activities=self.browserActivities)
