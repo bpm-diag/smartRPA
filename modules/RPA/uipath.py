@@ -61,13 +61,14 @@ class UIPathXAML:
     # dataframe utils
     def __df_without_duplicates(self):
         # add hostname column to dataframe
-        self.df['browser_url_hostname'] = self.df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
+        self.df['browser_url_hostname'] = \
+            self.df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
         # add duplicated column to dataframe, boolean indicating if each row is duplicated
         # The rows with duplicated = True are unique, the other ones should run in separate cases of a switch
         duplication_subset = ['concept:name', 'category', 'application', 'browser_url_hostname', 'xpath']
         self.df['duplicated'] = self.df.duplicated(subset=duplication_subset, keep=False)
         # dataframe without duplicates and with 'duplicated' column indicated if the row should go to main sequence or switch
-        return self.df.drop_duplicates(subset=duplication_subset, ignore_index=False, keep='first')
+        return self.df.drop_duplicates(subset=duplication_subset, ignore_index=True, keep='first')
 
     def __howManyDecisionVariables(self):
         # return number of groups that will be converted into switch statements in UiPath
@@ -82,9 +83,9 @@ class UIPathXAML:
         # return number of groups with duplicated = False
         return gl.count(False)
 
-    def __equalGroups(self, g: pandas.DataFrameGroupBy, a: int, b: int, duplication_subset: list):
-        return g.get_group(a)[duplication_subset].reset_index(drop=True).equals(
-            g.get_group(b)[duplication_subset].reset_index(drop=True))
+    # def __equalGroups(self, g: pandas.DataFrameGroupBy, a: int, b: int, duplication_subset: list):
+    #     return g.get_group(a)[duplication_subset].reset_index(drop=True).equals(
+    #         g.get_group(b)[duplication_subset].reset_index(drop=True))
 
     def __generateTraceKeywords(self, options):
         keywords = defaultdict(str)
@@ -247,7 +248,7 @@ class UIPathXAML:
         self.mainSequence.append(state)
         self.root.append(self.mainSequence)
 
-    def __createSequence(self, children: list, displayName: str = "Do", key=None):
+    def __createSequence(self, activities: list, displayName: str = "Do", key=None):
         self.sequence_id += 1
         props = {
             etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Sequence_{self.sequence_id}",
@@ -273,7 +274,7 @@ class UIPathXAML:
         dictionary.append(boolean)
         state.append(dictionary)
         sequence.append(state)
-        [sequence.append(child) for child in children]
+        [sequence.append(child) for child in activities]
         return sequence
 
     def createBaseFile(self):
@@ -329,11 +330,11 @@ class UIPathXAML:
             etree.QName(self.ui, "InputDialog.Result")
         )
         outArgument = etree.Element(
-                etree.QName(None, "OutArgument"),
-                {
-                    etree.QName(self.x, "TypeArguments"): "x:String",
-                }
-            )
+            etree.QName(None, "OutArgument"),
+            {
+                etree.QName(self.x, "TypeArguments"): "x:String",
+            }
+        )
         outArgument.text = f"[decision{self.switch}]"
         result.append(outArgument)
         inputDialog.append(result)
@@ -373,8 +374,10 @@ class UIPathXAML:
         if defaulActivity:
             default.append(self.__createSequence([defaulActivity]))
         switch.append(default)
-        for k, v in caseActivities.items():
-            switch.append(self.__createSequence(children=v, key=k))
+
+        for key, value in caseActivities.items():
+            switch.append(self.__createSequence(activities=value, key=key))
+
         self.mainSequence.append(switch)
 
     # browser
@@ -460,7 +463,7 @@ class UIPathXAML:
         body.append(activityAction)
         attachBrowser.append(body)
         return attachBrowser
-        #self.mainSequence.append(attachBrowser)
+        # self.mainSequence.append(attachBrowser)
 
     def __target(self, xpath: str = "", xpath_full: str = "", idx: str = "",
                  app: str = "", title: str = "", timeout: str = "1000"):
@@ -1009,7 +1012,7 @@ class UIPathXAML:
             path = utils.utils.convertToWindowsPath(wb_path, os_user)
             self.__excelSpreadsheet(workbookPath=path, attach=False)
 
-    def __generateActivities(self, df: pandas.DataFrame, row):
+    def __generateActivitiesOld(self, df: pandas.DataFrame, row: pandas.Series):
         ######
         # Variables
         ######
@@ -1132,7 +1135,7 @@ class UIPathXAML:
             modifiers = ', '.join(
                 list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
             self.systemActivities.append(self.__sendHotkey(key=hotkey[-1], modifiers=modifiers,
-                                                      displayName=f"Press {hotkey.upper()} - {row['description']}"))
+                                                           displayName=f"Press {hotkey.upper()} - {row['description']}"))
         if e in ["openFile", "openFolder"] and path:
             self.systemActivities.append(self.__openFileFolder(path, item_name))
         if e == "programOpen":
@@ -1199,6 +1202,181 @@ class UIPathXAML:
         if e == "closePresentation":
             return
 
+    def __generateActivities(self, df: pandas.DataFrame, row: pandas.Series):
+        ######
+        # Variables
+        ######
+        try:
+            e = row['event_type']
+            timestamp = row['timestamp']
+            user = row['user']
+        except KeyError:
+            e = row['concept:name']
+            timestamp = row['time:timestamp']
+            user = row['org:resource']
+
+        cell_value = utils.utils.unicodeString(row['cell_content'])
+        app = row['application']
+        cb = utils.utils.processClipboard(row['clipboard_content'])
+        path = ""
+        item_name = ""
+        if not pandas.isna(row['event_src_path']) \
+                and row['event_src_path'] != '' \
+                and '.tmp' not in row['event_src_path']:
+            path = row['event_src_path']
+            path = utils.utils.convertToWindowsPath(path, user)
+            item_name = path.replace('\\', r'\\')
+        dest_path = ""
+        if not pandas.isna(row['event_dest_path']) \
+                and row['event_dest_path'] != '' \
+                and '.tmp' not in row['event_dest_path']:
+            dest_path = row['event_dest_path']
+            dest_path = utils.utils.convertToWindowsPath(dest_path, user)
+        url = "about:blank"
+        if not pandas.isna(row['browser_url']):
+            url = row['browser_url']
+        id = ""
+        if not pandas.isna(row['id']):
+            id = row['id']
+        xpath = row['xpath']
+        xpath_full = row['xpath_full']
+        value = utils.utils.unicodeString(row['tag_value'])
+
+        if e in ["logonComplete"]:
+            return None
+
+        ######
+        # Browser
+        ######
+        if e == "newTab" and int(id) != 0:
+            # browserActivities.append(self.__navigateToInNewTab(""))
+            self.__comment("new tab event not supported by UiPath")
+            return None
+        if e == "selectTab":
+            # browserActivities.append(self.__sendHotkey(id, "Ctrl", f"Select tab {id}"))
+            return None
+        if e == "closeTab":
+            # browserActivities.append(self.__closeTab())
+            return None
+        if (e in ["clickLink", "typed", "reload", "link"]) and not (
+                any([x in url for x in ['chrome-extension', 'chrome-search://']])):
+            return self.__navigateTo(url)
+        if e == "mouseClick" or e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
+            return self.__click(xpath, xpath_full, displayName=f"Clicking {row['tag_category'].lower()}")
+        if e == "doubleClick" and xpath != '':
+           return self.__click(xpath, xpath_full, clickType="CLICK_DOUBLE")
+        if e == "changeField":
+            if row['tag_category'] == "SELECT":
+                return None
+            else:
+                # list of all xpaths in the dataframe having changeField as concept name
+                # so the user inserted text in an input
+                list_of_xpaths = df.loc[df['concept:name']
+                                        == 'changeField']['xpath'].tolist()
+                # current xpath
+                b = xpath
+                # index of current xpath
+                list_index = list_of_xpaths.index(b)
+                # previous xpath
+                a = list_of_xpaths[list_index - 1]
+                # compare current xpath to previous one to find differences
+                # pass index of current xpath because if it's 0, previous is None so idx is empty
+                idx = self.__getIdxFromXpath(a, b, list_index)
+                return self.__typeInto(text=value, xpath=xpath, xpath_full=xpath_full, idx=idx, timeout="2000")
+
+        ######
+        # Excel
+        ######
+        if e in ["addWorksheet", "WorksheetAdded"]:
+            return self.__writeCell(cell="", sheetName=row['current_worksheet'], text="")
+        if e in ["selectWorksheet", "WorksheetActivated"]:
+            return None
+        if e == "getCell":
+            return None
+        if e in ["editCellSheet", "editCell", "editRange"]:
+            return self.__writeCell(cell=row['cell_range'], sheetName=row['current_worksheet'], text=cell_value)
+        if e == "getRange":
+            return None
+        if e == "saveWorkbook":
+            return self.__saveWorkbook(displayName=f"Save {row['workbook']}")
+        if e == "printWorkbook":
+            return None
+        if e == "closeWindow":
+            return self.__closeWorkbook(displayName=f"Close {row['workbook']}")
+
+        ######
+        # System
+        ######
+        if (e == "copy" or e == "cut") and not pandas.isna(cb):
+            return self.__setToClipboard(cb)
+        if e == "paste" and row['category'] != 'Browser' and app != 'Excel':
+            return self.__typeInto(text=cb, app=app + '*', title=row["title"],
+                                   displayName=f"Paste into {row['title']}", emptyField=False, newLine=True)
+        if e == "pressHotkey":
+            hotkey = row["id"]
+            modifiers = ', '.join(
+                list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
+            return self.__sendHotkey(key=hotkey[-1], modifiers=modifiers,
+                                     displayName=f"Press {hotkey.upper()} - {row['description']}")
+        if e in ["openFile", "openFolder"] and path:
+            return self.__openFileFolder(path, item_name)
+        if e == "programOpen":
+            # don't open excel or powerpoint if there are events related to them in dataframe because it is already handled
+            try:
+                event_list = df['event_type'].tolist()
+            except KeyError:
+                event_list = df['concept:name'].tolist()
+            if (app in ["EXCEL.EXE", "Microsoft Excel", "Microsoft Excel (MacOS)", "Microsoft Powerpoint",
+                        "POWERPNT.EXE"]) and any(
+                i in event_list for i in
+                ["newWorkbook", "selectWorksheet", "WorksheetActivated", "newPresentation"]):
+                return None
+            if path and ntpath.basename(path) not in modules.events.systemEvents.programs_to_ignore:
+                return self.__startProcess(path, displayName=f"Open {app}")
+        if e == "programClose" and app not in modules.events.systemEvents.programs_to_ignore:
+            title = row['title']
+            displayName = f"Close {title}" if title else f"Close {app}"
+            return self.__closeApplication(
+                app=app + '*', title=row["title"], displayName=displayName)
+        if e == "created" and path:
+            if os.path.splitext(path)[1]:  # file
+                return self.__createFile(path, displayName=f"Create {item_name}")
+            else:  # directory
+                return self.__createDirectory(path, displayName=f"Create {item_name}")
+        if e in ["moved", "Unmount"] and path:
+            new_name = utils.utils.unicodeString(ntpath.basename(dest_path))
+            if os.path.dirname(path) == os.path.dirname(dest_path):
+                displayName = f"Rename file as {new_name}"
+            else:
+                displayName = f"Move file to {new_name}"
+            return self.__moveFile(path, dest_path, displayName)
+        if e == "deleted" and path:
+            return self.__delete(path, displayName=f"Delete {item_name}")
+
+        # word TODO
+        if e == "newDocument":
+            self.systemActivities.append(
+                self.__startProcess(r"C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.exe",
+                                    displayName="Open Word"))
+        if e == "saveDocument":
+            return None
+
+        # powerpoint TODO
+        if e == "newPresentation":
+            # presPath = path if path else ""
+            # self.__powerpointScope(path=presPath, insertSlide=False)
+            return None
+        if e == "newPresentationSlide" and not self.ppt_slides_inserted:
+            ppt_slides_inserted = True
+            presPath = path if path else ""
+            num_slides = len(
+                df[df['concept:name'] == 'newPresentationSlide'])
+            self.__powerpointScope(num_slides, path=presPath)
+        if e == "savePresentation":
+            return None
+        if e == "closePresentation":
+            return None
+
     def __handleActivitiesLists(self):
         if self.browserActivities:
             ab = self.__attachBrowser(activities=self.browserActivities)
@@ -1243,7 +1421,7 @@ class UIPathXAML:
                 self.previousCategory = currentCategory
                 self.__handleActivitiesLists()
 
-            self.__generateActivities(df, row)
+            self.__generateActivitiesOld(df, row)
 
         self.__handleActivitiesLists()
         self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
@@ -1338,13 +1516,15 @@ class UIPathXAML:
 
             self.__generateActivities(df, row)
 
-            #self.previousCaseId = currentCaseId
+            # self.previousCaseId = currentCaseId
 
-            table.append([index, row['concept:name'], debug1, debug2, str(self.caseActivities), str(self.browserActivities)])
-            #print(f"{index}) Event={row['concept:name']} {debug} caseActivities={self.caseActivities} browserActivities={self.browserActivities}")
+            table.append(
+                [index, row['concept:name'], debug1, debug2, str(self.caseActivities), str(self.browserActivities)])
+            # print(f"{index}) Event={row['concept:name']} {debug} caseActivities={self.caseActivities} browserActivities={self.browserActivities}")
 
-        #end for
-        print(tabulate(table, headers=["index", "event", "previous addSwitch", "current addSwitch", "case", "browser"], tablefmt="grid"))
+        # end for
+        print(tabulate(table, headers=["index", "event", "previous addSwitch", "current addSwitch", "case", "browser"],
+                       tablefmt="grid"))
 
         if self.browserActivities:
             ab = self.__attachBrowser(activities=self.browserActivities)
@@ -1383,28 +1563,67 @@ class UIPathXAML:
         self.browserActivities = []
         self.excelActivities = []
         self.systemActivities = []
-        self.caseActivities = defaultdict(list)
+        self.caseActivities = defaultdict(lambda: defaultdict(list))
         self.ppt_slides_inserted = False
         self.previousCategory = df.loc[0, 'category']
 
         for index, row in df.iterrows():
+            duplicated = row['duplicated']
+            caseid = row['case:concept:name']
 
-            self.__generateActivities(df, row)
+            currentCategory = row["category"]
+            categoryChange = (self.previousCategory != currentCategory) and not \
+                ((self.previousCategory == 'OperatingSystem' and currentCategory == 'Clipboard') or
+                 (self.previousCategory == 'Clipboard' and currentCategory == 'OperatingSystem'))
+            lastIndex = (index == len(df) - 1)
+            if currentCategory in ['OperatingSystem', 'Clipboard']: currentCategory = 'OperatingSystem'
 
-            if row['duplicated']:
+            xmlNode = self.__generateActivities(df, row)
+            if xmlNode is None: continue
+
+            if duplicated:  # main sequence
+                if currentCategory == "Browser":
+                    self.browserActivities.append(xmlNode)
+                elif currentCategory == "MicrosoftOffice":
+                    self.excelActivities.append(xmlNode)
+                elif currentCategory == "OperatingSystem":
+                    self.systemActivities.append(xmlNode)
+            else:  # switch
+                self.caseActivities[caseid][currentCategory].append(xmlNode)
+
+            if categoryChange or lastIndex:
+                self.previousCategory = currentCategory
                 if self.browserActivities:
-                    ab = self.__attachBrowser(activities=self.browserActivities)
-                    self.mainSequence.append(ab)
+                    x = self.__attachBrowser(activities=self.browserActivities)
+                    self.mainSequence.append(x)
                     self.browserActivities.clear()
-            else:
-                if self.browserActivities:
-                    ab = self.__attachBrowser(activities=self.browserActivities)
-                    caseid = row['case:concept:name']
-                    self.caseActivities[caseid].append(ab)
+                if self.excelActivities:
+                    x = self.__excelSpreadsheet(activities=self.excelActivities)
+                    self.mainSequence.append(x)
+                    self.browserActivities.clear()
+                if self.systemActivities:
+                    x = self.__createSequence(self.systemActivities, displayName="System events")
+                    self.mainSequence.append(x)
                     self.browserActivities.clear()
 
-        self.__switch(caseActivities=self.caseActivities)
-        # self.__handleActivitiesLists()
+                for key in self.caseActivities.keys():
+                    if self.caseActivities[key]["Browser"]:
+                        x = self.__attachBrowser(activities=self.caseActivities[key]["Browser"])
+                        self.caseActivities[key]["Browser"] = [x]
+                    if self.caseActivities[key]["MicrosoftOffice"]:
+                        x = self.__excelSpreadsheet(activities=self.caseActivities[key]["MicrosoftOffice"])
+                        self.caseActivities[key]["MicrosoftOffice"] = [x]
+                    if self.caseActivities[key]["OperatingSystem"]:
+                        x = self.__createSequence(activities=self.caseActivities[key]["OperatingSystem"], displayName="System events")
+                        self.caseActivities[key]["OperatingSystem"] = [x]
+
+        if self.caseActivities:
+            activities = defaultdict(list)
+            for key, value in self.caseActivities.items():
+                activities[key].extend(value["Browser"])
+                activities[key].extend(value["MicrosoftOffice"])
+                activities[key].extend(value["OperatingSystem"])
+            self.__switch(caseActivities=activities)
 
     # SW robot based on the most frequent selcted routine
     def generateUiPathRPA(self):
@@ -1415,6 +1634,5 @@ class UIPathXAML:
     # SW robot based on all recorded routines
     def generateUiPathRPA_decision(self):
         self.createBaseFile()
-        self.__generateRPA_decision(self.df)
+        self.__generateRPA_decision(self.df1)
         self.writeXmlToFile()
-
