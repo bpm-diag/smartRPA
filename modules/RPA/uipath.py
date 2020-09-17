@@ -87,7 +87,7 @@ class UIPathXAML:
     #     return g.get_group(a)[duplication_subset].reset_index(drop=True).equals(
     #         g.get_group(b)[duplication_subset].reset_index(drop=True))
 
-    def __generateTraceKeywords(self, options):
+    def __generateTraceKeywords(self, options: list):
         keywords = defaultdict(str)
         for trace in options:
             df2 = self.df.loc[(self.df['case:concept:name'] == trace) & (~self.df['duplicated'])]
@@ -99,9 +99,14 @@ class UIPathXAML:
                 tag_value = ','.join(filter(None, df2['tag_value'].unique()))
                 keywords[trace] += f", KEYWORDS: {tag_value}"
             if 'OperatingSystem' in category:
-                continue  # TODO
+                path = ','.join(filter(None, df2['event_src_path'].unique()))
+                keywords[trace] += f", PATH: {path}"
             if 'MicrosoftOffice' in category:
-                continue  # TODO
+                cells = ','.join(filter(None, df2['cell_range'].unique()))
+                keywords[trace] += f", CELLS: {cells}"
+                # take only the first 30 characters of cell content
+                cell_content = ','.join(filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
+                keywords[trace] += f", KEYWORDS: {cell_content}"
         return list(keywords.values())
 
     # base
@@ -1625,6 +1630,7 @@ class UIPathXAML:
 
             if categoryChange or lastIndex:
                 self.previousCategory = currentCategory
+
                 # wrap xml nodes with sequence and append to main sequence
                 if browserActivities:
                     x = self.__attachBrowser(activities=browserActivities)
@@ -1639,6 +1645,8 @@ class UIPathXAML:
                     self.mainSequence.append(x)
                     browserActivities.clear()
 
+                # handle cases for switch
+                # for each trace there are 3 possible categories each one with a list of xml nodes
                 for key in caseActivities.keys():
                     if caseActivities[key]["Browser"]:
                         x = self.__attachBrowser(activities=caseActivities[key]["Browser"])
@@ -1651,6 +1659,7 @@ class UIPathXAML:
                                                   displayName="System events")
                         caseActivities[key]["OperatingSystem"] = [x]
 
+        # if there are activities for the switch I need to flatten the sublists for each key
         if caseActivities and decision:
             activities = defaultdict(list)
             for key, value in caseActivities.items():

@@ -88,9 +88,9 @@ class Preferences(QMainWindow):
                 'QPushButton {background-color: #656565;}')
 
         self.process_discovery_cb = QCheckBox(
-            "Enable Process Discovery \nanalysis on log file")
+            "Enable Process Discovery \nanalysis on event log")
         self.process_discovery_cb.setToolTip("If enabled, process discovery analysis is performed automatically\n"
-                                             "after selecting log file, otherwise only log file is generated")
+                                             "after selecting event log file, otherwise only event log is generated")
         self.process_discovery_cb.tag = "process_discovery_cb"
         self.process_discovery_cb.stateChanged.connect(self.handle_cb)
         self.process_discovery_cb.setChecked(
@@ -729,8 +729,7 @@ class MainApplication(QMainWindow, QDialog):
             import pm4py
             # create class, combine all csv into one
             # print(f"[PROCESS MINING] Finding most frequent path...")
-            pm = modules.process_mining.ProcessMining(
-                log_filepath, self.status_queue, merged)
+            pm = modules.process_mining.ProcessMining(log_filepath, self.status_queue, merged)
             if fromRunCount:
                 self.PMThreadComplete((pm, log_filepath))
             else:
@@ -771,8 +770,7 @@ class MainApplication(QMainWindow, QDialog):
 
             # ask if some fields should be changed before generating RPA script
             # build choices dialog, passing low level most frequent case to analyze
-            choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(
-                pm.mostFrequentCase)
+            choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
             # when OK button is pressed
             if choicesDialog.exec_() in [0, 1]:
                 mostFrequentCase = choicesDialog.df
@@ -972,6 +970,7 @@ class MainApplication(QMainWindow, QDialog):
 def buildGUI():
     app = QApplication(sys.argv)
 
+    # dark mode
     palette = QPalette()
     palette.setColor(QPalette.Window, QColor(53, 53, 53))
     palette.setColor(QPalette.WindowText, Qt.white)
