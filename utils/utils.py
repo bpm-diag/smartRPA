@@ -66,6 +66,7 @@ MAIN_DIRECTORY = os.getcwd()  # main file path
 EVENT_LOG_FOLDER = "event_log"
 PROCESS_DISCOVERY_FOLDER = "process_discovery"
 SW_ROBOT_FOLDER = "SW_Robot"
+UIPATH_FOLDER = "UiPath"
 
 # ************
 # Functions

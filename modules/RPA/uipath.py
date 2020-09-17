@@ -317,7 +317,7 @@ class UIPathXAML:
         if not label:
             keywords = self.__generateTraceKeywords(options)
             n = "+Environment.NewLine+Environment.NewLine+"
-            label = '"Which path should I take?:"' + n + \
+            label = '"Which path do you want to take?:"' + n + \
                     n.join(['"%s"' % x for x in keywords])
         self.inputDialog += 1
         inputDialog = etree.Element(
@@ -1589,11 +1589,9 @@ class UIPathXAML:
         previousCategory = df.loc[0, 'category']
 
         for index, row in df.iterrows():
+
             # duplicated row is only available when performing decision points
-            try:
-                duplicated = row['duplicated']
-            except KeyError:
-                duplicated = True
+            duplicated = row['duplicated'] if decision else True
             caseid = row['case:concept:name']
             app = row['application']
             currentCategory = row["category"]
@@ -1670,8 +1668,11 @@ class UIPathXAML:
 
         self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
-    # SW robot based on the most frequent selcted routine
+    # If decision is False, dataframe of the most frequent trace is passed, else dataframe of the entire process
     def generateUiPathRPA(self, decision: bool):
         self.createBaseFile()
-        self.__generateRPA(self.df, decision)
+        # if decision, I should use df1, dataframe without duplicates,
+        # duplicated events should go to main sequence only once
+        dataframe = self.df1 if decision else self.df
+        self.__generateRPA(dataframe, decision)
         self.writeXmlToFile()

@@ -189,15 +189,5 @@ def startLogger(systemLoggerFilesFolder,
 
 if __name__ == "__main__":
     # launch GUI
-    # modules.GUI.GUI.buildGUI()
-    from modules.RPA.uipath import UIPathXAML
-    import pandas
-    csv_path = "/Users/marco/Desktop/RPA/smartRPA/RPA/2020-09-10_11-06-33/event_log/2020-09-10_11-06-33_combined.csv"
-    df = pandas.read_csv(csv_path, encoding='utf-8-sig') \
-        .rename(columns={'event_type': 'concept:name', 'timestamp': 'time:timestamp', 'user': 'org:resource'}) \
-        .dropna(subset=["time:timestamp"]) \
-        .fillna('') \
-        .sort_values(by='time:timestamp')
-    uipath = UIPathXAML(csv_path, Queue(), df)
-    uipath.generateUiPathRPA(decision=True)
+    modules.GUI.GUI.buildGUI()
 

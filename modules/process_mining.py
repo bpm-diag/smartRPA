@@ -89,6 +89,7 @@ class ProcessMining:
         utils.utils.createDirectory(self.discovery_path)
 
         utils.utils.createDirectory(os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER))
+        utils.utils.createDirectory(os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER, utils.utils.UIPATH_FOLDER))
 
     def _handle_log(self):
 

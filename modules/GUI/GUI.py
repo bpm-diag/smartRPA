@@ -779,37 +779,46 @@ class MainApplication(QMainWindow, QDialog):
     def choices(self, pm, log_filepath):
         # print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
-            # create high level DFG model based on all logs
-            pm.highLevelDFG()
-            pm.highLevelPetriNet()
-            pm.highLevelBPMN()
+            if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
+                # create high level DFG model based on all logs
+                pm.highLevelDFG()
+                pm.highLevelPetriNet()
+                pm.highLevelBPMN()
 
-            # open BPMN
-            utils.utils.open_file(
-                os.path.join(pm.discovery_path,
-                             f'{utils.utils.getFilename(log_filepath[-1]).strip("_combined")}_BPMN.pdf')
-            )
+                # open BPMN
+                utils.utils.open_file(
+                    os.path.join(pm.discovery_path,
+                                 f'{utils.utils.getFilename(log_filepath[-1]).strip("_combined")}_BPMN.pdf')
+                )
 
-            # ask if some fields should be changed before generating RPA script
-            # build choices dialog, passing low level most frequent case to analyze
-            choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
-            # when OK button is pressed
-            if choicesDialog.exec_() in [0, 1]:
-                mostFrequentCase = choicesDialog.df
+                # ask if some fields should be changed before generating RPA script
+                # build choices dialog, passing low level most frequent case to analyze
+                choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
+                # when OK button is pressed
+                if choicesDialog.exec_() in [0, 1]:
+                    mostFrequentCase = choicesDialog.df
 
-                # create RPA based on most frequent path
-                rpa = modules.RPA.generateRPAScript.RPAScript(
-                    log_filepath[-1], self.status_queue)
-                rpa.generateRPAMostFrequentPath(mostFrequentCase)
+                    # create RPA based on most frequent path
+                    rpa = modules.RPA.generateRPAScript.RPAScript(
+                        log_filepath[-1], self.status_queue)
+                    rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
-                pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
+                    pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
+                    self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
+
+                    # create UiPath RPA script passing dataframe with only the most frequent trace
+                    UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, mostFrequentCase)
+                    UiPath.generateUiPathRPA(decision=False)
+
+            elif utils.config.MyConfig.get_instance().enable_decision_point_analysis:
+                pm.highLevelDFG()
+                pm.highLevelPetriNet()
                 self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
+                # create UiPath RPA script passing dataframe of entire process
+                UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, pm.dataframe)
+                UiPath.generateUiPathRPA(decision=True)
 
-                # create UiPath RPA script
-                UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, mostFrequentCase)
-                UiPath.generateUiPathRPA(decision=False)
-
-                self.status_queue.put(f"[GUI] Done\n")
+            self.status_queue.put(f"[GUI] Done\n")
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
