@@ -96,10 +96,23 @@ class Preferences(QMainWindow):
         self.process_discovery_cb.setChecked(
             utils.config.MyConfig.get_instance().perform_process_discovery)
 
-        processDiscoveryGroupBox = QGroupBox()
+        self.mfr = QRadioButton("Most frequent routine")
+        self.mfr.clicked.connect(self.handle_radio)
+        self.mfr.setChecked(utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis)
+        self.decision = QRadioButton("Decision points")
+        self.decision.clicked.connect(self.handle_radio)
+        self.decision.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_analysis)
+
+        processDiscoveryGroupBox = QGroupBox("Process Discovery")
         vbox = QVBoxLayout()
         vbox.addWidget(self.process_discovery_cb)
         processDiscoveryGroupBox.setLayout(vbox)
+
+        decisionGroupBox = QGroupBox("Analysis type")
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.mfr)
+        vbox.addWidget(self.decision)
+        decisionGroupBox.setLayout(vbox)
 
         xesGroupBox = QGroupBox()
         vbox = QVBoxLayout()
@@ -115,6 +128,7 @@ class Preferences(QMainWindow):
 
         mainLayout = QVBoxLayout()
         mainLayout.addWidget(processDiscoveryGroupBox)
+        mainLayout.addWidget(decisionGroupBox)
         mainLayout.addWidget(xesGroupBox)
         mainLayout.addWidget(confirmButton)
 
@@ -136,6 +150,14 @@ class Preferences(QMainWindow):
             self.status_queue.put("[GUI] Process discovery enabled")
         else:
             self.status_queue.put("[GUI] Process discovery disabled")
+
+    def handle_radio(self):
+        mfr_checked = self.mfr.isChecked()
+        decision_checked = self.decision.isChecked()
+        utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis = mfr_checked
+        utils.config.MyConfig.get_instance().enable_decision_point_analysis = decision_checked
+        msg = "Most frequent routine analysis enabled" if mfr_checked else "Decision point analysis enabled"
+        self.status_queue.put(f"[GUI] {msg}")
 
     def handleButton(self):
         self.close()

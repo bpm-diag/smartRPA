@@ -19,3 +19,7 @@ class MyConfig(PreferredConfig):
     # Option in settings to control process discovery, if disabled, csv is generated but process discovery techniques
     # are not applied
     perform_process_discovery = BooleanOption('perform_process_discovery', default=True)
+
+    enable_most_frequent_routine_analysis = BooleanOption('enable_most_frequent_routine_analysis', default=True)
+
+    enable_decision_point_analysis = BooleanOption('enable_decision_point_analysis', default=False)
