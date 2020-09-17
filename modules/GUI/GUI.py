@@ -787,7 +787,7 @@ class MainApplication(QMainWindow, QDialog):
 
                 # create UiPath RPA script
                 UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, mostFrequentCase)
-                UiPath.generateUiPathRPA()
+                UiPath.generateUiPathRPA(decision=False)
 
                 self.status_queue.put(f"[GUI] Done\n")
 
