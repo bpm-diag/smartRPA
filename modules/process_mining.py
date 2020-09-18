@@ -604,7 +604,7 @@ class ProcessMining:
         # filter rows
         df = df[~df.browser_url.str.contains('chrome-extension://')]
         df = df[~df.eventQual.str.contains('clientRedirect')]
-        df = df[~df.eventQual.str.contains('serverRedirect')]
+        # df = df[~df.eventQual.str.contains('serverRedirect')]
 
         # remove rows that contain empty clipboard text
         # [df.drop(row_index, inplace=True) for row_index, row in df.iterrows() if
