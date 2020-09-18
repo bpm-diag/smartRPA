@@ -814,9 +814,13 @@ class MainApplication(QMainWindow, QDialog):
                 pm.highLevelDFG()
                 pm.highLevelPetriNet()
                 self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
-                # create UiPath RPA script passing dataframe of entire process
-                UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, pm.dataframe)
-                UiPath.generateUiPathRPA(decision=True)
+                # at least 2 traces are needed to perform decision analysis
+                if len(pm.dataframe['case:concept:name'].drop_duplicates()) >= 2:
+                    # create UiPath RPA script passing dataframe of entire process
+                    UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, pm.dataframe)
+                    UiPath.generateUiPathRPA(decision=True)
+                else:
+                    self.status_queue.put(f"[GUI] Could not generate UiPath script, at least 2 traces are needed\n")
 
             self.status_queue.put(f"[GUI] Done\n")
 

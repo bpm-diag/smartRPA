@@ -493,7 +493,6 @@ class ProcessMining:
 
     @staticmethod
     def _getHighLevelEvent(row):
-
         e = row["concept:name"]
         url = utils.utils.getHostname(row['browser_url'])
         app = row['application']
@@ -519,7 +518,7 @@ class ProcessMining:
                     return f"[{app}] Click {row['tag_type']} {row['tag_category'].lower()} '{row['tag_name']}' on {url}"
         elif e in ["clickLink"]:
             return f"[{app}] Click '{row['tag_innerText']}' on {url}"
-        elif e in ["link", "reload", "generated", "urlHashChange", ]:
+        elif (e in ["link", "reload", "generated", "urlHashChange"]) or (e == "typed" and "fromAddressBar" in row['eventQual']):
             return f"[{app}] Navigate to {url}"
         elif e in ["submit", "formSubmit", "selectOptions"]:
             return "Submit"
@@ -617,7 +616,7 @@ class ProcessMining:
                 df = df.drop(row_index)  # returns a copy, previously was inplace so it returned null and side-effect db
 
         rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
-                          "selectTab", "moveTab", "zoomTab", "typed", "submit", "formSubmit",
+                          "selectTab", "moveTab", "zoomTab", "submit", "formSubmit",
                           "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
                           "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",

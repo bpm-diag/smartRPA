@@ -17,7 +17,7 @@ import re
 import os
 import sys
 from collections import defaultdict
-
+import ntpath
 sys.path.append('../')  # this way main file is visible from this file
 
 
@@ -96,17 +96,21 @@ class UIPathXAML:
             if 'Browser' in category:
                 hostname = ','.join(df2['browser_url_hostname'].unique())
                 keywords[trace] += f", URL: {hostname}"
-                tag_value = ','.join(filter(None, df2['tag_value'].unique()))
-                keywords[trace] += f", KEYWORDS: {tag_value}"
+                tag_value = ','.join(filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
+                if tag_value:
+                    keywords[trace] += f", KEYWORDS: {tag_value}"
             if 'OperatingSystem' in category:
                 path = ','.join(filter(None, df2['event_src_path'].unique()))
-                keywords[trace] += f", PATH: {path}"
+                if path:
+                    keywords[trace] += f", PATH: {path}"
             if 'MicrosoftOffice' in category:
                 cells = ','.join(filter(None, df2['cell_range'].unique()))
-                keywords[trace] += f", CELLS: {cells}"
+                if cells:
+                    keywords[trace] += f", CELLS: {cells}"
                 # take only the first 30 characters of cell content
                 cell_content = ','.join(filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
-                keywords[trace] += f", KEYWORDS: {cell_content}"
+                if cell_content:
+                    keywords[trace] += f", KEYWORDS: {cell_content}"
         return list(keywords.values())
 
     # base
@@ -998,7 +1002,6 @@ class UIPathXAML:
         )
 
     # generate RPA
-
     def __createOpenBrowser(self, df: pandas.DataFrame):
         # if dataframe contains browser related events add openBrowser element
         if not df.query('category=="Browser"').empty:
@@ -1016,378 +1019,6 @@ class UIPathXAML:
             os_user = df['org:resource'].iloc[0]
             path = utils.utils.convertToWindowsPath(wb_path, os_user)
             self.__excelSpreadsheet(workbookPath=path, attach=False)
-
-    # delete TODO
-    # def __generateActivitiesOld(self, df: pandas.DataFrame, row: pandas.Series):
-    #     ######
-    #     # Variables
-    #     ######
-    #     try:
-    #         e = row['event_type']
-    #         timestamp = row['timestamp']
-    #         user = row['user']
-    #     except KeyError:
-    #         e = row['concept:name']
-    #         timestamp = row['time:timestamp']
-    #         user = row['org:resource']
-    #
-    #     cell_value = utils.utils.unicodeString(row['cell_content'])
-    #     app = row['application']
-    #     cb = utils.utils.processClipboard(row['clipboard_content'])
-    #     path = ""
-    #     item_name = ""
-    #     if not pandas.isna(row['event_src_path']) \
-    #             and row['event_src_path'] != '' \
-    #             and '.tmp' not in row['event_src_path']:
-    #         path = row['event_src_path']
-    #         path = utils.utils.convertToWindowsPath(path, user)
-    #         item_name = path.replace('\\', r'\\')
-    #     dest_path = ""
-    #     if not pandas.isna(row['event_dest_path']) \
-    #             and row['event_dest_path'] != '' \
-    #             and '.tmp' not in row['event_dest_path']:
-    #         dest_path = row['event_dest_path']
-    #         dest_path = utils.utils.convertToWindowsPath(dest_path, user)
-    #     url = "about:blank"
-    #     if not pandas.isna(row['browser_url']):
-    #         url = row['browser_url']
-    #     id = ""
-    #     if not pandas.isna(row['id']):
-    #         id = row['id']
-    #     xpath = row['xpath']
-    #     xpath_full = row['xpath_full']
-    #     value = utils.utils.unicodeString(row['tag_value'])
-    #
-    #     if e in ["logonComplete"]:
-    #         return
-    #
-    #     ######
-    #     # Browser
-    #     ######
-    #     if e == "newTab" and int(id) != 0:
-    #         # browserActivities.append(self.__navigateToInNewTab(""))
-    #         self.__comment("new tab event not supported by UiPath")
-    #         return
-    #     if e == "selectTab":
-    #         # browserActivities.append(self.__sendHotkey(id, "Ctrl", f"Select tab {id}"))
-    #         return
-    #     if e == "closeTab":
-    #         # browserActivities.append(self.__closeTab())
-    #         return
-    #     if (e in ["clickLink", "typed", "reload", "link", "formSubmit"]) and not (
-    #             any([x in url for x in ['chrome-extension', 'chrome-search://']])):
-    #         self.browserActivities.append(self.__navigateTo(url))
-    #     if e == "mouseClick" or e == "clickButton" or e == "clickRadioButton" or e == "clickCheckboxButton":
-    #         self.browserActivities.append(
-    #             self.__click(xpath, xpath_full, displayName=f"Clicking {row['tag_category'].lower()}"))
-    #     if e == "doubleClick" and xpath != '':
-    #         self.browserActivities.append(self.__click(
-    #             xpath, xpath_full, clickType="CLICK_DOUBLE"))
-    #     if e == "changeField":
-    #         if row['tag_category'] == "SELECT":
-    #             return
-    #         else:
-    #             # list of all xpaths in the dataframe having changeField as concept name
-    #             # so the user inserted text in an input
-    #             list_of_xpaths = df.loc[df['concept:name']
-    #                                     == 'changeField']['xpath'].tolist()
-    #             # current xpath
-    #             b = xpath
-    #             # index of current xpath
-    #             list_index = list_of_xpaths.index(b)
-    #             # previous xpath
-    #             a = list_of_xpaths[list_index - 1]
-    #             # compare current xpath to previous one to find differences
-    #             # pass index of current xpath because if it's 0, previous is None so idx is empty
-    #             idx = self.__getIdxFromXpath(a, b, list_index)
-    #             self.browserActivities.append(self.__typeInto(
-    #                 text=value, xpath=xpath, xpath_full=xpath_full, idx=idx, timeout="2000"))
-    #
-    #     ######
-    #     # Excel
-    #     ######
-    #     if e in ["addWorksheet", "WorksheetAdded"]:
-    #         self.excelActivities.append(self.__writeCell(
-    #             cell="", sheetName=row['current_worksheet'], text=""))
-    #     if e in ["selectWorksheet", "WorksheetActivated"]:
-    #         return
-    #     if e == "getCell":
-    #         return
-    #     if e in ["editCellSheet", "editCell", "editRange"]:
-    #         self.excelActivities.append(self.__writeCell(
-    #             cell=row['cell_range'], sheetName=row['current_worksheet'], text=cell_value))
-    #     if e == "getRange":
-    #         return
-    #     if e == "saveWorkbook":
-    #         self.excelActivities.append(
-    #             self.__saveWorkbook(displayName=f"Save {row['workbook']}"))
-    #     if e == "printWorkbook":
-    #         return
-    #     if e == "closeWindow":
-    #         self.excelActivities.append(
-    #             self.__closeWorkbook(displayName=f"Close {row['workbook']}"))
-    #
-    #     ######
-    #     # System
-    #     ######
-    #     if (e == "copy" or e == "cut") and not pandas.isna(cb):
-    #         self.systemActivities.append(self.__setToClipboard(cb))
-    #     if e == "paste" and row['category'] != 'Browser' and app != 'Excel':
-    #         self.systemActivities.append(
-    #             self.__typeInto(text=cb, app=app + '*', title=row["title"],
-    #                             displayName=f"Paste into {row['title']}", emptyField=False, newLine=True))
-    #     if e == "pressHotkey":
-    #         hotkey = row["id"]
-    #         modifiers = ', '.join(
-    #             list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
-    #         self.systemActivities.append(self.__sendHotkey(key=hotkey[-1], modifiers=modifiers,
-    #                                                        displayName=f"Press {hotkey.upper()} - {row['description']}"))
-    #     if e in ["openFile", "openFolder"] and path:
-    #         self.systemActivities.append(self.__openFileFolder(path, item_name))
-    #     if e == "programOpen":
-    #         # don't open excel or powerpoint if there are events related to them in dataframe because it is already handled
-    #         try:
-    #             event_list = df['event_type'].tolist()
-    #         except KeyError:
-    #             event_list = df['concept:name'].tolist()
-    #         if (app in ["EXCEL.EXE", "Microsoft Excel", "Microsoft Excel (MacOS)", "Microsoft Powerpoint",
-    #                     "POWERPNT.EXE"]) and any(
-    #             i in event_list for i in
-    #             ["newWorkbook", "selectWorksheet", "WorksheetActivated", "newPresentation"]):
-    #             return
-    #         if path and ntpath.basename(path) not in modules.events.systemEvents.programs_to_ignore:
-    #             self.systemActivities.append(self.__startProcess(
-    #                 path, displayName=f"Open {app}"))
-    #     if e == "programClose" and app not in modules.events.systemEvents.programs_to_ignore:
-    #         title = row['title']
-    #         displayName = f"Close {title}" if title else f"Close {app}"
-    #         self.systemActivities.append(self.__closeApplication(
-    #             app=app + '*', title=row["title"], displayName=displayName))
-    #
-    #     if e == "created" and path:
-    #         if os.path.splitext(path)[1]:  # file
-    #             self.systemActivities.append(self.__createFile(
-    #                 path, displayName=f"Create {item_name}"))
-    #         else:  # directory
-    #             self.systemActivities.append(self.__createDirectory(
-    #                 path, displayName=f"Create {item_name}"))
-    #     if e in ["moved", "Unmount"] and path:
-    #         new_name = utils.utils.unicodeString(
-    #             ntpath.basename(dest_path))
-    #         if os.path.dirname(path) == os.path.dirname(dest_path):
-    #             displayName = f"Rename file as {new_name}"
-    #         else:
-    #             displayName = f"Move file to {new_name}"
-    #         self.systemActivities.append(
-    #             self.__moveFile(path, dest_path, displayName))
-    #     if e == "deleted" and path:
-    #         self.systemActivities.append(self.__delete(
-    #             path, displayName=f"Delete {item_name}"))
-    #
-    #     # word
-    #     if e == "newDocument":
-    #         self.systemActivities.append(
-    #             self.__startProcess(r"C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.exe",
-    #                                 displayName="Open Word"))
-    #     if e == "saveDocument":
-    #         return
-    #
-    #     # powerpoint
-    #     if e == "newPresentation":
-    #         # presPath = path if path else ""
-    #         # self.__powerpointScope(path=presPath, insertSlide=False)
-    #         return
-    #     if e == "newPresentationSlide" and not self.ppt_slides_inserted:
-    #         self.ppt_slides_inserted = True
-    #         presPath = path if path else ""
-    #         num_slides = len(
-    #             df[df['concept:name'] == 'newPresentationSlide'])
-    #         self.__powerpointScope(num_slides, path=presPath)
-    #     if e == "savePresentation":
-    #         return
-    #     if e == "closePresentation":
-    #         return
-
-    # delete TODO
-    # def __generateRPA_old(self, df: pandas.DataFrame):
-    #     # check if dataframe contains values
-    #     if df.empty:
-    #         return False
-    #
-    #     self.__comment("// Generated using SmartRPA available at "
-    #                    "https://github.com/bpm-diag/smartRPA")
-    #
-    #     self.__createOpenBrowser(df)
-    #     self.__createOpenExcel(df)
-    #
-    #     browserActivities = []
-    #     excelActivities = []
-    #     systemActivities = []
-    #     previousCategory = df.loc[0, 'category']
-    #     self.ppt_slides_inserted = False
-    #
-    #     for index, row in df.iterrows():
-    #         ######
-    #         # Check sequence
-    #         ######
-    #         # print(f"[DEBUG] {index}) Event={e} PreviousCat={previousCategory}, CurrentCat={currentCategory}")
-    #         # OperatingSystem and Clipboard should be in the same sequence
-    #         currentCategory = row["category"]
-    #         if (previousCategory != currentCategory) \
-    #                 and not ((previousCategory == 'OperatingSystem' and currentCategory == 'Clipboard') or
-    #                          (previousCategory == 'Clipboard' and currentCategory == 'OperatingSystem')):
-    #             previousCategory = currentCategory
-    #
-    #             if browserActivities:
-    #                 ab = self.__attachBrowser(activities=browserActivities)
-    #                 self.mainSequence.append(ab)
-    #                 browserActivities.clear()
-    #             if excelActivities:
-    #                 ea = self.__excelSpreadsheet(activities=excelActivities)
-    #                 self.mainSequence.append(ea)
-    #                 excelActivities.clear()
-    #             if systemActivities:
-    #                 sy = self.__createSequence(systemActivities, displayName="System events")
-    #                 self.mainSequence.append(sy)
-    #                 systemActivities.clear()
-    #
-    #         xmlNode = self.__generateActivities(df, row)
-    #         if xmlNode is None:
-    #             continue
-    #         if currentCategory == "Browser":
-    #             browserActivities.append(xmlNode)
-    #         if app == "Microsoft Excel":
-    #             excelActivities.append(xmlNode)
-    #         if currentCategory == "OperatingSystem":
-    #             systemActivities.append(xmlNode)
-    #
-    #     self.__handleActivitiesLists()
-    #     self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
-
-    # delete TODO
-    # def __generateRPA_decision_first(self, df: pandas.DataFrame):
-    #
-    #     # this works if there are at least 2 traces of execution
-    #     assert len(df['case:concept:name'].drop_duplicates()) >= 2
-    #
-    #     self.__comment("// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA")
-    #
-    #     df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
-    #     duplication_subset = ['concept:name', 'category', 'application', 'browser_url_hostname', 'xpath']
-    #     df['duplicated'] = df.duplicated(subset=duplication_subset, keep=False)
-    #     df = df.drop_duplicates(subset=duplication_subset, ignore_index=False, keep='first')
-    #     # at this point I have a dataframe without duplicates.
-    #     # The rows with duplicated = True are unique, the other ones should run in separate cases of a switch
-    #
-    #     self.__createOpenBrowser(df)
-    #     self.__createOpenExcel(df)
-    #
-    #     self.browserActivities = []
-    #     self.excelActivities = []
-    #     self.systemActivities = []
-    #     self.caseActivities = defaultdict(list)
-    #     self.ppt_slides_inserted = False
-    #     self.previousCategory = df.loc[0, 'category']
-    #     self.previousCaseId = df.loc[0, 'case:concept:name']
-    #     self.previousAddToSwitchCase = not df.loc[0, 'duplicated']
-    #
-    #     from tabulate import tabulate
-    #     table = []
-    #
-    #     for index, row in df.iterrows():
-    #
-    #         currentCategory = row["category"]
-    #         currentCaseId = row['case:concept:name']
-    #         addToSwitchCase = not row['duplicated']
-    #
-    #         debug1 = self.previousAddToSwitchCase
-    #         debug2 = addToSwitchCase
-    #
-    #         changeCase = (self.previousCategory != currentCategory) and not (
-    #                 (self.previousCategory == 'OperatingSystem' and currentCategory == 'Clipboard') or
-    #                 (self.previousCategory == 'Clipboard' and currentCategory == 'OperatingSystem'))
-    #         if changeCase:
-    #             self.previousCategory = currentCategory
-    #             if self.browserActivities:
-    #                 ab = self.__attachBrowser(activities=self.browserActivities)
-    #                 if not addToSwitchCase:
-    #                     self.mainSequence.append(ab)
-    #                 self.browserActivities.clear()
-    #             if self.excelActivities:
-    #                 ea = self.__excelSpreadsheet(activities=self.excelActivities)
-    #                 if not addToSwitchCase:
-    #                     self.mainSequence.append(ea)
-    #                 self.excelActivities.clear()
-    #             if self.systemActivities:
-    #                 sy = self.__createSequence(self.systemActivities, displayName="System events")
-    #                 if not addToSwitchCase:
-    #                     self.mainSequence.append(sy)
-    #                 self.systemActivities.clear()
-    #
-    #         if self.previousAddToSwitchCase != addToSwitchCase:
-    #             if self.browserActivities:
-    #                 ab = self.__attachBrowser(activities=self.browserActivities)
-    #                 if not self.previousAddToSwitchCase and addToSwitchCase:
-    #                     self.mainSequence.append(ab)
-    #
-    #                 if not addToSwitchCase:
-    #                     self.mainSequence.append(ab)
-    #                 else:
-    #                     self.caseActivities[currentCaseId].append(ab)
-    #
-    #                 self.browserActivities.clear()
-    #             if self.excelActivities:
-    #                 ea = self.__excelSpreadsheet(activities=self.excelActivities)
-    #                 if not addToSwitchCase:
-    #                     self.mainSequence.append(ea)
-    #                 else:
-    #                     self.caseActivities[currentCaseId].append(ea)
-    #                 self.excelActivities.clear()
-    #             if self.systemActivities:
-    #                 sy = self.__createSequence(self.systemActivities, displayName="System events")
-    #                 if not addToSwitchCase:
-    #                     self.mainSequence.append(sy)
-    #                 else:
-    #                     self.caseActivities[currentCaseId].append(sy)
-    #                 self.systemActivities.clear()
-    #             self.__switch(caseActivities=self.caseActivities)
-    #             self.previousAddToSwitchCase = addToSwitchCase
-    #
-    #         self.__generateActivities(df, row)
-    #
-    #         # self.previousCaseId = currentCaseId
-    #
-    #         table.append(
-    #             [index, row['concept:name'], debug1, debug2, str(self.caseActivities), str(self.browserActivities)])
-    #         # print(f"{index}) Event={row['concept:name']} {debug} caseActivities={self.caseActivities} browserActivities={self.browserActivities}")
-    #
-    #     # end for
-    #     print(tabulate(table, headers=["index", "event", "previous addSwitch", "current addSwitch", "case", "browser"],
-    #                    tablefmt="grid"))
-    #
-    #     if self.browserActivities:
-    #         ab = self.__attachBrowser(activities=self.browserActivities)
-    #         if not self.previousAddToSwitchCase:
-    #             self.mainSequence.append(ab)
-    #         else:
-    #             self.caseActivities[self.previousCaseId].append(ab)
-    #         self.browserActivities.clear()
-    #     if self.excelActivities:
-    #         ea = self.__excelSpreadsheet(activities=self.excelActivities)
-    #         if not self.previousAddToSwitchCase:
-    #             self.mainSequence.append(ea)
-    #         else:
-    #             self.caseActivities[self.previousCaseId].append(ea)
-    #         self.excelActivities.clear()
-    #     if self.systemActivities:
-    #         sy = self.__createSequence(self.systemActivities, displayName="System events")
-    #         if not self.previousAddToSwitchCase:
-    #             self.mainSequence.append(sy)
-    #         else:
-    #             self.caseActivities[self.previousCaseId].append(sy)
-    #         self.systemActivities.clear()
-    #
-    #     self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
     def __generateActivities(self, df: pandas.DataFrame, row: pandas.Series):
         ######
@@ -1568,6 +1199,10 @@ class UIPathXAML:
         if decision:
             assert len(df['case:concept:name'].drop_duplicates()) >= 2
 
+        # backwards compatibility
+        if 'xpath_full' not in df.columns:
+            df['xpath_full'] = df['xpath']
+
         # add comment to main sequence
         self.__comment("// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA")
 
@@ -1628,7 +1263,6 @@ class UIPathXAML:
 
             if categoryChange or lastIndex:
                 self.previousCategory = currentCategory
-
                 # wrap xml nodes with sequence and append to main sequence
                 if browserActivities:
                     x = self.__attachBrowser(activities=browserActivities)
@@ -1673,6 +1307,6 @@ class UIPathXAML:
         self.createBaseFile()
         # if decision, I should use df1, dataframe without duplicates,
         # duplicated events should go to main sequence only once
-        dataframe = self.df1 if decision else self.df
+        dataframe = self.df1 if decision else self.df.reset_index()
         self.__generateRPA(dataframe, decision)
         self.writeXmlToFile()
