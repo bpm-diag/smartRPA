@@ -1024,6 +1024,7 @@ class UIPathXAML:
         ######
         # Variables
         ######
+        # backwards compatibility with older logs
         try:
             e = row['event_type']
             timestamp = row['timestamp']
@@ -1160,7 +1161,14 @@ class UIPathXAML:
                 return self.__createFile(path, displayName=f"Create {item_name}")
             else:  # directory
                 return self.__createDirectory(path, displayName=f"Create {item_name}")
+        if e == "Mount":
+            self.mac_source_filepath = path
         if e in ["moved", "Unmount"] and path:
+            # logs recorded on mac do not have dest_path
+            if not dest_path:
+                dest_path = path
+                path = self.mac_source_filepath
+
             new_name = utils.utils.unicodeString(ntpath.basename(dest_path))
             if os.path.dirname(path) == os.path.dirname(dest_path):
                 displayName = f"Rename file as {new_name}"
@@ -1218,7 +1226,9 @@ class UIPathXAML:
         # dictionary with 2 keys: case id of a trace and category of events belonging to that trace
         # 2 keys are needed to keep track of different categories for each trace
         caseActivities = defaultdict(lambda: defaultdict(list))
+        # variables used when creating xml nodes
         self.ppt_slides_inserted = False
+        self.mac_source_filepath = ""
         # previous category is used to detect a change in category and it's initialised as the category of the first row
         # When a change happens, nodes are added to sequence and lists are emptied
         previousCategory = df.loc[0, 'category']
