@@ -856,6 +856,10 @@ class UIPathXAML:
         self.__comment("// Generated using SmartRPA available at "
                        "https://github.com/bpm-diag/smartRPA")
 
+        df = df.reset_index()
+        if 'xpath_full' not in df.columns:
+            df['xpath_full'] = df['xpath']
+
         # if dataframe contains browser related events add openBrowser element
         if not df.query('category=="Browser"').empty:
             url = df.loc[df['category'] == 'Browser', 'browser_url'].iloc[0]
@@ -1089,13 +1093,3 @@ class UIPathXAML:
         self.createBaseFile()
         self.__generateRPA(df)
         self.writeXmlToFile()
-
-    def test(self):
-        self.createBaseFile()
-        presPath = r"C:\Users\marco\Desktop\pres.pptx"
-        self.__powerpointScope(path=presPath, insertSlide=False)
-        self.__powerpointScope(path=presPath, insertSlide=True)
-        filename = r"/Users/marco/Desktop/RPA/ppt.xaml"
-        with open(filename, "wb") as writer:
-            writer.write(etree.tostring(self.root, pretty_print=True))
-
