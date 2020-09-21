@@ -43,18 +43,6 @@ class Preferences(QMainWindow):
         if WINDOWS:
             self.resize(360, 320)
 
-        slider_minimum = 1
-        slider_maximum = 50
-
-        self.lcd = QLCDNumber(self)
-        self.lcd.setMinimumHeight(45)
-
-        self.sld = QSlider(Qt.Horizontal, self)
-        self.sld.setMinimum(slider_minimum)
-        self.sld.setMaximum(slider_maximum)
-        self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
-        self.sld.valueChanged.connect(self.handle_slider)
-
         if WINDOWS:
             monospaceFont = 'Lucida Console'
             fontSize = 10
@@ -64,27 +52,7 @@ class Preferences(QMainWindow):
         else:
             monospaceFont = 'monospace'
             fontSize = 13
-
         font = QFont(monospaceFont, fontSize, QFont.Normal)
-        label_minimum = QLabel(str(slider_minimum),
-                               alignment=Qt.AlignLeft, font=font)
-        label_maximum = QLabel(str(slider_maximum),
-                               alignment=Qt.AlignRight, font=font)
-
-        self.slider_label = QLabel(
-            "Number of runs after which \nXES file is generated:")
-        self.slider_label.setToolTip(
-            "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file "
-            "is automatically generated, to be used for process mining techniques")
-        self.handle_slider()
-
-        confirmButton = QPushButton("OK")
-        confirmButton.setCheckable(True)
-        confirmButton.setChecked(False)
-        confirmButton.clicked.connect(self.handleButton)
-        if darkdetect.isDark():
-            confirmButton.setStyleSheet(
-                'QPushButton {background-color: #656565;}')
 
         self.process_discovery_cb = QCheckBox(
             "Enable Process Discovery \nanalysis on event log")
@@ -101,6 +69,39 @@ class Preferences(QMainWindow):
         self.decision = QRadioButton("Decision points")
         self.decision.clicked.connect(self.handle_radio)
         self.decision.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_analysis)
+
+        if self.mfr.isChecked():
+            slider_minimum = 1
+        else:
+            slider_minimum = 2
+        slider_maximum = 30
+
+        self.lcd = QLCDNumber(self)
+        self.lcd.setMinimumHeight(45)
+
+        self.sld = QSlider(Qt.Horizontal, self)
+        self.sld.setMinimum(slider_minimum)
+        self.sld.setMaximum(slider_maximum)
+        self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
+        self.sld.valueChanged.connect(self.handle_slider)
+
+        label_minimum = QLabel(str(slider_minimum), alignment=Qt.AlignLeft, font=font)
+        label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
+
+        self.slider_label = QLabel(
+            "Number of runs after which \nXES file is generated:")
+        self.slider_label.setToolTip(
+            "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file "
+            "is automatically generated, to be used for process mining techniques")
+        self.handle_slider()
+
+        confirmButton = QPushButton("OK")
+        confirmButton.setCheckable(True)
+        confirmButton.setChecked(False)
+        confirmButton.clicked.connect(self.handleButton)
+        if darkdetect.isDark():
+            confirmButton.setStyleSheet(
+                'QPushButton {background-color: #656565;}')
 
         processDiscoveryGroupBox = QGroupBox("Process Discovery")
         vbox = QVBoxLayout()
@@ -158,9 +159,11 @@ class Preferences(QMainWindow):
         utils.config.MyConfig.get_instance().enable_decision_point_analysis = decision_checked
 
         # update lcd value, if decision there should be at least 2 traces
-        if decision_checked and self.sld.value() < 2:
-            utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = 2
-            self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
+        if mfr_checked:
+            self.sld.setMinimum(1)
+            # self.sld.setValue(1)
+        else:
+            self.sld.setMinimum(2)
 
         msg = "Most frequent routine analysis enabled" if mfr_checked else "Decision point analysis enabled"
         self.status_queue.put(f"[GUI] {msg}")
@@ -785,6 +788,7 @@ class MainApplication(QMainWindow, QDialog):
     def choices(self, pm, log_filepath):
         # print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
+            # most frequent routine
             if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
                 # create high level DFG model based on all logs
                 pm.highLevelDFG()
@@ -816,6 +820,7 @@ class MainApplication(QMainWindow, QDialog):
                     UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, mostFrequentCase)
                     UiPath.generateUiPathRPA(decision=False)
 
+            # decision
             elif utils.config.MyConfig.get_instance().enable_decision_point_analysis:
                 pm.highLevelDFG()
                 pm.highLevelPetriNet()
@@ -826,7 +831,8 @@ class MainApplication(QMainWindow, QDialog):
                     UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, pm.dataframe)
                     UiPath.generateUiPathRPA(decision=True)
                 else:
-                    self.status_queue.put(f"[GUI] Could not generate UiPath script, at least 2 traces are needed\n")
+                    self.status_queue.put(f"[GUI] Could not generate UiPath script, "
+                                          f"at least 2 traces are needed in the event log\n")
 
             self.status_queue.put(f"[GUI] Done\n")
 
