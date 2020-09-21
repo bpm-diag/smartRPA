@@ -52,8 +52,7 @@ class Preferences(QMainWindow):
         self.sld = QSlider(Qt.Horizontal, self)
         self.sld.setMinimum(slider_minimum)
         self.sld.setMaximum(slider_maximum)
-        self.sld.setValue(
-            utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
+        self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
         self.sld.valueChanged.connect(self.handle_slider)
 
         if WINDOWS:
@@ -154,8 +153,15 @@ class Preferences(QMainWindow):
     def handle_radio(self):
         mfr_checked = self.mfr.isChecked()
         decision_checked = self.decision.isChecked()
+
         utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis = mfr_checked
         utils.config.MyConfig.get_instance().enable_decision_point_analysis = decision_checked
+
+        # update lcd value, if decision there should be at least 2 traces
+        if decision_checked and self.sld.value() < 2:
+            utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = 2
+            self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
+
         msg = "Most frequent routine analysis enabled" if mfr_checked else "Decision point analysis enabled"
         self.status_queue.put(f"[GUI] {msg}")
 
