@@ -161,7 +161,7 @@ class Preferences(QMainWindow):
         # update lcd value, if decision there should be at least 2 traces
         if mfr_checked:
             self.sld.setMinimum(1)
-            # self.sld.setValue(1)
+            self.sld.setValue(1)
         else:
             self.sld.setMinimum(2)
 
