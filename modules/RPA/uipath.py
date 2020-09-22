@@ -1220,7 +1220,7 @@ class UIPathXAML:
         if 'xpath_full' not in df.columns:
             df['xpath_full'] = df['xpath']
             self.__comment("// Clicking and typing into web elements is not supported with this event log. "
-                           "Record again with the latest version of SmartRPA")
+                           "Record log again with the latest version of SmartRPA")
 
         # create open browser and open excel activities
         # all the other events relative to excel and browse are attached to this activities using sequence variables
@@ -1231,18 +1231,22 @@ class UIPathXAML:
         browserActivities = []
         excelActivities = []
         systemActivities = []
+
         # dictionary with 2 keys: case id of a trace and category of events belonging to that trace
         # 2 keys are needed to keep track of different categories for each trace
         caseActivities = defaultdict(lambda: defaultdict(list))
+
         # variables used when creating xml nodes
         self.ppt_slides_inserted = False
+        #
         self.mac_source_filepath = ""
+
         # previous category is used to detect a change in category and it's initialised as the category of the first row
         # When a change happens, nodes are added to sequence and lists are emptied
         previousCategory = df.loc[0, 'category']
         df['previousDuplicated'] = df['duplicated'].shift(1) if decision else True
 
-        for i, (index, row) in enumerate(df.iterrows()):
+        for index, row in df.iterrows():
 
             # define variables
             # duplicated row is only available when performing decision points
@@ -1251,7 +1255,6 @@ class UIPathXAML:
             caseid = row['case:concept:name']
             app = row['application']
             currentCategory = row["category"]
-            e = row['concept:name']
 
             # define conditions used to determine when to append xml nodes to main sequence or switch
             # if category changes a new sequence should be written
@@ -1264,6 +1267,7 @@ class UIPathXAML:
                 currentCategory = 'OperatingSystem'
             # on last loop iteration all the remaining xml nodes should be written
             lastIndex = (index == len(df) - 1)
+            # determine if entering switch block or vice versa
             enterSwitch = previousDuplicated is True and duplicated is False
             exitSwitch = previousDuplicated is False and duplicated is True
 
@@ -1284,8 +1288,12 @@ class UIPathXAML:
             else:
                 caseActivities[caseid][currentCategory].append(xmlNode)
 
+            # handle switch
+            # if decision analysis and there are at least 2 cases in switch and
+            # the switch case is finished so the next row will go in main sequence
+            # or this is the last index
             if decision and len(caseActivities) >= 2 and (exitSwitch or lastIndex):
-                # if there are activities for the switch I need to flatten the sublists for each key
+                # wrap low level xml events into specific sequence based on type
                 for key in caseActivities.keys():
                     if caseActivities[key]["Browser"]:
                         x = self.__attachBrowser(activities=caseActivities[key]["Browser"])
@@ -1297,15 +1305,19 @@ class UIPathXAML:
                         x = self.__createSequence(activities=caseActivities[key]["OperatingSystem"],
                                                   displayName="System events")
                         caseActivities[key]["OperatingSystem"] = [x]
-
+                # if there are activities for the switch I need to flatten the sublists
+                # for each key before creating the switch
                 activities = defaultdict(list)
                 for key, value in caseActivities.items():
                     activities[key].extend(value["Browser"])
                     activities[key].extend(value["MicrosoftOffice"])
                     activities[key].extend(value["OperatingSystem"])
                 self.__switch(caseActivities=activities)
+                # empty caseActivities dictionary for later use
                 caseActivities.clear()
 
+            # if there is a change in category but I'm still inside a switch case
+            # or I entered a switch case or this is the last index
             if (categoryChange and not exitSwitch) or enterSwitch or lastIndex:
 
                 if categoryChange:
@@ -1319,11 +1331,11 @@ class UIPathXAML:
                 if excelActivities:
                     x = self.__excelSpreadsheet(activities=excelActivities)
                     self.mainSequence.append(x)
-                    browserActivities.clear()
+                    excelActivities.clear()
                 if systemActivities:
                     x = self.__createSequence(systemActivities, displayName="System events")
                     self.mainSequence.append(x)
-                    browserActivities.clear()
+                    systemActivities.clear()
 
         self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
