@@ -61,6 +61,11 @@ class UIPathXAML:
 
     # dataframe utils
     def __df_without_duplicates(self):
+        unsupported = ["selectTab", "closeTab", "selectWorksheet", "WorksheetActivated",
+                       "closePresentation", "savePresentation", "newPresentation", "saveDocument",
+                       "printWorkbook", "getRange", "getCell", "saveWorkbook"]
+        # remove rows not supported by uipath
+        self.df = self.df[~self.df['concept:name'].isin(unsupported)]
         # add hostname column to dataframe
         self.df['browser_url_hostname'] = \
             self.df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
@@ -1237,7 +1242,7 @@ class UIPathXAML:
         previousCategory = df.loc[0, 'category']
         df['previousDuplicated'] = df['duplicated'].shift(1) if decision else True
 
-        for index, row in df.iterrows():
+        for i, (index, row) in enumerate(df.iterrows()):
 
             # define variables
             # duplicated row is only available when performing decision points
