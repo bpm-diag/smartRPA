@@ -1341,7 +1341,7 @@ class UIPathXAML:
 
     # If decision is False, dataframe of the most frequent trace is passed,
     # else dataframe of the entire process
-    def generateUiPathRPA(self, decision: bool):
+    def generateUiPathRPA(self, decision: bool = False):
         self.createBaseFile()
         # if decision, I should use df1, dataframe without duplicates,
         # duplicated events should go to main sequence only once

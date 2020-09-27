@@ -72,7 +72,7 @@ try:
     from automagica import *
 except ImportError as e:
     print("Please install 'automagica' module running 'pip3 install automagica==2.0.25'")
-    print("If you get errors check here https://github.com/bpm-diag/smartRPA#automagica")
+    print("If you get errors check here https://github.com/bpm-diag/smartRPA#1-automagica")
     sys.exit()
 \n"""
         if MAC:
