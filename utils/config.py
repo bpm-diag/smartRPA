@@ -20,6 +20,6 @@ class MyConfig(PreferredConfig):
     # are not applied
     perform_process_discovery = BooleanOption('perform_process_discovery', default=True)
 
-    enable_most_frequent_routine_analysis = BooleanOption('enable_most_frequent_routine_analysis', default=True)
-
-    enable_decision_point_analysis = BooleanOption('enable_decision_point_analysis', default=False)
+    enable_most_frequent_routine_analysis = BooleanOption('enable_most_frequent_routine_analysis', default=False)
+    enable_decision_point_analysis = BooleanOption('enable_decision_point_analysis', default=True)
+    enable_decision_point_RPA_analysis = BooleanOption('enable_decision_point_RPA_analysis', default=False)

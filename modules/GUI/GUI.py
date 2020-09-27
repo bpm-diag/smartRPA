@@ -9,6 +9,7 @@ import utils.utils
 import modules.process_mining
 import utils.xesConverter
 import modules.RPA.generateRPAScript
+import modules.decisionPoints
 import utils.config
 import main
 from utils.utils import *
@@ -54,26 +55,34 @@ class Preferences(QMainWindow):
             fontSize = 13
         font = QFont(monospaceFont, fontSize, QFont.Normal)
 
+        self.decisionGroupBox = QGroupBox("Analysis type")
+
         self.process_discovery_cb = QCheckBox(
             "Enable Process Discovery \nanalysis on event log")
         self.process_discovery_cb.setToolTip("If enabled, process discovery analysis is performed automatically\n"
                                              "after selecting event log file, otherwise only event log is generated")
         self.process_discovery_cb.tag = "process_discovery_cb"
         self.process_discovery_cb.stateChanged.connect(self.handle_cb)
-        self.process_discovery_cb.setChecked(
-            utils.config.MyConfig.get_instance().perform_process_discovery)
+        perform_process_discovery = utils.config.MyConfig.get_instance().perform_process_discovery
+        self.process_discovery_cb.setChecked(perform_process_discovery)
+        self.decisionGroupBox.setEnabled(perform_process_discovery)
 
         self.mfr = QRadioButton("Most frequent routine")
         self.mfr.clicked.connect(self.handle_radio)
         self.mfr.setChecked(utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis)
+        self.mfr.setToolTip("Create SW Robot based on most frequent routine in the event log")
+
         self.decision = QRadioButton("Decision points")
         self.decision.clicked.connect(self.handle_radio)
         self.decision.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_analysis)
+        self.decision.setToolTip("Create SW Robot based on user decisions")
 
-        if self.mfr.isChecked():
-            slider_minimum = 1
-        else:
-            slider_minimum = 2
+        self.decisionRPA = QRadioButton("Decision points in RPA")
+        self.decisionRPA.clicked.connect(self.handle_radio)
+        self.decisionRPA.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis)
+        self.decisionRPA.setToolTip("Create SW Robot that asks for user decisions in UiPath script")
+
+        slider_minimum = 1
         slider_maximum = 30
 
         self.lcd = QLCDNumber(self)
@@ -108,11 +117,11 @@ class Preferences(QMainWindow):
         vbox.addWidget(self.process_discovery_cb)
         processDiscoveryGroupBox.setLayout(vbox)
 
-        decisionGroupBox = QGroupBox("Analysis type")
         vbox = QVBoxLayout()
         vbox.addWidget(self.mfr)
         vbox.addWidget(self.decision)
-        decisionGroupBox.setLayout(vbox)
+        vbox.addWidget(self.decisionRPA)
+        self.decisionGroupBox.setLayout(vbox)
 
         xesGroupBox = QGroupBox()
         vbox = QVBoxLayout()
@@ -128,7 +137,7 @@ class Preferences(QMainWindow):
 
         mainLayout = QVBoxLayout()
         mainLayout.addWidget(processDiscoveryGroupBox)
-        mainLayout.addWidget(decisionGroupBox)
+        mainLayout.addWidget(self.decisionGroupBox)
         mainLayout.addWidget(xesGroupBox)
         mainLayout.addWidget(confirmButton)
 
@@ -145,6 +154,7 @@ class Preferences(QMainWindow):
 
     def handle_cb(self):
         perform = self.process_discovery_cb.isChecked()
+        self.decisionGroupBox.setEnabled(perform)
         utils.config.MyConfig.get_instance().perform_process_discovery = perform
         if perform:
             self.status_queue.put("[GUI] Process discovery enabled")
@@ -154,9 +164,11 @@ class Preferences(QMainWindow):
     def handle_radio(self):
         mfr_checked = self.mfr.isChecked()
         decision_checked = self.decision.isChecked()
+        decisionRPA_checked = self.decisionRPA.isChecked()
 
         utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis = mfr_checked
         utils.config.MyConfig.get_instance().enable_decision_point_analysis = decision_checked
+        utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis = decisionRPA_checked
 
         # update lcd value, if decision there should be at least 2 traces
         if mfr_checked:
@@ -165,8 +177,14 @@ class Preferences(QMainWindow):
         else:
             self.sld.setMinimum(2)
 
-        msg = "Most frequent routine analysis enabled" if mfr_checked else "Decision point analysis enabled"
-        self.status_queue.put(f"[GUI] {msg}")
+        msg = "[GUI] "
+        if mfr_checked:
+            msg += "Most frequent routine analysis enabled"
+        elif decision_checked:
+            msg += "Decision point analysis enabled"
+        elif decisionRPA_checked:
+            msg += "Decision point analysis in RPA script enabled"
+        self.status_queue.put(msg)
 
     def handleButton(self):
         self.close()
@@ -788,18 +806,17 @@ class MainApplication(QMainWindow, QDialog):
     def choices(self, pm, log_filepath):
         # print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
+            pm.highLevelDFG()
+            pm.highLevelPetriNet()
+
             # most frequent routine
             if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
-                # create high level DFG model based on all logs
-                pm.highLevelDFG()
-                pm.highLevelPetriNet()
+
+                # create high level DFG model based on most frequent routine
                 pm.highLevelBPMN()
 
-                # open BPMN
-                utils.utils.open_file(
-                    os.path.join(pm.discovery_path,
-                                 f'{utils.utils.getFilename(log_filepath[-1]).strip("_combined")}_BPMN.pdf')
-                )
+                # open high level BPMN
+                utils.utils.open_file(pm.bpmn_path)
 
                 # ask if some fields should be changed before generating RPA script
                 # build choices dialog, passing low level most frequent case to analyze
@@ -822,8 +839,40 @@ class MainApplication(QMainWindow, QDialog):
 
             # decision
             elif utils.config.MyConfig.get_instance().enable_decision_point_analysis:
-                pm.highLevelDFG()
-                pm.highLevelPetriNet()
+
+                # open high level DFG
+                utils.utils.open_file(pm.dfg_path)
+
+                # ask what to do if decisions could be made
+                d = modules.decisionPoints.DecisionPoints(pm.dataframe)
+                decided_dataframe = d.generateDecisionDataframe()
+
+                # create high level DFG model based on most frequent routine
+                pm.highLevelBPMN(df=decided_dataframe)
+
+                # open high level BPMN
+                utils.utils.open_file(pm.bpmn_path)
+
+                # ask if some fields should be changed before generating RPA script
+                # build choices dialog, passing low level most frequent case to analyze
+                choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(decided_dataframe)
+                # when OK button is pressed
+                if choicesDialog.exec_() in [0, 1]:
+                    decided_dataframe_with_choices = choicesDialog.df
+
+                    # create RPA based on most frequent path
+                    rpa = modules.RPA.generateRPAScript.RPAScript(
+                        log_filepath[-1], self.status_queue)
+                    rpa.generateRPAMostFrequentPath(decided_dataframe_with_choices)
+
+                    pm.highLevelBPMN(df=decided_dataframe_with_choices, name="BPMN_final")
+                    self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
+
+                    # create UiPath RPA script passing dataframe with only the most frequent trace
+                    UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, decided_dataframe_with_choices)
+                    UiPath.generateUiPathRPA()
+
+            elif utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis:  # decision point in RPA script at run time
                 self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
                 # at least 2 traces are needed to perform decision analysis
                 if len(pm.dataframe['case:concept:name'].drop_duplicates()) >= 2:
@@ -834,7 +883,7 @@ class MainApplication(QMainWindow, QDialog):
                     self.status_queue.put(f"[GUI] Could not generate UiPath script, "
                                           f"at least 2 traces are needed in the event log\n")
 
-            self.status_queue.put(f"[GUI] Done\n")
+        self.status_queue.put(f"[GUI] Done\n")
 
     # Generate xes file from multiple csv, each csv corresponds to a trace
     def handleRunCount(self, log_filepath):
