@@ -58,9 +58,10 @@ The architecture of SmartRPA integrates five main SW components.
 
 - [x] **Action Logger**, log user behaviour, cross-platform, modular, supports wide range of applications;
 - [x] **Log Processing**, generates both CSV and XES event log;
-- [x] **Event abstraction**, abstracts events to a high level;
-- [x] **Process Discovery**, selects the most frequent routine to automate and generates high-level flowchart diagram of such routine thus skipping completely manual modeling;
-- [x] **RPA**, implements and enacts a SW robot emulating the best (most frequent) routine reflecting the observed behavior. Available both as a cross-platform Python script and as a UiPath project.
+- [x] **Event abstraction**, abstracts events to a higher level;
+- [x] **Process Discovery**, selects the most frequent routine to automate and generates high-level flowchart diagram of the selected routine, thus skipping completely the manual modeling activity;
+- [x] **Decision Points**, discover differencies between multiple traces in a process and builds a new routine based on used decisions;
+- [x] **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform _Python script_ and as a _UiPath_ project.
 
 A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf).
 
