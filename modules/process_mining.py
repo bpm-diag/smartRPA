@@ -69,10 +69,14 @@ class ProcessMining:
         self._create_directories()
         self._log = self._handle_log()
 
-        if utils.config.MyConfig.get_instance().perform_process_discovery:
+        self.dfg_path = os.path.join(self.discovery_path, f"{self.filename}_DFG_model.pdf")
+        self.bpmn_path = os.path.join(self.discovery_path, f"{self.filename}_BPMN.pdf")
+
+        if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
             print(f"[PROCESS MINING] Performing process discovery")
             # low level trace used for RPA generation
             self.mostFrequentCase = self.selectMostFrequentCase()
+
 
     def _create_directories(self):
         # create directory if does not exists
@@ -666,13 +670,13 @@ class ProcessMining:
         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
         self._create_image(bpmn_figure, "BPMN")
 
-    def highLevelDFG(self, name="DFG_model"):
+    def highLevelDFG(self):
         try:
             df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
             dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
             gviz_parameters = self._createImageParameters(log=log, high_level=True)
             gviz = dfg_vis_factory.apply(dfg, log=log, variant="frequency", parameters=gviz_parameters)
-            self._create_image(gviz, name)
+            self._create_image(gviz, "DFG_model")
         except Exception as e:
             print(f"[PROCESS MINING] Could not create DFG: {e}")
             return False
