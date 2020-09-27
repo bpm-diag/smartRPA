@@ -12,7 +12,7 @@ from utils.utils import WINDOWS
 
 
 class ChoicesDialog(QDialog):
-    # df is low level dataframe with all the actions
+    # df is low level dataframe of the selected most frequent routine
     def __init__(self, df: pandas.DataFrame):
         super(ChoicesDialog, self).__init__(flags=Qt.Window |
                                                   Qt.WindowTitleHint |
