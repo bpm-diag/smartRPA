@@ -15,6 +15,9 @@ class DecisionPoints:
 
     # dataframe utils
     def __df_without_duplicates(self, ignore_index=True):
+        # application name of browsers is set to Chrome for all traces,
+        # otherwise there would be false positive decision points
+        self.df.loc[self.df['application'].isin(['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
         # add hostname column to dataframe
         self.df['browser_url_hostname'] = \
             self.df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
@@ -39,7 +42,7 @@ class DecisionPoints:
                 'case:concept:name': trace,
                 'category': ','.join(df2['category'].unique()),
                 'application': ','.join(df2['application'].unique()),
-                'events': ','.join(df2['concept:name'].unique()),
+                'events': ', '.join(df2['concept:name'].unique()),
                 'url': ', '.join(df2['browser_url_hostname'].unique()),
                 'keywords': keywords,
                 'path': ','.join(filter(None, df2['event_src_path'].unique())),
