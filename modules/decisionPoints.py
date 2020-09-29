@@ -1,4 +1,7 @@
 import sys
+
+from PyQt5 import QtWidgets
+
 sys.path.append('../')
 import ntpath
 import pandas
@@ -11,24 +14,41 @@ class DecisionPoints:
 
     def __init__(self, df: pandas.DataFrame):
         self.df = df
-        self.df1 = self.__df_without_duplicates()
+        self.duplication_subset = ['concept:name', 'category', 'application', 'browser_url_hostname', 'xpath']
+        self.df1 = self.__handle_df()
 
-    # dataframe utils
-    def __df_without_duplicates(self, ignore_index=True):
+    def __handle_df(self):
+
+        df1 = self.df
+
+        # remove rows with 'about:blank' url and with irrelevant events
+        df1 = df1[(df1['browser_url'] != 'about:blank') & (~df1['concept:name'].isin(['zoomTab']))]
+
         # application name of browsers is set to Chrome for all traces,
         # otherwise there would be false positive decision points
-        self.df.loc[self.df['application'].isin(['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
-        # add hostname column to dataframe
-        self.df['browser_url_hostname'] = \
-            self.df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
-        # add duplicated column to dataframe, boolean indicating if each row is duplicated
-        # The rows with duplicated = True are unique, the other ones should run in separate cases of a switch
-        duplication_subset = ['concept:name', 'category', 'application', 'browser_url_hostname', 'xpath']
-        self.df['duplicated'] = self.df.duplicated(subset=duplication_subset, keep=False)
-        # dataframe without duplicates and with 'duplicated' column indicated if the row should go to main sequence or switch
-        return self.df.drop_duplicates(subset=duplication_subset, ignore_index=ignore_index, keep='first')
+        df1.loc[df1['application'].isin(['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
 
-    def __generateKeywordsDataframe(self, traces: list, decisionDataframe: pandas.DataFrame):
+        # add hostname column to dataframe
+        df1['browser_url_hostname'] = \
+            df1['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
+
+        # two rows are considered as duplicated if the values in these columns are the same
+        duplicated = df1.duplicated(subset=self.duplication_subset, keep=False)
+        # fix for links with the same url in the same trace, without this they would be considered duplicated
+        link_duplicated = df1.loc[(df1['concept:name'].eq('link'))] \
+            .duplicated(subset=['concept:name', 'browser_url'], keep=False)
+        # add duplicated column to dataframe, boolean indicating if a row is duplicated
+        df1['duplicated'] = duplicated
+
+        # When a change happens, nodes are added to sequence and lists are emptied
+        df1['previousDuplicated'] = df1['duplicated'].shift(1)
+
+        # dataframe without duplicates and with 'duplicated' column indicated if the row should go to main sequence or switch
+        # df1.drop_duplicates(subset=duplication_subset, ignore_index=ignore_index, keep='first')
+
+        return df1
+
+    def __generateKeywordsDataframe_old(self, traces: list, decisionDataframe: pandas.DataFrame):
         s = []
         for trace in traces:
             df2 = decisionDataframe.loc[decisionDataframe['case:concept:name'] == trace]
@@ -51,20 +71,38 @@ class DecisionPoints:
         keywordsDataframe = pandas.DataFrame(s)
         return keywordsDataframe
 
-    def generateDecisionDataframe(self):
-        df = self.df1
+    def __generateKeywordsDataframe(self, dataframe: pandas.DataFrame):
+        s = []
+        for group, df2 in dataframe.groupby('case:concept:name'):
+            category = ','.join(df2['category'].unique())
+            if 'Browser' in category:
+                keywords = ','.join(filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
+            elif 'MicrosoftOffice' in category:
+                keywords = ','.join(filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
+            else:
+                keywords = ''
+            s.append({
+                'case:concept:name': df2['case:concept:name'].unique()[0],
+                'category': ','.join(df2['category'].unique()),
+                'application': ','.join(df2['application'].unique()),
+                'events': ', '.join(df2['concept:name'].unique()),
+                'url': ', '.join(df2['browser_url_hostname'].unique()),
+                'keywords': keywords,
+                'path': ','.join(filter(None, df2['event_src_path'].unique())),
+                'cells': ','.join(filter(None, df2['cell_range'].unique()))
+            })
+        keywordsDataframe = pandas.DataFrame(s)
+        return keywordsDataframe
 
+    def generateDecisionDataframe_old(self):
+        df = self.df1
         # there must be at least 2 traces in order to make a decision
         assert len(df['case:concept:name'].drop_duplicates()) >= 2
 
         # list to store dataframe rows
         series = []
-
         # dictionary to store dataframe rows that should be XORed
         caseActivities = defaultdict(list)
-
-        # When a change happens, nodes are added to sequence and lists are emptied
-        df['previousDuplicated'] = df['duplicated'].shift(1)
 
         for index, row in df.iterrows():
 
@@ -105,7 +143,7 @@ class DecisionPoints:
                 # empty caseActivities dictionary for later use
                 caseActivities.clear()
 
-                # app = QtWidgets.QApplication(sys.argv)
+                app = QtWidgets.QApplication(sys.argv) # DEBUG, REMOVE TODO
                 decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
                 # decisionDialog.show()
                 # when button is pressed
@@ -116,4 +154,35 @@ class DecisionPoints:
 
             if lastIndex:
                 # create and return new pandas datfaframe built from rows previously saved
-                return pandas.DataFrame(series).sort_index()
+                return pandas.DataFrame(series) \
+                    .sort_index() \
+                    .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')
+
+    def generateDecisionDataframe(self):
+        df = self.df1
+        # there must be at least 2 traces in order to make a decision
+        assert len(df['case:concept:name'].drop_duplicates()) >= 2
+        # list to store all dataframes, from which to build final dataframe with decisions
+        dataframes = []
+        s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        for group, dataframe in df.groupby(s):
+            try:
+                d = dataframe['duplicated'].unique()[0]
+            except IndexError:
+                d = True
+            if d:  # add to final dataframe
+                dataframes.append(dataframe)
+            else:  # decision point
+                # create keywords dataframe to display to the user
+                keywordsDF = self.__generateKeywordsDataframe(dataframe)
+                # open dialog UI
+                decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
+                # when button is pressed
+                if decisionDialog.exec_() in [0, 1]:
+                    decidedDF = dataframe.loc[dataframe['case:concept:name'] == decisionDialog.selectedTrace]
+                    dataframes.append(decidedDF)
+        # create and return new pandas datfaframe built from rows previously saved
+        return pandas.concat(dataframes) \
+            .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')\
+            .sort_index()
+
