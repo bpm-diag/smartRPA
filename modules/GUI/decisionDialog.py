@@ -67,7 +67,7 @@ class DecisionDialog(QDialog):
 
         # layout
         mainLayout = QVBoxLayout()
-        mainLayout.addWidget(QLabel(f"{numberOfTraces} decision points found"))
+        mainLayout.addWidget(QLabel(f"Which trace do you want to execute?"))
         mainLayout.addWidget(self.table)
         mainLayout.addWidget(self.buttonBox)
         self.setLayout(mainLayout)
