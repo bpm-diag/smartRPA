@@ -3,8 +3,8 @@
 // ********************
 
 function timestamp(){
-    //return moment().format("YYYY-MM-DD HH:mm:ss:SSSSSS")
-    return moment().toISOString().replace('Z', '');
+    const timezoneOffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    return (new Date(Date.now() - timezoneOffset)).toISOString().slice(0, -1);
 }
 
 function userAgent(string){
