@@ -77,12 +77,12 @@ class Preferences(QMainWindow):
         self.decision.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_analysis)
         self.decision.setToolTip("Create SW Robot based on user decisions")
 
-        self.decisionRPA = QRadioButton("Decision points in RPA")
+        self.decisionRPA = QRadioButton("Decision points in UiPath")
         self.decisionRPA.clicked.connect(self.handle_radio)
         self.decisionRPA.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis)
         self.decisionRPA.setToolTip("Create SW Robot that asks for user decisions in UiPath script")
 
-        slider_minimum = 1
+        slider_minimum = 1 if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis else 2
         slider_maximum = 30
 
         self.lcd = QLCDNumber(self)
@@ -94,7 +94,7 @@ class Preferences(QMainWindow):
         self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
         self.sld.valueChanged.connect(self.handle_slider)
 
-        label_minimum = QLabel(str(slider_minimum), alignment=Qt.AlignLeft, font=font)
+        label_minimum = QLabel(str(1), alignment=Qt.AlignLeft, font=font)
         label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
 
         self.slider_label = QLabel(
@@ -806,12 +806,13 @@ class MainApplication(QMainWindow, QDialog):
     def choices(self, pm, log_filepath):
         # print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
+            num_traces = len(pm.dataframe['case:concept:name'].drop_duplicates())
             pm.highLevelDFG()
             pm.highLevelPetriNet()
+            self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
 
             # most frequent routine
             if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
-
                 # create high level DFG model based on most frequent routine
                 pm.highLevelBPMN()
 
@@ -831,7 +832,6 @@ class MainApplication(QMainWindow, QDialog):
                     rpa.generateRPAMostFrequentPath(mostFrequentCase)
 
                     pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
-                    self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
 
                     # create UiPath RPA script passing dataframe with only the most frequent trace
                     UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, mostFrequentCase)
@@ -840,47 +840,50 @@ class MainApplication(QMainWindow, QDialog):
             # decision
             elif utils.config.MyConfig.get_instance().enable_decision_point_analysis:
 
-                # open high level DFG
-                utils.utils.open_file(pm.dfg_path)
+                if num_traces >= 2:
+                    # open high level DFG
+                    utils.utils.open_file(pm.dfg_path)
 
-                # ask what to do if decisions could be made
-                d = modules.decisionPoints.DecisionPoints(pm.dataframe)
-                decided_dataframe = d.generateDecisionDataframe()
+                    # ask what to do if decisions could be made
+                    d = modules.decisionPoints.DecisionPoints(pm.dataframe)
+                    decided_dataframe = d.generateDecisionDataframe()
 
-                # create high level DFG model based on most frequent routine
-                pm.highLevelBPMN(df=decided_dataframe)
+                    # create high level DFG model based on most frequent routine
+                    pm.highLevelBPMN(df=decided_dataframe)
 
-                # open high level BPMN
-                utils.utils.open_file(pm.bpmn_path)
+                    # open high level BPMN
+                    utils.utils.open_file(pm.bpmn_path)
 
-                # ask if some fields should be changed before generating RPA script
-                # build choices dialog, passing low level most frequent case to analyze
-                choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(decided_dataframe)
-                # when OK button is pressed
-                if choicesDialog.exec_() in [0, 1]:
-                    decided_dataframe_with_choices = choicesDialog.df
+                    # ask if some fields should be changed before generating RPA script
+                    # build choices dialog, passing low level most frequent case to analyze
+                    choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(decided_dataframe)
+                    # when OK button is pressed
+                    if choicesDialog.exec_() in [0, 1]:
+                        decided_dataframe_with_choices = choicesDialog.df
 
-                    # create RPA based on most frequent path
-                    rpa = modules.RPA.generateRPAScript.RPAScript(
-                        log_filepath[-1], self.status_queue)
-                    rpa.generateRPAMostFrequentPath(decided_dataframe_with_choices)
+                        # create RPA based on most frequent path
+                        rpa = modules.RPA.generateRPAScript.RPAScript(
+                            log_filepath[-1], self.status_queue)
+                        rpa.generateRPAMostFrequentPath(decided_dataframe_with_choices)
 
-                    pm.highLevelBPMN(df=decided_dataframe_with_choices, name="BPMN_final")
-                    self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
+                        pm.highLevelBPMN(df=decided_dataframe_with_choices, name="BPMN_final")
+                        self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
 
-                    # create UiPath RPA script passing dataframe with only the most frequent trace
-                    UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, decided_dataframe_with_choices)
-                    UiPath.generateUiPathRPA()
+                        # create UiPath RPA script passing dataframe with only the most frequent trace
+                        UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, decided_dataframe_with_choices)
+                        UiPath.generateUiPathRPA()
+                    else:
+                        self.status_queue.put(f"[GUI] Could not perform decision points analysis, "
+                                              f"at least 2 traces are needed in the event log\n")
 
             elif utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis:  # decision point in RPA script at run time
-                self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
                 # at least 2 traces are needed to perform decision analysis
-                if len(pm.dataframe['case:concept:name'].drop_duplicates()) >= 2:
+                if num_traces >= 2:
                     # create UiPath RPA script passing dataframe of entire process
                     UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, pm.dataframe)
                     UiPath.generateUiPathRPA(decision=True)
                 else:
-                    self.status_queue.put(f"[GUI] Could not generate UiPath script, "
+                    self.status_queue.put(f"[GUI] Could not perform decision points analysis, "
                                           f"at least 2 traces are needed in the event log\n")
 
         self.status_queue.put(f"[GUI] Done\n")
