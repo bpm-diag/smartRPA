@@ -77,6 +77,8 @@ class DecisionPoints:
                 'cells': ','.join(filter(None, df2['cell_range'].unique()))
             })
         keywordsDataframe = pandas.DataFrame(s)
+        # remove duplicate decision points
+        keywordsDataframe = keywordsDataframe.drop_duplicates(subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
         return keywordsDataframe
 
     def generateDecisionDataframe_old(self):
