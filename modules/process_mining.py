@@ -15,7 +15,7 @@ import utils.config
 import utils.utils
 import utils.utils
 from fuzzywuzzy import fuzz
-from datetime import datetime
+from datetime import datetime, timedelta
 from multiprocessing.queues import Queue
 
 try:
@@ -696,8 +696,25 @@ class ProcessMining:
             print(f"[PROCESS MINING] Could not create Petri Net: {e}")
             return False
 
-    def highLevelBPMN(self, df: pandas.DataFrame = None, name="BPMN"):
+    def highLevelBPMN(self, df: pandas.DataFrame = None, name="BPMN", decisionPoints=False):
         try:
+            # during decision points analysis, the final BPMN may have unordered timestamps which may lead
+            # to an incorrect representation. Since the order of events is given by row index, timestamps
+            # are reset to sequential number starting from the first timestamp and adding 1 second for each row,
+            # thus obtaining a linear BPMN
+            if decisionPoints:
+                try:
+                    first_timestamp = datetime.fromisoformat(str(df.reset_index()['time:timestamp'].iloc[0]))
+                    for i, (index, row) in enumerate(df.iterrows()):
+                        df.loc[index, 'time:timestamp'] = first_timestamp + timedelta(minutes=i+1, seconds=i+1)
+                    # debug_path = "/Users/marco/Desktop/decided.csv"
+                    # if os.path.exists(debug_path):
+                    #     os.remove(debug_path)
+                    # df.to_csv(debug_path)
+                except Exception as e:
+                    print(f"[PROCESS MINING] Could not reorder timestamps for BPMN: {e}")
+                    pass
+
             df, log, parameters = self.aggregateData(df, remove_duplicates=True)
             net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
             bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
