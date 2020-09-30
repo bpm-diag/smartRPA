@@ -32,13 +32,20 @@ class DecisionPoints:
         df1['browser_url_hostname'] = \
             df1['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
 
-        # two rows are considered as duplicated if the values in these columns are the same
-        duplicated = df1.duplicated(subset=self.duplication_subset, keep=False)
-        # fix for links with the same url in the same trace, without this they would be considered duplicated
-        link_duplicated = df1.loc[(df1['concept:name'].eq('link'))] \
-            .duplicated(subset=['concept:name', 'browser_url'], keep=False)
-        # add duplicated column to dataframe, boolean indicating if a row is duplicated
-        df1['duplicated'] = duplicated
+        # Use crosstab for get counts per ID and combinations (url_host, action)
+        df_temp = pandas.crosstab(
+            [df1['category'], df1['application'], df1['browser_url_hostname'], df1['concept:name']],
+            df1['case:concept:name'])
+
+        # test only rows with greater like 1 for match at least one value in all groups
+        df_temp = (df_temp.reset_index().loc[df_temp.gt(0).all(axis=1).to_numpy(),
+                                             ['category', 'application', 'browser_url_hostname', 'concept:name']])
+
+        # use DataFrame.merge with indicator parameter for test if match filtered rows in original data
+        mask = df1.merge(df_temp, how='left', indicator=True)['_merge'].eq('both')
+
+        # generate column from mask
+        df1['duplicated'] = mask.to_list()
 
         # When a change happens, nodes are added to sequence and lists are emptied
         df1['previousDuplicated'] = df1['duplicated'].shift(1)
@@ -47,29 +54,6 @@ class DecisionPoints:
         # df1.drop_duplicates(subset=duplication_subset, ignore_index=ignore_index, keep='first')
 
         return df1
-
-    def __generateKeywordsDataframe_old(self, traces: list, decisionDataframe: pandas.DataFrame):
-        s = []
-        for trace in traces:
-            df2 = decisionDataframe.loc[decisionDataframe['case:concept:name'] == trace]
-            category = ','.join(df2['category'].unique())
-            keywords = ''
-            if 'Browser' in category:
-                keywords = ','.join(filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
-            elif 'MicrosoftOffice' in category:
-                keywords = ','.join(filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
-            s.append({
-                'case:concept:name': trace,
-                'category': ','.join(df2['category'].unique()),
-                'application': ','.join(df2['application'].unique()),
-                'events': ', '.join(df2['concept:name'].unique()),
-                'url': ', '.join(df2['browser_url_hostname'].unique()),
-                'keywords': keywords,
-                'path': ','.join(filter(None, df2['event_src_path'].unique())),
-                'cells': ','.join(filter(None, df2['cell_range'].unique()))
-            })
-        keywordsDataframe = pandas.DataFrame(s)
-        return keywordsDataframe
 
     def __generateKeywordsDataframe(self, dataframe: pandas.DataFrame):
         s = []
@@ -86,7 +70,8 @@ class DecisionPoints:
                 'category': ','.join(df2['category'].unique()),
                 'application': ','.join(df2['application'].unique()),
                 'events': ', '.join(df2['concept:name'].unique()),
-                'url': ', '.join(df2['browser_url_hostname'].unique()),
+                'hostname': ', '.join(df2['browser_url_hostname'].unique()),
+                'url': ', '.join(df2['browser_url'].unique()),
                 'keywords': keywords,
                 'path': ','.join(filter(None, df2['event_src_path'].unique())),
                 'cells': ','.join(filter(None, df2['cell_range'].unique()))
