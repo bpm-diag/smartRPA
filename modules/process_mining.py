@@ -702,18 +702,18 @@ class ProcessMining:
             # to an incorrect representation. Since the order of events is given by row index, timestamps
             # are reset to sequential number starting from the first timestamp and adding 1 second for each row,
             # thus obtaining a linear BPMN
-            if decisionPoints:
-                try:
-                    first_timestamp = datetime.fromisoformat(str(df.reset_index()['time:timestamp'].iloc[0]))
-                    for i, (index, row) in enumerate(df.iterrows()):
-                        df.loc[index, 'time:timestamp'] = first_timestamp + timedelta(minutes=i+1, seconds=i+1)
-                    # debug_path = "/Users/marco/Desktop/decided.csv"
-                    # if os.path.exists(debug_path):
-                    #     os.remove(debug_path)
-                    # df.to_csv(debug_path)
-                except Exception as e:
-                    print(f"[PROCESS MINING] Could not reorder timestamps for BPMN: {e}")
-                    pass
+            # if decisionPoints:
+            #     try:
+            #         first_timestamp = datetime.fromisoformat(str(df.reset_index()['time:timestamp'].iloc[0]))
+            #         for i, (index, row) in enumerate(df.iterrows()):
+            #             df.loc[index, 'time:timestamp'] = first_timestamp + timedelta(minutes=i+1, seconds=i+1)
+            #         # debug_path = "/Users/marco/Desktop/decided.csv"
+            #         # if os.path.exists(debug_path):
+            #         #     os.remove(debug_path)
+            #         # df.to_csv(debug_path)
+            #     except Exception as e:
+            #         print(f"[PROCESS MINING] Could not reorder timestamps for BPMN: {e}")
+            #         pass
 
             df, log, parameters = self.aggregateData(df, remove_duplicates=True)
             net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
