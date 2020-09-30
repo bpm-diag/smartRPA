@@ -849,7 +849,7 @@ class MainApplication(QMainWindow, QDialog):
                     decided_dataframe = d.generateDecisionDataframe()
 
                     # create high level DFG model based on most frequent routine
-                    pm.highLevelBPMN(df=decided_dataframe)
+                    pm.highLevelBPMN(df=decided_dataframe, decisionPoints=True)
 
                     # open high level BPMN
                     utils.utils.open_file(pm.bpmn_path)
@@ -866,7 +866,7 @@ class MainApplication(QMainWindow, QDialog):
                             log_filepath[-1], self.status_queue)
                         rpa.generateRPAMostFrequentPath(decided_dataframe_with_choices)
 
-                        pm.highLevelBPMN(df=decided_dataframe_with_choices, name="BPMN_final")
+                        pm.highLevelBPMN(df=decided_dataframe_with_choices, name="BPMN_final", decisionPoints=True)
                         self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
 
                         # create UiPath RPA script passing dataframe with only the most frequent trace
