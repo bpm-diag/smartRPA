@@ -1,57 +1,64 @@
+from collections import defaultdict
+import modules.GUI.decisionDialog
+import utils.utils
+import pandas
+import ntpath
 import sys
 
 from PyQt5 import QtWidgets
 
 sys.path.append('../')
-import ntpath
-import pandas
-import utils.utils
-import modules.GUI.decisionDialog
-from collections import defaultdict
 
 
 class DecisionPoints:
 
     def __init__(self, df: pandas.DataFrame):
         self.df = df
-        self.duplication_subset = ['concept:name', 'category', 'application', 'browser_url_hostname', 'xpath']
+        self.duplication_subset = [
+            'concept:name', 'category', 'application', 'browser_url_hostname', 'xpath']
         self.df1 = self.__handle_df()
 
     def __handle_df(self):
-
         df1 = self.df
 
-        # remove rows with 'about:blank' url and with irrelevant events
-        df1 = df1[(df1['browser_url'] != 'about:blank') & (~df1['concept:name'].isin(['zoomTab']))]
+        # *************
+        # preprocessing
+        # *************
 
+        # remove rows with 'about:blank' url and with irrelevant events
+        df1 = df1[(df1['browser_url'] != 'about:blank') &
+                  (~df1['concept:name'].isin(['zoomTab']))]
         # application name of browsers is set to Chrome for all traces,
         # otherwise there would be false positive decision points
-        df1.loc[df1['application'].isin(['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
-
+        df1.loc[df1['application'].isin(
+            ['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
         # add hostname column to dataframe
         df1['browser_url_hostname'] = \
-            df1['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
+            df1['browser_url'].apply(
+                lambda url: utils.utils.getHostname(url)).fillna('')
+
+        # *************
+        # marking duplicates among all distinct groups
+        # *************
 
         # Use crosstab for get counts per ID and combinations (url_host, action)
-        df_temp = pandas.crosstab(
-            [df1['category'], df1['application'], df1['browser_url_hostname'], df1['concept:name']],
-            df1['case:concept:name'])
+        df_temp = pandas.crosstab([
+            df1['category'], df1['application'], df1['browser_url_hostname'],
+            df1['concept:name'], df1['clipboard_content'], df1['event_src_path']
+        ], df1['case:concept:name'])
 
         # test only rows with greater like 1 for match at least one value in all groups
-        df_temp = (df_temp.reset_index().loc[df_temp.gt(0).all(axis=1).to_numpy(),
-                                             ['category', 'application', 'browser_url_hostname', 'concept:name']])
+        df_temp = (df_temp.reset_index().loc[
+            df_temp.gt(0).all(axis=1).to_numpy(),
+            ['category', 'application', 'browser_url_hostname',
+             'concept:name', 'clipboard_content', 'event_src_path']
+        ])
 
         # use DataFrame.merge with indicator parameter for test if match filtered rows in original data
         mask = df1.merge(df_temp, how='left', indicator=True)['_merge'].eq('both')
 
-        # generate column from mask
+        # generate duplicated column from mask
         df1['duplicated'] = mask.to_list()
-
-        # When a change happens, nodes are added to sequence and lists are emptied
-        df1['previousDuplicated'] = df1['duplicated'].shift(1)
-
-        # dataframe without duplicates and with 'duplicated' column indicated if the row should go to main sequence or switch
-        # df1.drop_duplicates(subset=duplication_subset, ignore_index=ignore_index, keep='first')
 
         return df1
 
@@ -60,9 +67,11 @@ class DecisionPoints:
         for group, df2 in dataframe.groupby('case:concept:name'):
             category = ','.join(df2['category'].unique())
             if 'Browser' in category:
-                keywords = ','.join(filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
+                keywords = ','.join(
+                    filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
             elif 'MicrosoftOffice' in category:
-                keywords = ','.join(filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
+                keywords = ','.join(
+                    filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
             else:
                 keywords = ''
             s.append({
@@ -77,8 +86,9 @@ class DecisionPoints:
                 'cells': ','.join(filter(None, df2['cell_range'].unique()))
             })
         keywordsDataframe = pandas.DataFrame(s)
-        # remove duplicate decision points
-        keywordsDataframe = keywordsDataframe.drop_duplicates(subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
+        # remove duplicate decision points, considering all fields except caseID, which is the first one
+        keywordsDataframe = keywordsDataframe.drop_duplicates(
+            subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
         return keywordsDataframe
 
     def generateDecisionDataframe_old(self):
@@ -90,6 +100,9 @@ class DecisionPoints:
         series = []
         # dictionary to store dataframe rows that should be XORed
         caseActivities = defaultdict(list)
+
+        # When a change happens, nodes are added to sequence and lists are emptied
+        df['previousDuplicated'] = df['duplicated'].shift(1)
 
         for index, row in df.iterrows():
 
@@ -124,14 +137,14 @@ class DecisionPoints:
                 decisionDataframe = pandas.DataFrame(s).sort_index()
 
                 # create keywords dataframe to display to the user
-                keywordsDF = self.__generateKeywordsDataframe(traces=list(caseActivities.keys()),
-                                                              decisionDataframe=decisionDataframe)
+                keywordsDF = self.__generateKeywordsDataframe(decisionDataframe)
 
                 # empty caseActivities dictionary for later use
                 caseActivities.clear()
 
-                app = QtWidgets.QApplication(sys.argv) # DEBUG, REMOVE TODO
-                decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
+                app = QtWidgets.QApplication(sys.argv)  # DEBUG, REMOVE TODO
+                decisionDialog = modules.GUI.decisionDialog.DecisionDialog(
+                    keywordsDF)
                 # decisionDialog.show()
                 # when button is pressed
                 if decisionDialog.exec_() in [0, 1]:
@@ -152,7 +165,8 @@ class DecisionPoints:
         # list to store all dataframes, from which to build final dataframe with decisions
         dataframes = []
         s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
-        for group, dataframe in df.groupby(s):
+        duplicated_groups = df.groupby(s)
+        for group, dataframe in duplicated_groups:
             try:
                 d = dataframe['duplicated'].unique()[0]
             except IndexError:
@@ -163,13 +177,14 @@ class DecisionPoints:
                 # create keywords dataframe to display to the user
                 keywordsDF = self.__generateKeywordsDataframe(dataframe)
                 # open dialog UI
-                decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
+                decisionDialog = modules.GUI.decisionDialog.DecisionDialog(
+                    keywordsDF)
                 # when button is pressed
                 if decisionDialog.exec_() in [0, 1]:
-                    decidedDF = dataframe.loc[dataframe['case:concept:name'] == decisionDialog.selectedTrace]
+                    decidedDF = dataframe.loc[dataframe['case:concept:name']
+                                              == decisionDialog.selectedTrace]
                     dataframes.append(decidedDF)
         # create and return new pandas datfaframe built from rows previously saved
         return pandas.concat(dataframes) \
             .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')\
             .sort_index()
-
