@@ -120,7 +120,7 @@ class Preferences(QMainWindow):
         vbox = QVBoxLayout()
         vbox.addWidget(self.mfr)
         vbox.addWidget(self.decision)
-        vbox.addWidget(self.decisionRPA)
+        #vbox.addWidget(self.decisionRPA)
         self.decisionGroupBox.setLayout(vbox)
 
         xesGroupBox = QGroupBox()
@@ -845,7 +845,7 @@ class MainApplication(QMainWindow, QDialog):
                     utils.utils.open_file(pm.dfg_path)
 
                     # ask what to do if decisions could be made
-                    d = modules.decisionPoints.DecisionPoints(pm.dataframe)
+                    d = modules.decisionPoints.DecisionPoints(pm.dataframe, self.status_queue)
                     decided_dataframe = d.generateDecisionDataframe()
 
                     # create high level DFG model based on most frequent routine
