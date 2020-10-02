@@ -155,6 +155,9 @@ class ProcessMining:
             # dataframe of combined csv, sorted by timestamp
             combined_csv = pandas.concat(csv_to_combine)
 
+            # remove rows containing path of temporary files
+            combined_csv = combined_csv[~combined_csv['event_src_path'].str.contains('~.*\.tmp|\.tmp.*~')]
+
             # convert case id to string
             # combined_csv['case:concept:name'] = combined_csv['case:concept:name'].astype(str)
 
