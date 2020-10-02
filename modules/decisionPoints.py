@@ -1,9 +1,12 @@
 from collections import defaultdict
 import modules.GUI.decisionDialog
+import modules.events.systemEvents
 import utils.utils
 import pandas
+import pandas.core.groupby.generic
 import ntpath
 import sys
+from multiprocessing import Queue
 
 from PyQt5 import QtWidgets
 
@@ -12,10 +15,11 @@ sys.path.append('../')
 
 class DecisionPoints:
 
-    def __init__(self, df: pandas.DataFrame):
+    def __init__(self, df: pandas.DataFrame, status_queue: Queue):
+        self.status_queue = status_queue
         self.df = df
-        self.duplication_subset = [
-            'concept:name', 'category', 'application', 'browser_url_hostname', 'xpath']
+        self.duplication_subset = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
+                                   'clipboard_content', 'cell_range', 'browser_url_hostname']
         self.df1 = self.__handle_df()
 
     def __handle_df(self):
@@ -25,33 +29,38 @@ class DecisionPoints:
         # preprocessing
         # *************
 
-        # remove rows with 'about:blank' url and with irrelevant events
-        df1 = df1[(df1['browser_url'] != 'about:blank') &
-                  (~df1['concept:name'].isin(['zoomTab']))]
+        # filter irrelevant rows
+        # opening excel is already managed, no need for this row
+        excelMask = ~((df1['concept:name'] == 'programOpen') &
+                      (df1['application'] == 'EXCEL.EXE') &
+                      (df1['event_src_path'].str.contains('EXCEL.EXE')))
+        # these events are irrelevant for decision mining and rpa bot
+        browserUrlMask = ~df1['browser_url'].isin(
+            ['about:blank', 'chrome://newtab/', 'chrome-search://local-ntp/local-ntp.html'])
+        eventsMask = ~df1['concept:name'].isin(
+            ['zoomTab', 'enableBrowserExtension', 'logonComplete', 'getCell', 'afterCalculate', 'newWindow'])
+        appsMask = ~df1['application'].isin(modules.events.systemEvents.programs_to_ignore)
+        df1 = df1[browserUrlMask & eventsMask & excelMask & appsMask]
         # application name of browsers is set to Chrome for all traces,
         # otherwise there would be false positive decision points
-        df1.loc[df1['application'].isin(
-            ['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
+        df1.loc[df1['application'].isin(['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
         # add hostname column to dataframe
-        df1['browser_url_hostname'] = \
-            df1['browser_url'].apply(
-                lambda url: utils.utils.getHostname(url)).fillna('')
+        df1['browser_url_hostname'] = df1['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
 
         # *************
         # marking duplicates among all distinct groups
         # *************
 
         # Use crosstab for get counts per ID and combinations (url_host, action)
-        df_temp = pandas.crosstab([
-            df1['category'], df1['application'], df1['browser_url_hostname'],
-            df1['concept:name'], df1['clipboard_content'], df1['event_src_path']
-        ], df1['case:concept:name'])
+        df_temp = pandas.crosstab(
+            [df1[col] for col in self.duplication_subset],
+            df1['case:concept:name']
+        )
 
         # test only rows with greater like 1 for match at least one value in all groups
         df_temp = (df_temp.reset_index().loc[
             df_temp.gt(0).all(axis=1).to_numpy(),
-            ['category', 'application', 'browser_url_hostname',
-             'concept:name', 'clipboard_content', 'event_src_path']
+            self.duplication_subset
         ])
 
         # use DataFrame.merge with indicator parameter for test if match filtered rows in original data
@@ -61,6 +70,16 @@ class DecisionPoints:
         df1['duplicated'] = mask.to_list()
 
         return df1
+
+    def number_of_decision_points(self):
+        count = 0
+        s = self.df1.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        g = self.df1.groupby([s, 'category'])
+        for x in g.groups:
+            group = g.get_group(x)
+            if len(group.groupby('case:concept:name')) >= 2 and not group['duplicated'].unique():
+                count += 1
+        return count
 
     def __generateKeywordsDataframe(self, dataframe: pandas.DataFrame):
         s = []
@@ -80,16 +99,16 @@ class DecisionPoints:
                 'application': ','.join(df2['application'].unique()),
                 'events': ', '.join(df2['concept:name'].unique()),
                 'hostname': ', '.join(df2['browser_url_hostname'].unique()),
-                'url': ', '.join(df2['browser_url'].unique()),
+                'url': ', '.join(map(lambda url: url.split('&')[0], df2['browser_url'].unique())),  # remove query parameters from url
                 'keywords': keywords,
                 'path': ','.join(filter(None, df2['event_src_path'].unique())),
                 'clipboard': ','.join(filter(None, df2['clipboard_content'].unique())),
-                'cells': ','.join(filter(None, df2['cell_range'].unique()))
+                'cells': ','.join(filter(None, df2['cell_range'].unique())),
+                'id': ','.join(filter(None, df2['id'].unique())),
             })
         keywordsDataframe = pandas.DataFrame(s)
         # remove duplicate decision points, considering all fields except caseID, which is the first one
-        keywordsDataframe = keywordsDataframe.drop_duplicates(
-            subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
+        keywordsDataframe = keywordsDataframe.drop_duplicates(subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
         return keywordsDataframe
 
     def generateDecisionDataframe_old(self):
@@ -166,26 +185,24 @@ class DecisionPoints:
         # list to store all dataframes, from which to build final dataframe with decisions
         dataframes = []
 
-        s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
-        duplicated_groups = df.groupby(s)
-        duplicated_groups_list = [df for _, df in duplicated_groups]
-        groups_by_duplicated_and_category = []
-        for grouped_df in duplicated_groups_list:
-            for _, df in grouped_df.groupby('category'):
-                groups_by_duplicated_and_category.append(df)
+        n = self.number_of_decision_points()
+        status = f"[DECISION POINTS] Discovered {n} decision point"
+        if n > 1: status += "s"
+        self.status_queue.put(status)
 
-        for dataframe in groups_by_duplicated_and_category:
+        s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        for _, dataframe in df.groupby([s, 'category']):
+
             try:
-                d = dataframe['duplicated'].unique()[0]
+                duplicated = dataframe['duplicated'].unique()[0]
             except IndexError:
-                d = True
-            if d:  # add to final dataframe
+                duplicated = True
+
+            if duplicated:  # add to final dataframe
                 dataframes.append(dataframe)
-            else:  # decision point
+            elif not duplicated and len(dataframe.groupby('case:concept:name')) >= 2:  # decision point
                 # create keywords dataframe to display to the user
                 keywordsDF = self.__generateKeywordsDataframe(dataframe)
-                # if, after removing duplicates, there is only 1 row, directly append that row to dataframes
-                # without prompting user
                 # open dialog UI
                 decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
                 # when button is pressed
@@ -193,7 +210,7 @@ class DecisionPoints:
                     decidedDF = dataframe.loc[dataframe['case:concept:name'] == decisionDialog.selectedTrace]
                     dataframes.append(decidedDF)
 
-        # create and return new pandas datfaframe built from rows previously saved
+        # create and return new pandas dataframe built from rows previously saved
         return pandas.concat(dataframes) \
             .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')\
             .sort_index()
