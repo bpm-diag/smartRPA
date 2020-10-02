@@ -19,7 +19,7 @@ class DecisionPoints:
         self.status_queue = status_queue
         self.df = df
         self.duplication_subset = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
-                                   'clipboard_content', 'cell_range', 'browser_url_hostname']
+                                   'clipboard_content', 'cell_range', 'browser_url_hostname', 'xpath']
         self.df1 = self.__handle_df()
 
     def __handle_df(self):
@@ -191,7 +191,8 @@ class DecisionPoints:
         self.status_queue.put(status)
 
         s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
-        for _, dataframe in df.groupby([s, 'category']):
+        duplicated_groups = df.groupby([s, 'category'])
+        for _, dataframe in duplicated_groups:
 
             try:
                 duplicated = dataframe['duplicated'].unique()[0]
