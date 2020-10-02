@@ -83,6 +83,7 @@ class DecisionPoints:
                 'url': ', '.join(df2['browser_url'].unique()),
                 'keywords': keywords,
                 'path': ','.join(filter(None, df2['event_src_path'].unique())),
+                'clipboard': ','.join(filter(None, df2['clipboard_content'].unique())),
                 'cells': ','.join(filter(None, df2['cell_range'].unique()))
             })
         keywordsDataframe = pandas.DataFrame(s)
@@ -164,9 +165,16 @@ class DecisionPoints:
         assert len(df['case:concept:name'].drop_duplicates()) >= 2
         # list to store all dataframes, from which to build final dataframe with decisions
         dataframes = []
+
         s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
         duplicated_groups = df.groupby(s)
-        for group, dataframe in duplicated_groups:
+        duplicated_groups_list = [df for _, df in duplicated_groups]
+        groups_by_duplicated_and_category = []
+        for grouped_df in duplicated_groups_list:
+            for _, df in grouped_df.groupby('category'):
+                groups_by_duplicated_and_category.append(df)
+
+        for dataframe in groups_by_duplicated_and_category:
             try:
                 d = dataframe['duplicated'].unique()[0]
             except IndexError:
@@ -176,14 +184,15 @@ class DecisionPoints:
             else:  # decision point
                 # create keywords dataframe to display to the user
                 keywordsDF = self.__generateKeywordsDataframe(dataframe)
+                # if, after removing duplicates, there is only 1 row, directly append that row to dataframes
+                # without prompting user
                 # open dialog UI
-                decisionDialog = modules.GUI.decisionDialog.DecisionDialog(
-                    keywordsDF)
+                decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
                 # when button is pressed
                 if decisionDialog.exec_() in [0, 1]:
-                    decidedDF = dataframe.loc[dataframe['case:concept:name']
-                                              == decisionDialog.selectedTrace]
+                    decidedDF = dataframe.loc[dataframe['case:concept:name'] == decisionDialog.selectedTrace]
                     dataframes.append(decidedDF)
+
         # create and return new pandas datfaframe built from rows previously saved
         return pandas.concat(dataframes) \
             .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')\
