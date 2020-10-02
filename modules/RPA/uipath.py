@@ -18,6 +18,7 @@ import os
 import sys
 from collections import defaultdict
 import ntpath
+import modules.events.systemEvents
 
 sys.path.append('../')  # this way main file is visible from this file
 
