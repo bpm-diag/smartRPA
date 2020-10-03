@@ -67,7 +67,7 @@ A _partial_ list of features for each module of the Action Logger is available i
 
 # Installation and execution:
 
-Make sure you are using **_64bit_ version of Python 3.7 or greater** installed from the [official website](https://www.python.org/downloads/).
+Make sure you are using **_64bit_ version of Python ≥ 3.7** installed from the [official website](https://www.python.org/downloads/).
 
 ### 1. **Install dependencies**
 
@@ -137,6 +137,21 @@ If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy 
 ```bash
 python3 main.py
 ```
+
+<details>
+<summary>
+    Click to show how to <b>fix</b> <code>ModuleNotFoundError</code> error on Windows
+</summary>
+</br>
+
+If you have installed all the [dependencies](#1-install-dependencies) but you still get <code>ModuleNotFoundError</code>, run the tool with:
+
+```bash
+py main.py
+```
+
+</details>
+<br>
 
 The resulting event log will be saved in `/logs` directory.
 
@@ -304,4 +319,4 @@ To sum up, you should have installed:
     - [Chromedriver](#2-chromedriver)
   - [UiPath](#uipath-windows-only)
 
-If you have everything installed, you can [run the tool](#4-run-main-logger) (`python3 main.py`).
+If you have everything installed, you can [run the tool](#4-run-main-logger).
