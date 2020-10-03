@@ -548,7 +548,7 @@ class ProcessMining:
         elif e in ["changeField"]:
             # sometimes 2 out of 3 tags fields are equal, like TEXTAREA, textarea, luoghi
             # I don't want to repeat them so I remove duplicates by creating a set and then print the remaining ones
-            tags = list({row['tag_type'], row['tag_category'].lower(), row['tag_name']})
+            tags = [row['tag_type'], row['tag_category'].lower()]  # , row['tag_name']
             value = row['tag_value'].replace('\n', ', ')
             return f"[{app}] Write in {' '.join(tags)} on {url}: '{value}'"
 
@@ -557,10 +557,19 @@ class ProcessMining:
             path = row['event_src_path'].replace('\\', r'\\')
             name, extension = ntpath.splitext(path)
             name = ntpath.basename(path)
+            fileorfolder = ""
+            action = ""
             if extension:
-                return f"[{app}] Edit file '{path}'"
+                fileorfolder = "file"
             else:
-                return f"[{app}] Edit folder '{path}'"
+                fileorfolder = "folder"
+            if e in ["created", "Mount"]:
+                action = "Create"
+            elif e == "deleted":
+                action = "Delete"
+            elif e in ["openFile", "openFolder"]:
+                action = "Open"
+            return f"[{app}] {action} {fileorfolder} '{path}'"
         elif e in ['moved', 'Unmount']:
             path = row['event_dest_path'] if e == "moved" else row['event_src_path']
             path = path.replace('\\', r'\\')
