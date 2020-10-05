@@ -775,7 +775,7 @@ except Exception:
         self.status_queue.put(f"[RPA] Generated Python RPA script")
         return True
 
-    def generateRPAMostFrequentPath(self, df: pandas.DataFrame):
+    def generatePythonRPA(self, df: pandas.DataFrame):
         self._generateUnifiedRPA(df, filename="_RPA.py")
 
     # file called by GUI when main script terminates and csv log file is created.
