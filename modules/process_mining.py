@@ -505,13 +505,8 @@ class ProcessMining:
         app = row['application']
         cb = utils.utils.removeWhitespaces(row['clipboard_content'])
         # general
-        if e in ["copy", "cut", "paste"]:  # take only first 15 characters of clipboard
-            if len(cb) > 80:
-                return f"[{app}] Copy and Paste: '{cb[:80]}...'"
-            if len(cb) == 0:
-                return f"[{app}] Copy and Paste"
-            else:
-                return f"[{app}] Copy and Paste: '{cb}'"
+        if e in ["copy", "cut", "paste"] and cb:  # take only first 15 characters of clipboard
+            return f"[{app}] Copy and Paste: '{cb[:40]}...'"
 
         # browser
         elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick",
@@ -524,7 +519,7 @@ class ProcessMining:
                 else:
                     return f"[{app}] Click {row['tag_type']} {row['tag_category'].lower()} '{row['tag_name']}' on {url}"
         elif e in ["clickLink"]:
-            return f"[{app}] Click '{row['tag_innerText']}' on {url}"
+            return f"[{app}] Click '{row['tag_innerText'][:40]}' on {url}"
         elif (e in ["link", "reload", "generated", "urlHashChange"]) or (e == "typed" and "fromAddressBar" in row['eventQual']):
             return f"[{app}] Navigate to {url}"
         elif e in ["submit", "formSubmit", "selectOptions"]:
@@ -623,8 +618,6 @@ class ProcessMining:
         # df = df[~df.eventQual.str.contains('serverRedirect')]
 
         # remove rows that contain empty clipboard text
-        # [df.drop(row_index, inplace=True) for row_index, row in df.iterrows() if
-        #  row['concept:name'] == 'copy' and utils.utils.removeWhitespaces(row['clipboard_content']) == '']
         for row_index, row in df.iterrows():
             concept_name = row['concept:name']
             cb_content = row['clipboard_content']
@@ -638,7 +631,7 @@ class ProcessMining:
                           "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                           "closePresentation", "SlideSelectionChanged", "closeWorkbook",
                           "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile",
-                          "manualSubframe", "copy", "KernelDropped", "startDownload", "keyword"]  # mouseclick
+                          "manualSubframe", "KernelDropped", "startDownload", "keyword", "dragElement"]  # mouseclick
 
         df = df[~df['concept:name'].isin(rows_to_remove)]
 
