@@ -41,7 +41,7 @@ class DecisionDialog(QDialog):
 
         # instance variables
         self.df = df
-        numberOfTraces = len(self.df['case:concept:name'].drop_duplicates())
+        # numberOfTraces = len(self.df['case:concept:name'].drop_duplicates())
         self.selectedTrace = None
 
         # dialog settings
@@ -57,12 +57,12 @@ class DecisionDialog(QDialog):
         # select only one row
         self.table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         # enable button when a row is selected
-        self.table.selectionModel().selectionChanged.connect(self.on_selection_changed)
+        # self.table.selectionModel().selectionChanged.connect(self.on_selection_changed)
 
         # button to select trace
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
         # enabled only when a row is selected
-        self.buttonBox.setEnabled(False)
+        # self.buttonBox.setEnabled(False)
         self.buttonBox.accepted.connect(self.handleReturn)
 
         # layout
