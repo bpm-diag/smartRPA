@@ -6,6 +6,7 @@ Flask==1.1.1
 darkdetect==0.1.1
 PyQt5==5.15.1
 PyQtWebEngine==5.15.1
+beautifulsoup4==4.9.3
 watchdog==0.10.2
 pandas==1.0.0
 nativeconfig==3.4.0
