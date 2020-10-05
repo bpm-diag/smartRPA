@@ -82,31 +82,30 @@ class DecisionPoints:
         return count
 
     def __generateKeywordsDataframe(self, dataframe: pandas.DataFrame):
-        s = []
+        series = []
         for group, df2 in dataframe.groupby('case:concept:name'):
             category = ','.join(df2['category'].unique())
+            application = ','.join(df2['application'].unique())
+            keywords = ''
             if 'Browser' in category:
                 keywords = ','.join(
                     filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
-            elif 'MicrosoftOffice' in category:
-                keywords = ','.join(
-                    filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
-            else:
-                keywords = ''
-            s.append({
+            if 'Excel' in application:
+                keywords = ','.join(filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
+            series.append({
                 'case:concept:name': df2['case:concept:name'].unique()[0],
-                'category': ','.join(df2['category'].unique()),
-                'application': ','.join(df2['application'].unique()),
+                'category': category,
+                'application': application,
                 'events': ', '.join(df2['concept:name'].unique()),
                 'hostname': ', '.join(df2['browser_url_hostname'].unique()),
-                'url': ', '.join(map(lambda url: url.split('&')[0], df2['browser_url'].unique())),  # remove query parameters from url
+                'url': ', '.join(map(lambda url: url, df2['browser_url'].unique())),
                 'keywords': keywords,
                 'path': ','.join(filter(None, df2['event_src_path'].unique())),
                 'clipboard': ','.join(filter(None, df2['clipboard_content'].unique())),
                 'cells': ','.join(filter(None, df2['cell_range'].unique())),
                 'id': ','.join(filter(None, df2['id'].unique())),
             })
-        keywordsDataframe = pandas.DataFrame(s)
+        keywordsDataframe = pandas.DataFrame(series)
         # remove duplicate decision points, considering all fields except caseID, which is the first one
         keywordsDataframe = keywordsDataframe.drop_duplicates(subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
         return keywordsDataframe
@@ -168,9 +167,11 @@ class DecisionPoints:
                 # decisionDialog.show()
                 # when button is pressed
                 if decisionDialog.exec_() in [0, 1]:
-                    decidedDF = decisionDataframe.loc[
-                        decisionDataframe['case:concept:name'] == decisionDialog.selectedTrace]
-                    [series.append(row) for _, row in decidedDF.iterrows()]
+                    selectedTrace = decisionDialog.selectedTrace
+                    if selectedTrace:
+                        decidedDF = decisionDataframe.loc[
+                            decisionDataframe['case:concept:name'] == selectedTrace]
+                        [series.append(row) for _, row in decidedDF.iterrows()]
 
             if lastIndex:
                 # create and return new pandas datfaframe built from rows previously saved
