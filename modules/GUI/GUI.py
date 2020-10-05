@@ -829,7 +829,7 @@ class MainApplication(QMainWindow, QDialog):
                     # create RPA based on most frequent path
                     rpa = modules.RPA.generateRPAScript.RPAScript(
                         log_filepath[-1], self.status_queue)
-                    rpa.generateRPAMostFrequentPath(mostFrequentCase)
+                    rpa.generatePythonRPA(mostFrequentCase)
 
                     pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
 
@@ -848,6 +848,12 @@ class MainApplication(QMainWindow, QDialog):
                     d = modules.decisionPoints.DecisionPoints(pm.dataframe, self.status_queue)
                     decided_dataframe = d.generateDecisionDataframe()
 
+                    # #TODO DEBUG REMOVE
+                    # debug_path = "/Users/marco/Desktop/decided.csv"
+                    # if os.path.exists(debug_path):
+                    #     os.remove(debug_path)
+                    # decided_dataframe.to_csv(debug_path)
+
                     # create high level DFG model based on most frequent routine
                     pm.highLevelBPMN(df=decided_dataframe, decisionPoints=True)
 
@@ -864,7 +870,7 @@ class MainApplication(QMainWindow, QDialog):
                         # create RPA based on most frequent path
                         rpa = modules.RPA.generateRPAScript.RPAScript(
                             log_filepath[-1], self.status_queue)
-                        rpa.generateRPAMostFrequentPath(decided_dataframe_with_choices)
+                        rpa.generatePythonRPA(decided_dataframe_with_choices)
 
                         pm.highLevelBPMN(df=decided_dataframe_with_choices, name="BPMN_final", decisionPoints=True)
                         self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
