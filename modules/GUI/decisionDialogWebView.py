@@ -41,6 +41,9 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
       .min-cell-width {
         min-width: 200px;
       }
+      .table-striped tbody tr.highlight {
+        background-color: lemonchiffon;
+      }
     </style>
   </head>
   <body>
@@ -49,7 +52,7 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
     </nav>
 
     <div class="container-fluid pt-3">
-      <table id="decisionTable" class="table table-sm table-responsive table-hover">
+      <table id="decisionTable" class="table table-sm table-responsive table-hover table-striped">
         <thead class="thead-light">
           <tr>
             <th scope="col">Case ID</th>
@@ -102,6 +105,7 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
       }
       $("#decisionTable tr").click(function () {
         $(this).find("th input:radio").prop("checked", true);
+        $(this).addClass("highlight").siblings().removeClass("highlight");
       });
     </script>
   </body>
