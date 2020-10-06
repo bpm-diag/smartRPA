@@ -1,5 +1,6 @@
 from collections import defaultdict
 import modules.GUI.decisionDialog
+import modules.GUI.decisionDialogWebView
 import modules.events.systemEvents
 import utils.utils
 import pandas
@@ -97,8 +98,8 @@ class DecisionPoints:
                 'category': category,
                 'application': application,
                 'events': ', '.join(df2['concept:name'].unique()),
-                'hostname': ', '.join(df2['browser_url_hostname'].unique()),
-                'url': ', '.join(map(lambda url: url, df2['browser_url'].unique())),
+                'hostname': '\n'.join(df2['browser_url_hostname'].unique()),
+                'url': '\n'.join(map(lambda url: url, df2['browser_url'].unique())),
                 'keywords': keywords,
                 'path': ','.join(filter(None, df2['event_src_path'].unique())),
                 'clipboard': ','.join(filter(None, df2['clipboard_content'].unique())),
@@ -206,7 +207,8 @@ class DecisionPoints:
                 # create keywords dataframe to display to the user
                 keywordsDF = self.__generateKeywordsDataframe(dataframe)
                 # open dialog UI
-                decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
+                # decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
+                decisionDialog = modules.GUI.decisionDialogWebView.DecisionDialogWebView(keywordsDF)
                 # when button is pressed
                 if decisionDialog.exec_() in [0, 1]:
                     decidedDF = dataframe.loc[dataframe['case:concept:name'] == decisionDialog.selectedTrace]
