@@ -1,4 +1,3 @@
-from collections import defaultdict
 import modules.GUI.decisionDialog
 import modules.GUI.decisionDialogWebView
 import modules.events.systemEvents
@@ -8,9 +7,6 @@ import pandas.core.groupby.generic
 import ntpath
 import sys
 from multiprocessing import Queue
-
-from PyQt5 import QtWidgets
-
 sys.path.append('../')
 
 

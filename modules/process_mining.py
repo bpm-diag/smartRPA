@@ -4,17 +4,15 @@
 # ******************************
 import sys
 sys.path.append('../')  # this way main file is visible from this file
-try:
-    import ntpath
-except ModuleNotFoundError:
-    import os
+import modules.eventAbstraction
+import modules.logProcessing
+import modules.mostFrequentRoutine
 import os
 from threading import Thread
 import pandas
 import utils.config
 import utils.utils
 import utils.utils
-from fuzzywuzzy import fuzz
 from datetime import datetime, timedelta
 from multiprocessing.queues import Queue
 
@@ -67,16 +65,19 @@ class ProcessMining:
         self.file_extension = utils.utils.getFileExtension(self.last_csv)
         # path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/
         self._create_directories()
-        self._log = self._handle_log()
-
+        self.dataframe, self._log = modules.logProcessing.handle_log(self.status_queue,
+                                                                     self.file_extension,
+                                                                     self.filename,
+                                                                     self.filepath,
+                                                                     self.save_path,
+                                                                     self.RPA_log_path)
         self.dfg_path = os.path.join(self.discovery_path, f"{self.filename}_DFG_model.pdf")
         self.bpmn_path = os.path.join(self.discovery_path, f"{self.filename}_BPMN.pdf")
 
         if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
             print(f"[PROCESS MINING] Performing process discovery")
             # low level trace used for RPA generation
-            self.mostFrequentCase = self.selectMostFrequentCase()
-
+            self.mostFrequentCase = modules.mostFrequentRoutine.selectMostFrequentCase(self.dataframe, self.status_queue)
 
     def _create_directories(self):
         # create directory if does not exists
@@ -93,323 +94,8 @@ class ProcessMining:
         utils.utils.createDirectory(self.discovery_path)
 
         utils.utils.createDirectory(os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER))
-        utils.utils.createDirectory(os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER, utils.utils.UIPATH_FOLDER))
-
-    def _handle_log(self):
-
-        if self.file_extension == ".csv":
-
-            def createCaseID(ts):
-                try:
-                    # caseID = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%f").strftime('%m%d%H%M%S%f')  # [:-3]
-                    caseID = datetime.fromisoformat(ts).strftime('%m%d%H%M%S%f')
-                    return caseID
-                except Exception:
-                    caseID = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%m%d%H%M%S%f')  # [:-3]
-                    return caseID
-
-            # combine multiple csv into one and then export it to xes
-            csv_to_combine = list()
-            for i, csv_path in enumerate(self.filepath):
-                # load csv in pandas dataframe,
-                # rename columns to match xes standard,
-                # remove rows that don't have timestamp
-                # replace null values with empty string
-                # sort by timestamp
-                df = pandas\
-                    .read_csv(csv_path, encoding='utf-8-sig') \
-                    .rename(columns={'event_type': 'concept:name',
-                                     'timestamp': 'time:timestamp',
-                                     'user': 'org:resource'}) \
-                    .dropna(subset=["time:timestamp"])\
-                    .fillna('')\
-                    .sort_values(by='time:timestamp')
-                # Each csv should have a separate case ID, so I insert a column to the left of each csv and assign
-                # number i. When I convert the combined csv to xes, all the rows with the same number will belong to a
-                # single trace, so I will have i traces.
-
-                # convert timestamp to ISO format
-                # try:
-                #     df['time:timestamp'] = df['time:timestamp'] \
-                #         .apply((lambda ts: datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").isoformat()))
-                # except ValueError:
-                #     pass
-
-                try:  # insert this column to create a unique trace for each csv
-                    df.insert(0, 'case:concept:name', createCaseID(df['time:timestamp'][0]))
-                except ValueError:  # column already present, replace case id values so they are sequential
-                    pass
-
-                try:  # insert this column to create a unique trace for each csv
-                    df.insert(1, 'case:creator', 'SmartRPA by marco2012')
-                except ValueError:  # column already present
-                    pass
-
-                try:
-                    df.insert(2, 'lifecycle:transition', 'complete')
-                except ValueError:  # column already present
-                    pass
-
-                csv_to_combine.append(df)
-
-            # dataframe of combined csv, sorted by timestamp
-            combined_csv = pandas.concat(csv_to_combine)
-
-            # remove rows containing path of temporary files
-            combined_csv = combined_csv[~combined_csv['event_src_path'].str.contains('~.*\.tmp|\.tmp.*~')]
-
-            # convert case id to string
-            # combined_csv['case:concept:name'] = combined_csv['case:concept:name'].astype(str)
-
-            # insert index for each row
-            # combined_csv.insert(0, 'row_index', range(0, len(combined_csv)))
-
-            self.dataframe = combined_csv
-
-            # calculate csv path
-            combined_csv_path = os.path.join(self.RPA_log_path, f'{self.filename}_combined.csv')
-
-            # save dataframe as csv
-            combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
-
-            # convert csv to xes
-            log = conversion_factory.apply(combined_csv)
-
-            # sort by timestamp
-            # log = sorting.sort_timestamp(log)
-
-            # convert csv to xes
-            xes_path = os.path.join(self.save_path, utils.utils.EVENT_LOG_FOLDER, f'{self.filename}.xes')
-            xes_exporter.export_log(log, xes_path)
-            # timestamp in xes file must have attribute date, not string
-            utils.utils.fixTimestampFieldXES(xes_path)
-
-            self.status_queue.put(f"[PROCESS MINING] Working directory is {self.save_path}")
-            self.status_queue.put(f"[PROCESS MINING] Generated XES file")
-
-            return log
-
-        elif self.file_extension == ".xes":
-            log = xes_importer.import_log(self.filepath)
-            return log
-        else:
-            self.status_queue.put("[PROCESS_MINING] Input file must be either .csv or .xes")
-            return False
-
-    # return most frequent case in log in order to build RPA script
-    # def selectMostFrequentCaseWithoutDuration(self, flattened=False):
-    #     df = self.dataframe
-    #     if df.empty:
-    #         return None
-    #
-    #     # flattening
-    #     df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url))
-    #     df['flattened'] = df[
-    #         ['concept:name', 'category', 'application', 'browser_url_hostname', "workbook", "cell_content",
-    #          "cell_range", "cell_range_number", "slides"]].agg(','.join, axis=1)
-    #     groupby_column = 'flattened' if flattened else 'concept:name'
-    #
-    #     # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
-    #     # For example I get
-    #     # ID  Trace   Action
-    #     # 0   1   Create Fine, Send Fine
-    #     # 1   2   Insert Fine Notification, Add penalty, Payment
-    #     df1 = df.groupby('case:concept:name')[groupby_column].agg(', '.join).reset_index()
-    #
-    #     # calculate variants, grouping the previous dataframe
-    #     # concept:name  variants
-    #     # typed, clickTextField, changeField, mouseClick...	    [0]
-    #     # typed, changeField, mouseClick, formSubmit, li...	    [1]
-    #     df2 = df1.groupby(groupby_column, sort=False)['case:concept:name'].agg(list).reset_index(name='variants')
-    #
-    #     # get variants as list, each item represents a trace in the log
-    #     # [[0], [1], [2], [3], [4,5]]
-    #     variants = df2['variants'].tolist()
-    #
-    #     # longest variant is selected because it's the most frequent
-    #     longest_variants = max(variants, key=len)
-    #
-    #     if len(longest_variants) == 1:
-    #         # all the variants contain one case, need to check similarities
-    #
-    #         # Check similarities between all the strings in the log and return the most frequent one
-    #         def func(name, threshold=90):
-    #             matches = df2.apply(lambda row: (fuzz.partial_ratio(row[groupby_column], name) >= threshold), axis=1)
-    #             return [i for i, x in enumerate(matches) if x]
-    #
-    #         df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
-    #
-    #         # In this example, elements 2 and 4 in variants list are similar to element 0 and so on
-    #         # [[0, 2, 4], [1], [0, 2], [3], [0, 4]]
-    #         match_id_list = df3.tolist()
-    #
-    #         # longest variant is selected because it's the most frequent
-    #         longest_variants = max(match_id_list, key=len)
-    #         longest_variant = longest_variants[0]
-    #
-    #         if len(longest_variants) == 1:
-    #             self.status_queue.put(f"[PROCESS MINING] There is 1 variant, selecting first case")
-    #         else:
-    #             self.status_queue.put(
-    #                 f"[PROCESS MINING] There are {len(variants)} variants available, all with 1 case. "
-    #                 f"Variants {list(map(lambda x: x + 1, longest_variants))} are similar, "
-    #                 f"selecting the first case of variant {longest_variant + 1}")
-    #     else:
-    #         # there is a frequent variant, pick first case
-    #         self.status_queue.put(
-    #             f"[PROCESS MINING] There are {len(variants)} variants available, "
-    #             f"the most frequent one contains {len(longest_variants)} cases, selecting the first case")
-    #         longest_variant = longest_variants[0]
-    #
-    #     # return rows corresponding to selected trace
-    #     case = df.loc[df['case:concept:name'] == longest_variant]
-    #
-    #     return case
-
-    def selectMostFrequentCase(self, flattened=False, threshold=90):
-        df = self.dataframe
-        if df.empty:
-            return None
-
-        # flattening
-        df['browser_url_hostname'] = df['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
-        df['flattened'] = df[
-            ['concept:name', 'category', 'browser_url_hostname']].agg(','.join, axis=1)
-        groupby_column = 'flattened' if flattened else 'concept:name'
-
-        # Merge rows of each trace into one row, so the resulting dataframe has n rows where n is the number of traces
-        # For example I get
-        # case:concept:name     concept:name                            timestamp
-        # 0                     Create Fine, Send Fine                  2020-03-20 17:09:06:308, 2020-03-20 17:09:06:3
-        # 1                     Insert Fine Notification, Add penalty   2020-03-20 17:10:28:348, 2020-03-20 17:10:28:2
-        df1 = df.groupby(['case:concept:name'])[[groupby_column, 'time:timestamp']].agg(', '.join).reset_index()
-
-        # calculate duration in seconds for each row of dataframe
-        # I get a new a new column like
-        # duration
-        # 25.123
-        # 26.342
-        # 22.324
-        def getDuration(time):
-            timestamps = time.split(',')
-            try:
-                start = datetime.fromisoformat(timestamps[0].strip())
-                finish = datetime.fromisoformat(timestamps[-1].strip())
-                # start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%dT%H:%M:%S.%f")
-                # finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%dT%H:%M:%S.%f")
-            except ValueError:
-                start = datetime.strptime(timestamps[0].strip(), "%Y-%m-%d %H:%M:%S:%f")
-                finish = datetime.strptime(timestamps[-1].strip(), "%Y-%m-%d %H:%M:%S:%f")
-            duration = finish - start
-            return duration.total_seconds()
-
-        df1['duration'] = df1['time:timestamp'].apply(lambda time: getDuration(time))
-
-        # calculate variants, grouping the previous dataframe if there are equal rows
-        # concept:name                                          variants   duration
-        # typed, clickTextField, changeField, mouseClick...	    [0, 1]    [25.123, 26.342]
-        # typed, changeField, mouseClick, formSubmit, li...	    [2]       [22.324]
-        df2 = df1.groupby([groupby_column], sort=False)[['case:concept:name', 'duration']].agg(
-            list).reset_index().rename(columns={"case:concept:name": "variants"})
-
-        # return the concept:case:id of the variant with shortest duration
-        # not used when all traces are different
-        def _findVariantWithShortestDuration(df1: pandas.DataFrame, most_frequent_variants, equal=False):
-            #  there are at least 2 equal variants, most_frequent_variants is an array like [0,1]
-            # take only the most frequent rows in dataframe, like [0,1]
-            if equal:
-                most_frequent_variants_df = df1.loc[df1['case:concept:name'].isin(most_frequent_variants)]
-            else:
-                most_frequent_variants_df = df1.iloc[most_frequent_variants, :]
-            # find the row with the smallest duration
-            durations = most_frequent_variants_df['duration'].tolist()
-            # return the index of the row with the smallest duration
-            min_duration_trace = most_frequent_variants_df.loc[most_frequent_variants_df['duration'] == min(durations)][
-                'case:concept:name'].tolist()[0]
-            return min_duration_trace, min(durations)
-
-        # return case:concept:name of most frequent traces
-        def _findMostFrequentTraces(df2: pandas.DataFrame, most_frequent_variants):
-            try:
-                # list composed by the first column (case:concept:name) of the most frequent rows
-                # (selected by row index, because most_frequent_variants is a list of indices)
-                most_frequent_traces = df2.iloc[most_frequent_variants, 1].values.tolist()
-                # find the longest sublist of case:concept:name
-                max_most_frequent_traces = max(most_frequent_traces, key=len)
-                # if all the sublist have 1 element, I'm in case 2
-                if len(max_most_frequent_traces) == 1:
-                    return list(map(lambda a: a[0], most_frequent_traces))  # flattened list
-                # else there is a sublist with more element, case 3 where there are equal traces
-                else:
-                    return max_most_frequent_traces
-            except Exception:
-                return most_frequent_variants
-
-        # get variants as list, each item represents a trace in the log
-        # [[0, 1], [2]]
-        variants = df2['variants'].tolist()
-
-        # longest variant is selected because it's the most frequent
-        # [0, 1]
-        most_frequent_variants = max(variants, key=len)
-
-        if len(most_frequent_variants) == 1:
-            # all variants are different, I need to check similarities or find the one with the
-            # shortest duration in the whole dataset
-
-            # Check similarities between all the strings in the log and return the most frequent one
-            #  I don't need to check similarities in the other case, because there the strings are exactly the same
-            def func(name):
-                matches = df2.apply(lambda row: (fuzz.ratio(row[groupby_column], name) >= threshold), axis=1)
-                return [i for i, x in enumerate(matches) if x]
-
-            df3 = df2.apply(lambda row: func(row[groupby_column]), axis=1)  # axis=1 means apply function to each row
-
-            most_frequent_variants = max(df3.tolist(), key=len)
-            if len(most_frequent_variants) == 1:
-                # there are no similar strings, all are different, so I find the one with the smallest duration
-                # in the whole dataset, I don't need to filter like in the other cases
-
-                #  get all durations as list
-                durations = df1['duration'].tolist()
-                #  find smallest duration and select row in dataframe with that duration
-                min_duration_trace = df1.loc[df1['duration'] == min(durations)]['case:concept:name'].tolist()[0]
-                if len(variants) == 1:
-                    self.status_queue.put(
-                        f"[PROCESS MINING] There is only 1 trace with duration: {min(durations)} sec")
-                else:
-                    self.status_queue.put(
-                        f"[PROCESS MINING] All {len(variants)} variants are different, "
-                        f"case {min_duration_trace} is the shortest ({min(durations)} sec)")
-            else:
-                # some strings are similar, it should be like case below
-                min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
-                most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
-                self.status_queue.put(
-                    f"[PROCESS MINING] There are {len(variants)} variants, "
-                    f"among the {len(most_frequent_traces)} similar traces, "
-                    f"case {min_duration_trace} is the shortest ({duration} sec)")
-                print(f"[PROCESS MINING] Traces {most_frequent_traces} are similar by at least {threshold}%")
-        else:
-            # min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants)
-            # most_frequent_traces = _findMostFrequentTraces(df2, most_frequent_variants)
-            # self.status_queue.put(
-            #     f"[PROCESS MINING] There are {len(variants)} variants, "
-            #     f"among the {len(most_frequent_traces)} equal traces, "
-            #     f"case {min_duration_trace} is the shortest ({duration} sec)")
-            # print(f"[PROCESS MINING] Traces {most_frequent_traces} are equal")
-            min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants, equal=True)
-            self.status_queue.put(
-                f"[PROCESS MINING] There are {len(df1)} traces and {len(variants)} variants, "
-                f"among the {len(most_frequent_variants)} equal traces, "
-                f"case {min_duration_trace} is the shortest ({duration} sec)")
-            print(f"[PROCESS MINING] Traces {most_frequent_variants} are equal")
-
-        case = df.loc[df['case:concept:name'] == min_duration_trace]
-
-        # self.selected_trace = min_duration_trace
-
-        return case
+        utils.utils.createDirectory(
+            os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER, utils.utils.UIPATH_FOLDER))
 
     def _create_image(self, gviz, img_name, verbose=False):
         try:
@@ -480,7 +166,7 @@ class ProcessMining:
     def _createDFG(self, log=None, parameters=None, high_level=False):
         # create high level dfg, aggregate all data, not only most frequent one
         if high_level:
-            df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+            df, log, parameters = modules.eventAbstraction.aggregateData(self.dataframe, remove_duplicates=False)
         else:
             if parameters is None:
                 parameters = {}
@@ -498,174 +184,23 @@ class ProcessMining:
             gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
         self._create_image(gviz, name)
 
-    @staticmethod
-    def _getHighLevelEvent(row):
-        e = row["concept:name"]
-        url = utils.utils.getHostname(row['browser_url'])
-        app = row['application']
-        cb = utils.utils.removeWhitespaces(row['clipboard_content'])
-        # general
-        if e in ["copy", "cut", "paste"] and cb:  # take only first 15 characters of clipboard
-            return f"[{app}] Copy and Paste: '{cb[:40]}...'"
-
-        # browser
-        elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick",
-                   "clickCheckboxButton", "clickRadioButton"]:
-            if row['tag_type'] == 'submit':
-                return f"[{app}] Submit {row['tag_category'].lower()} on {url}"
-            else:
-                if row['tag_type'].lower() == row['tag_category'].lower():
-                    return f"[{app}] Click {row['tag_type']} '{row['tag_name']}' on {url}"
-                else:
-                    return f"[{app}] Click {row['tag_type']} {row['tag_category'].lower()} '{row['tag_name']}' on {url}"
-        elif e in ["clickLink"]:
-            return f"[{app}] Click '{row['tag_innerText'][:40]}' on {url}"
-        elif (e in ["link", "reload", "generated", "urlHashChange"]) or (e == "typed" and "fromAddressBar" in row['eventQual']):
-            return f"[{app}] Navigate to {url}"
-        elif e in ["submit", "formSubmit", "selectOptions"]:
-            return "Submit"
-        elif e in ["selectTab", "moveTab", "zoomTab"]:
-            return "Browser Tab"
-        elif e in ["newTab"]:
-            return f"[{app}] Open tab"
-        elif e in ["closeTab"]:
-            return f"[{app}] Close tab"
-        elif e in ["newWindow"]:
-            return f"[{app}] Open window"
-        elif e in ["closeWindow"]:
-            return f"[{app}] Close window"
-        elif e in ["typed", "selectText", "contextMenu"]:
-            category = row['tag_category']
-            if len(category) == 0:
-                return f"[{app}] Edit on {url}"
-            else:
-                return f"[{app}] Edit {row['tag_category']} on {url}"
-        elif e in ["changeField"]:
-            # sometimes 2 out of 3 tags fields are equal, like TEXTAREA, textarea, luoghi
-            # I don't want to repeat them so I remove duplicates by creating a set and then print the remaining ones
-            tags = [row['tag_type'], row['tag_category'].lower()]  # , row['tag_name']
-            value = row['tag_value'].replace('\n', ', ')
-            return f"[{app}] Write in {' '.join(tags)} on {url}: '{value}'"
-
-        # system
-        elif e in ["itemSelected", "deleted", "created", "Mount", "openFile", "openFolder"]:
-            path = row['event_src_path'].replace('\\', r'\\')
-            name, extension = ntpath.splitext(path)
-            name = ntpath.basename(path)
-            fileorfolder = ""
-            action = ""
-            if extension:
-                fileorfolder = "file"
-            else:
-                fileorfolder = "folder"
-            if e in ["created", "Mount"]:
-                action = "Create"
-            elif e == "deleted":
-                action = "Delete"
-            elif e in ["openFile", "openFolder"]:
-                action = "Open"
-            return f"[{app}] {action} {fileorfolder} '{path}'"
-        elif e in ['moved', 'Unmount']:
-            path = row['event_dest_path'] if e == "moved" else row['event_src_path']
-            path = path.replace('\\', r'\\')
-            _, extension = ntpath.splitext(path)
-            if extension:
-                return f"[{app}] Rename file as '{path}'"
-            else:
-                return f"[{app}] Rename folder as '{path}'"
-        elif e in ["programOpen", "programClose"]:
-            return f"Use program '{app}'"
-        elif e in ["hotkey"]:
-            return f"[{app}] Press '{row['description']}' hotkey ({row['id']})"
-
-        # excel win
-        elif e in ["newWorkbook", "openWorkbook", "activateWorkbook"]:
-            return f"[Excel] Open {row['workbook']}"
-        elif e in ["getCell", "getRange", "WorksheetCalculated", "WorksheetFormatChanged"]:
-            if row['current_worksheet'] != '':
-                return f"[Excel] Edit Cell on {row['current_worksheet']}"
-            else:
-                return f"[Excel] Edit Cell"
-        elif e in ["editCellSheet", "editCell", "editRange"]:
-            return f"[Excel] Edit cell {row['cell_range']} on {row['current_worksheet']} with value '{row['cell_content']}'"
-        elif e in ["addWorksheet", "deselectWorksheet", "selectWorksheet", "WorksheetActivated"]:
-            return f"[Excel] Select {row['current_worksheet']}"
-
-        # powerpoint
-        elif e in ["newPresentation"]:
-            return f"[PowerPoint] Open {row['title']}"
-        elif e in ["newPresentationSlide", "savePresentation", "SlideSelectionChanged"]:
-            return f"[PowerPoint] Edit presentation"
-
-        # word
-        elif e in ["newDocument"]:
-            return f"[Word] Open document"
-        elif e in ["changeDocument"]:
-            return f"[Word] Edit document"
-
-        else:
-            return e
-
-    # transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN
-    def aggregateData(self, df: pandas.DataFrame = None, remove_duplicates=False):
-
-        if df is None:
-            df = self.mostFrequentCase
-
-        # filter rows
-        df = df[~df.browser_url.str.contains('chrome-extension://')]
-        df = df[~df.eventQual.str.contains('clientRedirect')]
-        # df = df[~df.eventQual.str.contains('serverRedirect')]
-
-        # remove rows that contain empty clipboard text
-        for row_index, row in df.iterrows():
-            concept_name = row['concept:name']
-            cb_content = row['clipboard_content']
-            if (concept_name in ['cut', 'copy', 'paste']) and utils.utils.removeWhitespaces(cb_content) == '':
-                df = df.drop(row_index)  # returns a copy, previously was inplace so it returned null and side-effect db
-
-        rows_to_remove = ["activateWindow", "deactivateWindow", "openWindow", "newWindow", "closeWindow",
-                          "selectTab", "moveTab", "zoomTab", "submit", "formSubmit",
-                          "installBrowserExtension", "enableBrowserExtension", "disableBrowserExtension",
-                          "resizeWindow", "logonComplete", "startPage", "doubleClickCellWithValue",
-                          "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
-                          "closePresentation", "SlideSelectionChanged", "closeWorkbook",
-                          "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile",
-                          "manualSubframe", "KernelDropped", "startDownload", "keyword", "dragElement"]  # mouseclick
-
-        df = df[~df['concept:name'].isin(rows_to_remove)]
-
-        # convert each row of events to high level
-        df['customClassifier'] = df.apply(lambda row: self._getHighLevelEvent(row), axis=1)
-
-        # check duplicates
-        # print(df[df['customClassifier'].duplicated() == True])
-        # remove duplicates
-        if remove_duplicates:
-            df = df.drop_duplicates(subset='customClassifier', keep='first')
-
-        log = conversion_factory.apply(df)
-        parameters = {constants.PARAMETER_CONSTANT_ACTIVITY_KEY: "customClassifier"}
-        return df, log, parameters
-
-    def _create_petri_net(self, remove_duplicates=False):
-        df, log, dfg_parameters = self.aggregateData(remove_duplicates=remove_duplicates)
-        dfg = self._createDFG(log, dfg_parameters)
-        parameters = self._createImageParameters(log=log, high_level=True)
-        # gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
-        # self._create_image(gviz, "DFG")
-        net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
-        return net, im, fm
-
-    def save_petri_net(self, name):
-        net, im, fm = self._create_petri_net()
-        gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "pdf"})
-        self._create_image(gviz, name)
+    # def _create_petri_net(self, remove_duplicates=False):
+    #     df, log, dfg_parameters = modules.eventAbstraction.aggregateData(remove_duplicates=remove_duplicates)
+    #     dfg = self._createDFG(log, dfg_parameters)
+    #     parameters = self._createImageParameters(log=log, high_level=True)
+    #     # gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
+    #     # self._create_image(gviz, "DFG")
+    #     net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
+    #     return net, im, fm
+    #
+    # def save_petri_net(self, name):
+    #     net, im, fm = self._create_petri_net()
+    #     gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "pdf"})
+    #     self._create_image(gviz, name)
 
     def _create_bpmn(self, df: pandas.DataFrame = None):
-        df, log, parameters = self.aggregateData(df, remove_duplicates=True)
+        df, log, parameters = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)
         net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
-        # net, initial_marking, final_marking = self._create_petri_net(remove_duplicates=True)
         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
             net, initial_marking, final_marking)
         return bpmn_graph
@@ -677,7 +212,7 @@ class ProcessMining:
 
     def highLevelDFG(self):
         try:
-            df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+            df, log, parameters = modules.eventAbstraction.aggregateData(self.dataframe, remove_duplicates=False)
             dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
             gviz_parameters = self._createImageParameters(log=log, high_level=True)
             gviz = dfg_vis_factory.apply(dfg, log=log, variant="frequency", parameters=gviz_parameters)
@@ -689,7 +224,7 @@ class ProcessMining:
     # Petri net on entire process
     def highLevelPetriNet(self):
         try:
-            df, log, parameters = self.aggregateData(self.dataframe, remove_duplicates=False)
+            df, log, parameters = modules.eventAbstraction.aggregateData(self.dataframe, remove_duplicates=False)
             dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
             gviz_parameters = self._createImageParameters(log=log, high_level=True)
             net, im, fm = dfg_conv_factory.apply(dfg, parameters=gviz_parameters)
@@ -719,8 +254,9 @@ class ProcessMining:
             #     except Exception as e:
             #         print(f"[PROCESS MINING] Could not reorder timestamps for BPMN: {e}")
             #         pass
-
-            df, log, parameters = self.aggregateData(df, remove_duplicates=True)
+            if df is None:
+                df = self.mostFrequentCase
+            df, log, parameters = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)
             net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
             bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
                 net, initial_marking, final_marking)
