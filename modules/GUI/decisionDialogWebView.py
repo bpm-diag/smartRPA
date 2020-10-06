@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 import pandas
 from bs4 import BeautifulSoup
+from utils.utils import WINDOWS
 
 
 def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
@@ -27,11 +28,18 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
       crossorigin="anonymous"
     />
     <style>
+      body,
+      html {
+        height: 100%;
+      }
+      div, table {
+        height: 100%;
+      }
       .max-cell-width {
         max-width: 350px;
       }
       .min-cell-width {
-        min-width: 150px;
+        min-width: 200px;
       }
     </style>
   </head>
@@ -105,7 +113,7 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
     for trace in keywordsDataframe.values:
         caseID = trace[0]
 
-        tr = soup.new_tag('tr')
+        tr = soup.new_tag('tr', attrs={"class": "cursor-pointer"})
 
         # radio
         th = soup.new_tag('th')
@@ -125,10 +133,10 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
             # case id is already added above
             if column == 0:
                 continue
-            # url column should be wider
-            elif column == 5:
+            # URL, path and clipboard columns should be wider if they have content
+            elif column in [5, 7, 8] and trace[column]:
                 td = soup.new_tag('td', attrs={"class": "text-break text-wrap",
-                                               "style": "min-width: 300px; max-width: 500px;"})
+                                               "style": "min-width: 350px; max-width: 600px;"})
             else:
                 td = soup.new_tag('td', attrs={"class": "text-break text-wrap min-cell-width max-cell-width"})
             value = trace[column]
@@ -143,9 +151,9 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
 class DecisionDialogWebView(QDialog):
     def __init__(self, df: pandas.DataFrame):
         super(DecisionDialogWebView, self).__init__()
-        # instance variables
+        self.setMinimumWidth(800)
+
         self.df = df
-        # numberOfTraces = len(self.df['case:concept:name'].drop_duplicates())
         self.selectedTrace = None
 
         self.__controls()
@@ -155,11 +163,14 @@ class DecisionDialogWebView(QDialog):
         self.browser = QWebEngineView()
         text = dataframeToHTML(self.df)
         self.browser.setHtml(text)
-        self.browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        # self.browser.load(QUrl.fromLocalFile('/Users/marco/Desktop/decision.html'))
 
     def __layout(self):
         self.setWindowTitle("Decision point")
+
+        self.browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        if WINDOWS:
+            self.browser.setZoomFactor(1.8)
+
         self.vBox = QVBoxLayout()
         self.getTraceButton = QPushButton("Select trace")
         self.vBox.addWidget(self.browser)
@@ -174,18 +185,16 @@ class DecisionDialogWebView(QDialog):
     def getBounds(self, trace):
         self.accept()
         self.selectedTrace = trace
-        print(self.selectedTrace)
 
 
-if __name__ == '__main__':
-    from io import StringIO
-
-    k = StringIO(""",case:concept:name,category,application,events,hostname,url,keywords,path,clipboard,cells,id
-0,1005090352791000,Browser,Chrome,typed,corsidilaurea.uniroma1.it,https://corsidilaurea.uniroma1.it/,,,,,
-1,1005090509725000,Browser,Chrome,"changeField, link","www.google.com, www.uniroma1.it","https://www.google.com/, https://www.uniroma1.it/it/",uniroma1,,,,
-""")
-    df = pandas.read_csv(k, index_col=0).fillna('')
-    app = QtWidgets.QApplication(sys.argv)
-    window = DecisionDialogWebView(df)
-    window.show()
-    app.exec_()
+# if __name__ == '__main__':
+#     from io import StringIO
+#     k = StringIO(""",case:concept:name,category,application,events,hostname,url,keywords,path,clipboard,cells,id
+# 0,1005090352791000,Browser,Chrome,typed,corsidilaurea.uniroma1.it,https://corsidilaurea.uniroma1.it/,,,,,
+# 1,1005090509725000,Browser,Chrome,"changeField, link","www.google.com, www.uniroma1.it","https://www.google.com/, https://www.uniroma1.it/it/",uniroma1,,,,
+# """)
+#     df = pandas.read_csv(k, index_col=0).fillna('')
+#     app = QtWidgets.QApplication(sys.argv)
+#     window = DecisionDialogWebView(df)
+#     window.show()
+#     app.exec_()

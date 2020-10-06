@@ -47,7 +47,6 @@ class DecisionDialog(QDialog):
         # dialog settings
         self.setWindowTitle("Decision point")
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.resize(800, 400)
 
         # table to display dataframe
         self.table = QtWidgets.QTableView()
