@@ -28,7 +28,10 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
     />
     <style>
       .max-cell-width {
-        max-width: 320px;
+        max-width: 350px;
+      }
+      .min-cell-width {
+        min-width: 150px;
       }
     </style>
   </head>
@@ -38,7 +41,7 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
     </nav>
 
     <div class="container-fluid pt-3">
-      <table class="table table-sm table-responsive table-hover">
+      <table id="decisionTable" class="table table-sm table-responsive table-hover">
         <thead class="thead-light">
           <tr>
             <th scope="col">Case ID</th>
@@ -62,19 +65,6 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script>
-      function getSelectedTrace() {
-        let caseid;
-        let radios = document.getElementsByName("group1");
-        for (let i = 0, length = radios.length; i < length; i++) {
-          if (radios[i].checked) {
-            caseid = radios[i].value;
-            break;
-          }
-        }
-        return caseid;
-      }
-    </script>
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
       integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
@@ -90,6 +80,22 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
       integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
       crossorigin="anonymous"
     ></script>
+        <script>
+      function getSelectedTrace() {
+        let caseid;
+        let radios = document.getElementsByName("group1");
+        for (let i = 0, length = radios.length; i < length; i++) {
+          if (radios[i].checked) {
+            caseid = radios[i].value;
+            break;
+          }
+        }
+        return caseid;
+      }
+      $("#decisionTable tr").click(function () {
+        $(this).find("th input:radio").prop("checked", true);
+      });
+    </script>
   </body>
 </html>
     """
@@ -115,16 +121,21 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
         th.append(div)
         tr.append(th)
 
-        for value in trace[1:]:
-            # columns
-            td = soup.new_tag('td', attrs={"class": "text-break text-wrap max-cell-width"})
+        for column in range(len(trace)):
+            # case id is already added above
+            if column == 0:
+                continue
+            # url column should be wider
+            elif column == 5:
+                td = soup.new_tag('td', attrs={"class": "text-break text-wrap",
+                                               "style": "min-width: 300px; max-width: 500px;"})
+            else:
+                td = soup.new_tag('td', attrs={"class": "text-break text-wrap min-cell-width max-cell-width"})
+            value = trace[column]
             td.string = str(value)
             tr.append(td)
 
         tbody.append(tr)
-
-    with open("/Users/marco/Desktop/soup.html", "w") as file:
-        file.write(soup.prettify())
 
     return soup.prettify()
 
@@ -144,6 +155,7 @@ class DecisionDialogWebView(QDialog):
         self.browser = QWebEngineView()
         text = dataframeToHTML(self.df)
         self.browser.setHtml(text)
+        self.browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # self.browser.load(QUrl.fromLocalFile('/Users/marco/Desktop/decision.html'))
 
     def __layout(self):
@@ -151,7 +163,7 @@ class DecisionDialogWebView(QDialog):
         self.vBox = QVBoxLayout()
         self.getTraceButton = QPushButton("Select trace")
         self.vBox.addWidget(self.browser)
-        self.vBox.addWidget(self.getTraceButton, alignment=Qt.AlignCenter)
+        self.vBox.addWidget(self.getTraceButton, alignment=Qt.AlignCenter | Qt.AlignBottom)
         self.setLayout(self.vBox)
 
         self.getTraceButton.clicked.connect(self.updateBounds)
