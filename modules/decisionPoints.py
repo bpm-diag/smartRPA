@@ -14,9 +14,14 @@ class DecisionPoints:
 
     def __init__(self, df: pandas.DataFrame, status_queue: Queue):
         self.status_queue = status_queue
+
         self.df = df
         self.duplication_subset = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
                                    'clipboard_content', 'cell_range', 'browser_url_hostname', 'xpath']
+        # need to check separately for compatibility reasons, previous logs did not have this column
+        if 'hotkey' in self.df.columns:
+            self.duplication_subset.append('hotkey')
+
         self.df1 = self.__handle_df()
 
     def __handle_df(self):
@@ -89,6 +94,11 @@ class DecisionPoints:
                     filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
             if 'Excel' in application:
                 keywords = ','.join(filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
+
+            hotkeys = ''
+            if 'hotkey' in df2.columns:
+                hotkeys = ','.join(filter(None, df2['hotkey'].unique()))
+
             series.append({
                 'case:concept:name': df2['case:concept:name'].unique()[0],
                 'category': category,
@@ -100,7 +110,7 @@ class DecisionPoints:
                 'path': ','.join(filter(None, df2['event_src_path'].unique())),
                 'clipboard': ','.join(filter(None, df2['clipboard_content'].unique())),
                 'cells': ','.join(filter(None, df2['cell_range'].unique())),
-                'id': ','.join(filter(None, df2['id'].unique())),
+                'hotkeys': hotkeys,
             })
         keywordsDataframe = pandas.DataFrame(series)
         # remove duplicate decision points, considering all fields except caseID, which is the first one

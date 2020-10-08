@@ -38,7 +38,7 @@ class ChoicesDialog(QDialog):
         mask1 = self.df['concept:name'].isin(
             ['changeField',
              'editCell', 'editCellSheet', 'editRange',
-             'moved', 'Unmount']
+             'created', 'moved', 'Unmount', 'copy', 'hotkey']
         )
         # exclude paste in browser, take only paste in OS, do not consider cut or copy
         mask2 = ((self.df['concept:name'] == 'paste') & (self.df['category'] != 'Browser'))
@@ -67,9 +67,6 @@ class ChoicesDialog(QDialog):
             mainLayout.addWidget(buttonBox)
 
             self.setLayout(mainLayout)
-            # self.resize(self.sizeHint())
-            # QApplication.processEvents()
-            # self.adjustSize()
 
         else:
             buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
@@ -79,9 +76,6 @@ class ChoicesDialog(QDialog):
                                     "Press OK to generate RPA script."))
             layout.addWidget(buttonBox)
             self.setLayout(layout)
-            # self.resize(self.sizeHint())
-            # QApplication.processEvents()
-            # self.adjustSize()
 
     def addRows(self):
         for row_index, row in self.filtered_df.iterrows():
@@ -98,18 +92,31 @@ class ChoicesDialog(QDialog):
             elif e in ["editCell", "editCellSheet", "editRange"]:
                 label = f"[Excel] Edit cell {row['cell_range']} on {row['current_worksheet']} with value:"
                 value = row['cell_content']
-            elif e in ["moved", 'Unmount']:
+            elif e in ["moved", "Unmount", "created"]:
                 path = row['event_dest_path'] if e == "moved" else row['event_src_path']
                 _, extension = ntpath.splitext(path)
                 if extension:
-                    label = f"[{app}] Rename file as:"
+                    if e == 'created':
+                        label = f"[{app}] Create new file:"
+                    else:
+                        label = f"[{app}] Rename file as:"
                 else:
-                    label = f"[{app}] Rename folder as:"
+                    if e == 'created':
+                        label = f"[{app}] Create new folder:"
+                    else:
+                        label = f"[{app}] Rename folder as:"
                 value = path
             elif e in ["copy", "cut", "paste"]:
                 cb = utils.removeWhitespaces(row['clipboard_content'])
                 label = f"[{app}] Copy and Paste:"
                 value = cb
+            elif e == 'hotkey':
+                if 'hotkey' in self.df.columns:
+                    hotkey = row['hotkey']
+                else:
+                    hotkey = row['id']
+                label = f"[{app if app else 'Operating System'}] Hotkey:"
+                value = hotkey
 
             if label != "" and value != "":
                 lineEdit = QLineEdit(value)
@@ -140,11 +147,14 @@ class ChoicesDialog(QDialog):
                     self.df.loc[row_index, 'tag_value'] = new_values[i]
                 elif e in ["editCell", "editCellSheet", "editRange"]:
                     self.df.loc[row_index, 'cell_content'] = new_values[i]
-                elif e in ["moved", "Unmount"]:
+                elif e in ["moved", "Unmount", "created"]:
                     path = 'event_dest_path' if e == "moved" else 'event_src_path'
                     self.df.loc[row_index, path] = new_values[i]
                 elif e in ["copy", "cut", "paste"]:
                     self.df.loc[row_index, 'clipboard_content'] = new_values[i]
+                elif e == "hotkey":
+                    col = 'hotkey' if 'hotkey' in self.df.columns else 'id'
+                    self.df.loc[row_index, col] = new_values[i]
             except Exception:
                 pass
 
