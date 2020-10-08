@@ -1138,8 +1138,11 @@ class UIPathXAML:
         if e == "paste" and row['category'] != 'Browser' and app != 'Excel':
             return self.__typeInto(text=cb, app=app + '*', title=row["title"],
                                    displayName=f"Paste into {row['title']}", emptyField=False, newLine=True)
-        if e == "pressHotkey":
-            hotkey = row["id"]
+        if e in ["pressHotkey", "hotkey"]:
+            if 'hotkey' in df.columns:
+                hotkey = row["hotkey"]
+            else:
+                hotkey = row["id"]
             modifiers = ', '.join(
                 list(map(lambda x: string.capwords(x), hotkey.split('+')[:-1])))
             return self.__sendHotkey(key=hotkey[-1], modifiers=modifiers,
@@ -1208,7 +1211,7 @@ class UIPathXAML:
         if e == "closePresentation":
             return None
 
-    def __generateRPA(self, df: pandas.DataFrame, decision: bool = False):
+    def __generateRPAWithDecision(self, df: pandas.DataFrame, decision: bool = False):
 
         # at least 2 traces are needed for decision point
         if decision:
@@ -1340,12 +1343,80 @@ class UIPathXAML:
 
         self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
+    def __generateRPA(self, df: pandas.DataFrame):
+        # add comment to main sequence
+        self.__comment("// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA")
+
+        # backwards compatibility
+        if 'xpath_full' not in df.columns:
+            df['xpath_full'] = df['xpath']
+            self.__comment("// Clicking and typing into web elements is not supported with this event log. "
+                           "Record log again with the latest version of SmartRPA")
+
+        # create open browser and open excel activities
+        # all the other events relative to excel and browse are attached to this activities using sequence variables
+        self.__createOpenBrowser(df)
+        self.__createOpenExcel(df)
+
+        # dictionary of lists to store xml nodes relative to different categories
+        activities = defaultdict(list)
+
+        # variables used when creating xml nodes
+        self.ppt_slides_inserted = False
+        self.mac_source_filepath = ""
+
+        # previous category is used to detect a change in category and it's initialised as the category of the first row
+        # When a change happens, nodes are added to sequence and lists are emptied
+        df['previousCategory'] = df['category'].shift()
+
+        for index, row in df.iterrows():
+
+            # define variables
+            currentCategory = row["category"]
+            previousCategory = row["previousCategory"]
+
+            # if category changes, a new sequence should be written
+            categoryChange = (index > 0) and \
+                             (previousCategory != currentCategory) and not \
+                                 ((previousCategory == 'OperatingSystem' and currentCategory == 'Clipboard') or (
+                                         previousCategory == 'Clipboard' and currentCategory == 'OperatingSystem'))
+            # word and powerpoint events should all be appended to system list
+            if (currentCategory == "MicrosoftOffice" and
+                row['application'] in ["Microsoft Word", "Microsoft Powerpoint"]) or \
+                    (currentCategory == "Clipboard"):
+                currentCategory = 'OperatingSystem'
+            # on last loop iteration all the remaining xml nodes should be written
+            lastIndex = (index == len(df) - 1)
+
+            # generate UiPath XML node relative to specific row
+            xmlNode = self.__generateActivities(df, row)
+            if xmlNode is not None:
+                # add to main sequence
+                activities[currentCategory].append(xmlNode)
+
+            # if there is a change in category or this is the last index
+            if categoryChange or lastIndex:
+                # wrap xml nodes with sequence and append to main sequence
+                if activities["Browser"]:
+                    x = self.__attachBrowser(activities=activities["Browser"])
+                    self.mainSequence.append(x)
+                if activities["MicrosoftOffice"]:
+                    x = self.__excelSpreadsheet(activities=activities["MicrosoftOffice"])
+                    self.mainSequence.append(x)
+                if activities["OperatingSystem"]:
+                    x = self.__createSequence(activities["OperatingSystem"], displayName="System events")
+                    self.mainSequence.append(x)
+                activities.clear()
+
+        self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
+
     # If decision is False, dataframe of the most frequent trace is passed,
     # else dataframe of the entire process
     def generateUiPathRPA(self, decision: bool = False):
         self.createBaseFile()
         # if decision, I should use df1, dataframe without duplicates,
         # duplicated events should go to main sequence only once
-        dataframe = self.df1 if decision else self.df.reset_index()
-        self.__generateRPA(dataframe, decision)
+        dataframe = self.df1 if decision else self.df.reset_index(drop=True)
+        # self.__generateRPAWithDecision(dataframe, decision)
+        self.__generateRPA(dataframe)
         self.writeXmlToFile()
