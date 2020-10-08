@@ -674,7 +674,7 @@ class MainApplication(QMainWindow, QDialog):
 
                     # create UiPath RPA script passing dataframe with only the most frequent trace
                     UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, mostFrequentCase)
-                    UiPath.generateUiPathRPA(decision=False)
+                    UiPath.generateUiPathRPA()
 
             # decision
             elif utils.config.MyConfig.get_instance().enable_decision_point_analysis:

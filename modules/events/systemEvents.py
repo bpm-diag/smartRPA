@@ -45,7 +45,7 @@ programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHo
                       "cmd.exe", "WmiPrvSE.exe", "AppHostRegistrationVerifier.exe", "SgrmBroker.exe"]
 
 
-#  monitor file/folder changes on windows
+# monitor file/folder changes on windows
 def watchFolder():
     #  https://pythonhosted.org/watchdog/api.html#event-handler-classes
     class WatchFilesHandler(RegexMatchingEventHandler):
@@ -480,7 +480,7 @@ def logHotkeys():
             "application": appName,
             "event_type": event_type,
             "title": window_name,
-            "id": hotkey.upper(),
+            "hotkey": hotkey.upper(),
             "description": meaning,
             "clipboard_content": clipboard_content,
             "mouse_coord": mouse.position
