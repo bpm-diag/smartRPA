@@ -60,7 +60,7 @@ The architecture of SmartRPA integrates five main SW components.
 - [x] **Log Processing**, generates both CSV and XES event log;
 - [x] **Event abstraction**, abstracts events to a higher level;
 - [x] **Process Discovery**, selects the most frequent routine to automate and generates high-level flowchart diagram of the selected routine, thus skipping completely the manual modeling activity;
-- [x] **Decision Points**, discover differencies between multiple traces in a process and builds a new routine based on used decisions;
+- [x] **Decision Points**, discover differencies between multiple traces in a process and builds a new routine based on user decisions;
 - [x] **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform _Python script_ and as a _UiPath_ project.
 
 A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf).
@@ -144,7 +144,7 @@ python3 main.py
 </summary>
 </br>
 
-If you have installed all the [dependencies](#1-install-dependencies) but you still get <code>ModuleNotFoundError</code>, run the tool with:
+If you have installed all the [dependencies](#1-install-dependencies)(`pip3 install -r requirements.txt `) but you still get <code>ModuleNotFoundError</code>, run the tool with:
 
 ```bash
 py main.py
