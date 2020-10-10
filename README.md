@@ -181,7 +181,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
   1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
   2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
   3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
-  4. `pip3 install pm4py==1.2.12`
+  4. `pip3 install pm4py==1.5.0.1`
 
     </br>
     <details>
@@ -200,7 +200,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
   ```bash
   brew install graphviz
-  pip3 install pm4py==1.2.12
+  pip3 install pm4py==1.5.0.1
   ```
 
     <details>
@@ -211,17 +211,17 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
   If you get an error during installation:
 
-  1. If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, try to install the packages again
+  - If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, try to install the packages again
 
-     ```
-     sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-     ```
+    ```
+    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+    ```
 
-  2. If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, try to install the packages again
+  - If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, try to install the packages again
 
-     ```
-     export CPATH=`xcrun --show-sdk-path`/usr/include
-     ```
+    ```
+    export CPATH=`xcrun --show-sdk-path`/usr/include
+    ```
 
     </details>
 
