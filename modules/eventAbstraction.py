@@ -17,8 +17,11 @@ def _getHighLevelEvent(row):
     app = row['application']
     cb = utils.utils.removeWhitespaces(row['clipboard_content'])
     # general
-    if e in ["copy", "cut", "paste"] and cb:  # take only first 15 characters of clipboard
-        return f"[{app}] Copy and Paste: '{cb[:40]}...'"
+    if e in ["copy", "cut", "paste"] and cb:  # take only first 40 characters of clipboard
+        cutoff = 40
+        if len(cb) > cutoff:
+            cb = cb[:cutoff] + '...'
+        return f"[{app}] Copy and Paste -> '{cb}'"
 
     # browser
     elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick",
@@ -54,11 +57,11 @@ def _getHighLevelEvent(row):
         else:
             return f"[{app}] Edit {row['tag_category']} on {url}"
     elif e in ["changeField"]:
-        # sometimes 2 out of 3 tags fields are equal, like TEXTAREA, textarea, luoghi
+        # sometimes 2 out of 3 tags fields are equal, like TEXTAREA, textarea
         # I don't want to repeat them so I remove duplicates by creating a set and then print the remaining ones
         tags = [row['tag_type'], row['tag_category'].lower()]  # , row['tag_name']
         value = row['tag_value'].replace('\n', ', ')
-        return f"[{app}] Write in {' '.join(tags)} on {url}: '{value}'"
+        return f"[{app}] Write in {' '.join(tags)} on {url} -> '{value}'"
 
     # system
     elif e in ["itemSelected", "deleted", "created", "Mount", "openFile", "openFolder"]:
@@ -77,7 +80,7 @@ def _getHighLevelEvent(row):
             action = "Delete"
         elif e in ["openFile", "openFolder"]:
             action = "Open"
-        return f"[{app}] {action} {fileorfolder} '{path}'"
+        return f"[OS] {action} {fileorfolder} '{path}'"
     elif e in ['moved', 'Unmount']:
         path = row['event_dest_path'] if e == "moved" else row['event_src_path']
         path = path.replace('\\', r'\\')
@@ -87,7 +90,7 @@ def _getHighLevelEvent(row):
         else:
             return f"[{app}] Rename folder as '{path}'"
     elif e in ["programOpen", "programClose"]:
-        return f"Use program '{app}'"
+        return f"[OS] Use program '{app}'"
     elif e in ["hotkey"]:
         return f"[{app}] Press '{row['description']}' hotkey ({row['id']})"
 

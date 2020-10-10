@@ -97,14 +97,14 @@ class ChoicesDialog(QDialog):
                 _, extension = ntpath.splitext(path)
                 if extension:
                     if e == 'created':
-                        label = f"[{app}] Create new file:"
+                        label = f"[OS] Create new file:"
                     else:
-                        label = f"[{app}] Rename file as:"
+                        label = f"[OS] Rename file as:"
                 else:
                     if e == 'created':
-                        label = f"[{app}] Create new folder:"
+                        label = f"[OS] Create new folder:"
                     else:
-                        label = f"[{app}] Rename folder as:"
+                        label = f"[OS] Rename folder as:"
                 value = path
             elif e in ["copy", "cut", "paste"]:
                 cb = utils.removeWhitespaces(row['clipboard_content'])

@@ -13,7 +13,7 @@ import pandas
 import utils.config
 import utils.utils
 import utils.utils
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 from multiprocessing.queues import Queue
 
 try:
@@ -39,9 +39,9 @@ try:
     from pm4py.objects.log.util import sorting
     from pm4py.objects.petri.exporter import factory as pnml_factory
     # BPMN
-    from libraries.pm4pybpmn.visualization.bpmn import factory as bpmn_vis_factory
-    from libraries.pm4pybpmn.objects.conversion.petri_to_bpmn import factory as bpmn_converter
-    from libraries.pm4pybpmn.objects.bpmn.util import bpmn_diagram_layouter
+    # from libraries.pm4pybpmn.visualization.bpmn import factory as bpmn_vis_factory
+    # from libraries.pm4pybpmn.objects.conversion.petri_to_bpmn import factory as bpmn_converter
+    # from libraries.pm4pybpmn.objects.bpmn.util import bpmn_diagram_layouter
 except ImportError as e:
     print("[PROCESS MINING] Process mining analysis has been disabled because 'pm4py' module is not installed."
           "See https://github.com/bpm-diag/smartRPA#1-pm4py")
@@ -108,8 +108,8 @@ class ProcessMining:
                 pn_vis_factory.save(gviz, img_path)
             elif "DFG" in img_name:
                 dfg_vis_factory.save(gviz, img_path)
-            elif "BPMN" in img_name:
-                bpmn_vis_factory.save(gviz, img_path)
+            # elif "BPMN" in img_name:
+            #     bpmn_vis_factory.save(gviz, img_path)
 
             if verbose:
                 self.status_queue.put(f"[PROCESS MINING] Generated {img_name} in {img_path}")
@@ -125,8 +125,8 @@ class ProcessMining:
                 pn_vis_factory.save(gviz, img_path)
             elif "DFG" in img_name:
                 dfg_vis_factory.save(gviz, img_path)
-            elif "BPMN" in img_name:
-                bpmn_vis_factory.save(gviz, img_path)
+            # elif "BPMN" in img_name:
+            #     bpmn_vis_factory.save(gviz, img_path)
         except Exception as e:
             print(f"[PROCESS MINING] Could not save image: {e}")
 
@@ -198,17 +198,17 @@ class ProcessMining:
     #     gviz = pn_vis_factory.apply(net, im, fm, parameters={"format": "pdf"})
     #     self._create_image(gviz, name)
 
-    def _create_bpmn(self, df: pandas.DataFrame = None):
-        df, log, parameters = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)
-        net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
-        bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
-            net, initial_marking, final_marking)
-        return bpmn_graph
-
-    def save_bpmn(self, df: pandas.DataFrame = None):
-        bpmn_graph = self._create_bpmn(df)
-        bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
-        self._create_image(bpmn_figure, "BPMN")
+    # def _create_bpmn(self, df: pandas.DataFrame = None):
+    #     df, log, parameters = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)
+    #     net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
+    #     bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
+    #         net, initial_marking, final_marking)
+    #     return bpmn_graph
+    #
+    # def save_bpmn(self, df: pandas.DataFrame = None):
+    #     bpmn_graph = self._create_bpmn(df)
+    #     bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
+    #     self._create_image(bpmn_figure, "BPMN")
 
     def highLevelDFG(self):
         try:
@@ -236,41 +236,41 @@ class ProcessMining:
             print(f"[PROCESS MINING] Could not create Petri Net: {e}")
             return False
 
-    def highLevelBPMN(self, df: pandas.DataFrame = None, name="BPMN", decisionPoints=False):
-        try:
-            # during decision points analysis, the final BPMN may have unordered timestamps which may lead
-            # to an incorrect representation. Since the order of events is given by row index, timestamps
-            # are reset to sequential number starting from the first timestamp and adding 1 second for each row,
-            # thus obtaining a linear BPMN
-            # if decisionPoints:
-            #     try:
-            #         first_timestamp = datetime.fromisoformat(str(df.reset_index()['time:timestamp'].iloc[0]))
-            #         for i, (index, row) in enumerate(df.iterrows()):
-            #             df.loc[index, 'time:timestamp'] = first_timestamp + timedelta(minutes=i+1, seconds=i+1)
-            #         # debug_path = "/Users/marco/Desktop/decided.csv"
-            #         # if os.path.exists(debug_path):
-            #         #     os.remove(debug_path)
-            #         # df.to_csv(debug_path)
-            #     except Exception as e:
-            #         print(f"[PROCESS MINING] Could not reorder timestamps for BPMN: {e}")
-            #         pass
-            if df is None:
-                df = self.mostFrequentCase
-            df, log, parameters = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)
-            net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
-            bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
-                net, initial_marking, final_marking)
-            bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
-            self._create_image(bpmn_figure, name)
-            # try:
-            #     if name == "BPMN_final":
-            #         os.remove(os.path.join(self.discovery_path, f'{self.filename}_BPMN.pdf'))
-            # except Exception as e:
-            #     print(f"[PROCESS MINING] Could not delete old BPMN: {e}")
-            #     pass
-        except Exception as e:
-            print(f"[PROCESS MINING] Could not create BPMN: {e}")
-            return False
+    # def highLevelBPMN(self, df: pandas.DataFrame = None, name="BPMN", decisionPoints=False):
+    #     try:
+    #         # during decision points analysis, the final BPMN may have unordered timestamps which may lead
+    #         # to an incorrect representation. Since the order of events is given by row index, timestamps
+    #         # are reset to sequential number starting from the first timestamp and adding 1 second for each row,
+    #         # thus obtaining a linear BPMN
+    #         # if decisionPoints:
+    #         #     try:
+    #         #         first_timestamp = datetime.fromisoformat(str(df.reset_index()['time:timestamp'].iloc[0]))
+    #         #         for i, (index, row) in enumerate(df.iterrows()):
+    #         #             df.loc[index, 'time:timestamp'] = first_timestamp + timedelta(minutes=i+1, seconds=i+1)
+    #         #         # debug_path = "/Users/marco/Desktop/decided.csv"
+    #         #         # if os.path.exists(debug_path):
+    #         #         #     os.remove(debug_path)
+    #         #         # df.to_csv(debug_path)
+    #         #     except Exception as e:
+    #         #         print(f"[PROCESS MINING] Could not reorder timestamps for BPMN: {e}")
+    #         #         pass
+    #         if df is None:
+    #             df = self.mostFrequentCase
+    #         df, log, parameters = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)
+    #         net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)
+    #         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(
+    #             net, initial_marking, final_marking)
+    #         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant="frequency", parameters={"format": "pdf"})
+    #         self._create_image(bpmn_figure, name)
+    #         # try:
+    #         #     if name == "BPMN_final":
+    #         #         os.remove(os.path.join(self.discovery_path, f'{self.filename}_BPMN.pdf'))
+    #         # except Exception as e:
+    #         #     print(f"[PROCESS MINING] Could not delete old BPMN: {e}")
+    #         #     pass
+    #     except Exception as e:
+    #         print(f"[PROCESS MINING] Could not create BPMN: {e}")
+    #         return False
 
     # def createGraphs(self, df: pandas.DataFrame = None):
     #     self.save_bpmn(df)
