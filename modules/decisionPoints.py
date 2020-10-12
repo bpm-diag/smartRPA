@@ -41,13 +41,16 @@ class DecisionPoints:
             ['about:blank', 'chrome://newtab/', 'chrome-search://local-ntp/local-ntp.html'])
         eventsMask = ~df1['concept:name'].isin(
             ['zoomTab', 'enableBrowserExtension', 'logonComplete', 'getCell', 'afterCalculate', 'newWindow'])
-        appsMask = ~df1['application'].isin(modules.events.systemEvents.programs_to_ignore)
+        appsMask = ~df1['application'].isin(
+            modules.events.systemEvents.programs_to_ignore)
         df1 = df1[browserUrlMask & eventsMask & excelMask & appsMask]
         # application name of browsers is set to Chrome for all traces,
         # otherwise there would be false positive decision points
-        df1.loc[df1['application'].isin(['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
+        df1.loc[df1['application'].isin(
+            ['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
         # add hostname column to dataframe
-        df1['browser_url_hostname'] = df1['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
+        df1['browser_url_hostname'] = df1['browser_url'].apply(
+            lambda url: utils.utils.getHostname(url)).fillna('')
 
         # *************
         # marking duplicates among all distinct groups
@@ -66,7 +69,8 @@ class DecisionPoints:
         ])
 
         # use DataFrame.merge with indicator parameter for test if match filtered rows in original data
-        mask = df1.merge(df_temp, how='left', indicator=True)['_merge'].eq('both')
+        mask = df1.merge(df_temp, how='left', indicator=True)[
+            '_merge'].eq('both')
 
         # generate duplicated column from mask
         df1['duplicated'] = mask.to_list()
@@ -75,7 +79,8 @@ class DecisionPoints:
 
     def number_of_decision_points(self):
         count = 0
-        s = self.df1.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        s = self.df1.groupby('case:concept:name')['duplicated'].apply(
+            lambda d: d.ne(d.shift()).cumsum())
         g = self.df1.groupby([s, 'category'])
         for x in g.groups:
             group = g.get_group(x)
@@ -93,7 +98,8 @@ class DecisionPoints:
                 keywords = ','.join(
                     filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
             if 'Excel' in application:
-                keywords = ','.join(filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
+                keywords = ','.join(
+                    filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
 
             hotkeys = ''
             if 'hotkey' in df2.columns:
@@ -114,7 +120,8 @@ class DecisionPoints:
             })
         keywordsDataframe = pandas.DataFrame(series)
         # remove duplicate decision points, considering all fields except caseID, which is the first one
-        keywordsDataframe = keywordsDataframe.drop_duplicates(subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
+        keywordsDataframe = keywordsDataframe.drop_duplicates(
+            subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
         return keywordsDataframe
 
     # def generateDecisionDataframe_old(self):
@@ -198,10 +205,12 @@ class DecisionPoints:
 
         n = self.number_of_decision_points()
         status = f"[DECISION POINTS] Discovered {n} decision point"
-        if n > 1: status += "s"
+        if n > 1:
+            status += "s"
         self.status_queue.put(status)
 
-        s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        s = df.groupby('case:concept:name')['duplicated'].apply(
+            lambda d: d.ne(d.shift()).cumsum())
         duplicated_groups = df.groupby([s, 'category'])
         for _, dataframe in duplicated_groups:
 
@@ -212,14 +221,16 @@ class DecisionPoints:
 
             if duplicated:  # add to final dataframe
                 dataframes.append(dataframe)
-            elif not duplicated and len(dataframe.groupby('case:concept:name')) >= 2:  # decision point
+            # decision point
+            elif not duplicated and len(dataframe.groupby('case:concept:name')) >= 2:
                 # create keywords dataframe to display to the user
                 keywordsDF = self.__generateKeywordsDataframe(dataframe)
                 # open dialog UI
                 # decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
-                decisionDialog = modules.GUI.decisionDialogWebView.DecisionDialogWebView(keywordsDF)
+                decisionDialog = modules.GUI.decisionDialogWebView.DecisionDialogWebView(
+                    keywordsDF)
                 # when button is pressed
-                if decisionDialog.exec_() in [0, 1] and decisionDialog.selectedTrace:
+                if decisionDialog.exec_() in [0, 1] and decisionDialog.selectedTrace is not None:
                     try:
                         selectedTrace = int(decisionDialog.selectedTrace)
                     except ValueError:
