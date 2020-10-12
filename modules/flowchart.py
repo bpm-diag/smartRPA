@@ -1,8 +1,3 @@
-# import networkx as nx
-# import matplotlib.pyplot as plt
-# import matplotlib.image as mpimg
-# from io import StringIO
-# from IPython.display import SVG
 import pydot
 from itertools import tee
 import pandas
@@ -39,7 +34,10 @@ class Flowchart:
 
     def generateFlowchart(self, path: str, name: str = None):
         # Start node
-        self.__make_link(self.__make_node('Start'), self.__make_node(self.process_hl[0], 'record'))
+        self.__make_link(
+            self.__make_node('Start'),
+            self.__make_node(self.process_hl[0], 'record')
+        )
 
         for v, w in self.__pairwise(self.process_hl):
             a = self.__make_node(v, 'record')
@@ -47,7 +45,10 @@ class Flowchart:
             self.__make_link(a, b, style='solid')
 
         # End node
-        self.__make_link(self.__make_node(self.process_hl[-1], 'record'), self.__make_node('End'))  # box3d
+        self.__make_link(
+            self.__make_node(self.process_hl[-1], 'record'),
+            self.__make_node('End')
+        )  # box3d
 
         if name:
             path = path.replace('BPMN', name)
