@@ -197,21 +197,28 @@ class DecisionPoints:
     #                 .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')
 
     def generateDecisionDataframe(self):
+
         df = self.df1
+
         # there must be at least 2 traces in order to make a decision
         assert len(df['case:concept:name'].drop_duplicates()) >= 2
-        # list to store all dataframes, from which to build final dataframe with decisions
-        dataframes = []
 
+        # list to store all groups, from which to build final dataframe with decisions
+        dataframes = []
+        # variables to save previous decision
+        previousDataframe = None
+        previousDecision = None
+
+        # number of decision points
         n = self.number_of_decision_points()
         status = f"[DECISION POINTS] Discovered {n} decision point"
         if n > 1:
             status += "s"
         self.status_queue.put(status)
 
-        s = df.groupby('case:concept:name')['duplicated'].apply(
-            lambda d: d.ne(d.shift()).cumsum())
+        s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
         duplicated_groups = df.groupby([s, 'category'])
+
         for _, dataframe in duplicated_groups:
 
             try:
@@ -219,24 +226,61 @@ class DecisionPoints:
             except IndexError:
                 duplicated = True
 
-            if duplicated:  # add to final dataframe
+            # add directly to final dataframe
+            if duplicated:
                 dataframes.append(dataframe)
-            # decision point
+
+            # decision point if there are at least 2 traces in the current group
             elif not duplicated and len(dataframe.groupby('case:concept:name')) >= 2:
-                # create keywords dataframe to display to the user
-                keywordsDF = self.__generateKeywordsDataframe(dataframe)
+
+                # in the first loop iteration previous decision is None
+                if previousDecision is not None and \
+                        previousDataframe is not None and \
+                        not previousDataframe['duplicated'].unique()[0]:
+
+                    # Only the decisions belonging to the current path in the DFG should be selected
+                    # To achieve this, the previous decision is stored in a variable along with the previous group
+                    # First I select all the traces that have all the rows from previousDecision in their dataframe
+                    # To do this, previousDecision rows is joined with previousDataframe on duplication_subset.
+                    # Then, only the traces that have exactly the same number of rows as previousDecision rows are taken
+                    # Finally, the case id of each trace is returned as a list
+                    # decisionTraces is a list of case ids; it indicates the traces that include the previous decision made
+                    decisionTraces = pandas \
+                                        .merge(previousDataframe, previousDecision, on=self.duplication_subset) \
+                                        .groupby('case:concept:name_x')['case:concept:name_x'] \
+                                        .filter(lambda group: len(group) == len(previousDecision)) \
+                                        .unique().tolist()
+                    # only the selected traces should appear in the keywords dataframe
+                    filtered_df = dataframe.loc[dataframe['case:concept:name'].isin(decisionTraces)]
+                    if len(filtered_df.groupby('case:concept:name')) >= 2:
+                        # there are at least 2 traces, create keywords dataframe and prompt user
+                        keywordsDF = self.__generateKeywordsDataframe(filtered_df)
+                    else:
+                        # there is only 1 trace, append directly to dataframes without prompting decision and restart loop
+                        dataframes.append(filtered_df)
+                        previousDecision = filtered_df
+                        previousDataframe = dataframe
+                        continue
+                else:
+                    # create keywords dataframe to display to the user
+                    keywordsDF = self.__generateKeywordsDataframe(dataframe)
+
                 # open dialog UI
-                # decisionDialog = modules.GUI.decisionDialog.DecisionDialog(keywordsDF)
-                decisionDialog = modules.GUI.decisionDialogWebView.DecisionDialogWebView(
-                    keywordsDF)
+                decisionDialog = modules.GUI.decisionDialogWebView.DecisionDialogWebView(keywordsDF)
+
                 # when button is pressed
                 if decisionDialog.exec_() in [0, 1] and decisionDialog.selectedTrace is not None:
                     try:
                         selectedTrace = int(decisionDialog.selectedTrace)
                     except ValueError:
                         selectedTrace = decisionDialog.selectedTrace
+
                     decidedDF = dataframe.loc[dataframe['case:concept:name'] == selectedTrace]
                     dataframes.append(decidedDF)
+
+                    previousDecision = decidedDF
+
+            previousDataframe = dataframe
 
         # create and return new pandas dataframe built from rows previously saved
         return pandas.concat(dataframes) \
