@@ -113,7 +113,7 @@ class DecisionPoints:
                 'hostname': '\n'.join(df2['browser_url_hostname'].unique()),
                 'url': '\n'.join(map(lambda url: url, df2['browser_url'].unique())),
                 'keywords': keywords,
-                'path': ','.join(filter(None, df2['event_src_path'].unique())),
+                'path': '\n'.join(filter(None, df2['event_src_path'].unique())),
                 'clipboard': ','.join(filter(None, df2['clipboard_content'].unique())),
                 'cells': ','.join(filter(None, df2['cell_range'].unique())),
                 'hotkeys': hotkeys,
@@ -208,6 +208,7 @@ class DecisionPoints:
         # variables to save previous decision
         previousDataframe = None
         previousDecision = None
+        selectedTrace = None
 
         # number of decision points
         n = self.number_of_decision_points()
@@ -233,6 +234,10 @@ class DecisionPoints:
             # decision point if there are at least 2 traces in the current group
             elif not duplicated and len(dataframe.groupby('case:concept:name')) >= 2:
 
+                # if the current group does not contain rows from selected trace, skip iteration
+                if selectedTrace and selectedTrace not in dataframe['case:concept:name'].unique():
+                    continue
+
                 # in the first loop iteration previous decision is None
                 if previousDecision is not None and \
                         previousDataframe is not None and \
@@ -242,17 +247,40 @@ class DecisionPoints:
                     # To achieve this, the previous decision is stored in a variable along with the previous group
                     # First I select all the traces that have all the rows from previousDecision in their dataframe
                     # To do this, previousDecision rows is joined with previousDataframe on duplication_subset.
-                    # Then, only the traces that have exactly the same number of rows as previousDecision rows are taken
+                    # Then, only the traces that have at least the same number of rows as previousDecision rows are taken
                     # Finally, the case id of each trace is returned as a list
                     # decisionTraces is a list of case ids; it indicates the traces that include the previous decision made
-                    decisionTraces = pandas \
-                                        .merge(previousDataframe, previousDecision, on=self.duplication_subset) \
-                                        .groupby('case:concept:name_x')['case:concept:name_x'] \
-                                        .filter(lambda group: len(group) == len(previousDecision)) \
-                                        .unique().tolist()
+                    duplication_subset_merge = self.duplication_subset  # .append('browser_url')
+                    try:
+                        decisionTraces = pandas \
+                            .merge(previousDataframe, previousDecision, on=duplication_subset_merge) \
+                            .groupby('case:concept:name_x')['case:concept:name_x'] \
+                            .filter(lambda group: len(group) >= len(previousDecision)) \
+                            .unique().tolist()
+                    except KeyError:
+                        decisionTraces = pandas \
+                            .merge(previousDataframe, previousDecision, on=duplication_subset_merge) \
+                            .groupby('case:concept:name')['case:concept:name'] \
+                            .filter(lambda group: len(group) >= len(previousDecision)) \
+                            .unique().tolist()
+
                     # only the selected traces should appear in the keywords dataframe
-                    filtered_df = dataframe.loc[dataframe['case:concept:name'].isin(decisionTraces)]
-                    if len(filtered_df.groupby('case:concept:name')) >= 2:
+                    # this only considers the next decision point, but it should consider all decision points instead
+                    # filtered_df = dataframe.loc[dataframe['case:concept:name'].isin(decisionTraces)]
+                    filtered_df = None
+                    # for each group, if the group in the current iteration is not the same as the previous dataframe
+                    # and the current group is a decision point (is not duplicated), then find rows containing the
+                    # caseID of the trace selected before. When found, break the loop
+                    for _, group in duplicated_groups:
+                        if not group['duplicated'].unique() and not group.equals(previousDataframe):
+                            filtered_df = group.loc[group['case:concept:name'].isin(decisionTraces)]
+                            if not filtered_df.empty and selectedTrace in filtered_df['case:concept:name'].unique():
+                                break
+
+                    if filtered_df is None or \
+                            filtered_df.empty:
+                        continue
+                    elif len(filtered_df.groupby('case:concept:name')) >= 2:
                         # there are at least 2 traces, create keywords dataframe and prompt user
                         keywordsDF = self.__generateKeywordsDataframe(filtered_df)
                     else:
