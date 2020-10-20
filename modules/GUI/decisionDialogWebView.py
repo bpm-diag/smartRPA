@@ -30,16 +30,20 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
     <style>
       body,
       html {
-        height: 100%;
+        margin: 0; 
+        height: 100%; 
+        overflow: hidden;
+        padding-bottom: 15px;
       }
       div, table {
         height: 100%;
+        padding-bottom: 40px;
       }
       .max-cell-width {
         max-width: 350px;
       }
       .min-cell-width {
-        min-width: 200px;
+        min-width: 150px;
       }
       .table-striped tbody tr.highlight {
         background-color: lemonchiffon;
@@ -51,7 +55,7 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
       <a class="navbar-brand mx-auto" href="#">Select trace to execute</a>
     </nav>
 
-    <div class="container-fluid pt-3">
+    <div class="container-fluid pt-3" style="padding-bottom: 10px; margin-bottom: 10px;">
       <table id="decisionTable" class="table table-sm table-responsive table-hover table-striped">
         <thead class="thead-light">
           <tr>
@@ -133,12 +137,10 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
         th.append(div)
         tr.append(th)
 
-        for column in range(len(trace)):
-            # case id is already added above
-            if column == 0:
-                continue
-            # URL, path and clipboard columns should be wider if they have content
-            elif column in [5, 7, 8] and trace[column]:
+        # nested loop necessary to cycle through columns of the table for each row
+        for column in range(1, len(trace)):  # case id is already added above
+            # URL, keywords, path and clipboard columns should be wider if they have content
+            if column in range(5, 9) and trace[column]:
                 td = soup.new_tag('td', attrs={"class": "text-break text-wrap",
                                                "style": "min-width: 350px; max-width: 600px;"})
             else:
