@@ -79,11 +79,8 @@ class DecisionPoints:
 
     def number_of_decision_points(self):
         count = 0
-        s = self.df1.groupby('case:concept:name')['duplicated'].apply(
-            lambda d: d.ne(d.shift()).cumsum())
-        g = self.df1.groupby([s, 'category'])
-        for x in g.groups:
-            group = g.get_group(x)
+        s = self.df1.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        for _, group in self.df1.groupby([s, 'category']):
             if len(group.groupby('case:concept:name')) >= 2 and not group['duplicated'].unique():
                 count += 1
         return count
@@ -121,8 +118,10 @@ class DecisionPoints:
         keywordsDataframe = pandas.DataFrame(series)
         # remove duplicate decision points, considering all fields except caseID, which is the first one
         # sort rows
+        # subset = keywordsDataframe.columns.tolist()[1:]
+        subset = ['category', 'application', 'events', 'hostname', 'url', 'path', 'clipboard', 'cells', 'hotkeys']
         keywordsDataframe = keywordsDataframe\
-            .drop_duplicates(subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)\
+            .drop_duplicates(subset=subset, ignore_index=True)\
             .sort_values(['hostname', 'path', 'clipboard', 'cells', 'hotkeys'])
         return keywordsDataframe
 
@@ -222,7 +221,7 @@ class DecisionPoints:
         s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
         duplicated_groups = df.groupby([s, 'category'])
 
-        for _, dataframe in duplicated_groups:
+        for group_index, dataframe in duplicated_groups:
 
             try:
                 duplicated = dataframe['duplicated'].unique()[0]
@@ -253,34 +252,64 @@ class DecisionPoints:
                     # Then, only the traces that have at least the same number of rows as previousDecision rows are taken
                     # Finally, the case id of each trace is returned as a list
                     # decisionTraces is a list of case ids; it indicates the traces that include the previous decision made
-                    duplication_subset_merge = self.duplication_subset  # .append('browser_url')
+                    on = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
+                          'clipboard_content', 'cell_range', 'browser_url_hostname', 'browser_url']  # xpath
                     try:
                         decisionTraces = pandas \
-                            .merge(previousDataframe, previousDecision, on=duplication_subset_merge) \
+                            .merge(previousDataframe, previousDecision, on=on) \
                             .groupby('case:concept:name_x')['case:concept:name_x'] \
-                            .filter(lambda group: len(group) >= len(previousDecision)) \
+                            .filter(lambda group: len(group) >= len(previousDecision) * 0.76) \
                             .unique().tolist()
-                    except KeyError:  # if case:concept:name_x does not exists
+                    except KeyError:
                         decisionTraces = pandas \
-                            .merge(previousDataframe, previousDecision, on=duplication_subset_merge) \
+                            .merge(previousDataframe, previousDecision, on=on) \
                             .groupby('case:concept:name')['case:concept:name'] \
-                            .filter(lambda group: len(group) >= len(previousDecision)) \
+                            .filter(lambda group: len(group) >= len(previousDecision) * 0.76) \
                             .unique().tolist()
+                    # # only the selected traces should appear in the keywords dataframe
+                    # # this only considers the next decision point, but it should consider all decision points instead
 
-                    # only the selected traces should appear in the keywords dataframe
-                    # this only considers the next decision point, but it should consider all decision points instead
-                    # filtered_df = dataframe.loc[dataframe['case:concept:name'].isin(decisionTraces)]
-                    filtered_df = None
-                    # for each group, if the group in the current iteration is not the same as the previous dataframe
-                    # and the current group is a decision point (is not duplicated), then find rows containing the
-                    # caseID of the trace selected before. When found, break the loop
-                    for _, group in duplicated_groups:
-                        if not group['duplicated'].unique() and not group.equals(previousDataframe):
-                            filtered_df = group.loc[group['case:concept:name'].isin(decisionTraces)]
-                            if not filtered_df.empty and selectedTrace in filtered_df['case:concept:name'].unique():
-                                break
+                    # # filtered_df = dataframe.loc[dataframe['case:concept:name'].isin(decisionTraces)]
+                    # filtered_df = None
+                    filtered_df = []
 
-                    if filtered_df is None or \
+                    # # for each group, if the group in the current iteration is not the same as the previous dataframe
+                    # # and the current group is a decision point (is not duplicated), then find rows containing the
+                    # # caseID of the trace selected before. When found, break the loop
+                    # for _, group in duplicated_groups:
+                    #     if not group['duplicated'].unique() and not group.equals(previousDataframe):
+                    #         filtered_df = group.loc[group['case:concept:name'].isin(decisionTraces)]
+                    #         if not filtered_df.empty and selectedTrace in filtered_df['case:concept:name'].unique():
+                    #             break
+
+                    # for _, group in duplicated_groups:
+                    #     if not group['duplicated'].unique() and not group.equals(previousDataframe):
+                    #         mask = group['case:concept:name'].isin(decisionTraces)
+                    #         filtered_df.append(group.loc[mask])
+                    # filtered_df = pandas.concat(filtered_df).drop_duplicates(subset=self.duplication_subset)
+
+                    # find all the keys in groupby
+                    # p = previousDataframe group
+                    # loop starts from group after p
+                    # loop breaks if duplicated==True
+                    keys = list(duplicated_groups.groups.keys())
+                    prevDFGroupCount = keys.index(group_index)
+                    # handle case where first group is duplicated, skip to the next one
+                    if self.df1.iloc[duplicated_groups.groups[keys[prevDFGroupCount]]]['duplicated'].unique():
+                        prevDFGroupCount += 1
+                    for index in range(prevDFGroupCount, len(keys)):
+                        group = self.df1.iloc[duplicated_groups.groups[keys[index]]]
+                        if not group['duplicated'].unique():
+                            mask = group['case:concept:name'].isin(decisionTraces)
+                            filtered_df.append(group.loc[mask])
+                        else:
+                            break
+                    try:
+                        filtered_df = pandas.concat(filtered_df).drop_duplicates(subset=self.duplication_subset)
+                    except ValueError:
+                        filtered_df = []
+
+                    if len(filtered_df) == 0 or \
                             filtered_df.empty:
                         continue
                     elif len(filtered_df.groupby('case:concept:name')) >= 2:
