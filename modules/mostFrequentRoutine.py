@@ -138,7 +138,7 @@ def selectMostFrequentCase(dataframe: pandas.DataFrame, status_queue: Queue, fla
         #     f"case {min_duration_trace} is the shortest ({duration} sec)")
         # print(f"[PROCESS MINING] Traces {most_frequent_traces} are equal")
         min_duration_trace, duration = _findVariantWithShortestDuration(df1, most_frequent_variants, equal=True)
-        self.status_queue.put(
+        status_queue.put(
             f"[PROCESS MINING] There are {len(df1)} traces and {len(variants)} variants, "
             f"among the {len(most_frequent_variants)} equal traces, "
             f"case {min_duration_trace} is the shortest ({duration} sec)")
