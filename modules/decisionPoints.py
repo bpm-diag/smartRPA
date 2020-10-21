@@ -120,8 +120,10 @@ class DecisionPoints:
             })
         keywordsDataframe = pandas.DataFrame(series)
         # remove duplicate decision points, considering all fields except caseID, which is the first one
-        keywordsDataframe = keywordsDataframe.drop_duplicates(
-            subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)
+        # sort rows
+        keywordsDataframe = keywordsDataframe\
+            .drop_duplicates(subset=keywordsDataframe.columns.tolist()[1:], ignore_index=True)\
+            .sort_values(['hostname', 'path', 'clipboard', 'cells', 'hotkeys'])
         return keywordsDataframe
 
     # def generateDecisionDataframe_old(self):
@@ -175,7 +177,7 @@ class DecisionPoints:
     #             # empty caseActivities dictionary for later use
     #             caseActivities.clear()
     #
-    #             app = QtWidgets.QApplication(sys.argv)  # DEBUG, REMOVE TODO
+    #             app = QtWidgets.QApplication(sys.argv)
     #             decisionDialog = modules.GUI.decisionDialog.DecisionDialog(
     #                 keywordsDF)
     #             # decisionDialog.show()
@@ -227,18 +229,19 @@ class DecisionPoints:
             except IndexError:
                 duplicated = True
 
-            # add directly to final dataframe
+            # if current groups contains duplicated rows,
+            # add them directly to final dataframe because it is not a decision point
             if duplicated:
                 dataframes.append(dataframe)
 
-            # decision point if there are at least 2 traces in the current group
+            # decision point if not duplicated and there are at least 2 traces in the current group
             elif not duplicated and len(dataframe.groupby('case:concept:name')) >= 2:
 
                 # if the current group does not contain rows from selected trace, skip iteration
                 if selectedTrace and selectedTrace not in dataframe['case:concept:name'].unique():
                     continue
 
-                # in the first loop iteration previous decision is None
+                # in the first loop iteration previous decision is None, directly create keywords dataframe
                 if previousDecision is not None and \
                         previousDataframe is not None and \
                         not previousDataframe['duplicated'].unique()[0]:
@@ -257,7 +260,7 @@ class DecisionPoints:
                             .groupby('case:concept:name_x')['case:concept:name_x'] \
                             .filter(lambda group: len(group) >= len(previousDecision)) \
                             .unique().tolist()
-                    except KeyError:
+                    except KeyError:  # if case:concept:name_x does not exists
                         decisionTraces = pandas \
                             .merge(previousDataframe, previousDecision, on=duplication_subset_merge) \
                             .groupby('case:concept:name')['case:concept:name'] \
