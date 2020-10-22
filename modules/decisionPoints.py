@@ -40,7 +40,7 @@ class DecisionPoints:
         browserUrlMask = ~df1['browser_url'].isin(
             ['about:blank', 'chrome://newtab/', 'chrome-search://local-ntp/local-ntp.html'])
         eventsMask = ~df1['concept:name'].isin(
-            ['zoomTab', 'enableBrowserExtension', 'logonComplete', 'getCell', 'afterCalculate', 'newWindow'])
+            ['zoomTab', 'enableBrowserExtension', 'logonComplete', 'getCell', 'afterCalculate', 'newWindow', 'selectText'])
         appsMask = ~df1['application'].isin(
             modules.events.systemEvents.programs_to_ignore)
         df1 = df1[browserUrlMask & eventsMask & excelMask & appsMask]
@@ -106,7 +106,7 @@ class DecisionPoints:
                 'case:concept:name': df2['case:concept:name'].unique()[0],
                 'category': category,
                 'application': application,
-                'events': ', '.join(df2['concept:name'].unique()),
+                'events': ', '.join(sorted(df2['concept:name'].unique())),
                 'hostname': '\n'.join(df2['browser_url_hostname'].unique()),
                 'url': '\n'.join(map(lambda url: url, df2['browser_url'].unique())),
                 'keywords': keywords,
@@ -122,7 +122,7 @@ class DecisionPoints:
         subset = ['category', 'application', 'events', 'hostname', 'url', 'path', 'clipboard', 'cells', 'hotkeys']
         keywordsDataframe = keywordsDataframe\
             .drop_duplicates(subset=subset, ignore_index=True)\
-            .sort_values(['hostname', 'path', 'clipboard', 'cells', 'hotkeys'])
+            .sort_values(['hostname', 'category','application', 'path', 'clipboard', 'cells'])
         return keywordsDataframe
 
     # def generateDecisionDataframe_old(self):
@@ -292,18 +292,30 @@ class DecisionPoints:
                     # p = previousDataframe group
                     # loop starts from group after p
                     # loop breaks if duplicated==True
-                    keys = list(duplicated_groups.groups.keys())
-                    prevDFGroupCount = keys.index(group_index)
-                    # handle case where first group is duplicated, skip to the next one
-                    if self.df1.iloc[duplicated_groups.groups[keys[prevDFGroupCount]]]['duplicated'].unique():
-                        prevDFGroupCount += 1
-                    for index in range(prevDFGroupCount, len(keys)):
-                        group = self.df1.iloc[duplicated_groups.groups[keys[index]]]
-                        if not group['duplicated'].unique():
-                            mask = group['case:concept:name'].isin(decisionTraces)
-                            filtered_df.append(group.loc[mask])
-                        else:
-                            break
+                    # keys = list(duplicated_groups.groups.keys())
+                    # prevDFGroupCount = keys.index(group_index)
+                    # # handle case where first group is duplicated, skip to the next one
+                    # if self.df1.iloc[duplicated_groups.groups[keys[prevDFGroupCount]]]['duplicated'].unique():
+                    #     prevDFGroupCount += 1
+                    # for index in range(prevDFGroupCount, len(keys)):
+                    #     group = self.df1.iloc[duplicated_groups.groups[keys[index]]]
+                    #     if not group['duplicated'].unique():
+                    #         mask = group['case:concept:name'].isin(decisionTraces)
+                    #         filtered_df.append(group.loc[mask])
+                    #     else:
+                    #         break
+
+                    afterPreviousDataframe = False
+                    for _, group in duplicated_groups:
+                        if afterPreviousDataframe:
+                            if not group['duplicated'].unique():  # decision point
+                                mask = group['case:concept:name'].isin(decisionTraces)
+                                filtered_df.append(group.loc[mask])
+                            else:
+                                break
+                        if group.equals(previousDataframe):
+                            afterPreviousDataframe = True
+
                     try:
                         filtered_df = pandas.concat(filtered_df).drop_duplicates(subset=self.duplication_subset)
                     except ValueError:
