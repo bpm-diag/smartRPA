@@ -40,7 +40,8 @@ class DecisionPoints:
         browserUrlMask = ~df1['browser_url'].isin(
             ['about:blank', 'chrome://newtab/', 'chrome-search://local-ntp/local-ntp.html'])
         eventsMask = ~df1['concept:name'].isin(
-            ['zoomTab', 'enableBrowserExtension', 'logonComplete', 'getCell', 'afterCalculate', 'newWindow', 'selectText'])
+            ['zoomTab', 'enableBrowserExtension', 'logonComplete', 'getCell', 'afterCalculate',
+             'newWindow', 'selectText', 'KernelDropped'])
         appsMask = ~df1['application'].isin(
             modules.events.systemEvents.programs_to_ignore)
         df1 = df1[browserUrlMask & eventsMask & excelMask & appsMask]
