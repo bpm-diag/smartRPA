@@ -31,7 +31,7 @@
 **Robotic Process Automation (RPA)** is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
 The current generation of RPA tools is driven by predefined rules and manual configurations made by expert users rather than automated techniques.
 
-**SmartRPA** is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating the users’ most frequent observed behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
+**SmartRPA** is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating an observed user behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
 
 ## Authors
 
@@ -71,17 +71,17 @@ Make sure you are using **_64bit_ version of Python ≥ 3.7** installed from the
 
 ### 1. **Install dependencies**
 
-- Install **project** dependencies
+- Install **project** dependencies (required to record UI log)
 
   ```bash
   pip3 install -r requirements.txt
   ```
 
-- Install **Process Discovery** dependencies
+- Install **Process Discovery** dependencies (required to perform process discovery analysis)
 
   [Details here](#process-discovery-dependencies)
 
-- Install **RPA** dependencies
+- Install **RPA** dependencies (required to run RPA SW Robot)
 
   [Details here](#rpa-dependencies)
 
@@ -319,4 +319,4 @@ To sum up, you should have installed:
     - [Chromedriver](#2-chromedriver)
   - [UiPath](#uipath-windows-only)
 
-If you have everything installed, you can [run the tool](#4-run-main-logger).
+After installing the dependencies, you can [run the tool](#4-run-main-logger).
