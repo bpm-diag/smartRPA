@@ -24,6 +24,8 @@ def _getHighLevelEvent(row):
         return f"[{app}] Copy and Paste -> '{cb}'"
 
     # browser
+    elif e in ["clickRadioButton"]:
+        return f"[{app}] Click {row['tag_type']} '{row['tag_name']}' with value '{row['tag_value']}' on {url}"
     elif e in ["clickButton", "clickTextField", "doubleClick", "clickTextField", "mouseClick",
                "clickCheckboxButton", "clickRadioButton"]:
         if row['tag_type'] == 'submit':
@@ -61,7 +63,7 @@ def _getHighLevelEvent(row):
         # I don't want to repeat them so I remove duplicates by creating a set and then print the remaining ones
         tags = [row['tag_type'], row['tag_category'].lower()]  # , row['tag_name']
         value = row['tag_value'].replace('\n', ', ')
-        return f"[{app}] Write in {' '.join(tags)} on {url} -> '{value}'"
+        return f"[{app}] Write in {' '.join(tags)} '{row['tag_name']}' on {url} -> '{value}'"
 
     # system
     elif e in ["itemSelected", "deleted", "created", "Mount", "openFile", "openFolder"]:
