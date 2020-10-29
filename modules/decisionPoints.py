@@ -93,8 +93,15 @@ class DecisionPoints:
             application = ','.join(df2['application'].unique())
             keywords = ''
             if 'Browser' in category:
-                keywords = ','.join(
-                    filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique())))
+                # keywords = ','.join(filter(None, map(lambda x: ntpath.basename(x), df2['tag_value'].unique()))) + ','
+                # keywords += ','.join(filter(None, map(lambda x: ntpath.basename(x), df2['id'].unique())))
+                # remove empty values
+                a = filter(None, df2['tag_value'].unique())
+                b = filter(None, df2['id'].unique())
+                # create set of values from the two lists to remove duplicates
+                results_union = set().union(*[a, b])
+                # convert to string
+                keywords = ', '.join(results_union)
             if 'Excel' in application:
                 keywords = ','.join(
                     filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
@@ -120,7 +127,7 @@ class DecisionPoints:
         # remove duplicate decision points, considering all fields except caseID, which is the first one
         # sort rows
         # subset = keywordsDataframe.columns.tolist()[1:]
-        subset = ['category', 'application', 'events', 'hostname', 'url', 'path', 'clipboard', 'cells', 'hotkeys']
+        subset = ['category', 'application', 'events', 'hostname', 'url', 'path', 'clipboard', 'cells', 'hotkeys', 'keywords']
         keywordsDataframe = keywordsDataframe\
             .drop_duplicates(subset=subset, ignore_index=True)\
             .sort_values(['hostname', 'category','application', 'path', 'clipboard', 'cells'])
@@ -267,16 +274,16 @@ class DecisionPoints:
                             .groupby('case:concept:name')['case:concept:name'] \
                             .filter(lambda group: len(group) >= len(previousDecision) * 0.76) \
                             .unique().tolist()
-                    # # only the selected traces should appear in the keywords dataframe
-                    # # this only considers the next decision point, but it should consider all decision points instead
 
-                    # # filtered_df = dataframe.loc[dataframe['case:concept:name'].isin(decisionTraces)]
+                    # only the selected traces should appear in the keywords dataframe
+                    # this only considers the next decision point, but it should consider all decision points instead
+                    # filtered_df = dataframe.loc[dataframe['case:concept:name'].isin(decisionTraces)]
                     # filtered_df = None
                     filtered_df = []
 
-                    # # for each group, if the group in the current iteration is not the same as the previous dataframe
-                    # # and the current group is a decision point (is not duplicated), then find rows containing the
-                    # # caseID of the trace selected before. When found, break the loop
+                    # for each group, if the group in the current iteration is not the same as the previous dataframe
+                    # and the current group is a decision point (is not duplicated), then find rows containing the
+                    # caseID of the trace selected before. When found, break the loop
                     # for _, group in duplicated_groups:
                     #     if not group['duplicated'].unique() and not group.equals(previousDataframe):
                     #         filtered_df = group.loc[group['case:concept:name'].isin(decisionTraces)]
