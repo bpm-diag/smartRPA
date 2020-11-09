@@ -37,6 +37,11 @@ function handleCheckbox(){
     });
 }
 
+function timestamp(){
+    const timezoneOffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    return (new Date(Date.now() - timezoneOffset)).toISOString().slice(0, -1);
+}
+
 function handleEvent(event){
     return Excel.run(function(context) {
         Office.context.document.getFilePropertiesAsync(function (asyncResult) {
@@ -57,7 +62,7 @@ function handleEvent(event){
             return context.sync().then(function() {
 
                 let eventLog = {
-                    timestamp: moment().format("YYYY-MM-DD HH:mm:ss:SSSSSS"),
+                    timestamp: timestamp(),
                     category: "MSOffice",
                     application: "Microsoft Excel (MacOS)",
                     event_type: event.type,
