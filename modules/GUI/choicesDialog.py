@@ -38,7 +38,7 @@ class ChoicesDialog(QDialog):
         mask1 = self.df['concept:name'].isin(
             ['changeField',
              'editCell', 'editCellSheet', 'editRange',
-             'created', 'moved', 'Unmount', 'copy', 'hotkey']
+             'created', 'moved', 'Unmount', 'hotkey', 'copy']
         )
         # exclude paste in browser, take only paste in OS, do not consider cut or copy
         mask2 = ((self.df['concept:name'] == 'paste') & (self.df['category'] != 'Browser'))
