@@ -64,6 +64,8 @@ def _getHighLevelEvent(row):
         tags = [row['tag_type'], row['tag_category'].lower()]  # , row['tag_name']
         value = row['tag_value'].replace('\n', ', ')
         return f"[{app}] Write in {' '.join(tags)} '{row['tag_name']}' on {url} -> '{value}'"
+    elif e in ["startDownload"]:
+        return f"[{app}] Download started"
 
     # system
     elif e in ["itemSelected", "deleted", "created", "Mount", "openFile", "openFolder"]:
@@ -147,7 +149,7 @@ def aggregateData(df: pandas.DataFrame, remove_duplicates=False):
                       "doubleClickEmptyCell", "rightClickCellWithValue", "rightClickEmptyCell", "afterCalculate",
                       "closePresentation", "SlideSelectionChanged", "closeWorkbook",
                       "deactivateWorkbook", "WorksheetAdded", "autoBookmark", "selectedFolder", "selectedFile",
-                      "manualSubframe", "KernelDropped", "startDownload", "keyword", "dragElement"]  # mouseclick
+                      "manualSubframe", "KernelDropped", "keyword", "dragElement"]  # mouseclick
 
     df = df[~df['concept:name'].isin(rows_to_remove)]
 
