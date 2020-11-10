@@ -16,15 +16,17 @@ class DecisionPoints:
         self.status_queue = status_queue
 
         self.df = df
+
         self.duplication_subset = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
-                                   'clipboard_content', 'cell_range', 'browser_url_hostname', 'xpath']
+                                   'browser_url_hostname', 'xpath']  # 'tag_value', 'clipboard_content', 'cell_range'
+
         # need to check separately for compatibility reasons, previous logs did not have this column
         if 'hotkey' in self.df.columns:
             self.duplication_subset.append('hotkey')
 
-        self.df1 = self.__handle_df()
+        self.df1 = self.handle_df()
 
-    def __handle_df(self):
+    def handle_df(self):
         df1 = self.df
 
         # *************
@@ -41,10 +43,11 @@ class DecisionPoints:
             ['about:blank', 'chrome://newtab/', 'chrome-search://local-ntp/local-ntp.html'])
         eventsMask = ~df1['concept:name'].isin(
             ['zoomTab', 'enableBrowserExtension', 'logonComplete', 'getCell', 'afterCalculate',
-             'newWindow', 'selectText', 'KernelDropped'])
+             'newWindow', 'selectText', 'KernelDropped', 'selectTab', 'newTab', 'doubleClick',
+             'formSubmit', 'paste', 'mouseClick'])
         appsMask = ~df1['application'].isin(
             modules.events.systemEvents.programs_to_ignore)
-        df1 = df1[browserUrlMask & eventsMask & excelMask & appsMask]
+        df1 = df1[browserUrlMask & excelMask & appsMask & eventsMask]
         # application name of browsers is set to Chrome for all traces,
         # otherwise there would be false positive decision points
         df1.loc[df1['application'].isin(
@@ -101,7 +104,7 @@ class DecisionPoints:
                 # create set of values from the two lists to remove duplicates
                 results_union = set().union(*[a, b])
                 # convert to string
-                keywords = ', '.join(results_union)
+                keywords = ', '.join(sorted(results_union))
             if 'Excel' in application:
                 keywords = ','.join(
                     filter(None, map(lambda x: x[:30], df2['cell_content'].unique())))
@@ -235,6 +238,8 @@ class DecisionPoints:
                 duplicated = dataframe['duplicated'].unique()[0]
             except IndexError:
                 duplicated = True
+            except ValueError:
+                duplicated = any(dataframe['duplicated'].unique())
 
             # if current groups contains duplicated rows,
             # add them directly to final dataframe because it is not a decision point
@@ -316,7 +321,11 @@ class DecisionPoints:
                     afterPreviousDataframe = False
                     for _, group in duplicated_groups:
                         if afterPreviousDataframe:
-                            if not group['duplicated'].unique():  # decision point
+                            try:
+                                not_duplicated = not group['duplicated'].unique()
+                            except ValueError:
+                                not_duplicated = not (any(group['duplicated'].unique()))
+                            if not_duplicated:  # decision point
                                 mask = group['case:concept:name'].isin(decisionTraces)
                                 filtered_df.append(group.loc[mask])
                             else:
@@ -364,5 +373,4 @@ class DecisionPoints:
 
         # create and return new pandas dataframe built from rows previously saved
         return pandas.concat(dataframes) \
-            .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')\
-            .sort_index()
+            .drop_duplicates(subset=self.duplication_subset, ignore_index=False, keep='first') #.sort_index()
