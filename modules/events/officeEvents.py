@@ -656,6 +656,14 @@ def excelEventsMacServer(status_queue, excelFilepath=None):
     macExcelAddinPath = os.path.join(utils.utils.MAIN_DIRECTORY, 'extensions', 'excelAddinMac')
     # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1") # hide output
     if not utils.utils.utils.utils.isPortInUse(3000):
+        utils.utils.session.post(SERVER_ADDR, json={
+            "timestamp": utils.utils.timestamp(),
+            "user": utils.utils.USER,
+            "category": "MicrosoftOffice",
+            "application": "Microsoft Excel",
+            "event_type": "openWorkbook",
+            "event_src_path": excelFilepath if excelFilepath else ""
+        })
         if excelFilepath:
             app = xw.App(visible=True)
             book = xw.Book(excelFilepath)
