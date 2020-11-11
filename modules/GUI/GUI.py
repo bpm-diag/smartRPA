@@ -2,33 +2,33 @@
 # GUI
 # Build native user interface and start main logger
 # ****************************** #
-import sys
-
-sys.path.append('../')  # this way main file is visible from this file
-import traceback
-import utils.utils
-import modules.process_mining
-# import utils.xesConverter
-import modules.RPA.generateRPAScript
-import modules.decisionPoints
-import modules.flowchart
-import utils.config
-import modules.GUI.PreferencesWindow
-import main
-from utils.utils import *
-from modules.GUI.filenameDialog import getFilenameDialog
-import time
-import webbrowser
-from multiprocessing import Process, Queue
-import darkdetect
-from modules.GUI.GUIThread import Worker
+from PyQt5.QtCore import Qt, QSize, QThreadPool, QTimer
+from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
                              QAbstractItemView, QRadioButton, QProgressDialog,
                              QMainWindow, QWidget, QSlider, QLCDNumber, QMessageBox)
-from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
-from PyQt5.QtCore import Qt, QSize, QThreadPool, QTimer
+from modules.GUI.GUIThread import Worker
+import darkdetect
+from multiprocessing import Process, Queue
+import webbrowser
+import time
+from modules.GUI.filenameDialog import getFilenameDialog
+from utils.utils import *
+import main
+import modules.GUI.PreferencesWindow
+import utils.config
+import modules.flowchart
+import modules.decisionPoints
+import modules.RPA.generateRPAScript
+import modules.process_mining
+import utils.utils
+import traceback
+import sys
+
+sys.path.append('../')  # this way main file is visible from this file
+# import utils.xesConverter
 
 
 class MainApplication(QMainWindow, QDialog):
@@ -117,7 +117,8 @@ class MainApplication(QMainWindow, QDialog):
         mergeAction.triggered.connect(self.handleMerge)
         runLogAction = fileMenu.addAction('RPA from log...')
         runLogAction.triggered.connect(self.handleRunLogAction)
-        self.preferencesDialog = modules.GUI.PreferencesWindow.Preferences(self, self.status_queue)
+        self.preferencesDialog = modules.GUI.PreferencesWindow.Preferences(
+            self, self.status_queue)
 
         helpMenu = menu.addMenu('Help')
         about = helpMenu.addAction('About')
@@ -619,7 +620,8 @@ class MainApplication(QMainWindow, QDialog):
             import pm4py
             # create class, combine all csv into one
             # print(f"[PROCESS MINING] Finding most frequent path...")
-            pm = modules.process_mining.ProcessMining(log_filepath, self.status_queue, merged)
+            pm = modules.process_mining.ProcessMining(
+                log_filepath, self.status_queue, merged)
             if fromRunCount:
                 self.PMThreadComplete((pm, log_filepath))
             else:
@@ -634,8 +636,10 @@ class MainApplication(QMainWindow, QDialog):
             return False
         except PermissionError as e:
             print(f"[GUI] Process mining analysis exited with error: {e}")
-            print(f"[GUI] Maybe the file is opened in another program. Close it and try again.")
-            self.status_queue.put(f"Unable to open the file. Maybe it is opened in another program.")
+            print(
+                f"[GUI] Maybe the file is opened in another program. Close it and try again.")
+            self.status_queue.put(
+                f"Unable to open the file. Maybe it is opened in another program.")
             return False
         except Exception as e:
             print(f"[GUI] Process mining analysis exited with error: {e}")
@@ -647,7 +651,8 @@ class MainApplication(QMainWindow, QDialog):
     def choices(self, pm, log_filepath):
         # print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
-            num_traces = len(pm.dataframe['case:concept:name'].drop_duplicates())
+            num_traces = len(
+                pm.dataframe['case:concept:name'].drop_duplicates())
             pm.highLevelDFG()
             pm.highLevelPetriNet()
             self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
@@ -656,14 +661,16 @@ class MainApplication(QMainWindow, QDialog):
             if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
                 # create high level DFG model based on most frequent routine
                 # pm.highLevelBPMN()
-                modules.flowchart.Flowchart(pm.mostFrequentCase).generateFlowchart(pm.bpmn_path)
+                modules.flowchart.Flowchart(
+                    pm.mostFrequentCase).generateFlowchart(pm.bpmn_path)
 
                 # open high level BPMN
                 utils.utils.open_file(pm.bpmn_path)
 
                 # ask if some fields should be changed before generating RPA script
                 # build choices dialog, passing low level most frequent case to analyze
-                choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(pm.mostFrequentCase)
+                choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(
+                    pm.mostFrequentCase)
                 # when OK button is pressed
                 if choicesDialog.exec_() in [0, 1]:
                     mostFrequentCase = choicesDialog.df
@@ -674,10 +681,12 @@ class MainApplication(QMainWindow, QDialog):
                     rpa.generatePythonRPA(mostFrequentCase)
 
                     # pm.highLevelBPMN(df=mostFrequentCase, name="BPMN_final")
-                    modules.flowchart.Flowchart(mostFrequentCase).generateFlowchart(pm.bpmn_path, name="BPMN_final")
+                    modules.flowchart.Flowchart(mostFrequentCase).generateFlowchart(
+                        pm.bpmn_path, name="BPMN_final")
 
                     # create UiPath RPA script passing dataframe with only the most frequent trace
-                    UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, mostFrequentCase)
+                    UiPath = modules.RPA.uipath.UIPathXAML(
+                        log_filepath[-1], self.status_queue, mostFrequentCase)
                     UiPath.generateUiPathRPA()
 
             # decision
@@ -688,30 +697,36 @@ class MainApplication(QMainWindow, QDialog):
                     utils.utils.open_file(pm.dfg_path)
 
                     # ask what to do if decisions could be made
-                    d = modules.decisionPoints.DecisionPoints(pm.dataframe, self.status_queue)
+                    d = modules.decisionPoints.DecisionPoints(
+                        pm.dataframe, self.status_queue)
                     decided_dataframe = d.generateDecisionDataframe()
 
                     # pm.highLevelBPMN(df=decided_dataframe, decisionPoints=True)
-                    modules.flowchart.Flowchart(decided_dataframe).generateFlowchart(pm.bpmn_path)
+                    modules.flowchart.Flowchart(
+                        decided_dataframe).generateFlowchart(pm.bpmn_path)
 
                     # open high level BPMN
                     utils.utils.open_file(pm.bpmn_path)
 
                     # ask if some fields should be changed before generating RPA script
                     # build choices dialog, passing low level most frequent case to analyze
-                    choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(decided_dataframe)
+                    choicesDialog = modules.GUI.choicesDialog.ChoicesDialog(
+                        decided_dataframe)
                     # when OK button is pressed
                     if choicesDialog.exec_() in [0, 1]:
                         decided_dataframe_with_choices = choicesDialog.df
 
                         # pm.highLevelBPMN(df=decided_dataframe_with_choices, name="BPMN_final", decisionPoints=True)
-                        modules.flowchart.Flowchart(decided_dataframe_with_choices).generateFlowchart(pm.bpmn_path, name="BPMN_final")
+                        modules.flowchart.Flowchart(decided_dataframe_with_choices).generateFlowchart(
+                            pm.bpmn_path, name="BPMN_final")
 
                         # create RPA
-                        rpa = modules.RPA.generateRPAScript.RPAScript(log_filepath[-1], self.status_queue)
+                        rpa = modules.RPA.generateRPAScript.RPAScript(
+                            log_filepath[-1], self.status_queue)
                         rpa.generatePythonRPA(decided_dataframe_with_choices)
 
-                        self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
+                        self.status_queue.put(
+                            f"[PROCESS MINING] Generated diagrams")
 
                         # create UiPath RPA script passing dataframe with only the most frequent trace
                         UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue,
@@ -721,11 +736,13 @@ class MainApplication(QMainWindow, QDialog):
                     self.status_queue.put(f"[GUI] Could not perform decision points analysis, "
                                           f"at least 2 traces are needed in the event log\n")
 
-            elif utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis:  # decision point in RPA script at run time
+            # decision point in RPA script at run time
+            elif utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis:
                 # at least 2 traces are needed to perform decision analysis
                 if num_traces >= 2:
                     # create UiPath RPA script passing dataframe of entire process
-                    UiPath = modules.RPA.uipath.UIPathXAML(log_filepath[-1], self.status_queue, pm.dataframe)
+                    UiPath = modules.RPA.uipath.UIPathXAML(
+                        log_filepath[-1], self.status_queue, pm.dataframe)
                     UiPath.generateUiPathRPA(decision=True)
                 else:
                     self.status_queue.put(f"[GUI] Could not perform decision points analysis, "
@@ -772,7 +789,8 @@ class MainApplication(QMainWindow, QDialog):
         msgBox.setText("SmartRPA allows to train RPA routines in order to automatically find the best way "
                        "to perform a specific user task.")
         websiteBtn = QPushButton('Website')
-        websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/bpm-diag/smartRPA'))
+        websiteBtn.clicked.connect(lambda: webbrowser.open(
+            'https://github.com/bpm-diag/smartRPA'))
         msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
         closeBtn = QPushButton('Close')
         if darkdetect.isDark():
