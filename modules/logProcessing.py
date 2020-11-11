@@ -25,25 +25,38 @@ def handle_log(status_queue: Queue,
                 caseID = datetime.fromisoformat(ts).strftime('%m%d%H%M%S%f')
                 return caseID
             except Exception:
-                caseID = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%m%d%H%M%S%f')  # [:-3]
+                caseID = datetime.strptime(
+                    ts, "%Y-%m-%d %H:%M:%S:%f").strftime('%m%d%H%M%S%f')  # [:-3]
                 return caseID
 
         # combine multiple csv into one and then export it to xes
         csv_to_combine = list()
         for i, csv_path in enumerate(filepath):
+
             # load csv in pandas dataframe,
             # rename columns to match xes standard,
             # remove rows that don't have timestamp
             # replace null values with empty string
             # sort by timestamp
-            df = pandas \
-                .read_csv(csv_path, encoding='utf-8-sig') \
-                .rename(columns={'event_type': 'concept:name',
-                                 'timestamp': 'time:timestamp',
-                                 'user': 'org:resource'}) \
-                .dropna(subset=["time:timestamp"]) \
-                .fillna('') \
-                .sort_values(by='time:timestamp')
+            try:
+                df = pandas \
+                    .read_csv(csv_path, encoding='utf-8-sig') \
+                    .rename(columns={'event_type': 'concept:name',
+                                     'timestamp': 'time:timestamp',
+                                     'user': 'org:resource'}) \
+                    .dropna(subset=["time:timestamp"]) \
+                    .fillna('') \
+                    .sort_values(by='time:timestamp')
+            except pandas.errors.ParserError:
+                df = pandas \
+                    .read_csv(csv_path, encoding='utf-8-sig', sep=';') \
+                    .rename(columns={'event_type': 'concept:name',
+                                     'timestamp': 'time:timestamp',
+                                     'user': 'org:resource'}) \
+                    .dropna(subset=["time:timestamp"]) \
+                    .fillna('') \
+                    .sort_values(by='time:timestamp')
+
             # Each csv should have a separate case ID, so I insert a column to the left of each csv and assign
             # number i. When I convert the combined csv to xes, all the rows with the same number will belong to a
             # single trace, so I will have i traces.
@@ -56,7 +69,8 @@ def handle_log(status_queue: Queue,
             #     pass
 
             try:  # insert this column to create a unique trace for each csv
-                df.insert(0, 'case:concept:name', createCaseID(df['time:timestamp'][0]))
+                df.insert(0, 'case:concept:name',
+                          createCaseID(df['time:timestamp'][0]))
             except ValueError:  # column already present, replace case id values so they are sequential
                 pass
 
@@ -76,7 +90,8 @@ def handle_log(status_queue: Queue,
         combined_csv = pandas.concat(csv_to_combine)
 
         # remove rows containing path of temporary files
-        combined_csv = combined_csv[~combined_csv['event_src_path'].str.contains('~.*\.tmp|\.tmp.*~')]
+        combined_csv = combined_csv[~combined_csv['event_src_path'].str.contains(
+            '~.*\.tmp|\.tmp.*~')]
 
         # convert case id to string
         # combined_csv['case:concept:name'] = combined_csv['case:concept:name'].astype(str)
@@ -87,10 +102,12 @@ def handle_log(status_queue: Queue,
         # dataframe = combined_csv
 
         # calculate csv path
-        combined_csv_path = os.path.join(RPA_log_path, f'{filename}_combined.csv')
+        combined_csv_path = os.path.join(
+            RPA_log_path, f'{filename}_combined.csv')
 
         # save dataframe as csv
-        combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
+        combined_csv.to_csv(combined_csv_path, index=False,
+                            encoding='utf-8-sig')
 
         # convert csv to xes
         log = conversion_factory.apply(combined_csv)
@@ -99,7 +116,8 @@ def handle_log(status_queue: Queue,
         # log = sorting.sort_timestamp(log)
 
         # convert csv to xes
-        xes_path = os.path.join(save_path, utils.utils.EVENT_LOG_FOLDER, f'{filename}.xes')
+        xes_path = os.path.join(
+            save_path, utils.utils.EVENT_LOG_FOLDER, f'{filename}.xes')
         xes_exporter.export_log(log, xes_path)
         # timestamp in xes file must have attribute date, not string
         utils.utils.fixTimestampFieldXES(xes_path)
@@ -113,5 +131,6 @@ def handle_log(status_queue: Queue,
         log = xes_importer.import_log(filepath)
         return None, log
     else:
-        status_queue.put("[PROCESS_MINING] Input file must be either .csv or .xes")
+        status_queue.put(
+            "[PROCESS_MINING] Input file must be either .csv or .xes")
         return False
