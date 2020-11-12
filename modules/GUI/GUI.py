@@ -789,8 +789,7 @@ class MainApplication(QMainWindow, QDialog):
         msgBox.setText("SmartRPA allows to train RPA routines in order to automatically find the best way "
                        "to perform a specific user task.")
         websiteBtn = QPushButton('Website')
-        websiteBtn.clicked.connect(lambda: webbrowser.open(
-            'https://github.com/bpm-diag/smartRPA'))
+        websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/bpm-diag/smartRPA'))
         msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
         closeBtn = QPushButton('Close')
         if darkdetect.isDark():
