@@ -1632,10 +1632,10 @@ def validate():
 
 def test():
     v = Validation(
-        log_size=750,
+        log_size=500,
         trace_size=50,
         events_size=40,
-        decision_points=5
+        decision_points=4
     )
 
     df = v.generateDataframe()
