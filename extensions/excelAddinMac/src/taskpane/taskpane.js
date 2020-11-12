@@ -63,7 +63,7 @@ function handleEvent(event){
 
                 let eventLog = {
                     timestamp: timestamp(),
-                    category: "MSOffice",
+                    category: "MicrosoftOffice",
                     application: "Microsoft Excel (MacOS)",
                     event_type: event.type,
                     workbook: workbook_name._N,

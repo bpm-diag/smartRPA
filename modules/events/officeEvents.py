@@ -660,7 +660,7 @@ def excelEventsMacServer(status_queue, excelFilepath=None):
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
-            "application": "Microsoft Excel",
+            "application": "Microsoft Excel (MacOS)",
             "event_type": "openWorkbook",
             "event_src_path": excelFilepath if excelFilepath else ""
         })

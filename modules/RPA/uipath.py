@@ -1019,13 +1019,13 @@ class UIPathXAML:
         # if dataframe contains excel events, add excel scope element
         v = df['concept:name'].values
         if 'newWorkbook' in v:
-            self.__excelSpreadsheet(workbookPath="", attach=False)
+            self.mainSequence.append(self.__excelSpreadsheet(workbookPath="", attach=False))
         if 'openWorkbook' in v:
             wb_path = df.loc[df['concept:name'] ==
                              'openWorkbook', 'event_src_path'].iloc[0]
             os_user = df['org:resource'].iloc[0]
             path = utils.utils.convertToWindowsPath(wb_path, os_user)
-            self.__excelSpreadsheet(workbookPath=path, attach=False)
+            self.mainSequence.append(self.__excelSpreadsheet(workbookPath=path, attach=False))
 
     def __generateActivities(self, df: pandas.DataFrame, row: pandas.Series):
         ######
@@ -1211,137 +1211,137 @@ class UIPathXAML:
         if e == "closePresentation":
             return None
 
-    def __generateRPAWithDecision(self, df: pandas.DataFrame, decision: bool = False):
-
-        # at least 2 traces are needed for decision point
-        if decision:
-            assert len(df['case:concept:name'].drop_duplicates()) >= 2
-
-        # add comment to main sequence
-        self.__comment("// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA")
-
-        # backwards compatibility
-        if 'xpath_full' not in df.columns:
-            df['xpath_full'] = df['xpath']
-            self.__comment("// Clicking and typing into web elements is not supported with this event log. "
-                           "Record log again with the latest version of SmartRPA")
-
-        # create open browser and open excel activities
-        # all the other events relative to excel and browse are attached to this activities using sequence variables
-        self.__createOpenBrowser(df)
-        self.__createOpenExcel(df)
-
-        # lists to store xml nodes relative to different categories
-        browserActivities = []
-        excelActivities = []
-        systemActivities = []
-
-        # dictionary with 2 keys: case id of a trace and category of events belonging to that trace
-        # 2 keys are needed to keep track of different categories for each trace
-        caseActivities = defaultdict(lambda: defaultdict(list))
-
-        # variables used when creating xml nodes
-        self.ppt_slides_inserted = False
-        #
-        self.mac_source_filepath = ""
-
-        # previous category is used to detect a change in category and it's initialised as the category of the first row
-        # When a change happens, nodes are added to sequence and lists are emptied
-        previousCategory = df.loc[0, 'category']
-        df['previousDuplicated'] = df['duplicated'].shift(1) if decision else True
-
-        for index, row in df.iterrows():
-
-            # define variables
-            # duplicated row is only available when performing decision points
-            duplicated = row['duplicated'] if decision else True
-            previousDuplicated = row['previousDuplicated']
-            caseid = row['case:concept:name']
-            app = row['application']
-            currentCategory = row["category"]
-
-            # define conditions used to determine when to append xml nodes to main sequence or switch
-            # if category changes a new sequence should be written
-            categoryChange = (previousCategory != currentCategory) and not \
-                ((previousCategory == 'OperatingSystem' and currentCategory == 'Clipboard') or
-                 (previousCategory == 'Clipboard' and currentCategory == 'OperatingSystem'))
-            # these categories should all be appended to system list
-            if (currentCategory == "MicrosoftOffice" and app in ["Microsoft Word", "Microsoft Powerpoint"]) \
-                    or (currentCategory == "Clipboard"):
-                currentCategory = 'OperatingSystem'
-            # on last loop iteration all the remaining xml nodes should be written
-            lastIndex = (index == len(df) - 1)
-            # determine if entering switch block or vice versa
-            enterSwitch = previousDuplicated is True and duplicated is False
-            exitSwitch = previousDuplicated is False and duplicated is True
-
-            # generate UiPath XML node relative to specific row
-            xmlNode = self.__generateActivities(df, row)
-            if xmlNode is None:
-                continue
-
-            # add to main sequence
-            if duplicated:
-                if currentCategory == "Browser":
-                    browserActivities.append(xmlNode)
-                if app == "Microsoft Excel":
-                    excelActivities.append(xmlNode)
-                if currentCategory == "OperatingSystem":
-                    systemActivities.append(xmlNode)
-            # add to switch case
-            else:
-                caseActivities[caseid][currentCategory].append(xmlNode)
-
-            # handle switch
-            # if decision analysis and there are at least 2 cases in switch and
-            # the switch case is finished so the next row will go in main sequence
-            # or this is the last index
-            if decision and len(caseActivities) >= 2 and (exitSwitch or lastIndex):
-                # wrap low level xml events into specific sequence based on type
-                for key in caseActivities.keys():
-                    if caseActivities[key]["Browser"]:
-                        x = self.__attachBrowser(activities=caseActivities[key]["Browser"])
-                        caseActivities[key]["Browser"] = [x]
-                    if caseActivities[key]["MicrosoftOffice"]:
-                        x = self.__excelSpreadsheet(activities=caseActivities[key]["MicrosoftOffice"])
-                        caseActivities[key]["MicrosoftOffice"] = [x]
-                    if caseActivities[key]["OperatingSystem"]:
-                        x = self.__createSequence(activities=caseActivities[key]["OperatingSystem"],
-                                                  displayName="System events")
-                        caseActivities[key]["OperatingSystem"] = [x]
-                # if there are activities for the switch I need to flatten the sublists
-                # for each key before creating the switch
-                activities = defaultdict(list)
-                for key, value in caseActivities.items():
-                    activities[key].extend(value["Browser"])
-                    activities[key].extend(value["MicrosoftOffice"])
-                    activities[key].extend(value["OperatingSystem"])
-                self.__switch(caseActivities=activities)
-                # empty caseActivities dictionary for later use
-                caseActivities.clear()
-
-            # if there is a change in category but I'm still inside a switch case
-            # or I entered a switch case or this is the last index
-            if (categoryChange and not exitSwitch) or enterSwitch or lastIndex:
-
-                if categoryChange:
-                    self.previousCategory = currentCategory
-
-                # wrap xml nodes with sequence and append to main sequence
-                if browserActivities:
-                    x = self.__attachBrowser(activities=browserActivities)
-                    self.mainSequence.append(x)
-                    browserActivities.clear()
-                if excelActivities:
-                    x = self.__excelSpreadsheet(activities=excelActivities)
-                    self.mainSequence.append(x)
-                    excelActivities.clear()
-                if systemActivities:
-                    x = self.__createSequence(systemActivities, displayName="System events")
-                    self.mainSequence.append(x)
-                    systemActivities.clear()
-
-        self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
+    # def __generateRPAWithDecision(self, df: pandas.DataFrame, decision: bool = False):
+    #
+    #     # at least 2 traces are needed for decision point
+    #     if decision:
+    #         assert len(df['case:concept:name'].drop_duplicates()) >= 2
+    #
+    #     # add comment to main sequence
+    #     self.__comment("// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA")
+    #
+    #     # backwards compatibility
+    #     if 'xpath_full' not in df.columns:
+    #         df['xpath_full'] = df['xpath']
+    #         self.__comment("// Clicking and typing into web elements is not supported with this event log. "
+    #                        "Record log again with the latest version of SmartRPA")
+    #
+    #     # create open browser and open excel activities
+    #     # all the other events relative to excel and browse are attached to this activities using sequence variables
+    #     self.__createOpenBrowser(df)
+    #     self.__createOpenExcel(df)
+    #
+    #     # lists to store xml nodes relative to different categories
+    #     browserActivities = []
+    #     excelActivities = []
+    #     systemActivities = []
+    #
+    #     # dictionary with 2 keys: case id of a trace and category of events belonging to that trace
+    #     # 2 keys are needed to keep track of different categories for each trace
+    #     caseActivities = defaultdict(lambda: defaultdict(list))
+    #
+    #     # variables used when creating xml nodes
+    #     self.ppt_slides_inserted = False
+    #     #
+    #     self.mac_source_filepath = ""
+    #
+    #     # previous category is used to detect a change in category and it's initialised as the category of the first row
+    #     # When a change happens, nodes are added to sequence and lists are emptied
+    #     previousCategory = df.loc[0, 'category']
+    #     df['previousDuplicated'] = df['duplicated'].shift(1) if decision else True
+    #
+    #     for index, row in df.iterrows():
+    #
+    #         # define variables
+    #         # duplicated row is only available when performing decision points
+    #         duplicated = row['duplicated'] if decision else True
+    #         previousDuplicated = row['previousDuplicated']
+    #         caseid = row['case:concept:name']
+    #         app = row['application']
+    #         currentCategory = row["category"]
+    #
+    #         # define conditions used to determine when to append xml nodes to main sequence or switch
+    #         # if category changes a new sequence should be written
+    #         categoryChange = (previousCategory != currentCategory) and not \
+    #             ((previousCategory == 'OperatingSystem' and currentCategory == 'Clipboard') or
+    #              (previousCategory == 'Clipboard' and currentCategory == 'OperatingSystem'))
+    #         # these categories should all be appended to system list
+    #         if (currentCategory == "MicrosoftOffice" and app in ["Microsoft Word", "Microsoft Powerpoint"]) \
+    #                 or (currentCategory == "Clipboard"):
+    #             currentCategory = 'OperatingSystem'
+    #         # on last loop iteration all the remaining xml nodes should be written
+    #         lastIndex = (index == len(df) - 1)
+    #         # determine if entering switch block or vice versa
+    #         enterSwitch = previousDuplicated is True and duplicated is False
+    #         exitSwitch = previousDuplicated is False and duplicated is True
+    #
+    #         # generate UiPath XML node relative to specific row
+    #         xmlNode = self.__generateActivities(df, row)
+    #         if xmlNode is None:
+    #             continue
+    #
+    #         # add to main sequence
+    #         if duplicated:
+    #             if currentCategory == "Browser":
+    #                 browserActivities.append(xmlNode)
+    #             if app == "Microsoft Excel":
+    #                 excelActivities.append(xmlNode)
+    #             if currentCategory == "OperatingSystem":
+    #                 systemActivities.append(xmlNode)
+    #         # add to switch case
+    #         else:
+    #             caseActivities[caseid][currentCategory].append(xmlNode)
+    #
+    #         # handle switch
+    #         # if decision analysis and there are at least 2 cases in switch and
+    #         # the switch case is finished so the next row will go in main sequence
+    #         # or this is the last index
+    #         if decision and len(caseActivities) >= 2 and (exitSwitch or lastIndex):
+    #             # wrap low level xml events into specific sequence based on type
+    #             for key in caseActivities.keys():
+    #                 if caseActivities[key]["Browser"]:
+    #                     x = self.__attachBrowser(activities=caseActivities[key]["Browser"])
+    #                     caseActivities[key]["Browser"] = [x]
+    #                 if caseActivities[key]["MicrosoftOffice"]:
+    #                     x = self.__excelSpreadsheet(activities=caseActivities[key]["MicrosoftOffice"])
+    #                     caseActivities[key]["MicrosoftOffice"] = [x]
+    #                 if caseActivities[key]["OperatingSystem"]:
+    #                     x = self.__createSequence(activities=caseActivities[key]["OperatingSystem"],
+    #                                               displayName="System events")
+    #                     caseActivities[key]["OperatingSystem"] = [x]
+    #             # if there are activities for the switch I need to flatten the sublists
+    #             # for each key before creating the switch
+    #             activities = defaultdict(list)
+    #             for key, value in caseActivities.items():
+    #                 activities[key].extend(value["Browser"])
+    #                 activities[key].extend(value["MicrosoftOffice"])
+    #                 activities[key].extend(value["OperatingSystem"])
+    #             self.__switch(caseActivities=activities)
+    #             # empty caseActivities dictionary for later use
+    #             caseActivities.clear()
+    #
+    #         # if there is a change in category but I'm still inside a switch case
+    #         # or I entered a switch case or this is the last index
+    #         if (categoryChange and not exitSwitch) or enterSwitch or lastIndex:
+    #
+    #             if categoryChange:
+    #                 self.previousCategory = currentCategory
+    #
+    #             # wrap xml nodes with sequence and append to main sequence
+    #             if browserActivities:
+    #                 x = self.__attachBrowser(activities=browserActivities)
+    #                 self.mainSequence.append(x)
+    #                 browserActivities.clear()
+    #             if excelActivities:
+    #                 x = self.__excelSpreadsheet(activities=excelActivities)
+    #                 self.mainSequence.append(x)
+    #                 excelActivities.clear()
+    #             if systemActivities:
+    #                 x = self.__createSequence(systemActivities, displayName="System events")
+    #                 self.mainSequence.append(x)
+    #                 systemActivities.clear()
+    #
+    #     self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
     def __generateRPA(self, df: pandas.DataFrame):
         # add comment to main sequence
@@ -1400,7 +1400,7 @@ class UIPathXAML:
                 if activities["Browser"]:
                     x = self.__attachBrowser(activities=activities["Browser"])
                     self.mainSequence.append(x)
-                if activities["MicrosoftOffice"]:
+                if activities["MicrosoftOffice"] or activities["MSOffice"]:
                     x = self.__excelSpreadsheet(activities=activities["MicrosoftOffice"])
                     self.mainSequence.append(x)
                 if activities["OperatingSystem"]:
