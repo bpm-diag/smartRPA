@@ -31,7 +31,7 @@
 **Robotic Process Automation (RPA)** is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
 The current generation of RPA tools is driven by predefined rules and manual configurations made by expert users rather than automated techniques.
 
-**SmartRPA** is a cross-platform tool that tackles such issues by automatically generating executable RPA scripts that will drive a SW robots in emulating an observed user behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
+**SmartRPA** is a cross-platform tool that tackles such issues. It allows to easily record event logs and to automatically generating executable RPA scripts that will drive a SW robots in emulating an observed user behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
 
 ## Authors
 
@@ -51,7 +51,7 @@ A **screencast** of the tool is available on [Vimeo](https://vimeo.com/marco2012
 The architecture of SmartRPA integrates five main SW components.
 
 <p align="center">
-  <img width="55%" src="docs/architecture.png"/>
+  <img width="55%" src="docs/architecture.jpeg"/>
 </p>
 
 **Key features** include:
@@ -59,11 +59,11 @@ The architecture of SmartRPA integrates five main SW components.
 - [x] **Action Logger**, log user behaviour, cross-platform, modular, supports wide range of applications;
 - [x] **Log Processing**, generates both CSV and XES event log;
 - [x] **Event abstraction**, abstracts events to a higher level;
-- [x] **Process Discovery**, selects the most frequent routine to automate and generates high-level flowchart diagram of the selected routine, thus skipping completely the manual modeling activity;
-- [x] **Decision Points**, discover differencies between multiple traces in a process and builds a new routine based on user decisions;
+- [x] **Process Discovery**, selects the most suitable routine variant to automate and generates high-level flowchart diagram, thus skipping completely the manual modeling activity;
+- [x] **Decision Points**, discover differencies between multiple traces in a process and build a new routine based on user decisions;
 - [x] **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform _Python script_ and as a _UiPath_ project.
 
-A _partial_ list of features for each module of the Action Logger is available in [`features.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/Features.pdf).
+A list of events supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/SmartRPA_events.pdf).
 
 # Installation and execution:
 
