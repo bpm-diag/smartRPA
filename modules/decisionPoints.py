@@ -39,23 +39,28 @@ class DecisionPoints:
                       (df1['application'] == 'EXCEL.EXE') &
                       (df1['event_src_path'].str.contains('EXCEL.EXE')))
         # these events are irrelevant for decision mining and rpa bot
-        browserUrlMask = ~df1['browser_url'].isin(
-            ['about:blank', 'chrome://newtab/', 'chrome-search://local-ntp/local-ntp.html'])
+        # browserUrlMask = ~df1['browser_url'].isin(
+        #     ['about:blank', 'chrome://newtab/', 'chrome-search://local-ntp/local-ntp.html'])
+        browserUrlMask = ~(
+                (df1['browser_url'].isin(['about:blank', 'chrome://newtab/',
+                                          'chrome-search://local-ntp/local-ntp.html'])) &
+                ~(df1['concept:name'] == 'startDownload')
+        )
         eventsMask = ~df1['concept:name'].isin(
             ['zoomTab', 'enableBrowserExtension', 'logonComplete', 'getCell', 'afterCalculate',
              'newWindow', 'selectText', 'KernelDropped', 'selectTab', 'newTab', 'doubleClick',
-             'formSubmit', 'paste', 'mouseClick'])
-        appsMask = ~df1['application'].isin(
-            modules.events.systemEvents.programs_to_ignore)
+             'paste', 'mouseClick'])  # formSubmit
+        appsMask = ~df1['application'].isin(modules.events.systemEvents.programs_to_ignore)
         df1 = df1[browserUrlMask & excelMask & appsMask & eventsMask]
         # application name of browsers is set to Chrome for all traces,
         # otherwise there would be false positive decision points
         df1.loc[df1['application'].isin(
             ['Firefox', 'Opera', 'Edge']), 'application'] = 'Chrome'
         # add hostname column to dataframe
-        df1['browser_url_hostname'] = df1['browser_url'].apply(
-            lambda url: utils.utils.getHostname(url)).fillna('')
-
+        df1['browser_url_hostname'] = df1['browser_url'].apply(lambda url: utils.utils.getHostname(url)).fillna('')
+        # remove query parameters from formSubmit url
+        formSubmitMask = df1['concept:name'] == 'formSubmit'
+        df1.loc[formSubmitMask, 'browser_url'] = df1.loc[formSubmitMask, 'browser_url'].apply(lambda url: url.split('?')[0])
         # *************
         # marking duplicates among all distinct groups
         # *************
@@ -241,10 +246,17 @@ class DecisionPoints:
             except ValueError:
                 duplicated = any(dataframe['duplicated'].unique())
 
-            # if current groups contains duplicated rows,
-            # add them directly to final dataframe because it is not a decision point
+            # if the current group is duplicated, all the rows in the group are present at least once per trace.
+            # hence this group contains repeated rows. I only need to select a group of rows, so I pick the first
+            # case id, select all the rows with that caseid and append them to the final dataframe
+            # otherwise there would be many duplicated rows in the final dataframe
             if duplicated:
-                dataframes.append(dataframe)
+                # dataframes.append(dataframe)
+                if selectedTrace:
+                    dataframes.append(dataframe[dataframe['case:concept:name'] == selectedTrace])
+                else:
+                    first_caseid_in_group = dataframe['case:concept:name'].unique()[0]
+                    dataframes.append(dataframe[dataframe['case:concept:name'] == first_caseid_in_group])
 
             # decision point if not duplicated and there are at least 2 traces in the current group
             elif not duplicated and len(dataframe.groupby('case:concept:name')) >= 2:
@@ -372,5 +384,9 @@ class DecisionPoints:
             previousDataframe = dataframe
 
         # create and return new pandas dataframe built from rows previously saved
-        return pandas.concat(dataframes) \
-            .drop_duplicates(subset=self.duplication_subset, ignore_index=False, keep='first') #.sort_index()
+        final_duplication_subset = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
+                                    'browser_url_hostname', 'xpath', 'tag_value', 'clipboard_content', 'cell_range']
+        return pandas\
+            .concat(dataframes)\
+            .drop_duplicates(subset=final_duplication_subset, ignore_index=False, keep='first')\
+            .sort_index()
