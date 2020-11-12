@@ -100,7 +100,11 @@ def _getHighLevelEvent(row):
 
     # excel win
     elif e in ["newWorkbook", "openWorkbook", "activateWorkbook"]:
-        return f"[Excel] Open {row['workbook']}"
+        if row['workbook']:
+            return f"[Excel] Open {row['workbook']}"
+        else:
+            name = ntpath.basename(row['event_src_path'])
+            return f"[Excel] Open '{name}'"
     elif e in ["getCell", "getRange", "WorksheetCalculated", "WorksheetFormatChanged"]:
         if row['current_worksheet'] != '':
             return f"[Excel] Edit Cell on {row['current_worksheet']}"
