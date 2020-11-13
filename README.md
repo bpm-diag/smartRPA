@@ -67,12 +67,10 @@ A list of events supported by the Action Logger is available in [`SmartRPA_event
 
 # Installation and execution:
 
-### 0. Prerequisites
-- [Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_)
-- MacOS 10
-- Windows 10
-
 ### 1. **Install dependencies**
+
+The tool works on MacOS 10.x and Windows 10.
+[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. 
 
 - Install **project** dependencies (required to record UI log)
 
@@ -277,10 +275,10 @@ pip3 install automagica==2.0.25
 
 Install chromedriver to enable automation in Google Chrome.
 
-Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history). The command below is for Chrome version 85.
+Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history).
 
 ```bash
-pip3 install chromedriver-binary==85.0.4183.83.0
+pip3 install chromedriver-binary
 ```
 
 <details>

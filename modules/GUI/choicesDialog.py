@@ -14,13 +14,13 @@ from utils.utils import WINDOWS
 class ChoicesDialog(QDialog):
     # df is low level dataframe of the selected most frequent routine
     def __init__(self, df: pandas.DataFrame):
-        super(ChoicesDialog, self).__init__(flags=Qt.Window |
-                                                  Qt.WindowTitleHint |
-                                                  Qt.CustomizeWindowHint)
+        
+        # flags = Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint
+        super(ChoicesDialog, self).__init__()
         self.setWindowTitle("Choices")
 
-        self.setMaximumWidth(1000)
-        self.setMaximumHeight(600)
+        # self.setMaximumWidth(1000)
+        # self.setMaximumHeight(600)
         if WINDOWS:
             self.setFixedWidth(1000)
         else:
