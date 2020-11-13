@@ -67,7 +67,10 @@ A list of events supported by the Action Logger is available in [`SmartRPA_event
 
 # Installation and execution:
 
-Make sure you are using **_64bit_ version of Python ≥ 3.7** installed from the [official website](https://www.python.org/downloads/).
+### 0. Prerequisites
+- [Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_)
+- MacOS 10
+- Windows 10
 
 ### 1. **Install dependencies**
 
