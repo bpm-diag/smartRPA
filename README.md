@@ -69,8 +69,8 @@ A list of events supported by the Action Logger is available in [`SmartRPA_event
 
 ### 1. **Install dependencies**
 
-The tool works on MacOS 10.x and Windows 10.
-[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. 
+The tool works on MacOS and Windows 10.
+[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required.
 
 - Install **project** dependencies (required to record UI log)
 
@@ -184,7 +184,6 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
   3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
   4. `pip3 install pm4py==1.5.0.1`
 
-    </br>
     <details>
     <summary>
         Click to show how to <b>fix installation errors</b> on Windows
@@ -194,15 +193,13 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
   If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/downloads/windows/">64bit version of Python3</a>.
 
     </details>
+  <br>
 
 - On **MacOS**:
 
-  Use [brew package manager](https://brew.sh/) to install graphviz
-
-  ```bash
-  brew install graphviz
-  pip3 install pm4py==1.5.0.1
-  ```
+  1. Install [brew](https://brew.sh/) package manager
+  2. Install graphviz with `brew install graphviz`
+  3. `pip3 install pm4py==1.5.0.1`
 
     <details>
     <summary>
@@ -212,16 +209,22 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
   If you get an error during installation:
 
-  - If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, try to install the packages again
+  - If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, install `pm4py` again
 
     ```
     sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
     ```
 
-  - If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, try to install the packages again
+  - If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, install `pm4py` again
 
     ```
     export CPATH=`xcrun --show-sdk-path`/usr/include
+    ```
+
+  - If you're on **MacOS 11.0 Big Sur**, install the nightly build version of `scikit-learn` running the following command and then install `pm4py` again
+
+    ```
+    pip3 install --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
     ```
 
     </details>
@@ -288,7 +291,7 @@ pip3 install chromedriver-binary
 <br>
 If you get the error <code>RuntimeError: Failed to download chromedriver archive</code>
 
-1. Navigate to `/Applications/Python 3.8/` folder
+1. Navigate to `/Applications/Python 3.x/` folder
 2. Run `Install Certificates.command` file
 3. Install the package again
 

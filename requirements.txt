@@ -1,31 +1,35 @@
 # Common dependencies
+wheel
 pyperclip==1.7.0
 keyboard==0.13.4
 requests_futures==1.0.0
 Flask==1.1.1
 darkdetect==0.1.1
-PyQt5==5.15.1
-PyQtWebEngine==5.15.1
+PyQt5==5.13.0 # only version compatible with macOS 11 (big sur)
+PyQtWebEngine==5.13.0
 beautifulsoup4==4.9.3
 watchdog==0.10.2
 pandas==1.1.4
 nativeconfig==3.4.0
 pynput==1.6.7
 selenium==3.7.0
-python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win because of visual studio
+python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win if visual studio c libraries missing
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
 psutil==5.4.6
 lxml==4.5.2
 pydot==1.4.1
-wheel
+
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"
 WMI==1.4.9; platform_system == "Windows"
+
 # MacOS specific dependencies
 applescript==2019.4.13; platform_system == "Darwin"
 MacFSEvents==0.8.1; platform_system == "Darwin"
 xlwings==0.18.0; platform_system == "Darwin"
+
+# deprecated dependencies
 # matplotlib==3.3.2
 # opyenxes==0.3.0
 # networkx==2.4
