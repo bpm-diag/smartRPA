@@ -69,20 +69,20 @@ A list of events supported by the Action Logger is available in [`SmartRPA_event
 
 ### 1. **Install dependencies**
 
-The tool works on MacOS and Windows 10.
 [Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required.
 
-- Install **project** dependencies (required to record UI log)
+- Install [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only) on Windows and [Brew](https://brew.sh) on MacOS
+- Install **project** dependencies _(required to record UI log)_
 
   ```bash
   pip3 install -r requirements.txt
   ```
 
-- Install **Process Discovery** dependencies (required to perform process discovery analysis)
+- Install **Process Discovery** dependencies _(required to perform process discovery analysis)_
 
   [Details here](#process-discovery-dependencies)
 
-- Install **RPA** dependencies (required to run RPA SW Robot)
+- Install **RPA** dependencies _(required to run RPA SW Robot)_
 
   [Details here](#rpa-dependencies)
 
@@ -197,7 +197,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
 - On **MacOS**:
 
-  1. Install [brew](https://brew.sh/) package manager
+  1. Make sure you installed [brew](https://brew.sh/) package manager
   2. Install graphviz with `brew install graphviz`
   3. `pip3 install pm4py==1.5.0.1`
 

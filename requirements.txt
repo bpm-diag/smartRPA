@@ -5,11 +5,14 @@ keyboard==0.13.4
 requests_futures==1.0.0
 Flask==1.1.1
 darkdetect==0.1.1
-PyQt5==5.13.0 # only version compatible with macOS 11 (big sur)
-PyQtWebEngine==5.13.0
+PyQt5==5.13.0; platform_system == "Darwin" # only version compatible with macOS 11 (big sur)
+PyQtWebEngine==5.13.0; platform_system == "Darwin"
+PyQt5==5.15.1; platform_system == "Windows" # version 5.13.0 is not available on windows
+PyQtWebEngine==5.15.1; platform_system == "Windows"
 beautifulsoup4==4.9.3
 watchdog==0.10.2
 pandas==1.1.4
+numpy==1.19.3
 nativeconfig==3.4.0
 pynput==1.6.7
 selenium==3.7.0
@@ -17,7 +20,8 @@ python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win if visua
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
 psutil==5.4.6
-lxml==4.5.2
+#lxml==4.5.2
+lxml==4.6.1
 pydot==1.4.1
 
 # Windows specific dependencies
