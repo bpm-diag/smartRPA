@@ -1,5 +1,6 @@
 # Common dependencies
 wheel
+setuptools
 pyperclip==1.7.0
 keyboard==0.13.4
 requests_futures==1.0.0
