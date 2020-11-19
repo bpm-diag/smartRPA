@@ -180,9 +180,8 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 - On **Windows**:
 
   1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
-  2. Install [graphviz-2.38.msi](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
-  3. Add `C:\Program Files (x86)\Graphviz2.38\bin` folder to [system path](https://stackoverflow.com/a/44272417/1440037)
-  4. `pip3 install pm4py==1.5.0.1`
+  2. Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
+  3. `pip3 install pm4py==1.5.0.1`
 
     <details>
     <summary>
@@ -221,7 +220,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
     export CPATH=`xcrun --show-sdk-path`/usr/include
     ```
 
-  - If you're on **MacOS 11.0 Big Sur**, install the nightly build version of `scikit-learn` running the following command and then install `pm4py` again
+  - If you're on **MacOS 11.0 Big Sur**, install the latest nightly build version of `scikit-learn` running the following command and then install `pm4py` again
 
     ```
     pip3 install --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
@@ -252,9 +251,9 @@ The cross-platform python script requires the following dependencies to work.
 
 #### 1) Automagica
 
-To run the generated RPA scripts you must install `automagica` module.
+To run the generated RPA scripts you must install `automagica` module available in the `libraries` directory.
 
-`pip3 install automagica==2.0.25`
+`pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
 
   <details>
   <summary>
@@ -269,14 +268,14 @@ To run the generated RPA scripts you must install `automagica` module.
 ```cmd
 set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
 set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
-pip3 install automagica==2.0.25
+pip3 install libraries/Automagica-2.0.25-py3-none-any.whl
 ```
 
 </details>
 
 #### 2) Chromedriver
 
-Install chromedriver to enable automation in Google Chrome.
+Install _chromedriver_ to enable automation in Google Chrome.
 
 Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history).
 
