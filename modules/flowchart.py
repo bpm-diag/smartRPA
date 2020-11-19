@@ -6,7 +6,8 @@ import modules.eventAbstraction
 
 class Flowchart:
     def __init__(self, df: pandas.DataFrame):
-        high_level_df, _, _ = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)
+        high_level_df, _, _ = modules.eventAbstraction.aggregateData(
+            df, remove_duplicates=True)
         self.process_hl = high_level_df['customClassifier'].to_list()
         self.dot_graph = pydot.Dot(graph_type='digraph')
 
@@ -53,4 +54,9 @@ class Flowchart:
         if name:
             path = path.replace('BPMN', name)
 
-        self.dot_graph.write(path, format="pdf")
+        try:
+            self.dot_graph.write(path, format="pdf")
+        except FileNotFoundError as e:
+            print(
+                "[FLOWCHART] Could not generate flowchart. Make sure that 'graphviz' is in system path.")
+            print(e)
