@@ -789,7 +789,8 @@ class MainApplication(QMainWindow, QDialog):
         msgBox.setText("SmartRPA allows to train RPA routines in order to automatically find the best way "
                        "to perform a specific user task.")
         websiteBtn = QPushButton('Website')
-        websiteBtn.clicked.connect(lambda: webbrowser.open('https://github.com/bpm-diag/smartRPA'))
+        websiteBtn.clicked.connect(lambda: webbrowser.open(
+            'https://github.com/bpm-diag/smartRPA'))
         msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
         closeBtn = QPushButton('Close')
         if darkdetect.isDark():
@@ -797,28 +798,29 @@ class MainApplication(QMainWindow, QDialog):
         msgBox.addButton(closeBtn, QMessageBox.RejectRole)
         msgBox.exec_()
 
+    # displays file dialog when excel is selected in order to choose a file to open
     def excelDialog(self):
         self.officeFilepath = None
-        if self.officeExcel:
-            msgBox = QMessageBox()
-            msgBox.setWindowTitle("Excel spreadsheet")
-            msgBox.setText(
-                "Do you want to open an existing Excel spreadsheet or create a new one?")
-            existing = QPushButton('Open existing spreadsheet')
-            new = QPushButton('Create new spreadsheet')
-            if darkdetect.isDark():
-                existing.setStyleSheet(
-                    'QPushButton {background-color: #656565;}')
-                new.setStyleSheet('QPushButton {background-color: #656565;}')
-            msgBox.addButton(existing, QMessageBox.YesRole)
-            msgBox.addButton(new, QMessageBox.NoRole)
-            ret = msgBox.exec_()
-            if ret == 0:
-                path = getFilenameDialog(customDialog=False,
-                                         title='Select Excel spreadsheet to open',
-                                         multipleItems=False,
-                                         filter_format="Excel files (*.csv *.xlsx *xls *.xlsm)")
-                self.officeFilepath = path[0] if path else None
+        # if self.officeExcel:
+        #     msgBox = QMessageBox()
+        #     msgBox.setWindowTitle("Excel spreadsheet")
+        #     msgBox.setText(
+        #         "Do you want to open an existing Excel spreadsheet or create a new one?")
+        #     existing = QPushButton('Open existing spreadsheet')
+        #     new = QPushButton('Create new spreadsheet')
+        #     if darkdetect.isDark():
+        #         existing.setStyleSheet(
+        #             'QPushButton {background-color: #656565;}')
+        #         new.setStyleSheet('QPushButton {background-color: #656565;}')
+        #     msgBox.addButton(existing, QMessageBox.YesRole)
+        #     msgBox.addButton(new, QMessageBox.NoRole)
+        #     ret = msgBox.exec_()
+        #     if ret == 0:
+        #         path = getFilenameDialog(customDialog=False,
+        #                                  title='Select Excel spreadsheet to open',
+        #                                  multipleItems=False,
+        #                                  filter_format="Excel files (*.csv *.xlsx *xls *.xlsm)")
+        #         self.officeFilepath = path[0] if path else None
 
     # Called when start button is clicked by user
     def onButtonClick(self):
