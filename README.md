@@ -1,5 +1,5 @@
 <p align="center">
-<img width="100%" src="docs/readme-header.png"><br/><br/>
+<img width="100%" src="images/readme-header.png"><br/><br/>
     <a href="https://www.python.org/downloads/" alt="Activity">
         <img src="https://img.shields.io/badge/Python-3.8 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
     <a href="#" alt="Activity">
@@ -22,7 +22,7 @@
     <br/>
     <a href="#"><img src="https://img.shields.io/badge/Sapienza University of Rome-blue?style=flat&labelColor=781A2D&color=781A2D&logoColor=white" /></a> 
   <br/><br/>
-  <img width="80%" src="docs/gui.jpg"/>
+  <img width="80%" src="images/gui.jpg"/>
 
 </p>
 
@@ -51,7 +51,7 @@ A **screencast** of the tool is available on [Vimeo](https://vimeo.com/marco2012
 The architecture of SmartRPA integrates five main SW components.
 
 <p align="center">
-  <img width="55%" src="docs/architecture.jpeg"/>
+  <img width="55%" src="images/architecture.jpeg"/>
 </p>
 
 **Key features** include:
@@ -63,7 +63,7 @@ The architecture of SmartRPA integrates five main SW components.
 - [x] **Decision Points**, discover differencies between multiple traces in a process and build a new routine based on user decisions;
 - [x] **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform _Python script_ and as a _UiPath_ project.
 
-A list of events supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/docs/SmartRPA_events.pdf).
+A list of events supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf).
 
 # Installation and execution:
 
@@ -123,7 +123,7 @@ npm stop    # stop server
   <li>Start the Action Logger selecting Excel module</li>
   <li>Go to <code>Insert</code> tab</li>
   <li>Click on the small down-arrow to the right of <code>My Add-ins</code> > <code>OfficeLogger</code></li>
-  <img width="50%" src="docs/excel_logger.png">
+  <img width="50%" src="images/excel_logger.png">
   <li>Go to <code>Home</code> tab</li>
   <li>Click the <code>Show Taskpane</code> button in the ribbon</li>
   <li>Enable the checkbox</li>
@@ -162,7 +162,7 @@ The following dependencies are required to enable process discovery analysis, a 
 
 #### 0) Visual Studio (Windows Only)
 
-<img width="40%" src="docs/visual_studio.png">
+<img width="40%" src="images/visual_studio.png">
 
 - On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
   It is vital to install all C++ related development tools like:
