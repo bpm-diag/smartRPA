@@ -14,8 +14,4 @@ python:
   version: 3.8
   install:
     - requirements: requirements.txt
-    - method: pip
-      path: .
-      extra_requirements:
-        - pm4py==1.5.0.1
   system_packages: true
