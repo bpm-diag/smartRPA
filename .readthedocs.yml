@@ -18,4 +18,4 @@ python:
       path: .
       extra_requirements:
         - pm4py==1.5.0.1
-    system_packages: true
+  system_packages: true
