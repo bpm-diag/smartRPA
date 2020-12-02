@@ -4,18 +4,17 @@
 # GUI when main process is terminated and csv is available.
 # https://automagica.readthedocs.io/activities.html
 # ******************************
+import modules
+from multiprocessing.queues import Queue
+import pandas
+import os
+import ntpath
+from threading import Thread
+import utils.config
+import utils
+from utils.utils import CHROME, DESKTOP, getActiveWindowInfo, WINDOWS, MAC
 import sys
 sys.path.append('../')  # this way main file is visible from this file
-
-from utils.utils import CHROME, DESKTOP, getActiveWindowInfo, WINDOWS, MAC
-import utils
-import utils.config
-from threading import Thread
-import ntpath
-import os
-import pandas
-from multiprocessing.queues import Queue
-import modules
 
 
 class RPAScript:
@@ -47,9 +46,11 @@ class RPAScript:
         self.csv_file_path = csv_file_path
         self.RPA_directory = utils.utils.getRPADirectory(self.csv_file_path)
         try:
-            self._dataframe = pandas.read_csv(csv_file_path, encoding='utf-8-sig')
+            self._dataframe = pandas.read_csv(
+                csv_file_path, encoding='utf-8-sig')
         except pandas.errors.ParserError:
-            self._dataframe = pandas.read_csv(csv_file_path, encoding='utf-8-sig', sep=';')
+            self._dataframe = pandas.read_csv(
+                csv_file_path, encoding='utf-8-sig', sep=';')
         except UnicodeDecodeError as e:
             print(f"[RPA] Could not decode {csv_file_path}: {e}")
 
@@ -72,7 +73,7 @@ import pyperclip
 try:
     from automagica import *
 except ImportError as e:
-    print("Please install 'automagica' module running 'pip3 install automagica==2.0.25'")
+    print("Please install 'automagica' module running 'pip3 install libraries/Automagica-2.0.25-py3-none-any.whl'")
     print("If you get errors check here https://github.com/bpm-diag/smartRPA#1-automagica")
     sys.exit()
 \n"""
@@ -137,7 +138,8 @@ except Exception:
         RPA_filename = utils.utils.getFilename(
             self.csv_file_path).strip('_combined') + RPA_type
         # RPA_filepath is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57/2020-02-25_23-21-57_RPA.py
-        RPA_filepath = os.path.join(self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, RPA_filename)
+        RPA_filepath = os.path.join(
+            self.RPA_directory, utils.utils.SW_ROBOT_FOLDER, RPA_filename)
         return RPA_filepath
 
     def _generateUnifiedRPA(self, df: pandas.DataFrame, filename="_UnifiedRPA.py"):
