@@ -21,7 +21,6 @@ node_modules
 *.py[cod]
 *$py.class
 .Python
-build/
 develop-eggs/
 dist/
 venv/
