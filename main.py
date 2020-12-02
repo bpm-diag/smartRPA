@@ -15,7 +15,7 @@ import modules.consumerServer
 import utils.utils
 from modules.events import systemEvents, officeEvents, clipboardEvents
 
-# this method is called by GUI when the user presses "start logger" button
+
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
                 systemLoggerClipboard,
@@ -35,6 +35,31 @@ def startLogger(systemLoggerFilesFolder,
                 LOG_FILEPATH,
                 processesPID
                 ):
+    """
+    Main function where program starts.
+    This method is called by the GUI when the user presses "start logger" button.
+    All the values are passed by the GUI module
+
+    :param systemLoggerFilesFolder: true if files/folder checkbox is checked in GUI
+    :param systemLoggerPrograms: true if programs checkbox is checked in GUI
+    :param systemLoggerClipboard: true if clipboard checkbox is checked in GUI
+    :param systemLoggerHotkeys: true if hotkeys checkbox is checked in GUI
+    :param systemLoggerUSB: true if usb checkbox is checked in GUI
+    :param systemLoggerEvents: deprecated
+    :param excelFilepath: contains path of excel file, default is None
+    :param officeExcel: true if excel checkbox is checked in GUI
+    :param officeWord: true if word checkbox is checked in GUI
+    :param officePowerpoint: true if powerpoint checkbox is checked in GUI
+    :param officeOutlook: true if outlook checkbox is checked in GUI
+    :param browserChrome: true if chrome checkbox is checked in GUI
+    :param browserFirefox: true if firefox checkbox is checked in GUI
+    :param browserEdge: true if edge checkbox is checked in GUI
+    :param browserOpera: true if opera checkbox is checked in GUI
+    :param status_queue: Queue to print messages on GUI
+    :param LOG_FILEPATH: path of the event log file
+    :param processesPID: PID of started processes
+    """
+
     try:
         # create the threads as daemons so they are closed when main ends
 
@@ -190,4 +215,3 @@ def startLogger(systemLoggerFilesFolder,
 if __name__ == "__main__":
     # launch GUI
     modules.GUI.GUI.buildGUI()
-

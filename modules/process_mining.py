@@ -49,8 +49,16 @@ except ImportError as e:
 
 
 class ProcessMining:
-
+    """
+    Process Mining class
+    """
     def __init__(self, filepath: list, status_queue: Queue, merged=False):
+        """
+        Process Mining class
+        :param filepath: path of the csv file
+        :param status_queue: queue to print messages on GUI
+        :param merged: true if class has been called when merging multiple files
+        """
 
         # queue to log messages to GUI
         self.status_queue = status_queue
@@ -80,6 +88,10 @@ class ProcessMining:
             self.mostFrequentCase = modules.mostFrequentRoutine.selectMostFrequentCase(self.dataframe, self.status_queue)
 
     def _create_directories(self):
+        """
+        Create directories
+        :return:
+        """
         # create directory if does not exists
         if self.merged:
             self.save_path = utils.utils.getRPADirectory(self.filename + '_merged')
@@ -176,6 +188,12 @@ class ProcessMining:
         return dfg, log
 
     def save_dfg(self, name="DFG", high_level=False):
+        """
+        Save DFG to file
+        :param name:
+        :param high_level:
+        :return:
+        """
         dfg, log = self._createDFG()
         parameters = self._createImageParameters(log=log, high_level=high_level)
         if high_level:
