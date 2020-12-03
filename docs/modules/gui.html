@@ -1,0 +1,669 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Graphical User Interface &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Action logger" href="action_logger.html" />
+    <link rel="prev" title="Main" href="../main.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Graphical User Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gui">GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#preferences-window">Preferences window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-dialog">File dialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#choices-dialog">Choices dialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#decision-dialog">Decision dialog</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Graphical User Interface</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/gui.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="graphical-user-interface">
+<h1>Graphical User Interface<a class="headerlink" href="#graphical-user-interface" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="gui">
+<h2>GUI<a class="headerlink" href="#gui" title="Permalink to this headline">¶</a></h2>
+<p>The main interface of the tool is designed to be simple and functional, yet powerful at the same time. The user can select which modules to enable by selecting the corresponding checkbox. A menu with different options is available to perform different actions. The interface was created using PyQt5.</p>
+<div class="figure align-center" style="width: 80%">
+<img alt="../_images/gui.jpg" src="../_images/gui.jpg" />
+</div>
+<p>When the app opens the user needs to select the options that should be enabled and press the “Start Logger” button. Then all selected modules are started. The configuration of each module takes place in the <a class="reference internal" href="../main.html#main"><span class="std std-ref">Main</span></a> file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The primary methods of this class to work with are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.onButtonClick">onButtonClick()</a></p></li>
+<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.handleProcessMining">handleProcessMining()</a></p></li>
+<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.choices">choices()</a></p></li>
+</ul>
+</div>
+<dl class="py class">
+<dt id="modules.GUI.GUI.MainApplication">
+<em class="property">class </em><code class="sig-prename descclassname">modules.GUI.GUI.</code><code class="sig-name descname">MainApplication</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication" title="Permalink to this definition">¶</a></dt>
+<dd><p>GUI</p>
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.PMThreadComplete">
+<code class="sig-name descname">PMThreadComplete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">result</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.PMThreadComplete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.PMThreadComplete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Once the working thread started by handleMerge() finishes processing, the result is returned in this method,
+which in turns calls the choices() method</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize GUI</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.cancelProgressDialog">
+<code class="sig-name descname">cancelProgressDialog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.cancelProgressDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.cancelProgressDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>manually dismiss progress dialog</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.choices">
+<code class="sig-name descname">choices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pm</span></em>, <em class="sig-param"><span class="n">log_filepath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.choices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.choices" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called once the worker thread started by handleMerge() completes.</p>
+<p>It is the core of the tool, responsible for performing all the analysis on the event log,
+from log processing to RPA SW robot generation.</p>
+<p>If process discovery is enabled in preferences:</p>
+<ul class="simple">
+<li><p>high level flowchart is generated from process mining class</p></li>
+<li><p>high level petri net is generated from process mining class</p></li>
+<li><p>events are logged in status queue</p></li>
+</ul>
+<p>If decision points analysis is enabled and there are at least 2 traces in the event log</p>
+<ul class="simple">
+<li><p>high level DFG is opened</p></li>
+<li><p>decision points class is called, the resulting decision dataframe is stored</p></li>
+<li><p>new flowchart is generated from decided dataframe</p></li>
+<li><p>choices dialog class is called, taking as input decided dataframe</p></li>
+<li><p>final flowchart with user edits is generated</p></li>
+<li><p>python SW robot is generated from RPAScript path</p></li>
+<li><p>Uipath project is generated from UIPathXAML class</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pm</strong> – instance of the Process Mining class</p></li>
+<li><p><strong>log_filepath</strong> – path of the event log to analyze</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.compatibilityCheckMessage">
+<code class="sig-name descname">compatibilityCheckMessage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.compatibilityCheckMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.compatibilityCheckMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display message if a program like office, firefox, chrome, edge, opera is not installed in the operating system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createBottomLayout">
+<code class="sig-name descname">createBottomLayout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createBottomLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createBottomLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>create bottom layout that contains button to start logging</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createBrowserLoggerGroupBox">
+<code class="sig-name descname">createBrowserLoggerGroupBox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createBrowserLoggerGroupBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createBrowserLoggerGroupBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create checkboxes to log browser events in chrome, firefox, edge or opera</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createMenu">
+<code class="sig-name descname">createMenu</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createMenu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createMenu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create file menu with preferences and options to merge multiple CSV event logs and to analyze one event log.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createOfficeLoggerGroupBox">
+<code class="sig-name descname">createOfficeLoggerGroupBox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createOfficeLoggerGroupBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createOfficeLoggerGroupBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create checkboxes to log microsoft office applications like excel, word, powerpoint</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createProgressDialog">
+<code class="sig-name descname">createProgressDialog</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span></em>, <em class="sig-param"><span class="n">message</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createProgressDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createProgressDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create progress dialog displayed when starting or stopping the action logger</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> – title of progress dialog</p></li>
+<li><p><strong>message</strong> – message of progress dialog</p></li>
+<li><p><strong>timeout</strong> – timeout after which progress dialog automatically disappears</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>progress dialog</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createStartButton">
+<code class="sig-name descname">createStartButton</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createStartButton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createStartButton" title="Permalink to this definition">¶</a></dt>
+<dd><p>create button to start and stop action logger</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createStatusLayout">
+<code class="sig-name descname">createStatusLayout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createStatusLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createStatusLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>create status layout, the window below the start button where all logging appears</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createSystemLoggerGroupBox">
+<code class="sig-name descname">createSystemLoggerGroupBox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createSystemLoggerGroupBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createSystemLoggerGroupBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create checkboxes to log operating systems events like opening a program, editing files/folders, logging clipboard, hotkeys or usb drives insertion</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.createTopLayout">
+<code class="sig-name descname">createTopLayout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.createTopLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.createTopLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>create top layout with buttons to enable all modules at once</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.excelDialog">
+<code class="sig-name descname">excelDialog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.excelDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.excelDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays file dialog when excel is selected in order to choose a file to open</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.handleCheckBox">
+<code class="sig-name descname">handleCheckBox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.handleCheckBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.handleCheckBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>detect which modules should be run based on selected checkboxes in UI</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.handleMerge">
+<code class="sig-name descname">handleMerge</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">merged</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Select multiple CSV to merge'</span></em>, <em class="sig-param"><span class="n">multipleItems</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.handleMerge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.handleMerge" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called when the user wants to merge multiple csv files
+or run an event log (in this case it is called by the handleRunLogAction() method).</p>
+<p>1. It displays a file dialog to select the event logs to process; this dialog returns a list of paths,
+each one representing the location of an event log.</p>
+<p>2. After the event logs have been selected, the method starts a worker thread to process them
+using the handleProcessMining() method. A new thread is necessary in order not to block the main UI.</p>
+<ol class="arabic simple" start="3">
+<li><p>Once the thread completes, the choices() method is called.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>merged</strong> – boolean value indicating if the user wants to merge multiple files or to run a single event log</p></li>
+<li><p><strong>title</strong> – title of the file dialog</p></li>
+<li><p><strong>multipleItems</strong> – boolean value indicating the ability to select multiple items</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.handleProcessMining">
+<code class="sig-name descname">handleProcessMining</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log_filepath</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">merged</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fromRunCount</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.handleProcessMining"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.handleProcessMining" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method can either be called by handleMerge() (when the user wants to merge multiple CSV or run RPA from log)
+or by the GUI after the user presses the Stop logger button.</p>
+<ol class="arabic simple">
+<li><p>It creates an instance of the Process Mining class, passing the selected event log files.</p></li>
+<li><p>Then it returns the instance of the class along with the selected file path.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_filepath</strong> – list of paths pointing to event logs selected in the file dialog</p></li>
+<li><p><strong>merged</strong> – boolean indicating if the logs have been merged</p></li>
+<li><p><strong>fromRunCount</strong> – indicates whether the method has been called by handleMerge() or by the GUI</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>process mining class instance, log_filepath</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.handleRunCount">
+<code class="sig-name descname">handleRunCount</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log_filepath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.handleRunCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.handleRunCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges multiple traces of execution together generating one event log.
+It depends on “number of runs after which event log is generated” setting in preferences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>log_filepath</strong> – path of event log file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.handleRunLogAction">
+<code class="sig-name descname">handleRunLogAction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.handleRunLogAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.handleRunLogAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called when the user wants to perform RPA analysis on an event log.</p>
+<p>It calls the handleMerge method with parameters (merged=False, title=’Select CSV to run’, multipleItems=False)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.onButtonClick">
+<code class="sig-name descname">onButtonClick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.onButtonClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.onButtonClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main method executed by the tool to start log capture when start button is clicked by user.</p>
+<p>If tool is starting:</p>
+<ul class="simple">
+<li><p>set boolean variable ‘running’ to true</p></li>
+<li><p>check which checkboxes are enabled in the GUI</p></li>
+<li><p>if excel checkbox is selected, display dialog to select file to open (deprecated)</p></li>
+<li><p>start progress dialog indicating loading</p></li>
+<li><p>start main process, passing as parameters the boolean checkbox values</p></li>
+</ul>
+<p>If tool is stopping:</p>
+<ul class="simple">
+<li><p>set boolean variable ‘running’ to false</p></li>
+<li><p>kill active processes using their PID before closing main</p></li>
+<li><p>terminate main</p></li>
+<li><p>call handleRunCount() method to check counter and generate event log file</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.platformCheck">
+<code class="sig-name descname">platformCheck</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.platformCheck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.platformCheck" title="Permalink to this definition">¶</a></dt>
+<dd><p>set appropriate values based on platform.</p>
+<p>disable checkboxes not available on macOS like word and powerpoint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.setAppIcon">
+<code class="sig-name descname">setAppIcon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.setAppIcon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.setAppIcon" title="Permalink to this definition">¶</a></dt>
+<dd><p>set app icon with support to dark mode</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.setCheckboxChecked">
+<code class="sig-name descname">setCheckboxChecked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.setCheckboxChecked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.setCheckboxChecked" title="Permalink to this definition">¶</a></dt>
+<dd><p>triggered by “enable all” button on top of the UI
+in some cases the checkbox should be enabled only if the program is installed in the system</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.setStyle">
+<code class="sig-name descname">setStyle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.setStyle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.setStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>set native GUI style for each OS</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.showAboutMessage">
+<code class="sig-name descname">showAboutMessage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.showAboutMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.showAboutMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show information about the tool under File menu</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.updateListWidget">
+<code class="sig-name descname">updateListWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/GUI.html#MainApplication.updateListWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.GUI.MainApplication.updateListWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads status queue and updates log window below start logger button in the GUI</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="preferences-window">
+<h2>Preferences window<a class="headerlink" href="#preferences-window" title="Permalink to this headline">¶</a></h2>
+<p>User preferences are stored in a local preferences file, because they need to remain consistent across different runs. The cross-platform Python package nativeconfig2 was used. It uses native mechanisms such as Windows Registry or NSUserDefaults to store user settings.</p>
+<div class="figure align-center" style="width: 60%">
+<img alt="../_images/preferences.png" src="../_images/preferences.png" />
+</div>
+<p>The first option allows the user to enable or disable Process discovery analysis described in Section 4.6 after the logs has been recorded. This is useful when the tool is used in a distributed environments where multiple people record defined steps that will later be merged together and analysed, as described in Chapter 5.</p>
+<p>The second option allows the user to set the number of runs after which the logs are merged XES file is generated. This option is useful when the user wants to perform multiple runs at the same time to analyze different variations. After reaching the specified number of runs, the tool merges all recorded CSV into one log file and converts it to XES, as described in Subsection 4.4.</p>
+<dl class="py class">
+<dt id="modules.GUI.PreferencesWindow.Preferences">
+<em class="property">class </em><code class="sig-prename descclassname">modules.GUI.PreferencesWindow.</code><code class="sig-name descname">Preferences</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">status_queue</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/PreferencesWindow.html#Preferences"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.PreferencesWindow.Preferences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Preferences window</p>
+<dl class="py method">
+<dt id="modules.GUI.PreferencesWindow.Preferences.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">status_queue</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/PreferencesWindow.html#Preferences.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.PreferencesWindow.Preferences.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize preferences window.</p>
+<p>It allows to:</p>
+<ul class="simple">
+<li><p>enable or disable process discovery analysis</p></li>
+<li><p>select the number of runs after which event log is generated</p></li>
+<li><p>select analysis type (either decision points or most frequent routine)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>status_queue</strong> – queue to send messages to main GUI</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="utils.config.MyConfig">
+<em class="property">class </em><code class="sig-prename descclassname">utils.config.</code><code class="sig-name descname">MyConfig</code><a class="reference internal" href="../_modules/utils/config.html#MyConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.config.MyConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration class, used to store preferences.</p>
+<p>Preferences include:</p>
+<ul class="simple">
+<li><p>total number of runs before executing process mining analysis</p></li>
+<li><p>control process discovery, if disabled csv is generated but process discovery techniques are not applied</p></li>
+<li><p>enable most frequent routine analysis (deprecated)</p></li>
+<li><p>enable decision points analysis</p></li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="file-dialog">
+<h2>File dialog<a class="headerlink" href="#file-dialog" title="Permalink to this headline">¶</a></h2>
+<p>A native file dialog to select files has been developed using the QFileDialog class available in PyQt5.
+It is used to select event logs to merge or to run. It supports both single and multiple selection, and it is possible to specify the file types that can be selected, in this case only CSV log files.
+It returns a list of strings representing the path of each file selected.</p>
+<div class="figure align-center" style="width: 70%">
+<img alt="../_images/file_dialog.png" src="../_images/file_dialog.png" />
+</div>
+<span class="target" id="module-modules.GUI.filenameDialog"></span><dl class="py function">
+<dt id="modules.GUI.filenameDialog.getFilenameDialog">
+<code class="sig-prename descclassname">modules.GUI.filenameDialog.</code><code class="sig-name descname">getFilenameDialog</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">customDialog</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Open'</span></em>, <em class="sig-param"><span class="n">hiddenItems</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">multipleItems</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">isFolder</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">forOpen</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">filter_format</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/filenameDialog.html#getFilenameDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.filenameDialog.getFilenameDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build custom dialog to select multiple files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>customDialog</strong> – if False, use native system dialog, otherwise use custom dialog</p></li>
+<li><p><strong>title</strong> – dialog title</p></li>
+<li><p><strong>hiddenItems</strong> – display hidden items</p></li>
+<li><p><strong>multipleItems</strong> – allow selection of multiple items</p></li>
+<li><p><strong>isFolder</strong> – allow selection of folders</p></li>
+<li><p><strong>forOpen</strong> – select files for opening or saving</p></li>
+<li><p><strong>directory</strong> – start directory</p></li>
+<li><p><strong>filter_format</strong> – filter to select only certain file types (for example <a href="#id1"><span class="problematic" id="id2">*</span></a>.csv)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>path of selected file (list of paths if multiple files are selected)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="choices-dialog">
+<h2>Choices dialog<a class="headerlink" href="#choices-dialog" title="Permalink to this headline">¶</a></h2>
+<p>Once the routine to automatize is selected, the user can customize its editable fields through a custom dialog window. The program automatically recognises which fields are editable, such as typing something in a web page, renaming a file or pasting a text, and dynamically builds the GUI to let the user edit them. After confirmation, the dataframe is updated.</p>
+<div class="figure align-center" style="width: 70%">
+<img alt="../_images/choices_dialog.png" src="../_images/choices_dialog.png" />
+</div>
+<p>This custom dialog has been implemented extending the QDialog class from PyQt5. It receives as input the low-level most frequent routine dataframe previously computed. This dataframe is then filtered to select only the events that needs to be edited by the user.</p>
+<span class="target" id="module-modules.GUI.choicesDialog.ChoicesDialog"></span><p>Choices dialog allows the user to customize editable fields before generating the SW robot.</p>
+<dl class="py function">
+<dt id="modules.GUI.choicesDialog.ChoicesDialog.__init__">
+<code class="sig-prename descclassname">modules.GUI.choicesDialog.ChoicesDialog.</code><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.GUI.choicesDialog.ChoicesDialog.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – low level dataframe of decided trace or most frequent routine</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.GUI.choicesDialog.ChoicesDialog.addRows">
+<code class="sig-prename descclassname">modules.GUI.choicesDialog.ChoicesDialog.</code><code class="sig-name descname">addRows</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.GUI.choicesDialog.ChoicesDialog.addRows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add editable rows to custom dialog, such as typing in a web page, renaming a file or pasting a text.</p>
+<p>For each row there is a label, the description of the field, and a value, the element to be edited</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.GUI.choicesDialog.ChoicesDialog.handleReturn">
+<code class="sig-prename descclassname">modules.GUI.choicesDialog.ChoicesDialog.</code><code class="sig-name descname">handleReturn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.GUI.choicesDialog.ChoicesDialog.handleReturn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when choices dialog is closed (OK button is pressed)</p>
+<p>Each row of the dataframe in input is updated with the values inserted by the user.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="decision-dialog">
+<h2>Decision dialog<a class="headerlink" href="#decision-dialog" title="Permalink to this headline">¶</a></h2>
+<p>The user can choose which user actions enact by means of a decision dialog, which displays data from the decided dataframe, that is used to group together all the rows of a routine trace belonging to a routine fragment into a single line.</p>
+<div class="figure align-center" style="width: 80%">
+<img alt="../_images/decision_dialog.png" src="../_images/decision_dialog.png" />
+</div>
+<dl class="py class">
+<dt id="modules.GUI.decisionDialogWebView.DecisionDialogWebView">
+<em class="property">class </em><code class="sig-prename descclassname">modules.GUI.decisionDialogWebView.</code><code class="sig-name descname">DecisionDialogWebView</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/decisionDialogWebView.html#DecisionDialogWebView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.decisionDialogWebView.DecisionDialogWebView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decision dialog to display and choose different decision in a routine.</p>
+<p>The input dataframe is shown in a HTML table generated at runtime using the dataframeToHTML() function
+and displayed in a webview.</p>
+<dl class="py method">
+<dt id="modules.GUI.decisionDialogWebView.DecisionDialogWebView.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/decisionDialogWebView.html#DecisionDialogWebView.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.decisionDialogWebView.DecisionDialogWebView.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize decision dialog</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – keywords dataframe</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>caseID of selected trace</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-modules.GUI.decisionDialogWebView"></span><dl class="py function">
+<dt id="modules.GUI.decisionDialogWebView.dataframeToHTML">
+<code class="sig-prename descclassname">modules.GUI.decisionDialogWebView.</code><code class="sig-name descname">dataframeToHTML</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">keywordsDataframe</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/decisionDialogWebView.html#dataframeToHTML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.decisionDialogWebView.dataframeToHTML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert input dataframe to HTML table</p>
+<p>Table is generated using BeautifulSoup.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>keywordsDataframe</strong> – keywrods dataframe</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>HTML page with table</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="action_logger.html" class="btn btn-neutral float-right" title="Action logger" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../main.html" class="btn btn-neutral float-left" title="Main" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

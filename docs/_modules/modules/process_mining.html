@@ -1,0 +1,551 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.process_mining &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>modules.process_mining</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.process_mining</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ******************************</span>
+<span class="c1"># Process mining techniques</span>
+<span class="c1"># https://pm4py.fit.fraunhofer.de/documentation#discovery</span>
+<span class="c1"># ******************************</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../&#39;</span><span class="p">)</span>  <span class="c1"># this way main file is visible from this file</span>
+<span class="kn">import</span> <span class="nn">modules.eventAbstraction</span>
+<span class="kn">import</span> <span class="nn">modules.logProcessing</span>
+<span class="kn">import</span> <span class="nn">modules.mostFrequentRoutine</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">utils.config</span>
+<span class="kn">import</span> <span class="nn">utils.utils</span>
+<span class="kn">import</span> <span class="nn">utils.utils</span>
+<span class="c1"># from datetime import datetime, timedelta</span>
+<span class="kn">from</span> <span class="nn">multiprocessing.queues</span> <span class="kn">import</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">deprecated.sphinx</span> <span class="kn">import</span> <span class="n">deprecated</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># constants</span>
+    <span class="kn">from</span> <span class="nn">pm4py.util</span> <span class="kn">import</span> <span class="n">constants</span>
+    <span class="kn">from</span> <span class="nn">pm4py.util</span> <span class="kn">import</span> <span class="n">xes_constants</span> <span class="k">as</span> <span class="n">xes_util</span>
+    <span class="c1"># importer</span>
+    <span class="kn">from</span> <span class="nn">pm4py.objects.log.adapters.pandas</span> <span class="kn">import</span> <span class="n">csv_import_adapter</span>
+    <span class="kn">from</span> <span class="nn">pm4py.objects.log.importer.xes</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">xes_importer</span>
+    <span class="kn">from</span> <span class="nn">pm4py.objects.log.exporter.xes</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">xes_exporter</span>
+    <span class="kn">from</span> <span class="nn">pm4py.objects.conversion.log</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">conversion_factory</span>
+    <span class="c1"># algorithms</span>
+    <span class="kn">from</span> <span class="nn">pm4py.algo.discovery.alpha</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">alpha_miner</span>
+    <span class="kn">from</span> <span class="nn">pm4py.algo.discovery.heuristics</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">heuristics_miner</span>
+    <span class="kn">from</span> <span class="nn">pm4py.algo.discovery.dfg</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">dfg_factory</span>
+    <span class="kn">from</span> <span class="nn">pm4py.objects.conversion.dfg</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">dfg_conv_factory</span>
+    <span class="kn">from</span> <span class="nn">pm4py.algo.discovery.inductive</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">inductive_miner</span>
+    <span class="c1"># visualization</span>
+    <span class="kn">from</span> <span class="nn">pm4py.visualization.petrinet</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">vis_factory</span>
+    <span class="kn">from</span> <span class="nn">pm4py.visualization.heuristics_net</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">hn_vis_factory</span>
+    <span class="kn">from</span> <span class="nn">pm4py.visualization.petrinet</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">pn_vis_factory</span>
+    <span class="kn">from</span> <span class="nn">pm4py.visualization.dfg</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">dfg_vis_factory</span>
+    <span class="kn">from</span> <span class="nn">pm4py.objects.log.util</span> <span class="kn">import</span> <span class="n">sorting</span>
+    <span class="kn">from</span> <span class="nn">pm4py.objects.petri.exporter</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">pnml_factory</span>
+    <span class="c1"># BPMN</span>
+    <span class="c1"># from libraries.pm4pybpmn.visualization.bpmn import factory as bpmn_vis_factory</span>
+    <span class="c1"># from libraries.pm4pybpmn.objects.conversion.petri_to_bpmn import factory as bpmn_converter</span>
+    <span class="c1"># from libraries.pm4pybpmn.objects.bpmn.util import bpmn_diagram_layouter</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[PROCESS MINING] Process mining analysis has been disabled because &#39;pm4py&#39; module is not installed.&quot;</span>
+          <span class="s2">&quot;See https://github.com/bpm-diag/smartRPA#1-pm4py&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProcessMining"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining">[docs]</a><span class="k">class</span> <span class="nc">ProcessMining</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process Discovery component is initialised by the GUI when a calculation on a log file needs to be performed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ProcessMining.__init__"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">status_queue</span><span class="p">:</span> <span class="n">Queue</span><span class="p">,</span> <span class="n">merged</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param filepath: path of the csv file</span>
+<span class="sd">        :param status_queue: queue to print messages on GUI</span>
+<span class="sd">        :param merged: true if class has been called when merging multiple files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># queue to log messages to GUI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span> <span class="o">=</span> <span class="n">status_queue</span>
+        <span class="c1"># true if class has been called when merging multiple files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span>
+        <span class="c1"># list of csv paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
+        <span class="c1"># last csv in the list, use its name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_csv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># name and extension of the last csv in the list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">getFilename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_csv</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;_combined&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_extension</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">getFileExtension</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_csv</span><span class="p">)</span>
+        <span class="c1"># path to save generated files, like /Users/marco/ComputerLogger/RPA/2020-03-06_12-50-28/</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_directories</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataframe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">logProcessing</span><span class="o">.</span><span class="n">handle_log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">,</span>
+                                                                     <span class="bp">self</span><span class="o">.</span><span class="n">file_extension</span><span class="p">,</span>
+                                                                     <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+                                                                     <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span>
+                                                                     <span class="bp">self</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span>
+                                                                     <span class="bp">self</span><span class="o">.</span><span class="n">RPA_log_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dfg_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discovery_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s2">_DFG_model.pdf&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bpmn_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discovery_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s2">_BPMN.pdf&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_most_frequent_routine_analysis</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[PROCESS MINING] Performing process discovery&quot;</span><span class="p">)</span>
+            <span class="c1"># low level trace used for RPA generation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mostFrequentCase</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">mostFrequentRoutine</span><span class="o">.</span><span class="n">selectMostFrequentCase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProcessMining._create_directories"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining._create_directories">[docs]</a>    <span class="k">def</span> <span class="nf">_create_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates directories inside RPA folder where processed files will be saved.</span>
+<span class="sd">        Directories include event_log, SW_robot, process_discovery.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># create directory if does not exists</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">merged</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_path</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">getRPADirectory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;_merged&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_path</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">getRPADirectory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">createDirectory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">RPA_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">EVENT_LOG_FOLDER</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">createDirectory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RPA_log_path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discovery_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PROCESS_DISCOVERY_FOLDER</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">createDirectory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discovery_path</span><span class="p">)</span>
+
+        <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">createDirectory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">SW_ROBOT_FOLDER</span><span class="p">))</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">createDirectory</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">SW_ROBOT_FOLDER</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">UIPATH_FOLDER</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ProcessMining._create_image"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining._create_image">[docs]</a>    <span class="k">def</span> <span class="nf">_create_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gviz</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create image file of the generated diagram (DFG,BPMN,Petr net)</span>
+
+<span class="sd">        :param gviz: image file generated by pm4py</span>
+<span class="sd">        :param img_name: name of the image to be saved</span>
+<span class="sd">        :param verbose: display log while generating images</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">img_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discovery_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">img_name</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;alpha_miner&quot;</span> <span class="ow">in</span> <span class="n">img_name</span><span class="p">:</span>
+                <span class="n">vis_factory</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">img_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;heuristic_miner&quot;</span> <span class="ow">in</span> <span class="n">img_name</span><span class="p">:</span>
+                <span class="n">hn_vis_factory</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">img_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;petri_net&quot;</span> <span class="ow">in</span> <span class="n">img_name</span><span class="p">:</span>
+                <span class="n">pn_vis_factory</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">img_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;DFG&quot;</span> <span class="ow">in</span> <span class="n">img_name</span><span class="p">:</span>
+                <span class="n">dfg_vis_factory</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">img_path</span><span class="p">)</span>
+            <span class="c1"># elif &quot;BPMN&quot; in img_name:</span>
+            <span class="c1">#     bpmn_vis_factory.save(gviz, img_path)</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[PROCESS MINING] Generated </span><span class="si">{</span><span class="n">img_name</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">img_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">PermissionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[PROCESS MINING] Could not save image because of permission error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trying to save image on desktop&quot;</span><span class="p">)</span>
+            <span class="n">img_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">DESKTOP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">img_name</span><span class="si">}</span><span class="s1">.pdf&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;alpha_miner&quot;</span> <span class="ow">in</span> <span class="n">img_name</span><span class="p">:</span>
+                <span class="n">vis_factory</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">img_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;heuristic_miner&quot;</span> <span class="ow">in</span> <span class="n">img_name</span><span class="p">:</span>
+                <span class="n">hn_vis_factory</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">img_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;petri_net&quot;</span> <span class="ow">in</span> <span class="n">img_name</span><span class="p">:</span>
+                <span class="n">pn_vis_factory</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">img_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;DFG&quot;</span> <span class="ow">in</span> <span class="n">img_name</span><span class="p">:</span>
+                <span class="n">dfg_vis_factory</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">img_path</span><span class="p">)</span>
+            <span class="c1"># elif &quot;BPMN&quot; in img_name:</span>
+            <span class="c1">#     bpmn_vis_factory.save(gviz, img_path)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[PROCESS MINING] Could not save image: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">create_alpha_miner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">net</span><span class="p">,</span> <span class="n">initial_marking</span><span class="p">,</span> <span class="n">final_marking</span> <span class="o">=</span> <span class="n">alpha_miner</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">)</span>
+        <span class="n">gviz</span> <span class="o">=</span> <span class="n">vis_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">initial_marking</span><span class="p">,</span> <span class="n">final_marking</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;pdf&quot;</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_image</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="s2">&quot;alpha_miner&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">create_heuristics_miner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">heu_net</span> <span class="o">=</span> <span class="n">heuristics_miner</span><span class="o">.</span><span class="n">apply_heu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dependency_thresh&quot;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">})</span>
+        <span class="n">gviz</span> <span class="o">=</span> <span class="n">hn_vis_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">heu_net</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;pdf&quot;</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_image</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="s2">&quot;heuristic_miner&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProcessMining._getSourceTargetNodes"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining._getSourceTargetNodes">[docs]</a>    <span class="k">def</span> <span class="nf">_getSourceTargetNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high_level</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Identifies the first and the last line in the event log, and mark them as source and target node.</span>
+<span class="sd">        Used to color first and last node in the generated diagrams.</span>
+
+<span class="sd">        :param log: low level event log</span>
+<span class="sd">        :param high_level:</span>
+<span class="sd">        :return: source and target nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="n">high_level</span><span class="p">:</span>
+            <span class="n">events_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;customClassifier&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">log</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">trace</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">events_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataframe</span><span class="p">[</span><span class="s1">&#39;concept:name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">events_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">events_list</span> <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;enableBrowserExtension&#39;</span><span class="p">]</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">events_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">events_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span></div>
+
+<div class="viewcode-block" id="ProcessMining._createImageParameters"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining._createImageParameters">[docs]</a>    <span class="k">def</span> <span class="nf">_createImageParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high_level</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create parameters for diagrams that needs to ben generated.</span>
+<span class="sd">        Parameters include source and target nodes as well as file format (diagrams are saved as pdf).</span>
+
+<span class="sd">        :param log: event log</span>
+<span class="sd">        :param high_level: boolean, if true generate high level diagram</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSourceTargetNodes</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">high_level</span><span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;start_activities&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">source</span><span class="p">],</span> <span class="s2">&quot;end_activities&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">target</span><span class="p">],</span> <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;pdf&quot;</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">parameters</span></div>
+
+    <span class="c1"># def mostFrequentPathInDFG(self):</span>
+    <span class="c1">#     dfg = self._createCustomDFG()</span>
+    <span class="c1">#     source, target = self._getSourceTargetNodes()</span>
+    <span class="c1">#     graphPath = utils.graphPath.HandleGraph(dfg, source, target)</span>
+    <span class="c1">#     graphPath.printPath()</span>
+    <span class="c1">#     return graphPath.frequentPath()</span>
+
+<div class="viewcode-block" id="ProcessMining._createDFG"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining._createDFG">[docs]</a>    <span class="k">def</span> <span class="nf">_createDFG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high_level</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        create df using dataframe with all traces</span>
+
+<span class="sd">        :param log: low-level event log</span>
+<span class="sd">        :param parameters: ooptional parameters to generate image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">high_level</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">parameters</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">eventAbstraction</span><span class="o">.</span><span class="n">aggregateData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">remove_duplicates</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">log</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log</span>
+        <span class="n">dfg</span> <span class="o">=</span> <span class="n">dfg_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">&quot;frequency&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dfg</span><span class="p">,</span> <span class="n">log</span></div>
+
+<div class="viewcode-block" id="ProcessMining.save_dfg"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining.save_dfg">[docs]</a>    <span class="nd">@deprecated</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.1.0&#39;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Not in use anymore&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">save_dfg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;DFG&quot;</span><span class="p">,</span> <span class="n">high_level</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save DFG to file</span>
+
+<span class="sd">        :param name: optional name of dfg file</span>
+<span class="sd">        :param high_level: generate high level dfg</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dfg</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createDFG</span><span class="p">()</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createImageParameters</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">high_level</span><span class="o">=</span><span class="n">high_level</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">high_level</span><span class="p">:</span>
+            <span class="n">gviz</span> <span class="o">=</span> <span class="n">dfg_vis_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">dfg</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">&quot;frequency&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">gviz</span> <span class="o">=</span> <span class="n">dfg_vis_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">dfg</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">&quot;frequency&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_image</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProcessMining._create_petri_net"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining._create_petri_net">[docs]</a>    <span class="nd">@deprecated</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.1.0&#39;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Not in use anymore&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_create_petri_net</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remove_duplicates</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate low level petri net</span>
+
+<span class="sd">        :param remove_duplicates:</span>
+<span class="sd">        :return: petri net</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">dfg_parameters</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">eventAbstraction</span><span class="o">.</span><span class="n">aggregateData</span><span class="p">(</span><span class="n">remove_duplicates</span><span class="o">=</span><span class="n">remove_duplicates</span><span class="p">)</span>
+        <span class="n">dfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createDFG</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">dfg_parameters</span><span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createImageParameters</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">high_level</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># gviz = dfg_vis_factory.apply(dfg, log=self._log, variant=&quot;frequency&quot;, parameters=parameters)</span>
+        <span class="c1"># self._create_image(gviz, &quot;DFG&quot;)</span>
+        <span class="n">net</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">fm</span> <span class="o">=</span> <span class="n">dfg_conv_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">dfg</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">net</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">fm</span></div>
+
+<div class="viewcode-block" id="ProcessMining.save_petri_net"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining.save_petri_net">[docs]</a>    <span class="nd">@deprecated</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.1.0&#39;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Not in use anymore&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">save_petri_net</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save low level petri net in pdf format from low level event log</span>
+
+<span class="sd">        :param name: name of the generated petri net</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">net</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">fm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_petri_net</span><span class="p">()</span>
+        <span class="n">gviz</span> <span class="o">=</span> <span class="n">pn_vis_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">fm</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;pdf&quot;</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_image</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+    <span class="c1"># def _create_bpmn(self, df: pandas.DataFrame = None):</span>
+    <span class="c1">#     df, log, parameters = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)</span>
+    <span class="c1">#     net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)</span>
+    <span class="c1">#     bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(</span>
+    <span class="c1">#         net, initial_marking, final_marking)</span>
+    <span class="c1">#     return bpmn_graph</span>
+    <span class="c1">#</span>
+    <span class="c1"># def save_bpmn(self, df: pandas.DataFrame = None):</span>
+    <span class="c1">#     bpmn_graph = self._create_bpmn(df)</span>
+    <span class="c1">#     bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant=&quot;frequency&quot;, parameters={&quot;format&quot;: &quot;pdf&quot;})</span>
+    <span class="c1">#     self._create_image(bpmn_figure, &quot;BPMN&quot;)</span>
+
+<div class="viewcode-block" id="ProcessMining.highLevelDFG"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining.highLevelDFG">[docs]</a>    <span class="k">def</span> <span class="nf">highLevelDFG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create high level DFG of entire process</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">parameters</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">eventAbstraction</span><span class="o">.</span><span class="n">aggregateData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">remove_duplicates</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">dfg</span> <span class="o">=</span> <span class="n">dfg_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">&quot;frequency&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="n">gviz_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createImageParameters</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">high_level</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">gviz</span> <span class="o">=</span> <span class="n">dfg_vis_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">dfg</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">&quot;frequency&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">gviz_parameters</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_image</span><span class="p">(</span><span class="n">gviz</span><span class="p">,</span> <span class="s2">&quot;DFG_model&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[PROCESS MINING] Could not create DFG: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="ProcessMining.highLevelPetriNet"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.process_mining.ProcessMining.highLevelPetriNet">[docs]</a>    <span class="k">def</span> <span class="nf">highLevelPetriNet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create high level petri net of entire process</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">parameters</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">eventAbstraction</span><span class="o">.</span><span class="n">aggregateData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">remove_duplicates</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">dfg</span> <span class="o">=</span> <span class="n">dfg_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">&quot;frequency&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="n">gviz_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createImageParameters</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">high_level</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">net</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">fm</span> <span class="o">=</span> <span class="n">dfg_conv_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">dfg</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">gviz_parameters</span><span class="p">)</span>
+            <span class="n">pnml_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">discovery_path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s1">_petri_net.pnml&#39;</span><span class="p">),</span>
+                               <span class="n">final_marking</span><span class="o">=</span><span class="n">fm</span><span class="p">)</span>
+        <span class="c1"># gviz = pn_vis_factory.apply(net, im, fm, parameters=gviz_parameters)</span>
+        <span class="c1"># self._create_image(gviz, &quot;petri_net&quot;)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[PROCESS MINING] Could not create Petri Net: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div></div>
+
+    <span class="c1"># def highLevelBPMN(self, df: pandas.DataFrame = None, name=&quot;BPMN&quot;, decisionPoints=False):</span>
+    <span class="c1">#     try:</span>
+    <span class="c1">#         # during decision points analysis, the final BPMN may have unordered timestamps which may lead</span>
+    <span class="c1">#         # to an incorrect representation. Since the order of events is given by row index, timestamps</span>
+    <span class="c1">#         # are reset to sequential number starting from the first timestamp and adding 1 second for each row,</span>
+    <span class="c1">#         # thus obtaining a linear BPMN</span>
+    <span class="c1">#         # if decisionPoints:</span>
+    <span class="c1">#         #     try:</span>
+    <span class="c1">#         #         first_timestamp = datetime.fromisoformat(str(df.reset_index()[&#39;time:timestamp&#39;].iloc[0]))</span>
+    <span class="c1">#         #         for i, (index, row) in enumerate(df.iterrows()):</span>
+    <span class="c1">#         #             df.loc[index, &#39;time:timestamp&#39;] = first_timestamp + timedelta(minutes=i+1, seconds=i+1)</span>
+    <span class="c1">#         #         # debug_path = &quot;/Users/marco/Desktop/decided.csv&quot;</span>
+    <span class="c1">#         #         # if os.path.exists(debug_path):</span>
+    <span class="c1">#         #         #     os.remove(debug_path)</span>
+    <span class="c1">#         #         # df.to_csv(debug_path)</span>
+    <span class="c1">#         #     except Exception as e:</span>
+    <span class="c1">#         #         print(f&quot;[PROCESS MINING] Could not reorder timestamps for BPMN: {e}&quot;)</span>
+    <span class="c1">#         #         pass</span>
+    <span class="c1">#         if df is None:</span>
+    <span class="c1">#             df = self.mostFrequentCase</span>
+    <span class="c1">#         df, log, parameters = modules.eventAbstraction.aggregateData(df, remove_duplicates=True)</span>
+    <span class="c1">#         net, initial_marking, final_marking = heuristics_miner.apply(log, parameters=parameters)</span>
+    <span class="c1">#         bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(</span>
+    <span class="c1">#             net, initial_marking, final_marking)</span>
+    <span class="c1">#         bpmn_figure = bpmn_vis_factory.apply(bpmn_graph, variant=&quot;frequency&quot;, parameters={&quot;format&quot;: &quot;pdf&quot;})</span>
+    <span class="c1">#         self._create_image(bpmn_figure, name)</span>
+    <span class="c1">#         # try:</span>
+    <span class="c1">#         #     if name == &quot;BPMN_final&quot;:</span>
+    <span class="c1">#         #         os.remove(os.path.join(self.discovery_path, f&#39;{self.filename}_BPMN.pdf&#39;))</span>
+    <span class="c1">#         # except Exception as e:</span>
+    <span class="c1">#         #     print(f&quot;[PROCESS MINING] Could not delete old BPMN: {e}&quot;)</span>
+    <span class="c1">#         #     pass</span>
+    <span class="c1">#     except Exception as e:</span>
+    <span class="c1">#         print(f&quot;[PROCESS MINING] Could not create BPMN: {e}&quot;)</span>
+    <span class="c1">#         return False</span>
+
+    <span class="c1"># def createGraphs(self, df: pandas.DataFrame = None):</span>
+    <span class="c1">#     self.save_bpmn(df)</span>
+    <span class="c1">#     self.highLevelPetriNet()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

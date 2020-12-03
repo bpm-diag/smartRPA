@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to SmartRPA’s documentation! &mdash; SmartRPA</title>
+  <title>SmartRPA documentation &mdash; SmartRPA</title>
   
 
   
@@ -35,7 +35,8 @@
 
     
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Main" href="main.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -49,15 +50,15 @@
           
 
           
-            <a href="#" class="icon icon-home" alt="Documentation Home"> SmartRPA
+            <a href="#">
           
 
+          
+            
+            <img src="_static/logo_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
           
 
           
@@ -80,13 +81,24 @@
               
             
             
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Welcome to SmartRPA’s documentation!</a></li>
-<li><a class="reference internal" href="#module-main">Model Files</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="main.html">Main</a></li>
 </ul>
-</div>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
+</ul>
+
             
           
         </div>
@@ -131,7 +143,7 @@
     
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Welcome to SmartRPA’s documentation!</li>
+      <li>SmartRPA documentation</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -150,75 +162,98 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome-to-smartrpa-s-documentation">
-<h1>Welcome to SmartRPA’s documentation!<a class="headerlink" href="#welcome-to-smartrpa-s-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+  <div class="section" id="smartrpa-documentation">
+<h1>SmartRPA documentation<a class="headerlink" href="#smartrpa-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-smartrpa">
+<h2>What is SmartRPA<a class="headerlink" href="#what-is-smartrpa" title="Permalink to this headline">¶</a></h2>
+<p><strong>Robotic Process Automation (RPA)</strong> is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines. The current generation of RPA tools is driven by predefined rules and manual configurations made by expert users rather than automated techniques.</p>
+<p><strong>SmartRPA</strong> is a cross-platform tool that tackles such issues. It allows to easily record event logs and to automatically generating executable RPA scripts that will drive a SW robots in emulating an observed user behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.</p>
 </div>
-</div>
-<div class="section" id="module-main">
-<span id="model-files"></span><h1>Model Files<a class="headerlink" href="#module-main" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
-<dt id="main.startLogger">
-<code class="sig-prename descclassname">main.</code><code class="sig-name descname">startLogger</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">systemLoggerFilesFolder</span></em>, <em class="sig-param"><span class="n">systemLoggerPrograms</span></em>, <em class="sig-param"><span class="n">systemLoggerClipboard</span></em>, <em class="sig-param"><span class="n">systemLoggerHotkeys</span></em>, <em class="sig-param"><span class="n">systemLoggerUSB</span></em>, <em class="sig-param"><span class="n">systemLoggerEvents</span></em>, <em class="sig-param"><span class="n">excelFilepath</span></em>, <em class="sig-param"><span class="n">officeExcel</span></em>, <em class="sig-param"><span class="n">officeWord</span></em>, <em class="sig-param"><span class="n">officePowerpoint</span></em>, <em class="sig-param"><span class="n">officeOutlook</span></em>, <em class="sig-param"><span class="n">browserChrome</span></em>, <em class="sig-param"><span class="n">browserFirefox</span></em>, <em class="sig-param"><span class="n">browserEdge</span></em>, <em class="sig-param"><span class="n">browserOpera</span></em>, <em class="sig-param"><span class="n">status_queue</span></em>, <em class="sig-param"><span class="n">LOG_FILEPATH</span></em>, <em class="sig-param"><span class="n">processesPID</span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.startLogger" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main function where program starts.
-This method is called by the GUI when the user presses “start logger” button.
-All the values are passed by the GUI module</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>systemLoggerFilesFolder</strong> – true if files/folder checkbox is checked in GUI</p></li>
-<li><p><strong>systemLoggerPrograms</strong> – true if programs checkbox is checked in GUI</p></li>
-<li><p><strong>systemLoggerClipboard</strong> – true if clipboard checkbox is checked in GUI</p></li>
-<li><p><strong>systemLoggerHotkeys</strong> – true if hotkeys checkbox is checked in GUI</p></li>
-<li><p><strong>systemLoggerUSB</strong> – true if usb checkbox is checked in GUI</p></li>
-<li><p><strong>systemLoggerEvents</strong> – deprecated</p></li>
-<li><p><strong>excelFilepath</strong> – contains path of excel file, default is None</p></li>
-<li><p><strong>officeExcel</strong> – true if excel checkbox is checked in GUI</p></li>
-<li><p><strong>officeWord</strong> – true if word checkbox is checked in GUI</p></li>
-<li><p><strong>officePowerpoint</strong> – true if powerpoint checkbox is checked in GUI</p></li>
-<li><p><strong>officeOutlook</strong> – true if outlook checkbox is checked in GUI</p></li>
-<li><p><strong>browserChrome</strong> – true if chrome checkbox is checked in GUI</p></li>
-<li><p><strong>browserFirefox</strong> – true if firefox checkbox is checked in GUI</p></li>
-<li><p><strong>browserEdge</strong> – true if edge checkbox is checked in GUI</p></li>
-<li><p><strong>browserOpera</strong> – true if opera checkbox is checked in GUI</p></li>
-<li><p><strong>status_queue</strong> – Queue to print messages on GUI</p></li>
-<li><p><strong>LOG_FILEPATH</strong> – path of the event log file</p></li>
-<li><p><strong>processesPID</strong> – PID of started processes</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt id="modules.process_mining.ProcessMining">
-<em class="property">class </em><code class="sig-prename descclassname">modules.process_mining.</code><code class="sig-name descname">ProcessMining</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">status_queue</span><span class="p">:</span> <span class="n">multiprocessing.queues.Queue</span></em>, <em class="sig-param"><span class="n">merged</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process Mining class</p>
-<dl class="py method">
-<dt id="modules.process_mining.ProcessMining._create_directories">
-<code class="sig-name descname">_create_directories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining._create_directories" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create directories
-:return:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="modules.process_mining.ProcessMining.save_dfg">
-<code class="sig-name descname">save_dfg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'DFG'</span></em>, <em class="sig-param"><span class="n">high_level</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining.save_dfg" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save DFG to file
-:param name:
-:param high_level:
-:return:</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+<li><p><strong>Source code</strong> is available on <a class="reference external" href="https://github.com/bpm-diag/smartRPA/">GitHub</a>.</p></li>
+<li><p>The associated <strong>paper</strong> is available on <a class="reference external" href="https://doi.org/10.1007/978-3-030-58779-6_8/">Springer</a>, and has been presented at the RPA Forum of 18th International Conference on Business Process Management.</p></li>
+<li><p>A <strong>screencast</strong> of the tool is available on <a class="reference external" href="https://vimeo.com/marco2012/smartRPA/">Vimeo</a>.</p></li>
 </ul>
+</div>
+<div class="section" id="authors">
+<h2>Authors<a class="headerlink" href="#authors" title="Permalink to this headline">¶</a></h2>
+<p>SmartRPA has been developed at DIAG, <em>Department of Computer, Control, and Management Engineering</em> Antonio Ruberti in Sapienza University of Rome by:</p>
+<ul class="simple">
+<li><p>Simone Agostinelli</p></li>
+<li><p>Marco Lupia</p></li>
+<li><p>Andrea Marrella</p></li>
+<li><p>Massimo Mecella</p></li>
+</ul>
+</div>
+<div class="section" id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
+<p>The architecture of SmartRPA integrates five main SW components.</p>
+<div class="figure align-center" style="width: 450px">
+<img alt="_images/architecture.jpeg" src="_images/architecture.jpeg" />
+</div>
+<p>Key features include:</p>
+<ul class="simple">
+<li><p><strong>Action Logger</strong>, log user behaviour, cross-platform, modular, supports wide range of applications;</p></li>
+<li><p><strong>Log Processing</strong>, generates both CSV and XES event log;</p></li>
+<li><p><strong>Event abstraction</strong>, abstracts events to a higher level;</p></li>
+<li><p><strong>Process Discovery</strong>, selects the most suitable routine variant to automate and generates high-level flowchart diagram, thus skipping completely the manual modeling activity;</p></li>
+<li><p><strong>Decision Points</strong>, discover differencies between multiple traces in a process and build a new routine based on user decisions;</p></li>
+<li><p><strong>RPA</strong>, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform Python script and as a UiPath project.</p></li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h2><a class="reference external" href="https://github.com/bpm-diag/smartRPA/#installation-and-execution">Installation and execution</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="main.html">Main</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/gui.html">Graphical User Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/gui.html#gui">GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/gui.html#preferences-window">Preferences window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/gui.html#file-dialog">File dialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/gui.html#choices-dialog">Choices dialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/gui.html#decision-dialog">Decision dialog</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/action_logger.html">Action logger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/action_logger.html#module-modules.events.systemEvents">Operating System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/action_logger.html#module-modules.events.officeEvents">Microsoft Office</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/action_logger.html#browser">Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/action_logger.html#logging-server">Logging Server</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/process_discovery.html">Process Discovery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/process_discovery.html#decision-points">Decision points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/process_discovery.html#most-frequent-routine">Most frequent routine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/process_discovery.html#diagrams">Diagrams</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/rpa.html">RPA</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/rpa.html#python-script">Python script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/rpa.html#uipath-project">UiPath project</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
+</ul>
+</div>
+</div>
 </div>
 
 
@@ -226,6 +261,13 @@ All the values are passed by the GUI module</p>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="main.html" class="btn btn-neutral float-right" title="Main" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
   
 
   <hr/>

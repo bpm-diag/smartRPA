@@ -1,0 +1,397 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.GUI.PreferencesWindow &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>modules.GUI.PreferencesWindow</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.GUI.PreferencesWindow</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QApplication</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QGridLayout</span><span class="p">,</span>
+                             <span class="n">QGroupBox</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span>
+                             <span class="n">QStyleFactory</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QListWidget</span><span class="p">,</span> <span class="n">QListWidgetItem</span><span class="p">,</span>
+                             <span class="n">QAbstractItemView</span><span class="p">,</span> <span class="n">QRadioButton</span><span class="p">,</span> <span class="n">QProgressDialog</span><span class="p">,</span>
+                             <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QSlider</span><span class="p">,</span> <span class="n">QLCDNumber</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtGui</span> <span class="kn">import</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QPalette</span><span class="p">,</span> <span class="n">QColor</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QThreadPool</span><span class="p">,</span> <span class="n">QTimer</span>
+<span class="kn">import</span> <span class="nn">utils.config</span>
+<span class="kn">import</span> <span class="nn">darkdetect</span>
+<span class="kn">from</span> <span class="nn">utils.utils</span> <span class="kn">import</span> <span class="n">WINDOWS</span><span class="p">,</span> <span class="n">MAC</span>
+
+
+<span class="c1"># Preferences window</span>
+<div class="viewcode-block" id="Preferences"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.PreferencesWindow.Preferences">[docs]</a><span class="k">class</span> <span class="nc">Preferences</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Preferences window</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Preferences.__init__"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.PreferencesWindow.Preferences.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">status_queue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize preferences window.</span>
+
+<span class="sd">        It allows to:</span>
+
+<span class="sd">        * enable or disable process discovery analysis</span>
+<span class="sd">        * select the number of runs after which event log is generated</span>
+<span class="sd">        * select analysis type (either decision points or most frequent routine)</span>
+
+<span class="sd">        :param status_queue: queue to send messages to main GUI</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Preferences</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span>
+                                          <span class="n">flags</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">Window</span> <span class="o">|</span>
+                                          <span class="n">Qt</span><span class="o">.</span><span class="n">WindowTitleHint</span> <span class="o">|</span>
+                                          <span class="n">Qt</span><span class="o">.</span><span class="n">CustomizeWindowHint</span> <span class="o">|</span>
+                                          <span class="n">Qt</span><span class="o">.</span><span class="n">WindowCloseButtonHint</span> <span class="o">|</span>
+                                          <span class="n">Qt</span><span class="o">.</span><span class="n">WindowMinimizeButtonHint</span>
+                                          <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span> <span class="o">=</span> <span class="n">status_queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">360</span><span class="p">,</span> <span class="mi">320</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">monospaceFont</span> <span class="o">=</span> <span class="s1">&#39;Lucida Console&#39;</span>
+            <span class="n">fontSize</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="k">elif</span> <span class="n">MAC</span><span class="p">:</span>
+            <span class="n">monospaceFont</span> <span class="o">=</span> <span class="s1">&#39;Monaco&#39;</span>
+            <span class="n">fontSize</span> <span class="o">=</span> <span class="mi">13</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">monospaceFont</span> <span class="o">=</span> <span class="s1">&#39;monospace&#39;</span>
+            <span class="n">fontSize</span> <span class="o">=</span> <span class="mi">13</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">(</span><span class="n">monospaceFont</span><span class="p">,</span> <span class="n">fontSize</span><span class="p">,</span> <span class="n">QFont</span><span class="o">.</span><span class="n">Normal</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decisionGroupBox</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Analysis type&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span>
+            <span class="s2">&quot;Enable Process Discovery </span><span class="se">\n</span><span class="s2">analysis on event log&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;If enabled, process discovery analysis is performed automatically</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                             <span class="s2">&quot;after selecting event log file, otherwise only event log is generated&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;process_discovery_cb&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_cb</span><span class="p">)</span>
+        <span class="n">perform_process_discovery</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">perform_process_discovery</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">perform_process_discovery</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decisionGroupBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">perform_process_discovery</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfr</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;Most frequent routine&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfr</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_radio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfr</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_most_frequent_routine_analysis</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfr</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Create SW Robot based on most frequent routine in the event log&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decision</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;Decision points&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_radio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_decision_point_analysis</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Create SW Robot based on user decisions&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decisionRPA</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;Decision points in UiPath&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decisionRPA</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_radio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decisionRPA</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_decision_point_RPA_analysis</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decisionRPA</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Create SW Robot that asks for user decisions in UiPath script&quot;</span><span class="p">)</span>
+
+        <span class="n">slider_minimum</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_most_frequent_routine_analysis</span> <span class="k">else</span> <span class="mi">2</span>
+        <span class="n">slider_maximum</span> <span class="o">=</span> <span class="mi">30</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lcd</span> <span class="o">=</span> <span class="n">QLCDNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lcd</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sld</span> <span class="o">=</span> <span class="n">QSlider</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">slider_minimum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">slider_maximum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">totalNumberOfRunGuiXes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_slider</span><span class="p">)</span>
+
+        <span class="n">label_minimum</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">alignment</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">)</span>
+        <span class="n">label_maximum</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">slider_maximum</span><span class="p">),</span> <span class="n">alignment</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span>
+            <span class="s2">&quot;Number of runs after which </span><span class="se">\n</span><span class="s2">event is generated:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider_label</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
+            <span class="s2">&quot;When the selected number of runs is reached, all CSV logs collected are merged into one </span><span class="se">\n</span><span class="s2">and a XES file &quot;</span>
+            <span class="s2">&quot;is automatically generated, to be used for process mining techniques&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_slider</span><span class="p">()</span>
+
+        <span class="n">confirmButton</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
+        <span class="n">confirmButton</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">confirmButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">confirmButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleButton</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="n">confirmButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                <span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
+
+        <span class="n">processDiscoveryGroupBox</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Process Discovery&quot;</span><span class="p">)</span>
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="p">)</span>
+        <span class="n">processDiscoveryGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mfr</span><span class="p">)</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decision</span><span class="p">)</span>
+        <span class="c1"># vbox.addWidget(self.decisionRPA)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decisionGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+
+        <span class="n">xesGroupBox</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">()</span>
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider_label</span><span class="p">)</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lcd</span><span class="p">)</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addSpacing</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="p">)</span>
+        <span class="n">hbox</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="n">hbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label_minimum</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+        <span class="n">hbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label_maximum</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">)</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">hbox</span><span class="p">)</span>
+        <span class="n">xesGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+
+        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">processDiscoveryGroupBox</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decisionGroupBox</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">xesGroupBox</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">confirmButton</span><span class="p">)</span>
+
+        <span class="n">wid</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
+        <span class="n">wid</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">mainLayout</span><span class="p">)</span>
+        <span class="n">wid</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
+        <span class="n">wid</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">handle_slider</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lcd</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">totalNumberOfRunGuiXes</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">handle_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">perform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decisionGroupBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">perform</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">perform_process_discovery</span> <span class="o">=</span> <span class="n">perform</span>
+        <span class="k">if</span> <span class="n">perform</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Process discovery enabled&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Process discovery disabled&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">handle_radio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mfr_checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfr</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="n">decision_checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="n">decisionRPA_checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decisionRPA</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+
+        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_most_frequent_routine_analysis</span> <span class="o">=</span> <span class="n">mfr_checked</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_decision_point_analysis</span> <span class="o">=</span> <span class="n">decision_checked</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_decision_point_RPA_analysis</span> <span class="o">=</span> <span class="n">decisionRPA_checked</span>
+
+        <span class="c1"># update lcd value, if decision there should be at least 2 traces</span>
+        <span class="k">if</span> <span class="n">mfr_checked</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;[GUI] &quot;</span>
+        <span class="k">if</span> <span class="n">mfr_checked</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Most frequent routine analysis enabled&quot;</span>
+        <span class="k">elif</span> <span class="n">decision_checked</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Decision point analysis enabled&quot;</span>
+        <span class="k">elif</span> <span class="n">decisionRPA_checked</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Decision point analysis in RPA script enabled&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">handleButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

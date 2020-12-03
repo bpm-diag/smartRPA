@@ -1,0 +1,428 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>main &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>main</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for main</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ****************************** #</span>
+<span class="c1"># Main logger</span>
+<span class="c1"># Handles all the threads of the application</span>
+<span class="c1"># ****************************** #</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">import</span> <span class="nn">utils.utils</span>
+<span class="kn">import</span> <span class="nn">modules.GUI.GUI</span>
+<span class="kn">import</span> <span class="nn">utils.config</span>
+<span class="kn">import</span> <span class="nn">modules.consumerServer</span>
+<span class="kn">import</span> <span class="nn">utils.utils</span>
+<span class="kn">from</span> <span class="nn">modules.events</span> <span class="kn">import</span> <span class="n">systemEvents</span><span class="p">,</span> <span class="n">officeEvents</span><span class="p">,</span> <span class="n">clipboardEvents</span>
+
+
+<div class="viewcode-block" id="startLogger"><a class="viewcode-back" href="../main.html#main.startLogger">[docs]</a><span class="k">def</span> <span class="nf">startLogger</span><span class="p">(</span><span class="n">systemLoggerFilesFolder</span><span class="p">,</span>
+                <span class="n">systemLoggerPrograms</span><span class="p">,</span>
+                <span class="n">systemLoggerClipboard</span><span class="p">,</span>
+                <span class="n">systemLoggerHotkeys</span><span class="p">,</span>
+                <span class="n">systemLoggerUSB</span><span class="p">,</span>
+                <span class="n">systemLoggerEvents</span><span class="p">,</span>
+                <span class="n">excelFilepath</span><span class="p">,</span>
+                <span class="n">officeExcel</span><span class="p">,</span>
+                <span class="n">officeWord</span><span class="p">,</span>
+                <span class="n">officePowerpoint</span><span class="p">,</span>
+                <span class="n">officeOutlook</span><span class="p">,</span>
+                <span class="n">browserChrome</span><span class="p">,</span>
+                <span class="n">browserFirefox</span><span class="p">,</span>
+                <span class="n">browserEdge</span><span class="p">,</span>
+                <span class="n">browserOpera</span><span class="p">,</span>
+                <span class="n">status_queue</span><span class="p">,</span>
+                <span class="n">LOG_FILEPATH</span><span class="p">,</span>
+                <span class="n">processesPID</span>
+                <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main function where program starts.</span>
+<span class="sd">    This method is called by the GUI when the user presses &quot;start logger&quot; button.</span>
+<span class="sd">    All the values are passed by the GUI module</span>
+
+<span class="sd">    :param systemLoggerFilesFolder: true if files/folder checkbox is checked in GUI</span>
+<span class="sd">    :param systemLoggerPrograms: true if programs checkbox is checked in GUI</span>
+<span class="sd">    :param systemLoggerClipboard: true if clipboard checkbox is checked in GUI</span>
+<span class="sd">    :param systemLoggerHotkeys: true if hotkeys checkbox is checked in GUI</span>
+<span class="sd">    :param systemLoggerUSB: true if usb checkbox is checked in GUI</span>
+<span class="sd">    :param systemLoggerEvents: deprecated</span>
+<span class="sd">    :param excelFilepath: contains path of excel file, default is None</span>
+<span class="sd">    :param officeExcel: true if excel checkbox is checked in GUI</span>
+<span class="sd">    :param officeWord: true if word checkbox is checked in GUI</span>
+<span class="sd">    :param officePowerpoint: true if powerpoint checkbox is checked in GUI</span>
+<span class="sd">    :param officeOutlook: true if outlook checkbox is checked in GUI</span>
+<span class="sd">    :param browserChrome: true if chrome checkbox is checked in GUI</span>
+<span class="sd">    :param browserFirefox: true if firefox checkbox is checked in GUI</span>
+<span class="sd">    :param browserEdge: true if edge checkbox is checked in GUI</span>
+<span class="sd">    :param browserOpera: true if opera checkbox is checked in GUI</span>
+<span class="sd">    :param status_queue: Queue to print messages on GUI</span>
+<span class="sd">    :param LOG_FILEPATH: path of the event log file</span>
+<span class="sd">    :param processesPID: PID of started processes, used to kill them when logger is stopped</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># create the threads as daemons so they are closed when main ends</span>
+
+        <span class="c1"># ************</span>
+        <span class="c1"># main logging server</span>
+        <span class="c1"># ************</span>
+        <span class="n">log_filepath</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">createLogFile</span><span class="p">()</span>
+        <span class="c1"># return log file to GUI so it can be processed</span>
+        <span class="n">LOG_FILEPATH</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">)</span>
+
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">modules</span><span class="o">.</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">runServer</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">status_queue</span><span class="p">])</span>
+        <span class="n">t0</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">t0</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="n">modules</span><span class="o">.</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">log_filepath</span> <span class="o">=</span> <span class="n">log_filepath</span>
+
+        <span class="c1"># ************</span>
+        <span class="c1"># system logger</span>
+        <span class="c1"># ************</span>
+
+        <span class="k">if</span> <span class="n">systemLoggerClipboard</span><span class="p">:</span>
+            <span class="c1"># log copy event</span>
+            <span class="n">t8</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">clipboardEvents</span><span class="o">.</span><span class="n">logClipboard</span><span class="p">)</span>
+            <span class="n">t8</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">t8</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="c1"># only way to log paste event is to detect ctrl + v, but it should be started as process instead of thread</span>
+            <span class="c1"># otherwise some events are lost</span>
+            <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+                <span class="n">t9</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">systemEvents</span><span class="o">.</span><span class="n">logPasteHotkey</span><span class="p">)</span>
+                <span class="c1"># t9.daemon = True</span>
+                <span class="n">t9</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">processesPID</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">t9</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">systemLoggerFilesFolder</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">systemEvents</span><span class="o">.</span><span class="n">watchFolder</span><span class="p">)</span>
+                <span class="n">t1</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+                <span class="n">t2</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">systemEvents</span><span class="o">.</span><span class="n">watchRecentsFilesWin</span><span class="p">)</span>
+                <span class="c1"># t2.daemon = True</span>
+                <span class="n">t2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">processesPID</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">t2</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+                <span class="c1"># t3 = Thread(target=systemEvents.detectSelectionWindowsExplorer)</span>
+                <span class="c1"># t3.daemon = True</span>
+                <span class="c1"># t3.start()</span>
+
+                <span class="c1"># t4 = Thread(target=systemEvents.printerLogger)</span>
+                <span class="c1"># t4.daemon = True</span>
+                <span class="c1"># t4.start()</span>
+
+            <span class="k">elif</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">MAC</span><span class="p">:</span>
+                <span class="n">t5</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">systemEvents</span><span class="o">.</span><span class="n">watchFolderMac</span><span class="p">)</span>
+                <span class="n">t5</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">t5</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">systemLoggerPrograms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+                <span class="n">t6</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">systemEvents</span><span class="o">.</span><span class="n">logProcessesWin</span><span class="p">)</span>
+                <span class="n">t6</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">t6</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">MAC</span><span class="p">:</span>
+                <span class="n">t7</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">systemEvents</span><span class="o">.</span><span class="n">logProcessesMac</span><span class="p">)</span>
+                <span class="n">t7</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">t7</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">systemLoggerHotkeys</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">t10</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">systemEvents</span><span class="o">.</span><span class="n">logHotkeys</span><span class="p">)</span>
+            <span class="n">t10</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">processesPID</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">t10</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">systemLoggerUSB</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">t11</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">systemEvents</span><span class="o">.</span><span class="n">logUSBDrives</span><span class="p">)</span>
+            <span class="n">t11</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">t11</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">systemLoggerEvents</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># ************</span>
+        <span class="c1"># office logger</span>
+        <span class="c1"># ************</span>
+
+        <span class="k">if</span> <span class="n">officeExcel</span><span class="p">:</span>
+            <span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[mainLogger] Loading Excel...&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+                <span class="n">t12</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">officeEvents</span><span class="o">.</span><span class="n">excelEvents</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">status_queue</span><span class="p">,</span> <span class="n">excelFilepath</span><span class="p">,))</span>
+                <span class="n">t12</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">processesPID</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">t12</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+                <span class="c1"># t14 = Thread(target=mouseEvents.logMouse)</span>
+                <span class="c1"># t14.daemon = True</span>
+                <span class="c1"># t14.start()</span>
+
+            <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">MAC</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isPortInUse</span><span class="p">(</span><span class="mi">3000</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;pkill -f node&quot;</span><span class="p">)</span>
+                <span class="n">t13</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">officeEvents</span><span class="o">.</span><span class="n">excelEventsMacServer</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">status_queue</span><span class="p">,</span> <span class="n">excelFilepath</span><span class="p">])</span>
+                <span class="n">t13</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">t13</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">officeWord</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">t14</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">officeEvents</span><span class="o">.</span><span class="n">wordEvents</span><span class="p">)</span>
+            <span class="n">t14</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">processesPID</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">t14</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[mainLogger] Loading Word...&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">officePowerpoint</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">t15</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">officeEvents</span><span class="o">.</span><span class="n">powerpointEvents</span><span class="p">)</span>
+            <span class="n">t15</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">processesPID</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">t15</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[mainLogger] Loading PowerPoint...&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">officeOutlook</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">t16</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">officeEvents</span><span class="o">.</span><span class="n">outlookEvents</span><span class="p">)</span>
+            <span class="n">t16</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">processesPID</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">t16</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+        <span class="c1"># ************</span>
+        <span class="c1"># browser logger</span>
+        <span class="c1"># ************</span>
+
+        <span class="k">if</span> <span class="n">browserChrome</span><span class="p">:</span>
+            <span class="n">modules</span><span class="o">.</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">log_chrome</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">browserFirefox</span><span class="p">:</span>
+            <span class="n">modules</span><span class="o">.</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">log_firefox</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">browserEdge</span><span class="p">:</span>
+            <span class="n">modules</span><span class="o">.</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">log_edge</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">browserOpera</span><span class="p">:</span>
+            <span class="n">modules</span><span class="o">.</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">log_opera</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># status_queue.put(f&quot;[mainLogger] Logging started&quot;)</span>
+
+        <span class="k">if</span> <span class="n">browserChrome</span> <span class="ow">or</span> <span class="n">browserFirefox</span> <span class="ow">or</span> <span class="n">browserEdge</span> <span class="ow">or</span> <span class="n">browserOpera</span><span class="p">:</span>
+            <span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[mainLogger] Remember to click on extension icon to enable browser logging&quot;</span><span class="p">)</span>
+
+        <span class="c1"># keep main active</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyboardInterrupt</span><span class="p">,</span> <span class="ne">SystemExit</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Closing threads and exiting...&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># launch GUI</span>
+    <span class="n">modules</span><span class="o">.</span><span class="n">GUI</span><span class="o">.</span><span class="n">GUI</span><span class="o">.</span><span class="n">buildGUI</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

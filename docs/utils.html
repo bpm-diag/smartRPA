@@ -1,0 +1,606 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Utils &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="RPA" href="modules/rpa.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="utils">
+<h1>Utils<a class="headerlink" href="#utils" title="Permalink to this headline">¶</a></h1>
+<p>Utility functions used by all the modules</p>
+<span class="target" id="module-utils.utils"></span><dl class="py function">
+<dt id="utils.utils.CSVEmpty">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">CSVEmpty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log_filepath</span></em>, <em class="sig-param"><span class="n">min_len</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#CSVEmpty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.CSVEmpty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if given csv is empty by counting number of rows</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_filepath</strong> – csv path</p></li>
+<li><p><strong>min_len</strong> – minimum number of rows after which csv is not considered empty</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if csv is empty</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="utils.utils.ThreadWithReturnValue">
+<em class="property">class </em><code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">ThreadWithReturnValue</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">args</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">kwargs</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">Verbose</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#ThreadWithReturnValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.ThreadWithReturnValue" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="utils.utils.ThreadWithReturnValue.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">args</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">kwargs</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">Verbose</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#ThreadWithReturnValue.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.ThreadWithReturnValue.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This constructor should always be called with keyword arguments. Arguments are:</p>
+<p><em>group</em> should be None; reserved for future extension when a ThreadGroup
+class is implemented.</p>
+<p><em>target</em> is the callable object to be invoked by the run()
+method. Defaults to None, meaning nothing is called.</p>
+<p><em>name</em> is the thread name. By default, a unique name is constructed of
+the form “Thread-N” where N is a small decimal number.</p>
+<p><em>args</em> is the argument tuple for the target invocation. Defaults to ().</p>
+<p><em>kwargs</em> is a dictionary of keyword arguments for the target
+invocation. Defaults to {}.</p>
+<p>If a subclass overrides the constructor, it must make sure to invoke
+the base class constructor (Thread.__init__()) before doing anything
+else to the thread.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="utils.utils.ThreadWithReturnValue.join">
+<code class="sig-name descname">join</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#ThreadWithReturnValue.join"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.ThreadWithReturnValue.join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait until the thread terminates.</p>
+<p>This blocks the calling thread until the thread whose join() method is
+called terminates – either normally or through an unhandled exception
+or until the optional timeout occurs.</p>
+<p>When the timeout argument is present and not None, it should be a
+floating point number specifying a timeout for the operation in seconds
+(or fractions thereof). As join() always returns None, you must call
+is_alive() after join() to decide whether a timeout happened – if the
+thread is still alive, the join() call timed out.</p>
+<p>When the timeout argument is not present or None, the operation will
+block until the thread terminates.</p>
+<p>A thread can be join()ed many times.</p>
+<p>join() raises a RuntimeError if an attempt is made to join the current
+thread as that would cause a deadlock. It is also an error to join() a
+thread before it has been started and attempts to do so raises the same
+exception.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="utils.utils.ThreadWithReturnValue.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#ThreadWithReturnValue.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.ThreadWithReturnValue.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method representing the thread’s activity.</p>
+<p>You may override this method in a subclass. The standard run() method
+invokes the callable object passed to the object’s constructor as the
+target argument, if any, with sequential and keyword arguments taken
+from the args and kwargs arguments, respectively.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.combineMultipleCsv">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">combineMultipleCsv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_of_csv_to_combine</span></em>, <em class="sig-param"><span class="n">combined_csv_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#combineMultipleCsv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.combineMultipleCsv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine multiple csv in a single file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list_of_csv_to_combine</strong> – list of csv paths</p></li>
+<li><p><strong>combined_csv_path</strong> – path where to save combined csv</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.convertToWindowsPath">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">convertToWindowsPath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">username_on_source_os</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#convertToWindowsPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.convertToWindowsPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert path to windows path with trailing slashes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – input path</p></li>
+<li><p><strong>username_on_source_os</strong> – username of user on source operating system</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>path formatted for windows</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.createDirectory">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">createDirectory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#createDirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.createDirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create directory with the given path if it does not exist</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – path of directory to be created</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.createLogFile">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">createLogFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#createLogFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.createLogFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates new log file with the current timestamp in /logs directory at the root of the project. used by main.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>path of created log</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.formatPathForCurrentOS">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">formatPathForCurrentOS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">username_on_source_os</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#formatPathForCurrentOS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.formatPathForCurrentOS" title="Permalink to this definition">¶</a></dt>
+<dd><p>format a given path for current OS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – input path</p></li>
+<li><p><strong>username_on_source_os</strong> – username of user on source operating system</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>path with username of user of destination operating system</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getActiveWindowInfo">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getActiveWindowInfo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parameter</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getActiveWindowInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getActiveWindowInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get name and size of active window in foreground (windows only)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parameter</strong> – either ‘name’ or ‘size’</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>name or size of active window</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getActiveWindowName">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getActiveWindowName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getActiveWindowName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getActiveWindowName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get name of window in foreground (windows only)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>name of window in foreground</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getChromeVersionMac">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getChromeVersionMac</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getChromeVersionMac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getChromeVersionMac" title="Permalink to this definition">¶</a></dt>
+<dd><p>return current chrome version, used to detect selenium driver</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>current chrome version</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getChromedriverPath">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getChromedriverPath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getChromedriverPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getChromedriverPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>return chromedriver path from automagica module used by selenium</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>hromedriver pat</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getFileExtension">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getFileExtension</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getFileExtension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getFileExtension" title="Permalink to this definition">¶</a></dt>
+<dd><p>return file extension of a given path like .csv</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – input path</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>file extension of given path (e.g. .csv)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getFilename">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getFilename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getFilename" title="Permalink to this definition">¶</a></dt>
+<dd><p>return filename of a given path without extension, like 2020-02-25_23-21-57</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – path of event log</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>filename without extension</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getHostname">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getHostname</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">url</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getHostname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getHostname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get hostname from url</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>url</strong> – url</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>hostname of url</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getPythonModuleLocation">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getPythonModuleLocation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">module_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getPythonModuleLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getPythonModuleLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>return python module install location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>module_name</strong> – name of module to find</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>install location</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.getRPADirectory">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">getRPADirectory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">csv_file_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#getRPADirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.getRPADirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Genreate path to save RPA files.</p>
+<p>RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>csv_file_path</strong> – path of event log in input</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>path of RPA directory</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.isInstalledMac">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">isInstalledMac</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">programName</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#isInstalledMac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.isInstalledMac" title="Permalink to this definition">¶</a></dt>
+<dd><p>detect if program is installed in /Applications folder on mac</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>programName</strong> – name of program to be checked</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if program is present in /Applications folder, else false</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.isInstalledWin">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">isInstalledWin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">programName</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#isInstalledWin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.isInstalledWin" title="Permalink to this definition">¶</a></dt>
+<dd><p>detect if program (both 32bit and 64bit) is installed checking windows registry</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>programName</strong> – name of program to be checked</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if program is installed, else false</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.isPortInUse">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">isPortInUse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#isPortInUse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.isPortInUse" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if port is available to start server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>port</strong> – port number</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if given port is in use by another process</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.open_file">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">open_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#open_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.open_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>open input file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – path of file to be opened</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.processClipboard">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">processClipboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cb</span></em>, <em class="sig-param"><span class="n">remove_whitespaces</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#processClipboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.processClipboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert clipboard text to unicode and remove whitespaces</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cb</strong> – clipboard text</p></li>
+<li><p><strong>remove_whitespaces</strong> – boolean, if true remove whitespaces</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>unicode version of clipboard text</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.removeWhitespaces">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">removeWhitespaces</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#removeWhitespaces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.removeWhitespaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove spaces before and after words in a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string</strong> – input string</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>string without whitespaces</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.timestamp">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">timestamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate current timestamp in ISO format (e.g. ‘2020-08-29T16:42:30.690’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>timestamp in ISO format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.toAscii">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">toAscii</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#toAscii"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.toAscii" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert input string to ascii characters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string</strong> – input string</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>input string with ascii characters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.utils.unicodeString">
+<code class="sig-prename descclassname">utils.utils.</code><code class="sig-name descname">unicodeString</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/utils.html#unicodeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.utils.unicodeString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace special accented characters with unicode version</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string</strong> – string to be replaced</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>unicode version of string with replaced accented characters</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="modules/rpa.html" class="btn btn-neutral float-left" title="RPA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

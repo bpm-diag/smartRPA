@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; SmartRPA</title>
+  <title>Action logger &mdash; SmartRPA</title>
   
 
   
@@ -20,7 +20,6 @@
   
 
   
-    
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -35,9 +34,10 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-    <script type="text/javascript" src="_static/searchtools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Process Discovery" href="process_discovery.html" />
+    <link rel="prev" title="Main" href="main.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -64,7 +64,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -87,13 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="main.html">Main</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Modules</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="modules/gui.html">Graphical User Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules/action_logger.html">Action logger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules/log_processing.html">Log processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules/event_abstraction.html">Event abstraction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules/process_discovery.html">Process Discovery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules/rpa.html">RPA</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="process_discovery.html">Process Discovery</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Utils</span></p>
 <ul>
@@ -144,12 +140,14 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Search</li>
+      <li>Action logger</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/gui.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -161,23 +159,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search functionality.
-    </p>
-  </div>
-  </noscript>
+  <div class="section" id="action-logger">
+<h1>Action logger<a class="headerlink" href="#action-logger" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="modules.GUI.GUI.MainApplication">
+<em class="property">class </em><code class="sig-prename descclassname">modules.GUI.GUI.</code><code class="sig-name descname">MainApplication</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.GUI.GUI.MainApplication" title="Permalink to this definition">¶</a></dt>
+<dd><p>GUI</p>
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.GUI.GUI.MainApplication.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parent</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
 
-  
-  <div id="search-results">
-  
-  </div>
+<dl class="py method">
+<dt id="modules.GUI.GUI.MainApplication.setStyle">
+<code class="sig-name descname">setStyle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">QStyle</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.GUI.GUI.MainApplication.setStyle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="process_discovery.html" class="btn btn-neutral float-right" title="Process Discovery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="main.html" class="btn btn-neutral float-left" title="Main" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -217,14 +237,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

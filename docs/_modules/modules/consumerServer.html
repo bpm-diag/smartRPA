@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.consumerServer &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>modules.consumerServer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.consumerServer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ****************************** #</span>
+<span class="c1"># CSV logging Server</span>
+<span class="c1"># Receives events from all the threads and writes them in a single csv file</span>
+<span class="c1"># ****************************** #</span>
+
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">environ</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">jsonify</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">import</span> <span class="nn">utils.config</span>
+<span class="kn">import</span> <span class="nn">utils.utils</span>
+<span class="c1"># import utils.GUI</span>
+
+<span class="c1"># server port</span>
+<span class="n">PORT</span> <span class="o">=</span> <span class="mi">4444</span>
+<span class="n">SERVER_ADDR</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;http://localhost:</span><span class="si">{</span><span class="n">PORT</span><span class="si">}</span><span class="s1">&#39;</span>
+
+<span class="c1"># The following variables are set by main during execution</span>
+<span class="n">log_filepath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">()</span>
+<span class="n">log_chrome</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">log_firefox</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">log_edge</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">log_opera</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># disable server log</span>
+<span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;werkzeug&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">environ</span><span class="p">[</span><span class="s1">&#39;WERKZEUG_RUN_MAIN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;true&#39;</span>
+
+
+<span class="c1"># Header to use for the csv logging file, written by main when file is first created</span>
+<span class="n">HEADER</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;application&quot;</span><span class="p">,</span> <span class="s2">&quot;event_type&quot;</span><span class="p">,</span> <span class="s2">&quot;event_src_path&quot;</span><span class="p">,</span> <span class="s2">&quot;event_dest_path&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clipboard_content&quot;</span><span class="p">,</span> <span class="s2">&quot;mouse_coord&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;workbook&quot;</span><span class="p">,</span> <span class="s2">&quot;current_worksheet&quot;</span><span class="p">,</span> <span class="s2">&quot;worksheets&quot;</span><span class="p">,</span> <span class="s2">&quot;sheets&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_content&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_range&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_range_number&quot;</span><span class="p">,</span> <span class="s2">&quot;window_size&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;slides&quot;</span><span class="p">,</span> <span class="s2">&quot;effect&quot;</span><span class="p">,</span> <span class="s2">&quot;hotkey&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;browser_url&quot;</span><span class="p">,</span> <span class="s2">&quot;eventQual&quot;</span><span class="p">,</span> <span class="s2">&quot;tab_moved_from_index&quot;</span><span class="p">,</span> <span class="s2">&quot;tab_moved_to_index&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;newZoomFactor&quot;</span><span class="p">,</span> <span class="s2">&quot;oldZoomFactor&quot;</span><span class="p">,</span> <span class="s2">&quot;tab_pinned&quot;</span><span class="p">,</span> <span class="s2">&quot;tab_audible&quot;</span><span class="p">,</span> <span class="s2">&quot;tab_muted&quot;</span><span class="p">,</span> <span class="s2">&quot;window_ingognito&quot;</span><span class="p">,</span> <span class="s2">&quot;file_size&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;tag_category&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_name&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_title&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_value&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_checked&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_html&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_href&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;tag_innerText&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_option&quot;</span><span class="p">,</span> <span class="s2">&quot;tag_attributes&quot;</span><span class="p">,</span> <span class="s2">&quot;xpath&quot;</span><span class="p">,</span> <span class="s2">&quot;xpath_full&quot;</span>
+<span class="p">]</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;Server working, send post with json data.&quot;</span>
+
+
+<div class="viewcode-block" id="writeLog"><a class="viewcode-back" href="../../modules/action_logger.html#modules.consumerServer.writeLog">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">writeLog</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    route where json event is received and processed.</span>
+
+<span class="sd">    JSON event includes metadata about the event, such as the timestamp, category, application, concept:name</span>
+<span class="sd">    and other information depending on the event type.</span>
+
+<span class="sd">    All this data is appended to the csv event log.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">POST received with content: </span><span class="si">{</span><span class="n">content</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># check if user enabled browser logging</span>
+    <span class="n">application</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;application&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">application</span> <span class="o">==</span> <span class="s2">&quot;Chrome&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">log_chrome</span><span class="p">)</span> <span class="ow">or</span> \
+            <span class="p">(</span><span class="n">application</span> <span class="o">==</span> <span class="s2">&quot;Firefox&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">log_firefox</span><span class="p">)</span> <span class="ow">or</span> \
+            <span class="p">(</span><span class="n">application</span> <span class="o">==</span> <span class="s2">&quot;Edge&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">log_edge</span><span class="p">)</span> <span class="ow">or</span> \
+            <span class="p">(</span><span class="n">application</span> <span class="o">==</span> <span class="s2">&quot;Opera&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">log_opera</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">application</span><span class="si">}</span><span class="s2"> logging disabled by user.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">content</span>
+
+    <span class="c1"># create row to write on csv: take the value of each column in HEADER if it exists and append it to the list</span>
+    <span class="c1"># row = list(map(lambda col: content.get(col), HEADER))</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">HEADER</span><span class="p">:</span>
+        <span class="c1"># add current user to browser logs (because browser extension can&#39;t determine current user)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">):</span>
+            <span class="n">content</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">USER</span>
+        <span class="k">if</span> <span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cell_content&quot;</span><span class="p">):</span>
+            <span class="n">content</span><span class="p">[</span><span class="s2">&quot;cell_content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="s2">&quot;cell_content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># convert events to camelCase (already done by browser extension)</span>
+        <span class="c1"># content[&quot;event_type&quot;] = stringcase.camelcase(content[&quot;event_type&quot;])</span>
+
+        <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">col</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+    <span class="c1"># empty the list for next use</span>
+    <span class="n">row</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">content</span></div>
+
+
+<div class="viewcode-block" id="getServerStatus"><a class="viewcode-back" href="../../modules/action_logger.html#modules.consumerServer.getServerStatus">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/serverstatus&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">getServerStatus</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get server status for browser extension.</span>
+
+<span class="sd">    Returns status of each browser checkbox in GUI.</span>
+
+<span class="sd">    :return: true if browser checkbox in GUI is active</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">log_chrome</span><span class="o">=</span><span class="n">log_chrome</span><span class="p">,</span>
+                   <span class="n">log_firefox</span><span class="o">=</span><span class="n">log_firefox</span><span class="p">,</span>
+                   <span class="n">log_edge</span><span class="o">=</span><span class="n">log_edge</span><span class="p">,</span>
+                   <span class="n">log_opera</span><span class="o">=</span><span class="n">log_opera</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_headers"><a class="viewcode-back" href="../../modules/action_logger.html#modules.consumerServer.add_headers">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">after_request</span>
+<span class="k">def</span> <span class="nf">add_headers</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Enable CORS, for browser extension</span>
+
+<span class="sd">    https://stackoverflow.com/a/35306327</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;Access-Control-Allow-Origin&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;Access-Control-Allow-Headers&#39;</span><span class="p">,</span> <span class="s1">&#39;Content-Type, Authorization&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="runServer"><a class="viewcode-back" href="../../modules/action_logger.html#modules.consumerServer.runServer">[docs]</a><span class="k">def</span> <span class="nf">runServer</span><span class="p">(</span><span class="n">status_queue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    start server thread, executed by mainLogger</span>
+
+<span class="sd">    :param status_queue: queue to print messages in GUI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">isPortInUse</span><span class="p">(</span><span class="n">PORT</span><span class="p">):</span>
+        <span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[Server] Logging server started&quot;</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_reloader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[Server] Could not start logging server because port </span><span class="si">{</span><span class="n">PORT</span><span class="si">}</span><span class="s2"> is already in use.&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_reloader</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

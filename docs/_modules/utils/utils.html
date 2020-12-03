@@ -1,0 +1,735 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>utils.utils &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>utils.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for utils.utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ****************************** #</span>
+<span class="c1"># Utils</span>
+<span class="c1"># Global utils used by the modules, provides information about current OS, installed applications and folders</span>
+<span class="c1"># ****************************** #</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">from</span> <span class="nn">concurrent.futures.thread</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+<span class="kn">from</span> <span class="nn">getpass</span> <span class="kn">import</span> <span class="n">getuser</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">plistlib</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">util</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">platform</span> <span class="kn">import</span> <span class="n">system</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span>
+<span class="kn">import</span> <span class="nn">utils.config</span>
+<span class="kn">import</span> <span class="nn">modules.consumerServer</span>
+<span class="kn">import</span> <span class="nn">unicodedata</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">from</span> <span class="nn">unidecode</span> <span class="kn">import</span> <span class="n">unidecode</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">tee</span><span class="p">,</span> <span class="n">islice</span><span class="p">,</span> <span class="n">chain</span>
+<span class="c1"># asynchronous session.post requests to log server, used by multiple modules</span>
+<span class="kn">from</span> <span class="nn">requests_futures.sessions</span> <span class="kn">import</span> <span class="n">FuturesSession</span>
+
+<span class="n">session</span> <span class="o">=</span> <span class="n">FuturesSession</span><span class="p">()</span>
+
+<span class="c1"># ************</span>
+<span class="c1"># Constants</span>
+<span class="c1"># ************</span>
+
+
+<span class="n">WINDOWS</span> <span class="o">=</span> <span class="p">(</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">)</span>
+<span class="n">MAC</span> <span class="o">=</span> <span class="p">(</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">)</span>
+<span class="n">LINUX</span> <span class="o">=</span> <span class="p">(</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Linux&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">winreg</span>
+    <span class="kn">from</span> <span class="nn">win32com.shell</span> <span class="kn">import</span> <span class="n">shell</span><span class="p">,</span> <span class="n">shellcon</span>
+    <span class="kn">import</span> <span class="nn">win32gui</span>
+
+    <span class="n">RECENT_ITEMS_PATH_WIN</span> <span class="o">=</span> <span class="n">shell</span><span class="o">.</span><span class="n">SHGetFolderPath</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shellcon</span><span class="o">.</span><span class="n">CSIDL_RECENT</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, &quot;AppData\\Roaming\\Microsoft\\Windows\\Recent&quot;)</span>
+
+<span class="c1"># return shortcut lnk full path</span>
+<span class="c1"># def shortcut_target(filename):</span>
+<span class="c1">#     pythoncom.CoInitialize()</span>
+<span class="c1">#     link = pythoncom.CoCreateInstance(</span>
+<span class="c1">#         shell.CLSID_ShellLink,</span>
+<span class="c1">#         None,</span>
+<span class="c1">#         pythoncom.CLSCTX_INPROC_SERVER,</span>
+<span class="c1">#         shell.IID_IShellLink</span>
+<span class="c1">#     )</span>
+<span class="c1">#     link.QueryInterface(pythoncom.IID_IPersistFile).Load(filename)</span>
+<span class="c1">#     name, _ = link.GetPath(shell.SLGP_UNCPRIORITY)</span>
+<span class="c1">#     return name</span>
+
+
+<span class="n">USER</span> <span class="o">=</span> <span class="n">getuser</span><span class="p">()</span>
+<span class="n">HOME_FOLDER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
+<span class="n">DESKTOP</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HOME_FOLDER</span><span class="p">,</span> <span class="s2">&quot;Desktop&quot;</span><span class="p">)</span>
+<span class="n">DOCUMENTS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HOME_FOLDER</span><span class="p">,</span> <span class="s2">&quot;Documents&quot;</span><span class="p">)</span>
+<span class="n">DOWNLOADS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HOME_FOLDER</span><span class="p">,</span> <span class="s2">&quot;Downloads&quot;</span><span class="p">)</span>
+<span class="n">MAIN_DIRECTORY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>  <span class="c1"># main file path</span>
+<span class="n">EVENT_LOG_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;event_log&quot;</span>
+<span class="n">PROCESS_DISCOVERY_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;process_discovery&quot;</span>
+<span class="n">SW_ROBOT_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;SW_Robot&quot;</span>
+<span class="n">UIPATH_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;UiPath&quot;</span>
+
+<span class="c1"># ************</span>
+<span class="c1"># Functions</span>
+<span class="c1"># ************</span>
+
+
+<div class="viewcode-block" id="timestamp"><a class="viewcode-back" href="../../utils.html#utils.utils.timestamp">[docs]</a><span class="k">def</span> <span class="nf">timestamp</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate current timestamp in ISO format (e.g. &#39;2020-08-29T16:42:30.690&#39;)</span>
+
+<span class="sd">    :return: timestamp in ISO format</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#return datetime.now().strftime(&quot;%Y-%m-%d %H:%M:%S:%f&quot;)  # [:-3]</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(</span><span class="n">timespec</span><span class="o">=</span><span class="s1">&#39;milliseconds&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="createDirectory"><a class="viewcode-back" href="../../utils.html#utils.utils.createDirectory">[docs]</a><span class="k">def</span> <span class="nf">createDirectory</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create directory with the given path if it does not exist</span>
+
+<span class="sd">    :param path: path of directory to be created</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[UTILS] Created directory </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># Guard against race condition</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[UTILS] Could not create directory </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+                <span class="k">raise</span></div>
+
+
+<div class="viewcode-block" id="createLogFile"><a class="viewcode-back" href="../../utils.html#utils.utils.createLogFile">[docs]</a><span class="k">def</span> <span class="nf">createLogFile</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates new log file with the current timestamp in /logs directory at the root of the project. used by main.</span>
+
+<span class="sd">    :return: path of created log</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># filename to use in current session until the &#39;stop&#39; button is pressed. must be set here because the filename</span>
+    <span class="c1"># uses the current timestamp and it must remain the same during the whole session</span>
+
+    <span class="c1"># current_directory = utils.config.MyConfig.get_instance().main_directory</span>
+    <span class="c1"># if current_directory is None: current_directory = os.getcwd()</span>
+    <span class="c1"># logs = os.path.join(current_directory, &#39;logs&#39;)</span>
+    <span class="n">logs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MAIN_DIRECTORY</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">)</span>
+    <span class="n">createDirectory</span><span class="p">(</span><span class="n">logs</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+    <span class="n">log_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logs</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="c1"># utils.config.MyConfig.get_instance().log_filepath = log_filepath</span>
+    <span class="c1"># create HEADER</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">modules</span><span class="o">.</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">HEADER</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">log_filepath</span></div>
+
+
+<div class="viewcode-block" id="getRPADirectory"><a class="viewcode-back" href="../../utils.html#utils.utils.getRPADirectory">[docs]</a><span class="k">def</span> <span class="nf">getRPADirectory</span><span class="p">(</span><span class="n">csv_file_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Genreate path to save RPA files.</span>
+
+<span class="sd">    RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57</span>
+
+<span class="sd">    :param csv_file_path: path of event log in input</span>
+<span class="sd">    :return: path of RPA directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">csv_filename</span> <span class="o">=</span> <span class="n">getFilename</span><span class="p">(</span><span class="n">csv_file_path</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">RPA_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MAIN_DIRECTORY</span><span class="p">,</span> <span class="s1">&#39;RPA&#39;</span><span class="p">,</span> <span class="n">csv_filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[UTILS] Could not create RPA directory, saving RPA script on Desktop&quot;</span><span class="p">)</span>
+        <span class="n">RPA_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DESKTOP</span><span class="p">,</span> <span class="s1">&#39;RPA&#39;</span><span class="p">,</span> <span class="n">csv_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">RPA_directory</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;_combined&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getFilename"><a class="viewcode-back" href="../../utils.html#utils.utils.getFilename">[docs]</a><span class="k">def</span> <span class="nf">getFilename</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return filename of a given path without extension, like 2020-02-25_23-21-57</span>
+
+
+<span class="sd">    :param path: path of event log</span>
+<span class="sd">    :return: filename without extension</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="removeWhitespaces"><a class="viewcode-back" href="../../utils.html#utils.utils.removeWhitespaces">[docs]</a><span class="k">def</span> <span class="nf">removeWhitespaces</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    remove spaces before and after words in a string</span>
+
+<span class="sd">    :param string: input string</span>
+<span class="sd">    :return: string without whitespaces</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="processClipboard"><a class="viewcode-back" href="../../utils.html#utils.utils.processClipboard">[docs]</a><span class="k">def</span> <span class="nf">processClipboard</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="n">remove_whitespaces</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convert clipboard text to unicode and remove whitespaces</span>
+
+<span class="sd">    :param cb: clipboard text</span>
+<span class="sd">    :param remove_whitespaces: boolean, if true remove whitespaces</span>
+<span class="sd">    :return: unicode version of clipboard text</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">clipboard</span> <span class="o">=</span> <span class="n">unicodeString</span><span class="p">(</span><span class="n">cb</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">remove_whitespaces</span><span class="p">:</span>
+            <span class="n">clipboard</span> <span class="o">=</span> <span class="n">removeWhitespaces</span><span class="p">(</span><span class="n">clipboard</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">clipboard</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cb</span></div>
+
+
+<div class="viewcode-block" id="unicodeString"><a class="viewcode-back" href="../../utils.html#utils.utils.unicodeString">[docs]</a><span class="k">def</span> <span class="nf">unicodeString</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replace special accented characters with unicode version</span>
+
+<span class="sd">    :param string: string to be replaced</span>
+<span class="sd">    :return: unicode version of string with replaced accented characters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">unidecode</span><span class="p">(</span><span class="n">string</span>
+                         <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;à&quot;</span><span class="p">,</span> <span class="s2">&quot;a&#39;&quot;</span><span class="p">)</span>
+                         <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;è&quot;</span><span class="p">,</span> <span class="s2">&quot;e&#39;&quot;</span><span class="p">)</span>
+                         <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;ì&quot;</span><span class="p">,</span> <span class="s2">&quot;i&#39;&quot;</span><span class="p">)</span>
+                         <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;ò&quot;</span><span class="p">,</span> <span class="s2">&quot;o&#39;&quot;</span><span class="p">)</span>
+                         <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;ù&quot;</span><span class="p">,</span> <span class="s2">&quot;u&#39;&quot;</span><span class="p">)</span>
+                         <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">string</span></div>
+
+
+<div class="viewcode-block" id="isPortInUse"><a class="viewcode-back" href="../../utils.html#utils.utils.isPortInUse">[docs]</a><span class="k">def</span> <span class="nf">isPortInUse</span><span class="p">(</span><span class="n">port</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    check if port is available to start server</span>
+
+<span class="sd">    :param port: port number</span>
+<span class="sd">    :return: true if given port is in use by another process</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">socket</span>
+    <span class="k">with</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span> <span class="k">as</span> <span class="n">s</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">connect_ex</span><span class="p">((</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="CSVEmpty"><a class="viewcode-back" href="../../utils.html#utils.utils.CSVEmpty">[docs]</a><span class="k">def</span> <span class="nf">CSVEmpty</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="n">min_len</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if given csv is empty by counting number of rows</span>
+
+<span class="sd">    :param log_filepath: csv path</span>
+<span class="sd">    :param min_len: minimum number of rows after which csv is not considered empty</span>
+<span class="sd">    :return: true if csv is empty</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">pandas</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">EmptyDataError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">min_len</span></div>
+
+
+<div class="viewcode-block" id="getFileExtension"><a class="viewcode-back" href="../../utils.html#utils.utils.getFileExtension">[docs]</a><span class="k">def</span> <span class="nf">getFileExtension</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return file extension of a given path like .csv</span>
+
+<span class="sd">    :param path: input path</span>
+<span class="sd">    :return: file extension of given path (e.g. .csv)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="getChromeVersionMac"><a class="viewcode-back" href="../../utils.html#utils.utils.getChromeVersionMac">[docs]</a><span class="k">def</span> <span class="nf">getChromeVersionMac</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return current chrome version, used to detect selenium driver</span>
+
+<span class="sd">    :return: current chrome version</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;/Applications/Google Chrome.app&quot;</span><span class="p">):</span>
+        <span class="n">plistloc</span> <span class="o">=</span> <span class="s2">&quot;/Applications/Google Chrome.app/Contents/Info.plist&quot;</span>
+        <span class="n">pl</span> <span class="o">=</span> <span class="n">plistlib</span><span class="o">.</span><span class="n">readPlist</span><span class="p">(</span><span class="n">plistloc</span><span class="p">)</span>
+        <span class="n">pver</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[</span><span class="s2">&quot;CFBundleShortVersionString&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">pver</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="combineMultipleCsv"><a class="viewcode-back" href="../../utils.html#utils.utils.combineMultipleCsv">[docs]</a><span class="k">def</span> <span class="nf">combineMultipleCsv</span><span class="p">(</span><span class="n">list_of_csv_to_combine</span><span class="p">,</span> <span class="n">combined_csv_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Combine multiple csv in a single file</span>
+
+<span class="sd">    :param list_of_csv_to_combine: list of csv paths</span>
+<span class="sd">    :param combined_csv_path: path where to save combined csv</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># make sure that given csv to combine actually exist in system</span>
+    <span class="n">existing_csv_to_combine</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">list_of_csv_to_combine</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># combine all files in the list</span>
+        <span class="n">combined_csv</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;latin&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">existing_csv_to_combine</span><span class="p">])</span>
+        <span class="c1"># export to csv</span>
+        <span class="n">combined_csv</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">combined_csv_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[UTILS] </span><span class="si">{</span><span class="n">combined_csv_path</span><span class="si">}</span><span class="s2"> created by merging </span><span class="si">{</span><span class="n">existing_csv_to_combine</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">pandas</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">ParserError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="getActiveWindowInfo"><a class="viewcode-back" href="../../utils.html#utils.utils.getActiveWindowInfo">[docs]</a><span class="k">def</span> <span class="nf">getActiveWindowInfo</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get name and size of active window in foreground (windows only)</span>
+
+<span class="sd">    :param parameter: either &#39;name&#39; or &#39;size&#39;</span>
+<span class="sd">    :return: name or size of active window</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hwnd</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetForegroundWindow</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowText</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowRect</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">name</span>
+        <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="getActiveWindowName"><a class="viewcode-back" href="../../utils.html#utils.utils.getActiveWindowName">[docs]</a><span class="k">def</span> <span class="nf">getActiveWindowName</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get name of window in foreground (windows only)</span>
+
+<span class="sd">    :return: name of window in foreground</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hwnd</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetForegroundWindow</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">win32gui</span><span class="o">.</span><span class="n">GetWindowText</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">name</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="getPythonModuleLocation"><a class="viewcode-back" href="../../utils.html#utils.utils.getPythonModuleLocation">[docs]</a><span class="k">def</span> <span class="nf">getPythonModuleLocation</span><span class="p">(</span><span class="n">module_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return python module install location</span>
+
+<span class="sd">    :param module_name: name of module to find</span>
+<span class="sd">    :return: install location</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">module</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">module</span><span class="o">.</span><span class="n">submodule_search_locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="getChromedriverPath"><a class="viewcode-back" href="../../utils.html#utils.utils.getChromedriverPath">[docs]</a><span class="k">def</span> <span class="nf">getChromedriverPath</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return chromedriver path from automagica module used by selenium</span>
+
+<span class="sd">    :return: hromedriver pat</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">automagica_path</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">getPythonModuleLocation</span><span class="p">(</span><span class="s1">&#39;automagica&#39;</span><span class="p">)</span>
+    <span class="n">chromedriver_relative</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+        <span class="n">chromedriver_relative</span> <span class="o">=</span> <span class="s2">&quot;bin/win32/chromedriver.exe&quot;</span>
+    <span class="k">elif</span> <span class="n">MAC</span><span class="p">:</span>
+        <span class="n">chromedriver_relative</span> <span class="o">=</span> <span class="s2">&quot;bin/mac64/chromedriver&quot;</span>
+    <span class="k">elif</span> <span class="n">LINUX</span><span class="p">:</span>
+        <span class="n">chromedriver_relative</span> <span class="o">=</span> <span class="s2">&quot;bin/linux64/chromedriver&quot;</span>
+    <span class="n">chromedriver</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">automagica_path</span><span class="p">,</span> <span class="n">chromedriver_relative</span><span class="p">)</span>
+    <span class="c1"># if MAC: os.chmod(chromedriver, 755)</span>
+    <span class="k">return</span> <span class="n">chromedriver</span></div>
+
+
+<div class="viewcode-block" id="getHostname"><a class="viewcode-back" href="../../utils.html#utils.utils.getHostname">[docs]</a><span class="k">def</span> <span class="nf">getHostname</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get hostname from url</span>
+
+<span class="sd">    :param url: url</span>
+<span class="sd">    :return: hostname of url</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">hostname</span> <span class="k">if</span> <span class="n">url</span> <span class="k">else</span> <span class="n">url</span></div>
+
+
+<div class="viewcode-block" id="toAscii"><a class="viewcode-back" href="../../utils.html#utils.utils.toAscii">[docs]</a><span class="k">def</span> <span class="nf">toAscii</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convert input string to ascii characters</span>
+
+<span class="sd">    :param string: input string</span>
+<span class="sd">    :return: input string with ascii characters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s1">&#39;NFD&#39;</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="formatPathForCurrentOS"><a class="viewcode-back" href="../../utils.html#utils.utils.formatPathForCurrentOS">[docs]</a><span class="k">def</span> <span class="nf">formatPathForCurrentOS</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">username_on_source_os</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    format a given path for current OS</span>
+
+<span class="sd">    :param path: input path</span>
+<span class="sd">    :param username_on_source_os: username of user on source operating system</span>
+<span class="sd">    :return: path with username of user of destination operating system</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">is_windows_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">MAC</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_windows_path</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C:/Users/</span><span class="si">{</span><span class="n">username_on_source_os</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;/Users/</span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">path</span>
+        <span class="k">elif</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_windows_path</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">path</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/Users/</span><span class="si">{</span><span class="n">username_on_source_os</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;C:/Users/</span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="convertToWindowsPath"><a class="viewcode-back" href="../../utils.html#utils.utils.convertToWindowsPath">[docs]</a><span class="k">def</span> <span class="nf">convertToWindowsPath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">username_on_source_os</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convert path to windows path with trailing slashes</span>
+
+<span class="sd">    :param path: input path</span>
+<span class="sd">    :param username_on_source_os: username of user on source operating system</span>
+<span class="sd">    :return: path formatted for windows</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>  <span class="c1"># already windows path</span>
+            <span class="k">return</span> <span class="n">path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/Users/</span><span class="si">{</span><span class="n">username_on_source_os</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;C:/Users/</span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="open_file"><a class="viewcode-back" href="../../utils.html#utils.utils.open_file">[docs]</a><span class="k">def</span> <span class="nf">open_file</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    open input file</span>
+
+<span class="sd">    :param path: path of file to be opened</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">opener</span> <span class="o">=</span> <span class="s2">&quot;open&quot;</span> <span class="k">if</span> <span class="n">MAC</span> <span class="k">else</span> <span class="s2">&quot;xdg-open&quot;</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="n">opener</span><span class="p">,</span> <span class="n">path</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[UTILS] Could not open file </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">fixTimestampFieldXES</span><span class="p">(</span><span class="n">xes_filepath</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">fileinput</span>
+    <span class="k">with</span> <span class="n">fileinput</span><span class="o">.</span><span class="n">FileInput</span><span class="p">(</span><span class="n">xes_filepath</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;string key=&quot;time:timestamp&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;date key=&quot;time:timestamp&quot;&#39;</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># loop accessing the previous, current, and next items https://stackoverflow.com/a/1012089/1440037</span>
+<span class="k">def</span> <span class="nf">previous_and_next</span><span class="p">(</span><span class="n">some_iterable</span><span class="p">):</span>
+    <span class="n">prevs</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">nexts</span> <span class="o">=</span> <span class="n">tee</span><span class="p">(</span><span class="n">some_iterable</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">prevs</span> <span class="o">=</span> <span class="n">chain</span><span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="n">prevs</span><span class="p">)</span>
+    <span class="n">nexts</span> <span class="o">=</span> <span class="n">chain</span><span class="p">(</span><span class="n">islice</span><span class="p">(</span><span class="n">nexts</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prevs</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">nexts</span><span class="p">)</span>
+
+
+<span class="c1"># ************</span>
+<span class="c1"># Class</span>
+<span class="c1"># ************</span>
+
+<div class="viewcode-block" id="ThreadWithReturnValue"><a class="viewcode-back" href="../../utils.html#utils.utils.ThreadWithReturnValue">[docs]</a><span class="k">class</span> <span class="nc">ThreadWithReturnValue</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<div class="viewcode-block" id="ThreadWithReturnValue.__init__"><a class="viewcode-back" href="../../utils.html#utils.utils.ThreadWithReturnValue.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">args</span><span class="o">=</span><span class="p">(),</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">Verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_return</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="ThreadWithReturnValue.run"><a class="viewcode-back" href="../../utils.html#utils.utils.ThreadWithReturnValue.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span>
+                                        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ThreadWithReturnValue.join"><a class="viewcode-back" href="../../utils.html#utils.utils.ThreadWithReturnValue.join">[docs]</a>    <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">Thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return</span></div></div>
+
+
+<span class="c1"># ************</span>
+<span class="c1"># Detect installed programs</span>
+<span class="c1"># ************</span>
+
+
+<div class="viewcode-block" id="isInstalledWin"><a class="viewcode-back" href="../../utils.html#utils.utils.isInstalledWin">[docs]</a><span class="k">def</span> <span class="nf">isInstalledWin</span><span class="p">(</span><span class="n">programName</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    detect if program (both 32bit and 64bit) is installed checking windows registry</span>
+
+<span class="sd">    :param programName: name of program to be checked</span>
+<span class="sd">    :return: true if program is installed, else false</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_getInstalledProgramsWin</span><span class="p">(</span><span class="n">hive</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+        <span class="n">registry</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">ConnectRegistry</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">hive</span><span class="p">)</span>
+        <span class="n">registry_key</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                                      <span class="n">winreg</span><span class="o">.</span><span class="n">KEY_READ</span> <span class="o">|</span> <span class="n">flag</span><span class="p">)</span>
+        <span class="n">registry_subkeys_number</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryInfoKey</span><span class="p">(</span><span class="n">registry_key</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">software_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">registry_subkeys_number</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">asubkey_name</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">EnumKey</span><span class="p">(</span><span class="n">registry_key</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">subkey</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">registry_key</span><span class="p">,</span> <span class="n">asubkey_name</span><span class="p">)</span>
+                <span class="n">software_name</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">subkey</span><span class="p">,</span> <span class="s2">&quot;DisplayName&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">software_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">software_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">EnvironmentError</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="k">return</span> <span class="n">software_list</span>
+
+    <span class="n">software_list</span> <span class="o">=</span> <span class="n">_getInstalledProgramsWin</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span> <span class="n">winreg</span><span class="o">.</span><span class="n">KEY_WOW64_32KEY</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="n">_getInstalledProgramsWin</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span> <span class="n">winreg</span><span class="o">.</span><span class="n">KEY_WOW64_64KEY</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="n">_getInstalledProgramsWin</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_CURRENT_USER</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">program</span><span class="p">:</span> <span class="n">programName</span> <span class="ow">in</span> <span class="n">program</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">software_list</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="isInstalledMac"><a class="viewcode-back" href="../../utils.html#utils.utils.isInstalledMac">[docs]</a><span class="k">def</span> <span class="nf">isInstalledMac</span><span class="p">(</span><span class="n">programName</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    detect if program is installed in /Applications folder on mac</span>
+
+<span class="sd">    :param programName: name of program to be checked</span>
+<span class="sd">    :return: true if program is present in /Applications folder, else false</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s2">&quot;ls -1 /Applications&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">program</span><span class="p">:</span> <span class="n">programName</span> <span class="ow">in</span> <span class="n">program</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">output</span><span class="p">)))</span></div>
+
+
+<span class="c1"># needs testing</span>
+<span class="k">def</span> <span class="nf">isInstalledLinux</span><span class="p">(</span><span class="n">programName</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dpkg -s </span><span class="si">{</span><span class="n">programName</span><span class="si">}</span><span class="s2"> &gt; /dev/null 2&gt;&amp;1&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+
+<span class="c1"># set boolean variables for available programs, used by GUI to enable/disable checkboxes</span>
+<span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+    <span class="n">OFFICE</span> <span class="o">=</span> <span class="n">isInstalledWin</span><span class="p">(</span><span class="s1">&#39;office&#39;</span><span class="p">)</span>
+    <span class="n">CHROME</span> <span class="o">=</span> <span class="n">isInstalledWin</span><span class="p">(</span><span class="s1">&#39;chrome&#39;</span><span class="p">)</span>
+    <span class="n">FIREFOX</span> <span class="o">=</span> <span class="n">isInstalledWin</span><span class="p">(</span><span class="s1">&#39;firefox&#39;</span><span class="p">)</span>
+    <span class="n">EDGE</span> <span class="o">=</span> <span class="n">isInstalledWin</span><span class="p">(</span><span class="s1">&#39;edge&#39;</span><span class="p">)</span>
+    <span class="n">OPERA</span> <span class="o">=</span> <span class="n">isInstalledWin</span><span class="p">(</span><span class="s1">&#39;opera&#39;</span><span class="p">)</span>
+<span class="k">elif</span> <span class="n">MAC</span><span class="p">:</span>
+    <span class="n">OFFICE</span> <span class="o">=</span> <span class="n">isInstalledMac</span><span class="p">(</span><span class="s1">&#39;excel&#39;</span><span class="p">)</span>  <span class="c1"># on MacOS only excel events can be logged through an addin</span>
+    <span class="n">CHROME</span> <span class="o">=</span> <span class="n">isInstalledMac</span><span class="p">(</span><span class="s1">&#39;chrome&#39;</span><span class="p">)</span>
+    <span class="n">FIREFOX</span> <span class="o">=</span> <span class="n">isInstalledMac</span><span class="p">(</span><span class="s1">&#39;firefox&#39;</span><span class="p">)</span>
+    <span class="n">EDGE</span> <span class="o">=</span> <span class="n">isInstalledMac</span><span class="p">(</span><span class="s1">&#39;edge&#39;</span><span class="p">)</span>
+    <span class="n">OPERA</span> <span class="o">=</span> <span class="n">isInstalledMac</span><span class="p">(</span><span class="s1">&#39;opera&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">OFFICE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">CHROME</span> <span class="o">=</span> <span class="n">isInstalledLinux</span><span class="p">(</span><span class="s1">&#39;chrome&#39;</span><span class="p">)</span>
+    <span class="n">FIREFOX</span> <span class="o">=</span> <span class="n">isInstalledLinux</span><span class="p">(</span><span class="s1">&#39;firefox&#39;</span><span class="p">)</span>
+    <span class="n">EDGE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">OPERA</span> <span class="o">=</span> <span class="n">isInstalledLinux</span><span class="p">(</span><span class="s1">&#39;opera&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

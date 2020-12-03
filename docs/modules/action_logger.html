@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Action logger &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Log processing" href="log_processing.html" />
+    <link rel="prev" title="Graphical User Interface" href="gui.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Action logger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-modules.events.systemEvents">Operating System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-modules.events.officeEvents">Microsoft Office</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#browser">Browser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging-server">Logging Server</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Action logger</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/action_logger.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="action-logger">
+<h1>Action logger<a class="headerlink" href="#action-logger" title="Permalink to this headline">¶</a></h1>
+<p>The Action Logger can be used to record a wide range of UI actions from multiple SW applications during the enactment of a routine.</p>
+<div class="section" id="module-modules.events.systemEvents">
+<span id="operating-system"></span><h2>Operating System<a class="headerlink" href="#module-modules.events.systemEvents" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-modules.events.clipboardEvents"></span><span class="target" id="module-modules.events.mouseEvents"></span><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Mouse events are deprecated, not in use.</p>
+</div>
+</div>
+<div class="section" id="module-modules.events.officeEvents">
+<span id="microsoft-office"></span><h2>Microsoft Office<a class="headerlink" href="#module-modules.events.officeEvents" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="browser">
+<h2>Browser<a class="headerlink" href="#browser" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Browser events are handled in the browser extension written in JavaScript.
+It is available under <code class="docutils literal notranslate"><span class="pre">extensions/browserLogger</span></code></p>
+</div>
+</div>
+<div class="section" id="logging-server">
+<h2>Logging Server<a class="headerlink" href="#logging-server" title="Permalink to this headline">¶</a></h2>
+<p>The logging server was built using Flask.
+The server is launched when the user presses the Start Logger button in the GUI.</p>
+<p>The selected browsers that needs to be enabled and the log file path are passed as parameters. At launch, the program checks if port 4444 is free on the system: in this case it starts listening for incoming requests.</p>
+<p>The default route (/) is used to receive JSON payloads by every module containing data about an event and write them on the CSV file. This payload contains different fields depending on the type of recorded event. When the program is started, the CSV log file is created and the header is written.</p>
+<span class="target" id="module-modules.consumerServer"></span><dl class="py function">
+<dt id="modules.consumerServer.add_headers">
+<code class="sig-prename descclassname">modules.consumerServer.</code><code class="sig-name descname">add_headers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">response</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/consumerServer.html#add_headers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.consumerServer.add_headers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable CORS, for browser extension</p>
+<p><a class="reference external" href="https://stackoverflow.com/a/35306327">https://stackoverflow.com/a/35306327</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.consumerServer.getServerStatus">
+<code class="sig-prename descclassname">modules.consumerServer.</code><code class="sig-name descname">getServerStatus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/consumerServer.html#getServerStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.consumerServer.getServerStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get server status for browser extension.</p>
+<p>Returns status of each browser checkbox in GUI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>true if browser checkbox in GUI is active</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.consumerServer.runServer">
+<code class="sig-prename descclassname">modules.consumerServer.</code><code class="sig-name descname">runServer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_queue</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/consumerServer.html#runServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.consumerServer.runServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>start server thread, executed by mainLogger</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>status_queue</strong> – queue to print messages in GUI</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.consumerServer.writeLog">
+<code class="sig-prename descclassname">modules.consumerServer.</code><code class="sig-name descname">writeLog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/consumerServer.html#writeLog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.consumerServer.writeLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>route where json event is received and processed.</p>
+<p>JSON event includes metadata about the event, such as the timestamp, category, application, concept:name
+and other information depending on the event type.</p>
+<p>All this data is appended to the csv event log.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="log_processing.html" class="btn btn-neutral float-right" title="Log processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gui.html" class="btn btn-neutral float-left" title="Graphical User Interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

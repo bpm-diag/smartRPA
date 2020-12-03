@@ -1,0 +1,1323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.GUI.GUI &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>modules.GUI.GUI</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.GUI.GUI</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ****************************** #</span>
+<span class="c1"># GUI</span>
+<span class="c1"># Build native user interface and start main logger</span>
+<span class="c1"># ****************************** #</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QSize</span><span class="p">,</span> <span class="n">QThreadPool</span><span class="p">,</span> <span class="n">QTimer</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtGui</span> <span class="kn">import</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QPalette</span><span class="p">,</span> <span class="n">QColor</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QApplication</span><span class="p">,</span> <span class="n">QCheckBox</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">,</span> <span class="n">QGridLayout</span><span class="p">,</span>
+                             <span class="n">QGroupBox</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span>
+                             <span class="n">QStyleFactory</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QListWidget</span><span class="p">,</span> <span class="n">QListWidgetItem</span><span class="p">,</span>
+                             <span class="n">QAbstractItemView</span><span class="p">,</span> <span class="n">QRadioButton</span><span class="p">,</span> <span class="n">QProgressDialog</span><span class="p">,</span>
+                             <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QSlider</span><span class="p">,</span> <span class="n">QLCDNumber</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">modules.GUI.GUIThread</span> <span class="kn">import</span> <span class="n">Worker</span>
+<span class="kn">import</span> <span class="nn">darkdetect</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">modules.GUI.filenameDialog</span> <span class="kn">import</span> <span class="n">getFilenameDialog</span>
+<span class="kn">from</span> <span class="nn">utils.utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">main</span>
+<span class="kn">import</span> <span class="nn">modules.GUI.PreferencesWindow</span>
+<span class="kn">import</span> <span class="nn">utils.config</span>
+<span class="kn">import</span> <span class="nn">modules.flowchart</span>
+<span class="kn">import</span> <span class="nn">modules.decisionPoints</span>
+<span class="kn">import</span> <span class="nn">modules.RPA.generateRPAScript</span>
+<span class="kn">import</span> <span class="nn">modules.process_mining</span>
+<span class="kn">import</span> <span class="nn">utils.utils</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../&#39;</span><span class="p">)</span>  <span class="c1"># this way main file is visible from this file</span>
+
+
+<span class="c1"># import utils.xesConverter</span>
+
+
+<div class="viewcode-block" id="MainApplication"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication">[docs]</a><span class="k">class</span> <span class="nc">MainApplication</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QDialog</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GUI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MainApplication.__init__"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize GUI</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">MainApplication</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">originalPalette</span> <span class="o">=</span> <span class="n">QApplication</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;SmartRPA&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAppIcon</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyle</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">threadpool</span> <span class="o">=</span> <span class="n">QThreadPool</span><span class="p">()</span>
+
+        <span class="c1"># queue used to send messages to GUI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="c1"># queue used to get filepath of current log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LOG_FILEPATH</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="c1"># queue used to kill processes before closing main, when pressing stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processesPID</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">createMenu</span><span class="p">()</span>
+
+        <span class="c1"># create layouts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createSystemLoggerGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createOfficeLoggerGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createBrowserLoggerGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createTopLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createStartButton</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createBottomLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createStatusLayout</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">platformCheck</span><span class="p">()</span>
+
+        <span class="c1"># Variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainProcess</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeFilepath</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runCount</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_to_join</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c1"># Boolean variables that save the state of each checkbox</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolderCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerPrograms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerProgramsCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboard</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboardCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEvents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEventsCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeWord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlook</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlookCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserChrome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserChromeCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefoxCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserEdge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserEdgeCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserOpera</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browserOperaCB</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+
+        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># start from cell (1,0) and expand in 2 rows but remain in 1 column</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systemGroupBox</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeGroupBox</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># mainLayout.addWidget(self.browserGroupBox, 2, 0) # bottom left</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browserGroupBox</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bottomLayout</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">statusLayout</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">setRowStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">setRowStretch</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">setColumnStretch</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">setColumnStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">wid</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
+        <span class="n">wid</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">mainLayout</span><span class="p">)</span>
+        <span class="c1"># self.setLayout(mainLayout)</span>
+
+        <span class="n">updateUIThread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateListWidget</span><span class="p">)</span>
+        <span class="n">updateUIThread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">updateUIThread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MainApplication.createMenu"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createMenu">[docs]</a>    <span class="k">def</span> <span class="nf">createMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create file menu with preferences and options to merge multiple CSV event logs and to analyze one event log.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">menuBar</span><span class="p">()</span>
+
+        <span class="n">fileMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s1">&#39;File&#39;</span><span class="p">)</span>
+        <span class="n">preferencesAction</span> <span class="o">=</span> <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Preferences...&#39;</span><span class="p">)</span>
+        <span class="n">preferencesAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlePreferences</span><span class="p">)</span>
+        <span class="n">mergeAction</span> <span class="o">=</span> <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Merge multiple CSV...&#39;</span><span class="p">)</span>
+        <span class="n">mergeAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleMerge</span><span class="p">)</span>
+        <span class="n">runLogAction</span> <span class="o">=</span> <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;RPA from log...&#39;</span><span class="p">)</span>
+        <span class="n">runLogAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleRunLogAction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferencesDialog</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">GUI</span><span class="o">.</span><span class="n">PreferencesWindow</span><span class="o">.</span><span class="n">Preferences</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span>
+
+        <span class="n">helpMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s1">&#39;Help&#39;</span><span class="p">)</span>
+        <span class="n">about</span> <span class="o">=</span> <span class="n">helpMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;About&#39;</span><span class="p">)</span>
+        <span class="n">about</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showAboutMessage</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.createSystemLoggerGroupBox"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createSystemLoggerGroupBox">[docs]</a>    <span class="k">def</span> <span class="nf">createSystemLoggerGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create checkboxes to log operating systems events like opening a program, editing files/folders, logging clipboard, hotkeys or usb drives insertion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemGroupBox</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;System logger&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolderCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Files/Folders&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolderCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;systemLoggerFilesFolder&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolderCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolderCB</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
+            <span class="s2">&quot;Log edits on files and folder like create, modify, delete and more&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboardCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Clipboard&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboardCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;systemLoggerClipboard&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboardCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboardCB</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Log clipboard copy&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerProgramsCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Programs&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerProgramsCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;systemLoggerPrograms&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerProgramsCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerProgramsCB</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
+            <span class="s2">&quot;Log opening and closing of programs&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Hotkeys&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;systemLoggerHotkeys&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Log system-wide hotkeys&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSBCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;USB Drives&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSBCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;systemLoggerUSB&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSBCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSBCB</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
+            <span class="s2">&quot;Log insertion and removal of usb drives&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEventsCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Events&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEventsCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;systemLoggerEvents&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEventsCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEventsCB</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Log edits on files and folder&quot;</span><span class="p">)</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolderCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerProgramsCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboardCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSBCB</span><span class="p">)</span>
+        <span class="c1"># layout.addWidget(self.systemLoggerEventsCB)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.createOfficeLoggerGroupBox"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createOfficeLoggerGroupBox">[docs]</a>    <span class="k">def</span> <span class="nf">createOfficeLoggerGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create checkboxes to log microsoft office applications like excel, word, powerpoint</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeGroupBox</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Office logger&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeGroupBox</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
+            <span class="s2">&quot;Log all activities in Office applications </span><span class="se">\n</span><span class="s2">like opening, closing, editing documents and more&quot;</span><span class="p">)</span>
+
+        <span class="n">hboxExcel</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Excel&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;officeExcel&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelNewRB</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;New File&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelNewRB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelNewRB</span><span class="o">.</span><span class="n">setAutoExclusive</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelOpenRB</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;Open File&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelOpenRB</span><span class="o">.</span><span class="n">setAutoExclusive</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">hboxExcel</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span><span class="p">)</span>
+        <span class="n">hboxExcel</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeExcelNewRB</span><span class="p">)</span>
+        <span class="n">hboxExcel</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeExcelOpenRB</span><span class="p">)</span>
+
+        <span class="n">hboxWord</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Word&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;officeWord&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeWordNewRB</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;New File&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeWordNewRB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeWordOpenRB</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;Open File&quot;</span><span class="p">)</span>
+        <span class="n">hboxWord</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span><span class="p">)</span>
+        <span class="n">hboxWord</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeWordNewRB</span><span class="p">)</span>
+        <span class="n">hboxWord</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeWordOpenRB</span><span class="p">)</span>
+
+        <span class="n">hboxPowerpoint</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;PowerPoint&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;officePowerpoint&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointNewRB</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;New File&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointNewRB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointOpenRB</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;Open File&quot;</span><span class="p">)</span>
+        <span class="n">hboxPowerpoint</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span><span class="p">)</span>
+        <span class="n">hboxPowerpoint</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointNewRB</span><span class="p">)</span>
+        <span class="n">hboxPowerpoint</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointOpenRB</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlookCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Outlook&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlookCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;officeOutlook&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlookCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span><span class="p">)</span>
+        <span class="c1"># if hbox is added to layout the user can select an existing file to open when starting office logging</span>
+        <span class="c1"># layout.addLayout(hboxExcel)</span>
+        <span class="c1"># layout.addLayout(hboxWord)</span>
+        <span class="c1"># layout.addLayout(hboxPowerpoint)</span>
+        <span class="c1"># layout.addWidget(self.officeOutlookCB)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.createBrowserLoggerGroupBox"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createBrowserLoggerGroupBox">[docs]</a>    <span class="k">def</span> <span class="nf">createBrowserLoggerGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create checkboxes to log browser events in chrome, firefox, edge or opera</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserGroupBox</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Browser logger&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserGroupBox</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span>
+            <span class="s2">&quot;Log all browser events in the window (like opening, closing tabs, printing, etc) </span><span class="se">\n</span><span class="s2">and in the page (like clicking, zooming, pasting, etc)&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserChromeCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Google Chrome&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserChromeCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;browserChrome&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserChromeCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefoxCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Mozilla Firefox&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefoxCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;browserFirefox&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefoxCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserEdgeCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Microsoft Edge&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserEdgeCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;browserEdge&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserEdgeCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserOperaCB</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;Opera&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserOperaCB</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;browserOpera&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserOperaCB</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleCheckBox</span><span class="p">)</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browserChromeCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browserFirefoxCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browserEdgeCB</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browserOperaCB</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">browserGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.createStartButton"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createStartButton">[docs]</a>    <span class="k">def</span> <span class="nf">createStartButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        create button to start and stop action logger</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Start logger&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                <span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onButtonClick</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">systemGroupBox</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browserGroupBox</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">officeGroupBox</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.createTopLayout"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createTopLayout">[docs]</a>    <span class="k">def</span> <span class="nf">createTopLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        create top layout with buttons to enable all modules at once</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Select modules to activate&quot;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Enable all&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QPushButton {color: white;}&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setFlat</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setCheckboxChecked</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.createBottomLayout"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createBottomLayout">[docs]</a>    <span class="k">def</span> <span class="nf">createBottomLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        create bottom layout that contains button to start logging</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottomLayout</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottomLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottomLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottomLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.createStatusLayout"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createStatusLayout">[docs]</a>    <span class="k">def</span> <span class="nf">createStatusLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        create status layout, the window below the start button where all logging appears</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">monospaceFont</span> <span class="o">=</span> <span class="s1">&#39;Lucida Console&#39;</span>
+            <span class="n">fontSize</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="k">elif</span> <span class="n">MAC</span><span class="p">:</span>
+            <span class="n">monospaceFont</span> <span class="o">=</span> <span class="s1">&#39;Courier&#39;</span>
+            <span class="n">fontSize</span> <span class="o">=</span> <span class="mi">12</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">monospaceFont</span> <span class="o">=</span> <span class="s1">&#39;monospace&#39;</span>
+            <span class="n">fontSize</span> <span class="o">=</span> <span class="mi">11</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusLayout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span> <span class="o">=</span> <span class="n">QListWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span>
+            <span class="n">QFont</span><span class="p">(</span><span class="n">monospaceFont</span><span class="p">,</span> <span class="n">fontSize</span><span class="p">,</span> <span class="n">QFont</span><span class="o">.</span><span class="n">Normal</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">NoSelection</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">140</span><span class="p">)</span>
+        <span class="c1"># self.statusListWidget.setMinimumWidth(self.statusListWidget.sizeHintForColumn(0))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setHorizontalScrollBarPolicy</span><span class="p">(</span>
+            <span class="n">Qt</span><span class="o">.</span><span class="n">ScrollBarAlwaysOff</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setWordWrap</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setTextElideMode</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ElideNone</span><span class="p">)</span>
+
+        <span class="c1"># old school green font</span>
+        <span class="c1"># if darkdetect.isDark():</span>
+        <span class="c1">#     self.statusListWidget.setStyleSheet(&#39;QListWidget::item {color: #00FF33;}&#39;)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">QListWidgetItem</span><span class="p">(</span>
+            <span class="s2">&quot;Ready to log, press Start button...&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">perform_process_discovery</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Process discovery disabled&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.createProgressDialog"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.createProgressDialog">[docs]</a>    <span class="k">def</span> <span class="nf">createProgressDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create progress dialog displayed when starting or stopping the action logger</span>
+
+<span class="sd">        :param title: title of progress dialog</span>
+<span class="sd">        :param message: message of progress dialog</span>
+<span class="sd">        :param timeout: timeout after which progress dialog automatically disappears</span>
+<span class="sd">        :return: progress dialog</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">Qt</span><span class="o">.</span><span class="n">WindowTitleHint</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Dialog</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">WindowMaximizeButtonHint</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">CustomizeWindowHint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_dialog</span> <span class="o">=</span> <span class="n">QProgressDialog</span><span class="p">(</span>
+            <span class="n">message</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_dialog</span><span class="o">.</span><span class="n">setWindowModality</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowModal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_dialog</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">progress_dialog</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">470</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">progress_dialog</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">260</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">progress_dialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cancelProgressDialog</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_dialog</span></div>
+
+<div class="viewcode-block" id="MainApplication.cancelProgressDialog"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.cancelProgressDialog">[docs]</a>    <span class="k">def</span> <span class="nf">cancelProgressDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        manually dismiss progress dialog</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_dialog</span><span class="o">.</span><span class="n">done</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MainApplication.setStyle"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.setStyle">[docs]</a>    <span class="k">def</span> <span class="nf">setStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        set native GUI style for each OS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="n">QApplication</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="n">QStyleFactory</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;windowsvista&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">MAC</span><span class="p">:</span>
+            <span class="n">QApplication</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="n">QStyleFactory</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;macintosh&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">QApplication</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="n">QStyleFactory</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;Fusion&#39;</span><span class="p">))</span>
+
+        <span class="c1"># remove question mark and expand button, show minimize and close button</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowFlags</span><span class="p">(</span>
+            <span class="n">Qt</span><span class="o">.</span><span class="n">Window</span> <span class="o">|</span>
+            <span class="n">Qt</span><span class="o">.</span><span class="n">WindowTitleHint</span> <span class="o">|</span>
+            <span class="n">Qt</span><span class="o">.</span><span class="n">CustomizeWindowHint</span> <span class="o">|</span>
+            <span class="n">Qt</span><span class="o">.</span><span class="n">WindowCloseButtonHint</span> <span class="o">|</span>
+            <span class="n">Qt</span><span class="o">.</span><span class="n">WindowMinimizeButtonHint</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.setAppIcon"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.setAppIcon">[docs]</a>    <span class="k">def</span> <span class="nf">setAppIcon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        set app icon with support to dark mode</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">app_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-16-dark.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+            <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-32-dark.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
+            <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-48-dark.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">))</span>
+            <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-128-dark.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-16.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+            <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-32.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
+            <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-48.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">))</span>
+            <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-128.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">app_icon</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.platformCheck"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.platformCheck">[docs]</a>    <span class="k">def</span> <span class="nf">platformCheck</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        set appropriate values based on platform.\n</span>
+<span class="sd">        disable checkboxes not available on macOS like word and powerpoint.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="c1"># window size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">640</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+            <span class="c1"># margins</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bottomLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+            <span class="c1"># disable checkbox if corresponding program is not installed in system</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">OFFICE</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeGroupBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlookCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeExcel</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeWord</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpoint</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlook</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                <span class="s2">&quot;QListWidget{background: #F0F0F0;}&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">MAC</span> <span class="ow">or</span> <span class="n">LINUX</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">OFFICE</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeExcel</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># program logger is not supported on mac</span>
+            <span class="c1"># self.systemLoggerFilesFolderCB.setChecked(False)</span>
+            <span class="c1"># self.systemLoggerFilesFolderCB.setDisabled(True)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSBCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSBCB</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEventsCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEventsCB</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlookCB</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># window size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">420</span><span class="p">)</span>
+
+            <span class="c1"># margins</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bottomLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                    <span class="s2">&quot;QListWidget{background: #3A3B3B;}&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                    <span class="s2">&quot;QListWidget{background: #ECECEC;}&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">CHROME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserChromeCB</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserChromeCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserChrome</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">FIREFOX</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefoxCB</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefoxCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefox</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">EDGE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserEdgeCB</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserEdgeCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserEdge</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">OPERA</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserOperaCB</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserOperaCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserOpera</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+        <span class="c1"># self.compatibilityCheckMessage()</span>
+
+<div class="viewcode-block" id="MainApplication.compatibilityCheckMessage"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.compatibilityCheckMessage">[docs]</a>    <span class="k">def</span> <span class="nf">compatibilityCheckMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display message if a program like office, firefox, chrome, edge, opera is not installed in the operating system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">MAC</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">QListWidgetItem</span><span class="p">(</span>
+                <span class="s2">&quot;- Office module not available on MacOS&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">WINDOWS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">OFFICE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span>
+                <span class="n">QListWidgetItem</span><span class="p">(</span><span class="s2">&quot;- Office not installed&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">CHROME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span>
+                <span class="n">QListWidgetItem</span><span class="p">(</span><span class="s2">&quot;- Chrome not installed&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">FIREFOX</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span>
+                <span class="n">QListWidgetItem</span><span class="p">(</span><span class="s2">&quot;- Firefox not installed&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">EDGE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span>
+                <span class="n">QListWidgetItem</span><span class="p">(</span><span class="s2">&quot;- Edge (chromium) not installed&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">OPERA</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span>
+                <span class="n">QListWidgetItem</span><span class="p">(</span><span class="s2">&quot;- Opera not installed&quot;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MainApplication.setCheckboxChecked"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.setCheckboxChecked">[docs]</a>    <span class="k">def</span> <span class="nf">setCheckboxChecked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        triggered by &quot;enable all&quot; button on top of the UI</span>
+<span class="sd">        in some cases the checkbox should be enabled only if the program is installed in the system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Disable all&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Enable all&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+        <span class="c1"># System checkboxes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboardCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerProgramsCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">officeExcelCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolderCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeysCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSBCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEventsCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+
+        <span class="c1"># office checkboxes</span>
+        <span class="k">if</span> <span class="n">WINDOWS</span> <span class="ow">and</span> <span class="n">OFFICE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officeWordCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpointCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlookCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+
+        <span class="c1"># browser checkboxes</span>
+        <span class="k">if</span> <span class="n">CHROME</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserChromeCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">FIREFOX</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefoxCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">EDGE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserEdgeCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">OPERA</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserOperaCB</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCBChecked</span><span class="p">)</span></div>
+
+        <span class="c1"># Create a dialog to select a file and return its path</span>
+        <span class="c1"># Used if the user wants to select an existing file for logging excel</span>
+        <span class="c1"># (not implemented in GUI)</span>
+
+<div class="viewcode-block" id="MainApplication.updateListWidget"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.updateListWidget">[docs]</a>    <span class="k">def</span> <span class="nf">updateListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads status queue and updates log window below start logger button in the GUI</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.handleCheckBox"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.handleCheckBox">[docs]</a>    <span class="k">def</span> <span class="nf">handleCheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        detect which modules should be run based on selected checkboxes in UI</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span><span class="o">.</span><span class="n">tag</span>
+        <span class="n">checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;systemLoggerFilesFolder&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolder</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;systemLoggerPrograms&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerPrograms</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;systemLoggerClipboard&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboard</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;systemLoggerHotkeys&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeys</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;systemLoggerUSB&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSB</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;systemLoggerEvents&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEvents</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;officeExcel&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officeExcel</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;officeWord&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officeWord</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;officePowerpoint&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpoint</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;officeOutlook&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlook</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;browserChrome&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserChrome</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;browserFirefox&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefox</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;browserEdge&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserEdge</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;browserOpera&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browserOpera</span> <span class="o">=</span> <span class="n">checked</span></div>
+
+    <span class="k">def</span> <span class="nf">handlePreferences</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferencesDialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MainApplication.handleRunLogAction"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.handleRunLogAction">[docs]</a>    <span class="k">def</span> <span class="nf">handleRunLogAction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is called when the user wants to perform RPA analysis on an event log.</span>
+
+<span class="sd">        It calls the handleMerge method with parameters (merged=False, title=&#39;Select CSV to run&#39;, multipleItems=False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">handleMerge</span><span class="p">(</span><span class="n">merged</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Select CSV to run&#39;</span><span class="p">,</span> <span class="n">multipleItems</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.handleMerge"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.handleMerge">[docs]</a>    <span class="k">def</span> <span class="nf">handleMerge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">merged</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Select multiple CSV to merge&#39;</span><span class="p">,</span> <span class="n">multipleItems</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is called when the user wants to merge multiple csv files</span>
+<span class="sd">        or run an event log (in this case it is called by the handleRunLogAction() method).</span>
+
+<span class="sd">        1. It displays a file dialog to select the event logs to process; this dialog returns a list of paths,</span>
+<span class="sd">        each one representing the location of an event log.</span>
+
+<span class="sd">        2. After the event logs have been selected, the method starts a worker thread to process them</span>
+<span class="sd">        using the handleProcessMining() method. A new thread is necessary in order not to block the main UI.</span>
+
+<span class="sd">        3. Once the thread completes, the choices() method is called.</span>
+
+<span class="sd">        :param merged: boolean value indicating if the user wants to merge multiple files or to run a single event log</span>
+<span class="sd">        :param title: title of the file dialog</span>
+<span class="sd">        :param multipleItems: boolean value indicating the ability to select multiple items</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">csv_to_merge</span> <span class="o">=</span> <span class="n">getFilenameDialog</span><span class="p">(</span><span class="n">customDialog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                         <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                         <span class="n">multipleItems</span><span class="o">=</span><span class="n">multipleItems</span><span class="p">,</span>
+                                         <span class="n">filter_format</span><span class="o">=</span><span class="s2">&quot;CSV log files (*.csv)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">csv_to_merge</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">merged</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Merging selected files...&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Analyzing selected log...&quot;</span><span class="p">)</span>
+            <span class="c1"># self.progress_dialogMFP = self.createProgressDialog(&quot;Working...&quot;, &quot;Finding most frequent path...&quot;)</span>
+
+            <span class="c1"># start PM as thread because it can take some time, I don&#39;t want to block the UI</span>
+            <span class="n">worker</span> <span class="o">=</span> <span class="n">Worker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleProcessMining</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">csv_to_merge</span><span class="p">),</span>
+                            <span class="n">merged</span><span class="p">)</span>  <span class="c1"># Any other args, kwargs are passed to the run function</span>
+            <span class="n">worker</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PMThreadComplete</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">threadpool</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] No csv selected...&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainApplication.handleProcessMining"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.handleProcessMining">[docs]</a>    <span class="k">def</span> <span class="nf">handleProcessMining</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_filepath</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">merged</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fromRunCount</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method can either be called by handleMerge() (when the user wants to merge multiple CSV or run RPA from log)</span>
+<span class="sd">        or by the GUI after the user presses the Stop logger button.</span>
+
+<span class="sd">        1. It creates an instance of the Process Mining class, passing the selected event log files.</span>
+<span class="sd">        2. Then it returns the instance of the class along with the selected file path.</span>
+
+<span class="sd">        :param log_filepath: list of paths pointing to event logs selected in the file dialog</span>
+<span class="sd">        :param merged: boolean indicating if the logs have been merged</span>
+<span class="sd">        :param fromRunCount: indicates whether the method has been called by handleMerge() or by the GUI</span>
+<span class="sd">        :return: process mining class instance, log_filepath</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># check if library is installed</span>
+            <span class="kn">import</span> <span class="nn">pm4py</span>
+            <span class="c1"># create class, combine all csv into one</span>
+            <span class="c1"># print(f&quot;[PROCESS MINING] Finding most frequent path...&quot;)</span>
+            <span class="n">pm</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">process_mining</span><span class="o">.</span><span class="n">ProcessMining</span><span class="p">(</span>
+                <span class="n">log_filepath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">,</span> <span class="n">merged</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fromRunCount</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">PMThreadComplete</span><span class="p">((</span><span class="n">pm</span><span class="p">,</span> <span class="n">log_filepath</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">pm</span><span class="p">,</span> <span class="n">log_filepath</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;[GUI] Can&#39;t apply process mining techniques because &#39;pm4py&#39; module is not installed.&quot;</span>
+                <span class="s2">&quot;See https://github.com/bpm-diag/smartRPA#1-pm4py&quot;</span><span class="p">)</span>
+            <span class="c1"># reset counter and list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runCount</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_to_join</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">PermissionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUI] Process mining analysis exited with error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;[GUI] Maybe the file is opened in another program. Close it and try again.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unable to open the file. Maybe it is opened in another program.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUI] Process mining analysis exited with error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="MainApplication.PMThreadComplete"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.PMThreadComplete">[docs]</a>    <span class="k">def</span> <span class="nf">PMThreadComplete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Once the working thread started by handleMerge() finishes processing, the result is returned in this method,</span>
+<span class="sd">        which in turns calls the choices() method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">pm</span><span class="p">,</span> <span class="n">log_filepath</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">pm</span><span class="p">,</span> <span class="n">log_filepath</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">handleRPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_filepath</span><span class="p">):</span>
+        <span class="n">rpa</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">RPA</span><span class="o">.</span><span class="n">generateRPAScript</span><span class="o">.</span><span class="n">RPAScript</span><span class="p">(</span>
+            <span class="n">log_filepath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span>
+        <span class="n">rpa_success</span> <span class="o">=</span> <span class="n">rpa</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;- RPA generated in /RPA/</span><span class="si">{</span><span class="n">getFilename</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
+
+<div class="viewcode-block" id="MainApplication.choices"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.choices">[docs]</a>    <span class="k">def</span> <span class="nf">choices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="n">log_filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is called once the worker thread started by handleMerge() completes.</span>
+
+<span class="sd">        It is the core of the tool, responsible for performing all the analysis on the event log,</span>
+<span class="sd">        from log processing to RPA SW robot generation.</span>
+
+<span class="sd">        If process discovery is enabled in preferences:</span>
+
+<span class="sd">        * high level flowchart is generated from process mining class</span>
+<span class="sd">        * high level petri net is generated from process mining class</span>
+<span class="sd">        * events are logged in status queue</span>
+
+<span class="sd">        If decision points analysis is enabled and there are at least 2 traces in the event log</span>
+
+<span class="sd">        * high level DFG is opened</span>
+<span class="sd">        * decision points class is called, the resulting decision dataframe is stored</span>
+<span class="sd">        * new flowchart is generated from decided dataframe</span>
+<span class="sd">        * choices dialog class is called, taking as input decided dataframe</span>
+<span class="sd">        * final flowchart with user edits is generated</span>
+<span class="sd">        * python SW robot is generated from RPAScript path</span>
+<span class="sd">        * Uipath project is generated from UIPathXAML class</span>
+
+<span class="sd">        :param pm: instance of the Process Mining class</span>
+<span class="sd">        :param log_filepath: path of the event log to analyze</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># print(f&quot;[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}&quot;)</span>
+        <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">perform_process_discovery</span><span class="p">:</span>
+            <span class="n">num_traces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">pm</span><span class="o">.</span><span class="n">dataframe</span><span class="p">[</span><span class="s1">&#39;case:concept:name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">())</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">highLevelDFG</span><span class="p">()</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">highLevelPetriNet</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[PROCESS MINING] Generated diagrams&quot;</span><span class="p">)</span>
+
+            <span class="c1"># most frequent routine</span>
+            <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_most_frequent_routine_analysis</span><span class="p">:</span>
+                <span class="c1"># create high level DFG model based on most frequent routine</span>
+                <span class="c1"># pm.highLevelBPMN()</span>
+                <span class="n">modules</span><span class="o">.</span><span class="n">flowchart</span><span class="o">.</span><span class="n">Flowchart</span><span class="p">(</span>
+                    <span class="n">pm</span><span class="o">.</span><span class="n">mostFrequentCase</span><span class="p">)</span><span class="o">.</span><span class="n">generateFlowchart</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">bpmn_path</span><span class="p">)</span>
+
+                <span class="c1"># open high level BPMN</span>
+                <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">bpmn_path</span><span class="p">)</span>
+
+                <span class="c1"># ask if some fields should be changed before generating RPA script</span>
+                <span class="c1"># build choices dialog, passing low level most frequent case to analyze</span>
+                <span class="n">choicesDialog</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">GUI</span><span class="o">.</span><span class="n">choicesDialog</span><span class="o">.</span><span class="n">ChoicesDialog</span><span class="p">(</span>
+                    <span class="n">pm</span><span class="o">.</span><span class="n">mostFrequentCase</span><span class="p">)</span>
+                <span class="c1"># when OK button is pressed</span>
+                <span class="k">if</span> <span class="n">choicesDialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">mostFrequentCase</span> <span class="o">=</span> <span class="n">choicesDialog</span><span class="o">.</span><span class="n">df</span>
+
+                    <span class="c1"># create RPA based on most frequent path</span>
+                    <span class="n">rpa</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">RPA</span><span class="o">.</span><span class="n">generateRPAScript</span><span class="o">.</span><span class="n">RPAScript</span><span class="p">(</span>
+                        <span class="n">log_filepath</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span>
+                    <span class="n">rpa</span><span class="o">.</span><span class="n">generatePythonRPA</span><span class="p">(</span><span class="n">mostFrequentCase</span><span class="p">)</span>
+
+                    <span class="c1"># pm.highLevelBPMN(df=mostFrequentCase, name=&quot;BPMN_final&quot;)</span>
+                    <span class="n">modules</span><span class="o">.</span><span class="n">flowchart</span><span class="o">.</span><span class="n">Flowchart</span><span class="p">(</span><span class="n">mostFrequentCase</span><span class="p">)</span><span class="o">.</span><span class="n">generateFlowchart</span><span class="p">(</span>
+                        <span class="n">pm</span><span class="o">.</span><span class="n">bpmn_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;BPMN_final&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># create UiPath RPA script passing dataframe with only the most frequent trace</span>
+                    <span class="n">UiPath</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">RPA</span><span class="o">.</span><span class="n">uipath</span><span class="o">.</span><span class="n">UIPathXAML</span><span class="p">(</span>
+                        <span class="n">log_filepath</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">,</span> <span class="n">mostFrequentCase</span><span class="p">)</span>
+                    <span class="n">UiPath</span><span class="o">.</span><span class="n">generateUiPathRPA</span><span class="p">()</span>
+
+            <span class="c1"># decision</span>
+            <span class="k">elif</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_decision_point_analysis</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="n">num_traces</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># open high level DFG</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">dfg_path</span><span class="p">)</span>
+
+                    <span class="c1"># ask what to do if decisions could be made</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">decisionPoints</span><span class="o">.</span><span class="n">DecisionPoints</span><span class="p">(</span>
+                        <span class="n">pm</span><span class="o">.</span><span class="n">dataframe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span>
+                    <span class="n">decided_dataframe</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">generateDecisionDataframe</span><span class="p">()</span>
+
+                    <span class="c1"># pm.highLevelBPMN(df=decided_dataframe, decisionPoints=True)</span>
+                    <span class="n">modules</span><span class="o">.</span><span class="n">flowchart</span><span class="o">.</span><span class="n">Flowchart</span><span class="p">(</span>
+                        <span class="n">decided_dataframe</span><span class="p">)</span><span class="o">.</span><span class="n">generateFlowchart</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">bpmn_path</span><span class="p">)</span>
+
+                    <span class="c1"># open high level BPMN</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">bpmn_path</span><span class="p">)</span>
+
+                    <span class="c1"># ask if some fields should be changed before generating RPA script</span>
+                    <span class="c1"># build choices dialog, passing low level most frequent case to analyze</span>
+                    <span class="n">choicesDialog</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">GUI</span><span class="o">.</span><span class="n">choicesDialog</span><span class="o">.</span><span class="n">ChoicesDialog</span><span class="p">(</span>
+                        <span class="n">decided_dataframe</span><span class="p">)</span>
+                    <span class="c1"># when OK button is pressed</span>
+                    <span class="k">if</span> <span class="n">choicesDialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">decided_dataframe_with_choices</span> <span class="o">=</span> <span class="n">choicesDialog</span><span class="o">.</span><span class="n">df</span>
+
+                        <span class="c1"># pm.highLevelBPMN(df=decided_dataframe_with_choices, name=&quot;BPMN_final&quot;, decisionPoints=True)</span>
+                        <span class="n">modules</span><span class="o">.</span><span class="n">flowchart</span><span class="o">.</span><span class="n">Flowchart</span><span class="p">(</span><span class="n">decided_dataframe_with_choices</span><span class="p">)</span><span class="o">.</span><span class="n">generateFlowchart</span><span class="p">(</span>
+                            <span class="n">pm</span><span class="o">.</span><span class="n">bpmn_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;BPMN_final&quot;</span><span class="p">)</span>
+
+                        <span class="c1"># create RPA</span>
+                        <span class="n">rpa</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">RPA</span><span class="o">.</span><span class="n">generateRPAScript</span><span class="o">.</span><span class="n">RPAScript</span><span class="p">(</span>
+                            <span class="n">log_filepath</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span>
+                        <span class="n">rpa</span><span class="o">.</span><span class="n">generatePythonRPA</span><span class="p">(</span><span class="n">decided_dataframe_with_choices</span><span class="p">)</span>
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;[PROCESS MINING] Generated diagrams&quot;</span><span class="p">)</span>
+
+                        <span class="c1"># create UiPath RPA script passing dataframe with only the most frequent trace</span>
+                        <span class="n">UiPath</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">RPA</span><span class="o">.</span><span class="n">uipath</span><span class="o">.</span><span class="n">UIPathXAML</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">,</span>
+                                                               <span class="n">decided_dataframe_with_choices</span><span class="p">)</span>
+                        <span class="n">UiPath</span><span class="o">.</span><span class="n">generateUiPathRPA</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUI] Could not perform decision points analysis, &quot;</span>
+                                          <span class="sa">f</span><span class="s2">&quot;at least 2 traces are needed in the event log</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># decision point in RPA script at run time</span>
+            <span class="k">elif</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">enable_decision_point_RPA_analysis</span><span class="p">:</span>
+                <span class="c1"># at least 2 traces are needed to perform decision analysis</span>
+                <span class="k">if</span> <span class="n">num_traces</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># create UiPath RPA script passing dataframe of entire process</span>
+                    <span class="n">UiPath</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">RPA</span><span class="o">.</span><span class="n">uipath</span><span class="o">.</span><span class="n">UIPathXAML</span><span class="p">(</span>
+                        <span class="n">log_filepath</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">,</span> <span class="n">pm</span><span class="o">.</span><span class="n">dataframe</span><span class="p">)</span>
+                    <span class="n">UiPath</span><span class="o">.</span><span class="n">generateUiPathRPA</span><span class="p">(</span><span class="n">decision</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUI] Could not perform decision points analysis, &quot;</span>
+                                          <span class="sa">f</span><span class="s2">&quot;at least 2 traces are needed in the event log</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUI] Done</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MainApplication.handleRunCount"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.handleRunCount">[docs]</a>    <span class="k">def</span> <span class="nf">handleRunCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Merges multiple traces of execution together generating one event log.</span>
+<span class="sd">        It depends on &quot;number of runs after which event log is generated&quot; setting in preferences.</span>
+
+<span class="sd">        :param log_filepath: path of event log file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># print(f&quot;[DEBUG] CSV path: {log_filepath}&quot;)</span>
+        <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">CSVEmpty</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;[GUI] Log file </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">)</span><span class="si">}</span><span class="s2"> is empty, removing&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># contains paths of csv to join</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_to_join</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;[GUI] Log saved as </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runCount</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">totalRunCount</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">totalNumberOfRunGuiXes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runCount</span> <span class="o">==</span> <span class="n">totalRunCount</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;[GUI] Run </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runCount</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">totalRunCount</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;[GUI] Run </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runCount</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">totalRunCount</span><span class="si">}</span><span class="s2">, waiting for next run...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># after each run append generated csv log to list, when totalNumberOfRun is reached, xes file will be created</span>
+        <span class="c1"># from these csv</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runCount</span> <span class="o">&gt;=</span> <span class="n">totalRunCount</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">csv_to_join</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handleProcessMining</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_to_join</span><span class="p">,</span> <span class="n">fromRunCount</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># reset counter and list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runCount</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_to_join</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MainApplication.showAboutMessage"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.showAboutMessage">[docs]</a>    <span class="k">def</span> <span class="nf">showAboutMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Show information about the tool under File menu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msgBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;About&quot;</span><span class="p">)</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;SmartRPA allows to train RPA routines in order to automatically find the best way &quot;</span>
+                       <span class="s2">&quot;to perform a specific user task.&quot;</span><span class="p">)</span>
+        <span class="n">websiteBtn</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Website&#39;</span><span class="p">)</span>
+        <span class="n">websiteBtn</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+            <span class="s1">&#39;https://github.com/bpm-diag/smartRPA&#39;</span><span class="p">))</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">websiteBtn</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">AcceptRole</span><span class="p">)</span>
+        <span class="n">closeBtn</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Close&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="n">closeBtn</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">closeBtn</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">RejectRole</span><span class="p">)</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MainApplication.excelDialog"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.excelDialog">[docs]</a>    <span class="k">def</span> <span class="nf">excelDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays file dialog when excel is selected in order to choose a file to open</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">officeExcel</span><span class="p">:</span>
+            <span class="n">msgBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Excel spreadsheet&quot;</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span>
+                <span class="s2">&quot;Do you want to open an existing Excel spreadsheet or create a new one?&quot;</span><span class="p">)</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Open existing spreadsheet&#39;</span><span class="p">)</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Create new spreadsheet&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+                <span class="n">existing</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                    <span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
+                <span class="n">new</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">existing</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">YesRole</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">NoRole</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">msgBox</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">getFilenameDialog</span><span class="p">(</span><span class="n">customDialog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                         <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Select Excel spreadsheet to open&#39;</span><span class="p">,</span>
+                                         <span class="n">multipleItems</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                         <span class="n">filter_format</span><span class="o">=</span><span class="s2">&quot;Excel files (*.csv *.xlsx *xls *.xlsm)&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeFilepath</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="MainApplication.onButtonClick"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.onButtonClick">[docs]</a>    <span class="k">def</span> <span class="nf">onButtonClick</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main method executed by the tool to start log capture when start button is clicked by user.</span>
+
+<span class="sd">        If tool is starting:</span>
+
+<span class="sd">        * set boolean variable &#39;running&#39; to true</span>
+<span class="sd">        * check which checkboxes are enabled in the GUI</span>
+<span class="sd">        * if excel checkbox is selected, display dialog to select file to open (deprecated)</span>
+<span class="sd">        * start progress dialog indicating loading</span>
+<span class="sd">        * start main process, passing as parameters the boolean checkbox values</span>
+
+<span class="sd">        If tool is stopping:</span>
+
+<span class="sd">        * set boolean variable &#39;running&#39; to false</span>
+<span class="sd">        * kill active processes using their PID before closing main</span>
+<span class="sd">        * terminate main</span>
+<span class="sd">        * call handleRunCount() method to check counter and generate event log file</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolder</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerPrograms</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboard</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeys</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSB</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEvents</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">officeFilepath</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">officeExcel</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">officeWord</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpoint</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlook</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">browserChrome</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefox</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">browserEdge</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">browserOpera</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                <span class="s2">&quot;[GUI] Select at least one module to start logging&quot;</span><span class="p">)</span>
+
+        <span class="c1"># start button clicked</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+            <span class="c1"># set GUI parameters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="c1"># ask if user want to create new spreadsheet or open existing one</span>
+            <span class="c1"># self.excelDialog()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Loading, please wait...&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createProgressDialog</span><span class="p">(</span><span class="s2">&quot;Loading...&quot;</span><span class="p">,</span> <span class="s2">&quot;Loading...&quot;</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span>
+
+            <span class="c1"># start main process with the options selected in GUI. It handles all other methods main method is</span>
+            <span class="c1"># started as a process so it can be terminated once the button is clicked all the methods in the main</span>
+            <span class="c1"># process are started as daemon threads so they are closed automatically when the main process is closed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mainProcess</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">main</span><span class="o">.</span><span class="n">startLogger</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerFilesFolder</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerPrograms</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerClipboard</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerHotkeys</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerUSB</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">systemLoggerEvents</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeFilepath</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeExcel</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeWord</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officePowerpoint</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">officeOutlook</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">browserChrome</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">browserFirefox</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">browserEdge</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">browserOpera</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">LOG_FILEPATH</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processesPID</span>
+            <span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mainProcess</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Stop logger&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+        <span class="c1"># stop button clicked</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># set GUI parameters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># self.createProgressDialog(&quot;Stopping...&quot;, &quot;Stopping server...&quot;, 1500)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Start logger&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+            <span class="c1"># kill active processes before closing main</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">processesPID</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processesPID</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="o">-</span><span class="mi">9</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;[GUI] Could not kill process </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">, trying another way&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="kn">import</span> <span class="nn">subprocess</span>
+                            <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Taskkill /F /PID </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUI] Process </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2"> killed&quot;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUI] Could not kill process </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">pass</span>
+            <span class="c1"># stop main process, automatically closing all daemon threads in main process</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mainProcess</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUI] Logger stopped&quot;</span><span class="p">)</span>
+
+            <span class="c1"># once log file is created, RPA actions are automatically generated for each category</span>
+            <span class="c1"># log_filepath = utils.config.MyConfig.get_instance().log_filepath</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">LOG_FILEPATH</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+                <span class="n">main_log_filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LOG_FILEPATH</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">main_log_filepath</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">main_log_filepath</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">handleRunCount</span><span class="p">(</span><span class="n">main_log_filepath</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;[GUI] Could not locate log file.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># kill node server when closing python server, otherwise port remains busy</span>
+            <span class="k">if</span> <span class="n">MAC</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">officeExcel</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;pkill -f node&quot;</span><span class="p">)</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">buildGUI</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main method to build the GUI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+
+    <span class="c1"># dark mode</span>
+    <span class="n">palette</span> <span class="o">=</span> <span class="n">QPalette</span><span class="p">()</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Window</span><span class="p">,</span> <span class="n">QColor</span><span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="mi">53</span><span class="p">))</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">WindowText</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Base</span><span class="p">,</span> <span class="n">QColor</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">AlternateBase</span><span class="p">,</span> <span class="n">QColor</span><span class="p">(</span><span class="mi">101</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">101</span><span class="p">))</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ToolTipBase</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ToolTipText</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Text</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ToolTipBase</span><span class="p">,</span> <span class="n">QColor</span><span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="mi">53</span><span class="p">))</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ToolTipText</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Button</span><span class="p">,</span> <span class="n">QColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ButtonText</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">BrightText</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">)</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Highlight</span><span class="p">,</span> <span class="n">QColor</span><span class="p">(</span><span class="mi">142</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">197</span><span class="p">)</span><span class="o">.</span><span class="n">lighter</span><span class="p">())</span>
+    <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">HighlightedText</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span>
+
+    <span class="n">mainApplication</span> <span class="o">=</span> <span class="n">MainApplication</span><span class="p">()</span>
+    <span class="n">mainApplication</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
