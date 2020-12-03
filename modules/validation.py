@@ -1596,6 +1596,7 @@ def validate():
         for trace_size in [25, 50, 75, 100]:
             for events_size in [40, 80, 120]:
                 for decision_point in [5]:  # [1, 2, 3, 4]
+
                     while True:
                         v = Validation(
                             log_size=log_size,
@@ -1632,10 +1633,10 @@ def validate():
 
 def test():
     v = Validation(
-        log_size=500,
-        trace_size=50,
+        log_size=750,
+        trace_size=100,
         events_size=40,
-        decision_points=4
+        decision_points=5
     )
 
     df = v.generateDataframe()
@@ -1644,8 +1645,39 @@ def test():
 
     total_time, number_of_decision_points = calculate_time_dp(df1)
 
-    process_info(v, df, df1, total_time, number_of_decision_points, False)
+    process_info(v, df, df1, total_time, number_of_decision_points, True)
+
+
+def test2():
+    while True:
+        v = Validation(
+            log_size=750,
+            trace_size=100,
+            events_size=40,
+            decision_points=2
+        )
+
+        try:
+            df = v.generateDataframe()
+        except IndexError as e:
+            print(e)
+            continue
+
+        df1 = DecisionPoints(df, Queue()).handle_df()
+
+        try:
+            total_time, number_of_decision_points = calculate_time_dp(
+                df1)
+        except ValueError as e:
+            print(e)
+            continue
+
+        process_info(v, df, df1, total_time,
+                     number_of_decision_points, True)
+
+        if number_of_decision_points == v.decision_points:
+            break
 
 
 if __name__ == '__main__':
-    test()
+    test2()
