@@ -11,12 +11,23 @@ sys.path.append('../')
 
 
 class DecisionPoints:
+    """
+    Decision points class
+    """
 
     def __init__(self, df: pandas.DataFrame, status_queue: Queue):
+        """
+        Decision points class
+
+        :param df: pandas dataframe of entire process
+        :param status_queue: queue to print values in the GUI
+        """
+
         self.status_queue = status_queue
 
         self.df = df
 
+        # values to find duplicated rows
         self.duplication_subset = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
                                    'browser_url_hostname', 'xpath']  # 'tag_value', 'clipboard_content', 'cell_range'
 
@@ -27,6 +38,12 @@ class DecisionPoints:
         self.df1 = self.handle_df()
 
     def handle_df(self):
+        """
+        Pre-process dataframe.
+        Filter irrelevant rows, add hostname column, and finally add duplicated columns to mark duplicated rows.
+
+        :return: processed dataframe
+        """
         df1 = self.df
 
         # *************
@@ -87,6 +104,11 @@ class DecisionPoints:
         return df1
 
     def number_of_decision_points(self):
+        """
+        Calculates the number of decision points in a trace
+
+        :return: number of decision points
+        """
         count = 0
         s = self.df1.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
         for _, group in self.df1.groupby([s, 'category']):
@@ -95,6 +117,13 @@ class DecisionPoints:
         return count
 
     def __generateKeywordsDataframe(self, dataframe: pandas.DataFrame):
+        """
+        Generate keywords dataframe, used in GUI when selecting decision points
+
+        :param dataframe: pandas dataframe
+        :return: keywords dataframe with duplicates removed and values sorted
+        """
+
         series = []
         for group, df2 in dataframe.groupby('case:concept:name'):
             category = ','.join(df2['category'].unique())
@@ -214,6 +243,11 @@ class DecisionPoints:
     #                 .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')
 
     def generateDecisionDataframe(self):
+        """
+        Find decision points in dataframe, ask user which decisions to take and generate final trace built from decisions.
+
+        :return: dataframe built from user decisions
+        """
 
         df = self.df1
 

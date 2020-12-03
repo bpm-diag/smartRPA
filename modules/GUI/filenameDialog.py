@@ -12,6 +12,20 @@ def getFilenameDialog(customDialog=True,
                       directory='',
                       filter_format=''):
 
+    """
+    Build custom dialog to select multiple files
+
+    :param customDialog: if False, use native system dialog, otherwise use custom dialog
+    :param title: dialog title
+    :param hiddenItems: display hidden items
+    :param multipleItems: allow selection of multiple items
+    :param isFolder: allow selection of folders
+    :param forOpen: select files for opening or saving
+    :param directory: start directory
+    :param filter_format: filter to select only certain file types (for example *.csv)
+    :return: path of selected file (list of paths if multiple files are selected)
+    """
+
     options = QFileDialog.Options()
     if customDialog:
         options |= QFileDialog.DontUseNativeDialog

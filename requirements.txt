@@ -24,6 +24,7 @@ psutil==5.4.6
 #lxml==4.5.2
 lxml==4.6.1
 pydot==1.4.1
+deprecated
 
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"

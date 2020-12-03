@@ -10,6 +10,14 @@ from utils.utils import WINDOWS
 
 
 def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
+    """
+    Convert input dataframe to HTML table
+
+    Table is generated using BeautifulSoup.
+
+    :param keywordsDataframe: keywrods dataframe
+    :return: HTML page with table
+    """
     html_doc = """
     <html lang="en">
   <head>
@@ -155,7 +163,20 @@ def dataframeToHTML(keywordsDataframe: pandas.DataFrame):
 
 
 class DecisionDialogWebView(QDialog):
+    """
+    Decision dialog to display and choose different decision in a routine.
+
+    The input dataframe is shown in a HTML table generated at runtime using the dataframeToHTML() function
+    and displayed in a webview.
+    """
+
     def __init__(self, df: pandas.DataFrame):
+        """
+        Initialize decision dialog
+
+        :param df: keywords dataframe
+        :return: caseID of selected trace
+        """
         super(DecisionDialogWebView, self).__init__()
         self.setMinimumWidth(800)
 

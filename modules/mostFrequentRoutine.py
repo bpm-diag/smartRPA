@@ -3,9 +3,21 @@ import pandas
 from datetime import datetime
 from fuzzywuzzy import fuzz
 from multiprocessing.queues import Queue
+from deprecated.sphinx import deprecated
 
 
+@deprecated(version='1.1.0', reason="Replaced by decision points")
 def selectMostFrequentCase(dataframe: pandas.DataFrame, status_queue: Queue, flattened=False, threshold=90):
+    """
+    Select the most frequent routine in the process by using levenhstein distance to calculate similarity between strings
+
+    :param dataframe: low level pandas dataframe of process
+    :param status_queue: queue to print messages in GUI
+    :param flattened:
+    :param threshold: threshold of similarity, traces are considered similar if they are equal by at least 90%
+    :return: most frequent trace
+    """
+
     df = dataframe
     if df.empty:
         return None
@@ -23,13 +35,13 @@ def selectMostFrequentCase(dataframe: pandas.DataFrame, status_queue: Queue, fla
     # 1                     Insert Fine Notification, Add penalty   2020-03-20 17:10:28:348, 2020-03-20 17:10:28:2
     df1 = df.groupby(['case:concept:name'])[[groupby_column, 'time:timestamp']].agg(', '.join).reset_index()
 
-    # calculate duration in seconds for each row of dataframe
-    # I get a new a new column like
-    # duration
-    # 25.123
-    # 26.342
-    # 22.324
     def getDuration(time):
+        """
+        Get duration of a trace, taking the first and last timestam in the trace and calculating the difference
+
+        :param time: timestamp column
+        :return: time duration in seconds
+        """
         timestamps = time.split(',')
         try:
             start = datetime.fromisoformat(timestamps[0].strip())
@@ -51,10 +63,17 @@ def selectMostFrequentCase(dataframe: pandas.DataFrame, status_queue: Queue, fla
     df2 = df1.groupby([groupby_column], sort=False)[['case:concept:name', 'duration']].agg(
         list).reset_index().rename(columns={"case:concept:name": "variants"})
 
-    # return the concept:case:id of the variant with shortest duration
-    # not used when all traces are different
     def _findVariantWithShortestDuration(df1: pandas.DataFrame, most_frequent_variants, equal=False):
-        #  there are at least 2 equal variants, most_frequent_variants is an array like [0,1]
+        """
+        Find the trace with the minimum duration in seconds.
+        Not used when all traces are different
+
+        :param df1: dataframe of process
+        :param most_frequent_variants: case ids of most frequent traces
+        :param equal:
+        :return: concept:case:id of the variant with shortest duration
+        """
+        # there are at least 2 equal variants, most_frequent_variants is an array like [0,1]
         # take only the most frequent rows in dataframe, like [0,1]
         if equal:
             most_frequent_variants_df = df1.loc[df1['case:concept:name'].isin(most_frequent_variants)]
@@ -67,8 +86,14 @@ def selectMostFrequentCase(dataframe: pandas.DataFrame, status_queue: Queue, fla
             'case:concept:name'].tolist()[0]
         return min_duration_trace, min(durations)
 
-    # return case:concept:name of most frequent traces
     def _findMostFrequentTraces(df2: pandas.DataFrame, most_frequent_variants):
+        """
+        Find the most frequent trace
+
+        :param df2: pandas dataframe
+        :param most_frequent_variants:
+        :return: case:concept:name of most frequent traces
+        """
         try:
             # list composed by the first column (case:concept:name) of the most frequent rows
             # (selected by row index, because most_frequent_variants is a list of indices)
@@ -97,7 +122,7 @@ def selectMostFrequentCase(dataframe: pandas.DataFrame, status_queue: Queue, fla
         # shortest duration in the whole dataset
 
         # Check similarities between all the strings in the log and return the most frequent one
-        #  I don't need to check similarities in the other case, because there the strings are exactly the same
+        # I don't need to check similarities in the other case, because there the strings are exactly the same
         def func(name):
             matches = df2.apply(lambda row: (fuzz.ratio(row[groupby_column], name) >= threshold), axis=1)
             return [i for i, x in enumerate(matches) if x]

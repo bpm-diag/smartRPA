@@ -16,6 +16,26 @@ except ImportError as e:
 
 def handle_log(status_queue: Queue,
                file_extension: str, filename: str, filepath: list, save_path: str, RPA_log_path: str):
+    """
+    Process event log.
+
+    For each log:
+
+    * import log into pandas dataframe
+    * rename columns to match XES standard (concept:name, time:timestamp, org:resource)
+    * generate caseIDs from timestamp
+    * insert case:creator and lifecycle:transition columns
+
+    Then all the processed event logs are merged into one.
+
+    :param status_queue: queue to print values in GUI
+    :param file_extension: extension of input event log (either CSV or XES)
+    :param filename: name of input log
+    :param filepath: list of paths of input logs
+    :param save_path: path where to save log
+    :param RPA_log_path: path of RPA folder
+    :return: processed event log
+    """
 
     if file_extension == ".csv":
 

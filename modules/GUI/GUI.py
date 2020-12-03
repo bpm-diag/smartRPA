@@ -28,11 +28,22 @@ import traceback
 import sys
 
 sys.path.append('../')  # this way main file is visible from this file
+
+
 # import utils.xesConverter
 
 
 class MainApplication(QMainWindow, QDialog):
+    """
+    GUI
+    """
+
     def __init__(self, parent=None):
+        """
+        Initialize GUI
+
+        """
+
         super(MainApplication, self).__init__(parent)
         self.originalPalette = QApplication.palette()
         self.setWindowTitle("SmartRPA")
@@ -108,6 +119,9 @@ class MainApplication(QMainWindow, QDialog):
         updateUIThread.start()
 
     def createMenu(self):
+        """
+        Create file menu with preferences and options to merge multiple CSV event logs and to analyze one event log.
+        """
         menu = self.menuBar()
 
         fileMenu = menu.addMenu('File')
@@ -125,6 +139,9 @@ class MainApplication(QMainWindow, QDialog):
         about.triggered.connect(self.showAboutMessage)
 
     def createSystemLoggerGroupBox(self):
+        """
+        Create checkboxes to log operating systems events like opening a program, editing files/folders, logging clipboard, hotkeys or usb drives insertion
+        """
         self.systemGroupBox = QGroupBox("System logger")
 
         self.systemLoggerFilesFolderCB = QCheckBox("Files/Folders")
@@ -172,6 +189,9 @@ class MainApplication(QMainWindow, QDialog):
         self.systemGroupBox.setLayout(layout)
 
     def createOfficeLoggerGroupBox(self):
+        """
+        Create checkboxes to log microsoft office applications like excel, word, powerpoint
+        """
 
         self.officeGroupBox = QGroupBox("Office logger")
         self.officeGroupBox.setToolTip(
@@ -229,6 +249,9 @@ class MainApplication(QMainWindow, QDialog):
         self.officeGroupBox.setLayout(layout)
 
     def createBrowserLoggerGroupBox(self):
+        """
+        Create checkboxes to log browser events in chrome, firefox, edge or opera
+        """
         self.browserGroupBox = QGroupBox("Browser logger")
         self.browserGroupBox.setToolTip(
             "Log all browser events in the window (like opening, closing tabs, printing, etc) \nand in the page (like clicking, zooming, pasting, etc)")
@@ -258,6 +281,9 @@ class MainApplication(QMainWindow, QDialog):
         self.browserGroupBox.setLayout(layout)
 
     def createStartButton(self):
+        """
+        create button to start and stop action logger
+        """
         self.runButton = QPushButton("Start logger")
         if darkdetect.isDark():
             self.runButton.setStyleSheet(
@@ -271,6 +297,9 @@ class MainApplication(QMainWindow, QDialog):
         self.runButton.toggled.connect(self.officeGroupBox.setDisabled)
 
     def createTopLayout(self):
+        """
+        create top layout with buttons to enable all modules at once
+        """
         self.topLayout = QHBoxLayout()
         self.topLayout.addWidget(QLabel("Select modules to activate"))
 
@@ -287,12 +316,18 @@ class MainApplication(QMainWindow, QDialog):
         self.topLayout.addWidget(self.checkButton)
 
     def createBottomLayout(self):
+        """
+        create bottom layout that contains button to start logging
+        """
         self.bottomLayout = QHBoxLayout()
         self.bottomLayout.addStretch(1)
         self.bottomLayout.addWidget(self.runButton)
         self.bottomLayout.addStretch(1)
 
     def createStatusLayout(self):
+        """
+        create status layout, the window below the start button where all logging appears
+        """
         if WINDOWS:
             monospaceFont = 'Lucida Console'
             fontSize = 8
@@ -330,6 +365,14 @@ class MainApplication(QMainWindow, QDialog):
             self.status_queue.put("[GUI] Process discovery disabled")
 
     def createProgressDialog(self, title, message, timeout=None):
+        """
+        Create progress dialog displayed when starting or stopping the action logger
+
+        :param title: title of progress dialog
+        :param message: message of progress dialog
+        :param timeout: timeout after which progress dialog automatically disappears
+        :return: progress dialog
+        """
         flags = Qt.WindowTitleHint | Qt.Dialog | Qt.WindowMaximizeButtonHint | Qt.CustomizeWindowHint
         self.progress_dialog = QProgressDialog(
             message, None, 0, 0, self, flags)
@@ -349,12 +392,17 @@ class MainApplication(QMainWindow, QDialog):
         return self.progress_dialog
 
     def cancelProgressDialog(self):
+        """
+        manually dismiss progress dialog
+        """
         self.progress_dialog.done(0)
         self.timer.stop()
         self.timer.deleteLater()
 
-    # display native GUI for each OS
     def setStyle(self):
+        """
+        set native GUI style for each OS
+        """
         if WINDOWS:
             QApplication.setStyle(QStyleFactory.create('windowsvista'))
         elif MAC:
@@ -372,7 +420,9 @@ class MainApplication(QMainWindow, QDialog):
         )
 
     def setAppIcon(self):
-        # set app icon with support to dark mode
+        """
+        set app icon with support to dark mode
+        """
         app_icon = QIcon()
         if darkdetect.isDark():
             app_icon.addFile('utils/icons/icon-16-dark.png', QSize(16, 16))
@@ -386,8 +436,11 @@ class MainApplication(QMainWindow, QDialog):
             app_icon.addFile('utils/icons/icon-128.png', QSize(128, 128))
         self.setWindowIcon(app_icon)
 
-    # set appropriate values based on platform
     def platformCheck(self):
+        """
+        set appropriate values based on platform.\n
+        disable checkboxes not available on macOS like word and powerpoint.
+        """
 
         if WINDOWS:
             # window size
@@ -469,6 +522,9 @@ class MainApplication(QMainWindow, QDialog):
         # self.compatibilityCheckMessage()
 
     def compatibilityCheckMessage(self):
+        """
+        Display message if a program like office, firefox, chrome, edge, opera is not installed in the operating system.
+        """
         self.statusListWidget.clear()
         if MAC:
             self.statusListWidget.addItem(QListWidgetItem(
@@ -489,9 +545,11 @@ class MainApplication(QMainWindow, QDialog):
             self.statusListWidget.addItem(
                 QListWidgetItem("- Opera not installed"))
 
-    # triggered by "enable all" button on top of the UI
-    # in some cases the checkbox should be enabled only if the program is installed in the system
     def setCheckboxChecked(self):
+        """
+        triggered by "enable all" button on top of the UI
+        in some cases the checkbox should be enabled only if the program is installed in the system
+        """
 
         if not self.allCBChecked:
             self.allCBChecked = True
@@ -533,8 +591,10 @@ class MainApplication(QMainWindow, QDialog):
         # Used if the user wants to select an existing file for logging excel
         # (not implemented in GUI)
 
-    # Reads queue and updates list widget
     def updateListWidget(self):
+        """
+        Reads status queue and updates log window below start logger button in the GUI
+        """
         while 1:
             if not self.status_queue.empty():
                 item = self.status_queue.get()
@@ -542,39 +602,10 @@ class MainApplication(QMainWindow, QDialog):
                 self.statusListWidget.addItem(QListWidgetItem(item))
             time.sleep(0.5)
 
-    def handlePreferences(self):
-        self.preferencesDialog.show()
-
-    def handleRunLogAction(self):
-        return self.handleMerge(merged=False, title='Select CSV to run', multipleItems=False)
-
-    def handleMerge(self, merged=True, title='Select multiple CSV to merge', multipleItems=True):
-        self.statusListWidget.clear()
-        csv_to_merge = getFilenameDialog(customDialog=False,
-                                         title=title,
-                                         multipleItems=multipleItems,
-                                         filter_format="CSV log files (*.csv)")
-        if csv_to_merge:
-            if merged:
-                self.status_queue.put("[GUI] Merging selected files...")
-            else:
-                self.status_queue.put("[GUI] Analyzing selected log...")
-            # self.progress_dialogMFP = self.createProgressDialog("Working...", "Finding most frequent path...")
-            # start PM as thread because it can take some time, I don't want to block the UI
-            worker = Worker(self.handleProcessMining, sorted(csv_to_merge),
-                            merged)  # Any other args, kwargs are passed to the run function
-            worker.signals.result.connect(self.PMThreadComplete)
-            self.threadpool.start(worker)
-        else:
-            self.status_queue.put("[GUI] No csv selected...")
-
-    def PMThreadComplete(self, result):
-        if result:
-            pm, log_filepath = result
-            self.choices(pm, log_filepath)
-
-    # detect what modules should be run based on selected checkboxes in UI
     def handleCheckBox(self):
+        """
+        detect which modules should be run based on selected checkboxes in UI
+        """
         tag = self.sender().tag
         checked = self.sender().isChecked()
         if (tag == "systemLoggerFilesFolder"):
@@ -606,15 +637,67 @@ class MainApplication(QMainWindow, QDialog):
         elif (tag == "browserOpera"):
             self.browserOpera = checked
 
-    def handleRPA(self, log_filepath):
-        # generate RPA actions from log file just saved.
-        rpa = modules.RPA.generateRPAScript.RPAScript(
-            log_filepath, self.status_queue)
-        rpa_success = rpa.run()
-        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
-        self.statusListWidget.addItem(QListWidgetItem(msg))
+    def handlePreferences(self):
+        self.preferencesDialog.show()
+
+    def handleRunLogAction(self):
+        """
+        This method is called when the user wants to perform RPA analysis on an event log.
+
+        It calls the handleMerge method with parameters (merged=False, title='Select CSV to run', multipleItems=False)
+        """
+        return self.handleMerge(merged=False, title='Select CSV to run', multipleItems=False)
+
+    def handleMerge(self, merged=True, title='Select multiple CSV to merge', multipleItems=True):
+        """
+        This method is called when the user wants to merge multiple csv files
+        or run an event log (in this case it is called by the handleRunLogAction() method).
+
+        1. It displays a file dialog to select the event logs to process; this dialog returns a list of paths,
+        each one representing the location of an event log.
+
+        2. After the event logs have been selected, the method starts a worker thread to process them
+        using the handleProcessMining() method. A new thread is necessary in order not to block the main UI.
+
+        3. Once the thread completes, the choices() method is called.
+
+        :param merged: boolean value indicating if the user wants to merge multiple files or to run a single event log
+        :param title: title of the file dialog
+        :param multipleItems: boolean value indicating the ability to select multiple items
+        """
+        self.statusListWidget.clear()
+        csv_to_merge = getFilenameDialog(customDialog=False,
+                                         title=title,
+                                         multipleItems=multipleItems,
+                                         filter_format="CSV log files (*.csv)")
+        if csv_to_merge:
+            if merged:
+                self.status_queue.put("[GUI] Merging selected files...")
+            else:
+                self.status_queue.put("[GUI] Analyzing selected log...")
+            # self.progress_dialogMFP = self.createProgressDialog("Working...", "Finding most frequent path...")
+
+            # start PM as thread because it can take some time, I don't want to block the UI
+            worker = Worker(self.handleProcessMining, sorted(csv_to_merge),
+                            merged)  # Any other args, kwargs are passed to the run function
+            worker.signals.result.connect(self.PMThreadComplete)
+            self.threadpool.start(worker)
+        else:
+            self.status_queue.put("[GUI] No csv selected...")
 
     def handleProcessMining(self, log_filepath: list, merged=False, fromRunCount=False):
+        """
+        This method can either be called by handleMerge() (when the user wants to merge multiple CSV or run RPA from log)
+        or by the GUI after the user presses the Stop logger button.
+
+        1. It creates an instance of the Process Mining class, passing the selected event log files.
+        2. Then it returns the instance of the class along with the selected file path.
+
+        :param log_filepath: list of paths pointing to event logs selected in the file dialog
+        :param merged: boolean indicating if the logs have been merged
+        :param fromRunCount: indicates whether the method has been called by handleMerge() or by the GUI
+        :return: process mining class instance, log_filepath
+        """
         try:
             # check if library is installed
             import pm4py
@@ -647,8 +730,48 @@ class MainApplication(QMainWindow, QDialog):
             print(traceback.format_exc())
             return False
 
-    # it must be in main thread
+    def PMThreadComplete(self, result):
+        """
+        Once the working thread started by handleMerge() finishes processing, the result is returned in this method,
+        which in turns calls the choices() method
+        """
+        if result:
+            pm, log_filepath = result
+            self.choices(pm, log_filepath)
+
+    def handleRPA(self, log_filepath):
+        rpa = modules.RPA.generateRPAScript.RPAScript(
+            log_filepath, self.status_queue)
+        rpa_success = rpa.run()
+        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
+        self.statusListWidget.addItem(QListWidgetItem(msg))
+
     def choices(self, pm, log_filepath):
+        """
+        This method is called once the worker thread started by handleMerge() completes.
+
+        It is the core of the tool, responsible for performing all the analysis on the event log,
+        from log processing to RPA SW robot generation.
+
+        If process discovery is enabled in preferences:
+
+        * high level flowchart is generated from process mining class
+        * high level petri net is generated from process mining class
+        * events are logged in status queue
+
+        If decision points analysis is enabled and there are at least 2 traces in the event log
+
+        * high level DFG is opened
+        * decision points class is called, the resulting decision dataframe is stored
+        * new flowchart is generated from decided dataframe
+        * choices dialog class is called, taking as input decided dataframe
+        * final flowchart with user edits is generated
+        * python SW robot is generated from RPAScript path
+        * Uipath project is generated from UIPathXAML class
+
+        :param pm: instance of the Process Mining class
+        :param log_filepath: path of the event log to analyze
+        """
         # print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
         if utils.config.MyConfig.get_instance().perform_process_discovery:
             num_traces = len(
@@ -750,8 +873,14 @@ class MainApplication(QMainWindow, QDialog):
 
         self.status_queue.put(f"[GUI] Done\n")
 
-    # Generate xes file from multiple csv, each csv corresponds to a trace
+
     def handleRunCount(self, log_filepath):
+        """
+        Merges multiple traces of execution together generating one event log.
+        It depends on "number of runs after which event log is generated" setting in preferences.
+
+        :param log_filepath: path of event log file
+        """
         # print(f"[DEBUG] CSV path: {log_filepath}")
         if utils.utils.CSVEmpty(log_filepath):
             self.status_queue.put(
@@ -784,6 +913,9 @@ class MainApplication(QMainWindow, QDialog):
             self.csv_to_join.clear()
 
     def showAboutMessage(self):
+        """
+        Show information about the tool under File menu
+        """
         msgBox = QMessageBox()
         msgBox.setWindowTitle("About")
         msgBox.setText("SmartRPA allows to train RPA routines in order to automatically find the best way "
@@ -798,32 +930,51 @@ class MainApplication(QMainWindow, QDialog):
         msgBox.addButton(closeBtn, QMessageBox.RejectRole)
         msgBox.exec_()
 
-    # displays file dialog when excel is selected in order to choose a file to open
     def excelDialog(self):
-        self.officeFilepath = None
-        # if self.officeExcel:
-        #     msgBox = QMessageBox()
-        #     msgBox.setWindowTitle("Excel spreadsheet")
-        #     msgBox.setText(
-        #         "Do you want to open an existing Excel spreadsheet or create a new one?")
-        #     existing = QPushButton('Open existing spreadsheet')
-        #     new = QPushButton('Create new spreadsheet')
-        #     if darkdetect.isDark():
-        #         existing.setStyleSheet(
-        #             'QPushButton {background-color: #656565;}')
-        #         new.setStyleSheet('QPushButton {background-color: #656565;}')
-        #     msgBox.addButton(existing, QMessageBox.YesRole)
-        #     msgBox.addButton(new, QMessageBox.NoRole)
-        #     ret = msgBox.exec_()
-        #     if ret == 0:
-        #         path = getFilenameDialog(customDialog=False,
-        #                                  title='Select Excel spreadsheet to open',
-        #                                  multipleItems=False,
-        #                                  filter_format="Excel files (*.csv *.xlsx *xls *.xlsm)")
-        #         self.officeFilepath = path[0] if path else None
+        """
+        Displays file dialog when excel is selected in order to choose a file to open
+        """
+        if self.officeExcel:
+            msgBox = QMessageBox()
+            msgBox.setWindowTitle("Excel spreadsheet")
+            msgBox.setText(
+                "Do you want to open an existing Excel spreadsheet or create a new one?")
+            existing = QPushButton('Open existing spreadsheet')
+            new = QPushButton('Create new spreadsheet')
+            if darkdetect.isDark():
+                existing.setStyleSheet(
+                    'QPushButton {background-color: #656565;}')
+                new.setStyleSheet('QPushButton {background-color: #656565;}')
+            msgBox.addButton(existing, QMessageBox.YesRole)
+            msgBox.addButton(new, QMessageBox.NoRole)
+            ret = msgBox.exec_()
+            if ret == 0:
+                path = getFilenameDialog(customDialog=False,
+                                         title='Select Excel spreadsheet to open',
+                                         multipleItems=False,
+                                         filter_format="Excel files (*.csv *.xlsx *xls *.xlsm)")
+                self.officeFilepath = path[0] if path else None
 
-    # Called when start button is clicked by user
     def onButtonClick(self):
+        """
+        Main method executed by the tool to start log capture when start button is clicked by user.
+
+        If tool is starting:
+
+        * set boolean variable 'running' to true
+        * check which checkboxes are enabled in the GUI
+        * if excel checkbox is selected, display dialog to select file to open (deprecated)
+        * start progress dialog indicating loading
+        * start main process, passing as parameters the boolean checkbox values
+
+        If tool is stopping:
+
+        * set boolean variable 'running' to false
+        * kill active processes using their PID before closing main
+        * terminate main
+        * call handleRunCount() method to check counter and generate event log file
+
+        """
 
         if not any([self.systemLoggerFilesFolder,
                     self.systemLoggerPrograms,
@@ -851,7 +1002,7 @@ class MainApplication(QMainWindow, QDialog):
             self.statusListWidget.clear()
 
             # ask if user want to create new spreadsheet or open existing one
-            self.excelDialog()
+            # self.excelDialog()
 
             self.status_queue.put("[GUI] Loading, please wait...")
             self.createProgressDialog("Loading...", "Loading...", 3000)
@@ -932,6 +1083,9 @@ class MainApplication(QMainWindow, QDialog):
 
 
 def buildGUI():
+    """
+    Main method to build the GUI
+    """
     app = QApplication(sys.argv)
 
     # dark mode

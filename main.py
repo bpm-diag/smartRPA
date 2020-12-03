@@ -57,7 +57,7 @@ def startLogger(systemLoggerFilesFolder,
     :param browserOpera: true if opera checkbox is checked in GUI
     :param status_queue: Queue to print messages on GUI
     :param LOG_FILEPATH: path of the event log file
-    :param processesPID: PID of started processes
+    :param processesPID: PID of started processes, used to kill them when logger is stopped
     """
 
     try:

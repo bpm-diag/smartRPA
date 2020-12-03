@@ -73,15 +73,23 @@ UIPATH_FOLDER = "UiPath"
 # ************
 
 
-# return current timestamp in the format '2020-08-29T16:42:30.690'
-# used by multiple modules
 def timestamp():
+    """
+    Generate current timestamp in ISO format (e.g. '2020-08-29T16:42:30.690')
+
+    :return: timestamp in ISO format
+    """
+
     #return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")  # [:-3]
     return datetime.now().isoformat(timespec='milliseconds')
 
 
-# Create directory with the given path if it does not exist
 def createDirectory(path):
+    """
+    Create directory with the given path if it does not exist
+
+    :param path: path of directory to be created
+    """
     if not os.path.exists(path):
         try:
             os.makedirs(path)
@@ -92,8 +100,12 @@ def createDirectory(path):
                 raise
 
 
-# used by main, creates new log file with the current timestamp in /logs directory at the root of the project.
 def createLogFile():
+    """
+    Creates new log file with the current timestamp in /logs directory at the root of the project. used by main.
+
+    :return: path of created log
+    """
     # filename to use in current session until the 'stop' button is pressed. must be set here because the filename
     # uses the current timestamp and it must remain the same during the whole session
 
@@ -112,8 +124,15 @@ def createLogFile():
     return log_filepath
 
 
-# RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
 def getRPADirectory(csv_file_path):
+    """
+    Genreate path to save RPA files.
+
+    RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
+
+    :param csv_file_path: path of event log in input
+    :return: path of RPA directory
+    """
     csv_filename = getFilename(csv_file_path)
     try:
         RPA_directory = os.path.join(MAIN_DIRECTORY, 'RPA', csv_filename)
@@ -124,16 +143,35 @@ def getRPADirectory(csv_file_path):
     return RPA_directory.strip('_combined')
 
 
-# return filename of a given path without extension, like 2020-02-25_23-21-57
 def getFilename(path):
+    """
+    return filename of a given path without extension, like 2020-02-25_23-21-57
+
+
+    :param path: path of event log
+    :return: filename without extension
+    """
     return os.path.splitext(os.path.basename(path))[0]
 
 
 def removeWhitespaces(string):
+    """
+    remove spaces before and after words in a string
+
+    :param string: input string
+    :return: string without whitespaces
+    """
     return " ".join(string.split())
 
 
 def processClipboard(cb, remove_whitespaces=False):
+    """
+    convert clipboard text to unicode and remove whitespaces
+
+    :param cb: clipboard text
+    :param remove_whitespaces: boolean, if true remove whitespaces
+    :return: unicode version of clipboard text
+    """
     try:
         clipboard = unicodeString(cb.strip('"'))
         if remove_whitespaces:
@@ -144,6 +182,12 @@ def processClipboard(cb, remove_whitespaces=False):
 
 
 def unicodeString(string):
+    """
+    Replace special accented characters with unicode version
+
+    :param string: string to be replaced
+    :return: unicode version of string with replaced accented characters
+    """
     try:
         return unidecode(string
                          .replace("à", "a'")
@@ -156,14 +200,26 @@ def unicodeString(string):
         return string
 
 
-# check if port is available to start server
 def isPortInUse(port):
+    """
+    check if port is available to start server
+
+    :param port: port number
+    :return: true if given port is in use by another process
+    """
     import socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('127.0.0.1', port)) == 0
 
 
 def CSVEmpty(log_filepath, min_len=1):
+    """
+    Check if given csv is empty by counting number of rows
+
+    :param log_filepath: csv path
+    :param min_len: minimum number of rows after which csv is not considered empty
+    :return: true if csv is empty
+    """
     try:
         df = pandas.read_csv(log_filepath, encoding='utf-8-sig')
     except pandas.errors.EmptyDataError:
@@ -171,13 +227,22 @@ def CSVEmpty(log_filepath, min_len=1):
     return df.empty or len(df) <= min_len
 
 
-# return file extension of a given path like .csv
 def getFileExtension(path):
+    """
+    return file extension of a given path like .csv
+
+    :param path: input path
+    :return: file extension of given path (e.g. .csv)
+    """
     return os.path.splitext(os.path.basename(path))[1]
 
 
-# return current chrome version, used to detect selenium driver
 def getChromeVersionMac():
+    """
+    return current chrome version, used to detect selenium driver
+
+    :return: current chrome version
+    """
     if os.path.exists("/Applications/Google Chrome.app"):
         plistloc = "/Applications/Google Chrome.app/Contents/Info.plist"
         pl = plistlib.readPlist(plistloc)
@@ -188,6 +253,12 @@ def getChromeVersionMac():
 
 
 def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
+    """
+    Combine multiple csv in a single file
+
+    :param list_of_csv_to_combine: list of csv paths
+    :param combined_csv_path: path where to save combined csv
+    """
     # make sure that given csv to combine actually exist in system
     existing_csv_to_combine = [p for p in list_of_csv_to_combine if os.path.exists(p)]
     try:
@@ -203,6 +274,12 @@ def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
 
 
 def getActiveWindowInfo(parameter):
+    """
+    Get name and size of active window in foreground (windows only)
+
+    :param parameter: either 'name' or 'size'
+    :return: name or size of active window
+    """
     try:
         hwnd = win32gui.GetForegroundWindow()
         name = win32gui.GetWindowText(hwnd)
@@ -216,6 +293,11 @@ def getActiveWindowInfo(parameter):
 
 
 def getActiveWindowName():
+    """
+    Get name of window in foreground (windows only)
+
+    :return: name of window in foreground
+    """
     try:
         hwnd = win32gui.GetForegroundWindow()
         name = win32gui.GetWindowText(hwnd)
@@ -224,15 +306,24 @@ def getActiveWindowName():
         pass
 
 
-# return python module install location
 def getPythonModuleLocation(module_name):
+    """
+    return python module install location
+
+    :param module_name: name of module to find
+    :return: install location
+    """
     module = importlib.util.find_spec(module_name)
     if module:
         return module.submodule_search_locations[0]
 
 
-# return chromedriver path from automagica module used by selenium
 def getChromedriverPath():
+    """
+    return chromedriver path from automagica module used by selenium
+
+    :return: hromedriver pat
+    """
     automagica_path = utils.utils.getPythonModuleLocation('automagica')
     chromedriver_relative = ""
     if WINDOWS:
@@ -247,15 +338,33 @@ def getChromedriverPath():
 
 
 def getHostname(url):
+    """
+    Get hostname from url
+
+    :param url: url
+    :return: hostname of url
+    """
     return urlparse(url).hostname if url else url
 
 
 def toAscii(string):
+    """
+    convert input string to ascii characters
+
+    :param string: input string
+    :return: input string with ascii characters
+    """
     return unicodedata.normalize('NFD', string).encode('ascii', 'ignore')
 
 
-# format a given path for current OS
 def formatPathForCurrentOS(path, username_on_source_os):
+    """
+    format a given path for current OS
+
+    :param path: input path
+    :param username_on_source_os: username of user on source operating system
+    :return: path with username of user of destination operating system
+    """
     if path:
         is_windows_path = '\\' in path[:10]
         if MAC:
@@ -273,6 +382,13 @@ def formatPathForCurrentOS(path, username_on_source_os):
 
 
 def convertToWindowsPath(path, username_on_source_os):
+    """
+    convert path to windows path with trailing slashes
+
+    :param path: input path
+    :param username_on_source_os: username of user on source operating system
+    :return: path formatted for windows
+    """
     if path != "":
         if '\\' in path[:10]:  # already windows path
             return path
@@ -283,6 +399,11 @@ def convertToWindowsPath(path, username_on_source_os):
 
 
 def open_file(path):
+    """
+    open input file
+
+    :param path: path of file to be opened
+    """
     try:
         if WINDOWS:
             os.startfile(path)
@@ -312,7 +433,6 @@ def previous_and_next(some_iterable):
 # Class
 # ************
 
-
 class ThreadWithReturnValue(Thread):
     def __init__(self, group=None, target=None, name=None,
                  args=(), kwargs={}, Verbose=None):
@@ -337,8 +457,13 @@ class ThreadWithReturnValue(Thread):
 # ************
 
 
-# detect if program (both 32bit and 64bit) is installed checking windows registry
 def isInstalledWin(programName):
+    """
+    detect if program (both 32bit and 64bit) is installed checking windows registry
+
+    :param programName: name of program to be checked
+    :return: true if program is installed, else false
+    """
     def _getInstalledProgramsWin(hive, flag):
         registry = winreg.ConnectRegistry(None, hive)
         registry_key = winreg.OpenKey(registry, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", 0,
@@ -362,8 +487,13 @@ def isInstalledWin(programName):
     return bool(list(filter(lambda program: programName in program.lower(), software_list)))
 
 
-# detect if program is installed in /Applications folder
 def isInstalledMac(programName):
+    """
+    detect if program is installed in /Applications folder on mac
+
+    :param programName: name of program to be checked
+    :return: true if program is present in /Applications folder, else false
+    """
     output = os.popen("ls -1 /Applications").read().split('\n')
     return bool(list(filter(lambda program: programName in program.lower(), output)))
 

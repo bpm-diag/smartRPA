@@ -2,8 +2,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QLabel, QVBoxLayout, QStyle, QSizePolicy
 import pandas
+from deprecated.sphinx import deprecated
 
 
+@deprecated(version='1.1.0', reason="Not in use anymore, replaced with web view version which is more versatile")
 class TableModel(QtCore.QAbstractTableModel):
 
     def __init__(self, data):

@@ -12,7 +12,21 @@ from utils.utils import WINDOWS, MAC
 
 # Preferences window
 class Preferences(QMainWindow):
+    """
+    Preferences window
+    """
     def __init__(self, parent, status_queue):
+        """
+        Initialize preferences window.
+
+        It allows to:
+
+        * enable or disable process discovery analysis
+        * select the number of runs after which event log is generated
+        * select analysis type (either decision points or most frequent routine)
+
+        :param status_queue: queue to send messages to main GUI
+        """
         super(Preferences, self).__init__(parent,
                                           flags=Qt.Window |
                                           Qt.WindowTitleHint |
@@ -80,7 +94,7 @@ class Preferences(QMainWindow):
         label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
 
         self.slider_label = QLabel(
-            "Number of runs after which \nXES file is generated:")
+            "Number of runs after which \nevent is generated:")
         self.slider_label.setToolTip(
             "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file "
             "is automatically generated, to be used for process mining techniques")

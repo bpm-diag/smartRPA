@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QFormLayou
                              QGroupBox, QLabel, QLineEdit, QVBoxLayout, QScrollArea)
 import pandas
 
+# remove pandas warning
 pandas.options.mode.chained_assignment = None
 import sys
 import ntpath
@@ -12,8 +13,14 @@ from utils.utils import WINDOWS
 
 
 class ChoicesDialog(QDialog):
-    # df is low level dataframe of the selected most frequent routine
+    """
+    Choices dialog allows the user to customize editable fields before generating the SW robot.
+    """
     def __init__(self, df: pandas.DataFrame):
+        """
+
+        :param df: low level dataframe of decided trace or most frequent routine
+        """
         
         # flags = Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint
         super(ChoicesDialog, self).__init__()
@@ -78,6 +85,11 @@ class ChoicesDialog(QDialog):
             self.setLayout(layout)
 
     def addRows(self):
+        """
+        Add editable rows to custom dialog, such as typing in a web page, renaming a file or pasting a text.
+
+        For each row there is a label, the description of the field, and a value, the element to be edited
+        """
         for row_index, row in self.filtered_df.iterrows():
             e = row["concept:name"]
             url = utils.getHostname(row['browser_url'])
@@ -127,6 +139,12 @@ class ChoicesDialog(QDialog):
                 self.filtered_df = self.filtered_df.drop(row_index)
 
     def handleReturn(self):
+        """
+        Called when choices dialog is closed (OK button is pressed)
+
+        Each row of the dataframe in input is updated with the values inserted by the user.
+        """
+
         # close dialog
         self.accept()
 
@@ -161,6 +179,11 @@ class ChoicesDialog(QDialog):
         # self.df.to_csv('/Users/marco/Desktop/temp2.csv', encoding='utf-8-sig', index=False)
 
     def getDF(self):
+        """
+        Get edited dataframe
+
+        :return: dataframe of trace with user edits
+        """
         # self.df.to_csv('/Users/marco/Desktop/temp.csv', encoding='utf-8-sig', index=False)
         return self.df
 

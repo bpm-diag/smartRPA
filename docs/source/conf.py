@@ -12,7 +12,20 @@
 #
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('../../'))
+
+
+# -- init setup --------------------------------------------------------------
+
+def skip(app, what, name, obj, would_skip, options):
+    if name == "__init__":
+        return False
+    return would_skip
+
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
 
 
 # -- Project information -----------------------------------------------------
@@ -24,7 +37,6 @@ author = 'marco2012'
 # The full version, including alpha/beta/rc tags
 release = '1.1'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -32,8 +44,12 @@ release = '1.1'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.githubpages'
+    'sphinx.ext.githubpages',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.viewcode'
 ]
+
+viewcode_follow_imported_members = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -43,16 +59,22 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
 html_title = 'SmartRPA'
+html_logo = '../../images/logo_white.png'
+
 html_theme = 'sphinx_rtd_theme'
-#html_theme = 'sphinx_material'
-#html_theme = 'sphinx_materialdesign_theme'
+html_theme_options = {
+    'logo_only': True,
+    'display_version': False,
+}
+# html_theme = 'sphinx_material'
+#html_theme = 'sphinxawesome_theme'
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

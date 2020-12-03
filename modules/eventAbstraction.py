@@ -12,6 +12,12 @@ except ImportError as e:
 
 
 def _getHighLevelEvent(row):
+    """
+    Convert low-level dataframe row into high-level
+
+    :param row: row of the dataframe
+    :return: high level description of the row
+    """
     e = row["concept:name"]
     url = utils.utils.getHostname(row['browser_url'])
     app = row['application']
@@ -131,8 +137,14 @@ def _getHighLevelEvent(row):
         return e
 
 
-# transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN
 def aggregateData(df: pandas.DataFrame, remove_duplicates=False):
+    """
+    transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN
+
+    :param df: input dataframe
+    :param remove_duplicates: if true, duplicate rows are removed
+    :return: high-level dataframe
+    """
 
     # filter rows
     df = df[~df.browser_url.str.contains('chrome-extension://')]

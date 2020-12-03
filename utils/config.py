@@ -1,6 +1,6 @@
 # ****************************** #
 # Config
-# Global config class used to store values in memory like current filename
+# Global config class used to store values
 # ****************************** #
 
 import os
@@ -9,6 +9,16 @@ from datetime import datetime
 
 
 class MyConfig(PreferredConfig):
+    """
+    Configuration class, used to store preferences.
+
+    Preferences include:
+
+    * total number of runs before executing process mining analysis
+    * control process discovery, if disabled csv is generated but process discovery techniques are not applied
+    * enable most frequent routine analysis (deprecated)
+    * enable decision points analysis
+    """
     REGISTRY_PATH = r'Software\ComputerLogger'
     JSON_PATH = os.path.expanduser('~/.config/ComputerLogger/config')
 
