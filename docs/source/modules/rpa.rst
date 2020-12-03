@@ -7,8 +7,13 @@ The Robotic Process Automation python script is generated based on the low- leve
 Python script
 =============
 
-
+.. autoclass:: modules.RPA.generateRPAScript.RPAScript
+   :members:
+   :private-members:
 
 UiPath project
 ==============
 
+.. autoclass:: modules.RPA.uipath.UIPathXAML
+   :members:
+   :private-members:

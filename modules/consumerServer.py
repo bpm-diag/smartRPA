@@ -50,6 +50,14 @@ def index():
 
 @app.route('/', methods=['POST'])
 def writeLog():
+    """
+    route where json event is received and processed.
+
+    JSON event includes metadata about the event, such as the timestamp, category, application, concept:name
+    and other information depending on the event type.
+
+    All this data is appended to the csv event log.
+    """
     content = request.json
 
     print(f"\nPOST received with content: {content}\n")
@@ -89,26 +97,40 @@ def writeLog():
     return content
 
 
-# get server status, for browser extension
 @app.route('/serverstatus', methods=['GET'])
 def getServerStatus():
+    """
+    Get server status for browser extension.
+
+    Returns status of each browser checkbox in GUI.
+
+    :return: true if browser checkbox in GUI is active
+    """
     return jsonify(log_chrome=log_chrome,
                    log_firefox=log_firefox,
                    log_edge=log_edge,
                    log_opera=log_opera)
 
 
-# Enable CORS, for browser extension
-# https://stackoverflow.com/a/35306327
+
 @app.after_request
 def add_headers(response):
+    """
+    Enable CORS, for browser extension
+
+    https://stackoverflow.com/a/35306327
+    """
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     return response
 
 
-# start server thread, run by mainLogger
 def runServer(status_queue):
+    """
+    start server thread, executed by mainLogger
+
+    :param status_queue: queue to print messages in GUI
+    """
     if not utils.utils.isPortInUse(PORT):
         status_queue.put("[Server] Logging server started")
         app.run(port=PORT, debug=False, use_reloader=False)

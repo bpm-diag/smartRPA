@@ -19,6 +19,9 @@ Operating System
    :members:
    :private-members:
 
+.. note::
+    Mouse events are deprecated, not in use.
+
 Microsoft Office
 ================
 
@@ -31,7 +34,7 @@ Browser
 
 .. note::
     Browser events are handled in the browser extension written in JavaScript.
-    It is available under extensions/browserLogger
+    It is available under ``extensions/browserLogger``
 
 Logging Server
 ==============

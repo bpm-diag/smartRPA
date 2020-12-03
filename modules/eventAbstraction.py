@@ -13,7 +13,9 @@ except ImportError as e:
 
 def _getHighLevelEvent(row):
     """
-    Convert low-level dataframe row into high-level
+    Convert low-level dataframe row into high-level.
+
+    Generate descriptive string for each row based on event type and other fields.
 
     :param row: row of the dataframe
     :return: high level description of the row
@@ -139,11 +141,18 @@ def _getHighLevelEvent(row):
 
 def aggregateData(df: pandas.DataFrame, remove_duplicates=False):
     """
-    transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN
+    Transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN.
+
+    * rows with specific events are removed because irrelevant for the analysis
+    * rows with empty clipboard are removed because they don't need to be abstracted to high level
+    * a new column called 'customClassifier' is added to the dataframe, containing the high level description
+    of each row, generated using _getHighLevelEvent() method
+    * if remove_duplicates is true, duplicate rows are removed
+    * dataframe with high level descriptions for each row is returned
 
     :param df: input dataframe
     :param remove_duplicates: if true, duplicate rows are removed
-    :return: high-level dataframe
+    :return: high-level dataframe, log, parameters to generate diagrams
     """
 
     # filter rows

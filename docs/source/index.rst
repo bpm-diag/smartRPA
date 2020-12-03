@@ -1,15 +1,16 @@
-Welcome to SmartRPA documentation!
-====================================
+======================
+SmartRPA documentation
+======================
 
 What is SmartRPA
-----------------
+================
 
 **Robotic Process Automation (RPA)** is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines. The current generation of RPA tools is driven by predefined rules and manual configurations made by expert users rather than automated techniques.
 
 **SmartRPA** is a cross-platform tool that tackles such issues. It allows to easily record event logs and to automatically generating executable RPA scripts that will drive a SW robots in emulating an observed user behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
 
 Links
------
+=====
 
 * **Source code** is available on `GitHub <https://github.com/bpm-diag/smartRPA/>`_.
 * The associated **paper** is available on `Springer <https://doi.org/10.1007/978-3-030-58779-6_8/>`_, and has been presented at the RPA Forum of 18th International Conference on Business Process Management.
@@ -17,7 +18,7 @@ Links
 
 
 Authors
--------
+=======
 
 SmartRPA has been developed at DIAG, *Department of Computer, Control, and Management Engineering* Antonio Ruberti in Sapienza University of Rome by:
 
@@ -27,7 +28,7 @@ SmartRPA has been developed at DIAG, *Department of Computer, Control, and Manag
 * Massimo Mecella
 
 Architecture
-------------
+============
 
 The architecture of SmartRPA integrates five main SW components.
 
@@ -43,6 +44,13 @@ Key features include:
 * **Process Discovery**, selects the most suitable routine variant to automate and generates high-level flowchart diagram, thus skipping completely the manual modeling activity;
 * **Decision Points**, discover differencies between multiple traces in a process and build a new routine based on user decisions;
 * **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform Python script and as a UiPath project.
+
+
+`Installation and execution  <https://github.com/bpm-diag/smartRPA/#installation-and-execution>`_
+=================================================================================================
+
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
