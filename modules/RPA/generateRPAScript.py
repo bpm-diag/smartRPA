@@ -18,19 +18,22 @@ sys.path.append('../')  # this way main file is visible from this file
 
 
 class RPAScript:
-    """This class generate RPA scripts for a given csv
-
-    :param csv_file_path: Path of the csv to analyse
-    :param generate_all_scripts: If True, all RPA scripts are generated, both individual (like excel, browser) and unified
-    :param unified_RPA_script: if True, a single RPA script is generated containing all the events in the log
-    :return: boolean indicating success status
-    :rtype: bool
+    """
+    This class generate python RPA SW robot for a given csv
     """
 
     def __init__(self,
                  csv_file_path: str,
                  status_queue: Queue,
                  delay_between_actions=0.2):
+
+        """
+        Initialize class and import csv event log into dataframe
+
+        :param csv_file_path: path of event log to analyze
+        :param status_queue: queue to sent messages to GUI
+        :param delay_between_actions: delay between robot actions in milliseconds
+        """
 
         self.status_queue = status_queue
         self._delay_between_actions = delay_between_actions
@@ -62,8 +65,12 @@ class RPAScript:
         t0.start()
         t0.join()
 
-    # Adds import statements to generated python file
     def _createHeader(self):
+        """
+        Add import statements to generated python file with required packages like automagica
+
+        :return: import statement
+        """
         h = f"""
 # -*- coding: utf-8 -*-
 # This file was auto generated based on {self.csv_file_path}
@@ -84,6 +91,13 @@ except ImportError as e:
 
     @staticmethod
     def _createBrowserHeader():
+        """
+        Create import statement for the browser (import selenium for automation).
+
+        It is separated because those imports are added only if there are browser events.
+
+        :return: browser import statement
+        """
         return f"""
 try:
     import importlib
@@ -105,6 +119,12 @@ except WebDriverException as e:
     \n"""
 
     def _createOpenExcel(self, script, path):
+        """
+        Write instructions to open excel.
+
+        :param script: file object to write to
+        :param path: path of excel file to open
+        """
         if not self.excelOpened:
             self.excelOpened = True
             script.write(f"print('Opening Excel...')\n")
@@ -129,8 +149,13 @@ except Exception:
                 else:
                     script.write("excel = Excel(visible=True)\n")
 
-    # Create and return RPA directory and file for each specific RPA
     def _createRPAFile(self, RPA_type):
+        """
+        Generate path where to save python SW robot
+
+        :param RPA_type: name of file
+        :return: path of SW robot, like like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57/2020-02-25_23-21-57_RPA.py
+        """
         # csv_file_path is like /Users/marco/Desktop/ComputerLogger/logs/2020-02-25_23-21-57.csv
         # csv_filename is like 2020-02-25_23-21-57
         utils.utils.createDirectory(self.RPA_directory)
@@ -143,6 +168,14 @@ except Exception:
         return RPA_filepath
 
     def _generateUnifiedRPA(self, df: pandas.DataFrame, filename="_UnifiedRPA.py"):
+        """
+        Core method of the class, generates python SW robot from trace.
+
+        Each line of the dataframe is analyzed and the corresponding python instruction to automate it is generated.
+
+        :param df: low-level dataframe of trace to automate
+        :param filename: name of resulting sw robot
+        """
         if df.empty:
             return False
 
@@ -779,9 +812,14 @@ except Exception:
         return True
 
     def generatePythonRPA(self, df: pandas.DataFrame):
+        """
+        Start generation of python SW robot
+
+        called by GUI when main script terminates and csv log file is created.
+
+        """
         self._generateUnifiedRPA(df, filename="_RPA.py")
 
-    # file called by GUI when main script terminates and csv log file is created.
     def generateRPAScript(self):
         # check if given csv log file exists
         if not os.path.exists(self.csv_file_path):

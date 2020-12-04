@@ -4,6 +4,10 @@ Action logger
 
 The Action Logger can be used to record a wide range of UI actions from multiple SW applications during the enactment of a routine.
 
+.. figure:: ../../../images/1_action_logger.png
+   :figwidth: 50%
+   :align: center
+
 Operating System
 ================
 

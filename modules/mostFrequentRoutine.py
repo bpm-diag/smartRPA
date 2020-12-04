@@ -6,7 +6,7 @@ from multiprocessing.queues import Queue
 from deprecated.sphinx import deprecated
 
 
-@deprecated(version='1.1.0', reason="Replaced by decision points")
+@deprecated(version='1.2.0', reason="Replaced by decision points")
 def selectMostFrequentCase(dataframe: pandas.DataFrame, status_queue: Queue, flattened=False, threshold=90):
     """
     Select the most frequent routine in the process by using levenhstein distance to calculate similarity between strings

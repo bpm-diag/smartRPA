@@ -28,6 +28,10 @@ def handle_log(status_queue: Queue,
 
     Then all the processed event logs are merged into one.
 
+    A dataframe is created from the merged event logs and will be used in the rest of the process.
+
+    Dataframe is also exported in XES.
+
     :param status_queue: queue to print values in GUI
     :param file_extension: extension of input event log (either CSV or XES)
     :param filename: name of input log

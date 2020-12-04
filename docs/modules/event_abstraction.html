@@ -168,6 +168,9 @@
 <p>The Event Abstraction component is used to convert the low-level dataframe with detailed information about each event that has occurred into a high-level one to be exploited for diagnostic and analysis purposes by expert RPA analysts.</p>
 <p>In particular, the high-level event log can be used to derive the flowchart representing the abstract workflow underlying the routine execution.
 This is done by filtering out irrelevant events, grouping similar ones together (i.e.: copy/paste actions are combined into one) and returning a descriptive string for each recorded event.</p>
+<div class="figure align-center" style="width: 60%">
+<img alt="../_images/3_event_abstraction.png" src="../_images/3_event_abstraction.png" />
+</div>
 <span class="target" id="module-modules.eventAbstraction"></span><dl class="py function">
 <dt id="modules.eventAbstraction._getHighLevelEvent">
 <code class="sig-prename descclassname">modules.eventAbstraction.</code><code class="sig-name descname">_getHighLevelEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">row</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/eventAbstraction.html#_getHighLevelEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.eventAbstraction._getHighLevelEvent" title="Permalink to this definition">¶</a></dt>
@@ -188,13 +191,13 @@ This is done by filtering out irrelevant events, grouping similar ones together 
 <code class="sig-prename descclassname">modules.eventAbstraction.</code><code class="sig-name descname">aggregateData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">remove_duplicates</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/eventAbstraction.html#aggregateData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.eventAbstraction.aggregateData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN.</p>
 <ul class="simple">
-<li><p>rows with specific events are removed because irrelevant for the analysis</p></li>
+<li><p>rows with specific events are filtered because irrelevant for the analysis</p></li>
 <li><p>rows with empty clipboard are removed because they don’t need to be abstracted to high level</p></li>
-<li><p>a new column called ‘customClassifier’ is added to the dataframe, containing the high level description</p></li>
+<li><p>similar events are grouped together</p></li>
+<li><p>a new column called ‘customClassifier’ is added to the dataframe, containing the high level description of each row, generated using _getHighLevelEvent() method</p></li>
+<li><p>if remove_duplicates is true, duplicate rows are removed</p></li>
+<li><p>dataframe with high level descriptions for each row is returned</p></li>
 </ul>
-<p>of each row, generated using _getHighLevelEvent() method
-* if remove_duplicates is true, duplicate rows are removed
-* dataframe with high level descriptions for each row is returned</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

@@ -181,13 +181,25 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span> <span class="nn">ntpath</span>
 <span class="kn">import</span> <span class="nn">modules.events.systemEvents</span>
+<span class="kn">from</span> <span class="nn">deprecated.sphinx</span> <span class="kn">import</span> <span class="n">deprecated</span>
 
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../&#39;</span><span class="p">)</span>  <span class="c1"># this way main file is visible from this file</span>
 
 
 <div class="viewcode-block" id="UIPathXAML"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.uipath.UIPathXAML">[docs]</a><span class="k">class</span> <span class="nc">UIPathXAML</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Automatically generate RPA script compatible with UiPath. Called by</span>
+<span class="sd">    GUI when main process is terminated and csv is available.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="UIPathXAML.__init__"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.uipath.UIPathXAML.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">csv_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status_queue</span><span class="p">:</span> <span class="n">Queue</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param csv_file_path: path of event log csv</span>
+<span class="sd">        :param status_queue: queue to print messages on GUI</span>
+<span class="sd">        :param df: dataframe of a trace of execution to automate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># either most frequent dataframe or original dataframe</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__df_without_duplicates</span><span class="p">()</span>
@@ -223,7 +235,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inputDialog</span> <span class="o">=</span> <span class="mi">0</span></div>
 
     <span class="c1"># dataframe utils</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.2.0&#39;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Not in use anymore since decision point analysis now occurs before RPA script generation.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__df_without_duplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Filter unsupported events from dataframe, namely events that</span>
+
+<span class="sd">        :return: dataframe without unsupported events</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">unsupported</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;selectTab&quot;</span><span class="p">,</span> <span class="s2">&quot;closeTab&quot;</span><span class="p">,</span> <span class="s2">&quot;selectWorksheet&quot;</span><span class="p">,</span> <span class="s2">&quot;WorksheetActivated&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;closePresentation&quot;</span><span class="p">,</span> <span class="s2">&quot;savePresentation&quot;</span><span class="p">,</span> <span class="s2">&quot;newPresentation&quot;</span><span class="p">,</span> <span class="s2">&quot;saveDocument&quot;</span><span class="p">,</span>
                        <span class="s2">&quot;printWorkbook&quot;</span><span class="p">,</span> <span class="s2">&quot;getRange&quot;</span><span class="p">,</span> <span class="s2">&quot;getCell&quot;</span><span class="p">,</span> <span class="s2">&quot;saveWorkbook&quot;</span><span class="p">]</span>
@@ -239,9 +257,15 @@
         <span class="c1"># dataframe without duplicates and with &#39;duplicated&#39; column indicated if the row should go to main sequence or switch</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">duplication_subset</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
 
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.2.0&#39;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Not in use anymore since decision point analysis now occurs before RPA script generation.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__howManyDecisionVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># return number of groups that will be converted into switch statements in UiPath</span>
-        <span class="c1"># used to determine how many variables should be added to main sequence</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return number of groups that will be converted into switch statements in UiPath</span>
+<span class="sd">        used to determine how many variables should be added to main sequence</span>
+
+<span class="sd">        :return: number of decision points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
 
         <span class="c1"># group rows based on &#39;duplicated&#39; value</span>
         <span class="c1"># rows with duplicated=True should go to main sequence, otherwise they should go in a switch case</span>
@@ -256,7 +280,16 @@
     <span class="c1">#     return g.get_group(a)[duplication_subset].reset_index(drop=True).equals(</span>
     <span class="c1">#         g.get_group(b)[duplication_subset].reset_index(drop=True))</span>
 
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.2.0&#39;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Not in use anymore since decision point analysis now occurs before RPA script generation.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__generateTraceKeywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to generate keywords dataframe to explain different decision to user.</span>
+
+<span class="sd">        Not in use anymore since decision point analysis now occurs before RPA script generation.</span>
+
+<span class="sd">        :param options: list of traces</span>
+<span class="sd">        :return: keywords dataframe</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">keywords</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
             <span class="n">df2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;case:concept:name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">trace</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;duplicated&#39;</span><span class="p">])]</span>
@@ -283,7 +316,13 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">keywords</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="c1"># base</span>
-    <span class="k">def</span> <span class="nf">__createRoot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># https://stackoverflow.com/a/31074030</span>
+    <span class="k">def</span> <span class="nf">__createRoot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate XML root with namespace declarations. The base XML file for UiPath starts here.</span>
+
+<span class="sd">        reference https://stackoverflow.com/a/31074030</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xmlns</span> <span class="o">=</span> <span class="s2">&quot;http://schemas.microsoft.com/netfx/2009/xaml/activities&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mc</span> <span class="o">=</span> <span class="s2">&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mva</span> <span class="o">=</span> <span class="s2">&quot;clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities&quot;</span>
@@ -334,6 +373,10 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__createTextExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append required text expressions to XML root</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">textExpression</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="s1">&#39;TextExpression.NamespacesForImplementation&#39;</span><span class="p">)</span>
         <span class="n">collection</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
@@ -372,6 +415,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">textExpression</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__createMainSequence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create main sequence that will contain all other sequences and events and append it to root.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sequence_id</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainSequence</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Sequence&quot;</span><span class="p">),</span>

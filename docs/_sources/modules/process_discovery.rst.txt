@@ -4,6 +4,10 @@ Process Discovery
 
 The Process Discovery component is initialised by the GUI when a calculation on a log file has to be performed. It takes as input a list of CSV logs previously recorded and a multiprocessing queue used to communicate with the main process.
 
+.. figure:: ../../../images/4_process_discovery.png
+   :figwidth: 60%
+   :align: center
+
 Decision points
 ===============
 

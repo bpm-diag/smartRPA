@@ -45,6 +45,7 @@ Key features include:
 * **Decision Points**, discover differencies between multiple traces in a process and build a new routine based on user decisions;
 * **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform Python script and as a UiPath project.
 
+A list of events supported by the Action Logger is available in `SmartRPA_events.pdf <https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf>`_.
 
 `Installation and execution  <https://github.com/bpm-diag/smartRPA/#installation-and-execution>`_
 =================================================================================================
@@ -74,3 +75,10 @@ Contents
    :caption: Utils
 
    utils
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

@@ -5,7 +5,7 @@ import pandas
 from deprecated.sphinx import deprecated
 
 
-@deprecated(version='1.1.0', reason="Not in use anymore, replaced with web view version which is more versatile")
+@deprecated(version='1.2.0', reason="Not in use anymore, replaced with web view version which is more versatile")
 class TableModel(QtCore.QAbstractTableModel):
 
     def __init__(self, data):

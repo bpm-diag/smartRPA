@@ -22,7 +22,7 @@
     <br/>
     <a href="#"><img src="https://img.shields.io/badge/Sapienza University of Rome-blue?style=flat&labelColor=781A2D&color=781A2D&logoColor=white" /></a> 
   <br/><br/>
-  <img width="80%" src="images/gui.jpg"/>
+  <img width="80%" src="images/gui.png"/>
 
 </p>
 

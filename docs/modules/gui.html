@@ -175,17 +175,17 @@
 <div class="section" id="gui">
 <h2>GUI<a class="headerlink" href="#gui" title="Permalink to this headline">¶</a></h2>
 <p>The main interface of the tool is designed to be simple and functional, yet powerful at the same time. The user can select which modules to enable by selecting the corresponding checkbox. A menu with different options is available to perform different actions. The interface was created using PyQt5.</p>
-<div class="figure align-center" style="width: 80%">
-<img alt="../_images/gui.jpg" src="../_images/gui.jpg" />
+<div class="figure align-center" style="width: 90%">
+<img alt="../_images/gui.png" src="../_images/gui.png" />
 </div>
 <p>When the app opens the user needs to select the options that should be enabled and press the “Start Logger” button. Then all selected modules are started. The configuration of each module takes place in the <a class="reference internal" href="../main.html#main"><span class="std std-ref">Main</span></a> file.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The primary methods of this class to work with are:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.onButtonClick">onButtonClick()</a></p></li>
-<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.handleProcessMining">handleProcessMining()</a></p></li>
-<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.choices">choices()</a></p></li>
+<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.onButtonClick">onButtonClick()</a> - triggered by ‘start logger’ button</p></li>
+<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.handleProcessMining">handleProcessMining()</a> - intermediate process event log</p></li>
+<li><p><a class="reference external" href="#modules.GUI.GUI.MainApplication.choices">choices()</a> - perform all the analysis on the event log,</p></li>
 </ul>
 </div>
 <dl class="py class">

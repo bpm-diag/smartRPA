@@ -180,19 +180,22 @@
 
 
 <div class="viewcode-block" id="RPAScript"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.generateRPAScript.RPAScript">[docs]</a><span class="k">class</span> <span class="nc">RPAScript</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;This class generate RPA scripts for a given csv</span>
-
-<span class="sd">    :param csv_file_path: Path of the csv to analyse</span>
-<span class="sd">    :param generate_all_scripts: If True, all RPA scripts are generated, both individual (like excel, browser) and unified</span>
-<span class="sd">    :param unified_RPA_script: if True, a single RPA script is generated containing all the events in the log</span>
-<span class="sd">    :return: boolean indicating success status</span>
-<span class="sd">    :rtype: bool</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class generate python RPA SW robot for a given csv</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="RPAScript.__init__"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.generateRPAScript.RPAScript.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">csv_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                  <span class="n">status_queue</span><span class="p">:</span> <span class="n">Queue</span><span class="p">,</span>
                  <span class="n">delay_between_actions</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize class and import csv event log into dataframe</span>
+
+<span class="sd">        :param csv_file_path: path of event log to analyze</span>
+<span class="sd">        :param status_queue: queue to sent messages to GUI</span>
+<span class="sd">        :param delay_between_actions: delay between robot actions in milliseconds</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span> <span class="o">=</span> <span class="n">status_queue</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_delay_between_actions</span> <span class="o">=</span> <span class="n">delay_between_actions</span>
@@ -224,8 +227,12 @@
         <span class="n">t0</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
         <span class="n">t0</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
-    <span class="c1"># Adds import statements to generated python file</span>
-    <span class="k">def</span> <span class="nf">_createHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RPAScript._createHeader"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.generateRPAScript.RPAScript._createHeader">[docs]</a>    <span class="k">def</span> <span class="nf">_createHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add import statements to generated python file with required packages like automagica</span>
+
+<span class="sd">        :return: import statement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">h</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2"># -*- coding: utf-8 -*-</span>
 <span class="s2"># This file was auto generated based on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_file_path</span><span class="si">}</span><span class="s2"></span>
@@ -242,10 +249,17 @@
         <span class="k">if</span> <span class="n">MAC</span><span class="p">:</span>
             <span class="n">h</span> <span class="o">+=</span> <span class="s2">&quot;import applescript</span><span class="se">\n</span><span class="s2">&quot;</span> \
                  <span class="s2">&quot;import xlwings as xw</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="k">return</span> <span class="n">h</span>
+        <span class="k">return</span> <span class="n">h</span></div>
 
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="RPAScript._createBrowserHeader"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.generateRPAScript.RPAScript._createBrowserHeader">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_createBrowserHeader</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create import statement for the browser (import selenium for automation).</span>
+
+<span class="sd">        It is separated because those imports are added only if there are browser events.</span>
+
+<span class="sd">        :return: browser import statement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">try:</span>
 <span class="s2">    import importlib</span>
@@ -264,9 +278,15 @@
 <span class="s2">except WebDriverException as e:</span>
 <span class="s2">    print(e)</span>
 <span class="s2">    sys.exit()</span>
-<span class="s2">    </span><span class="se">\n</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    </span><span class="se">\n</span><span class="s2">&quot;&quot;&quot;</span></div>
 
-    <span class="k">def</span> <span class="nf">_createOpenExcel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="RPAScript._createOpenExcel"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.generateRPAScript.RPAScript._createOpenExcel">[docs]</a>    <span class="k">def</span> <span class="nf">_createOpenExcel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write instructions to open excel.</span>
+
+<span class="sd">        :param script: file object to write to</span>
+<span class="sd">        :param path: path of excel file to open</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">excelOpened</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">excelOpened</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">script</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;print(&#39;Opening Excel...&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -289,10 +309,15 @@
                     <span class="n">script</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;excel = Excel(visible=True, file_path=r&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">script</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;excel = Excel(visible=True)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">script</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;excel = Excel(visible=True)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-    <span class="c1"># Create and return RPA directory and file for each specific RPA</span>
-    <span class="k">def</span> <span class="nf">_createRPAFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">RPA_type</span><span class="p">):</span>
+<div class="viewcode-block" id="RPAScript._createRPAFile"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.generateRPAScript.RPAScript._createRPAFile">[docs]</a>    <span class="k">def</span> <span class="nf">_createRPAFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">RPA_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate path where to save python SW robot</span>
+
+<span class="sd">        :param RPA_type: name of file</span>
+<span class="sd">        :return: path of SW robot, like like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57/2020-02-25_23-21-57_RPA.py</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># csv_file_path is like /Users/marco/Desktop/ComputerLogger/logs/2020-02-25_23-21-57.csv</span>
         <span class="c1"># csv_filename is like 2020-02-25_23-21-57</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">createDirectory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RPA_directory</span><span class="p">)</span>
@@ -302,9 +327,17 @@
         <span class="c1"># RPA_filepath is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57/2020-02-25_23-21-57_RPA.py</span>
         <span class="n">RPA_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">RPA_directory</span><span class="p">,</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">SW_ROBOT_FOLDER</span><span class="p">,</span> <span class="n">RPA_filename</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">RPA_filepath</span>
+        <span class="k">return</span> <span class="n">RPA_filepath</span></div>
 
-    <span class="k">def</span> <span class="nf">_generateUnifiedRPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;_UnifiedRPA.py&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="RPAScript._generateUnifiedRPA"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.generateRPAScript.RPAScript._generateUnifiedRPA">[docs]</a>    <span class="k">def</span> <span class="nf">_generateUnifiedRPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;_UnifiedRPA.py&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Core method of the class, generates python SW robot from trace.</span>
+
+<span class="sd">        Each line of the dataframe is analyzed and the corresponding python instruction to automate it is generated.</span>
+
+<span class="sd">        :param df: low-level dataframe of trace to automate</span>
+<span class="sd">        :param filename: name of resulting sw robot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
@@ -938,12 +971,17 @@
 
         <span class="c1"># self.status_queue.put(f&quot;[RPA] Generated RPA script {ntpath.basename(RPA_filepath)}&quot;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[RPA] Generated Python RPA script&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
 
-    <span class="k">def</span> <span class="nf">generatePythonRPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_generateUnifiedRPA</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;_RPA.py&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="RPAScript.generatePythonRPA"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.generateRPAScript.RPAScript.generatePythonRPA">[docs]</a>    <span class="k">def</span> <span class="nf">generatePythonRPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start generation of python SW robot</span>
 
-    <span class="c1"># file called by GUI when main script terminates and csv log file is created.</span>
+<span class="sd">        called by GUI when main script terminates and csv log file is created.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generateUnifiedRPA</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;_RPA.py&quot;</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">generateRPAScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># check if given csv log file exists</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_file_path</span><span class="p">):</span>

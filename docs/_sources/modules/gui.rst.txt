@@ -7,8 +7,8 @@ GUI
 
 The main interface of the tool is designed to be simple and functional, yet powerful at the same time. The user can select which modules to enable by selecting the corresponding checkbox. A menu with different options is available to perform different actions. The interface was created using PyQt5.
 
-.. figure:: ../../../images/gui.jpg
-   :figwidth: 80%
+.. figure:: ../../../images/gui.png
+   :figwidth: 90%
    :align: center
 
 When the app opens the user needs to select the options that should be enabled and press the "Start Logger" button. Then all selected modules are started. The configuration of each module takes place in the :ref:`main` file.
@@ -16,9 +16,9 @@ When the app opens the user needs to select the options that should be enabled a
 .. note::
     The primary methods of this class to work with are:
 
-    * `onButtonClick() <#modules.GUI.GUI.MainApplication.onButtonClick>`_
-    * `handleProcessMining() <#modules.GUI.GUI.MainApplication.handleProcessMining>`_
-    * `choices() <#modules.GUI.GUI.MainApplication.choices>`_
+    * `onButtonClick() <#modules.GUI.GUI.MainApplication.onButtonClick>`_ - triggered by 'start logger' button
+    * `handleProcessMining() <#modules.GUI.GUI.MainApplication.handleProcessMining>`_ - intermediate process event log
+    * `choices() <#modules.GUI.GUI.MainApplication.choices>`_ - perform all the analysis on the event log,
 
 .. autoclass:: modules.GUI.GUI.MainApplication
    :members:

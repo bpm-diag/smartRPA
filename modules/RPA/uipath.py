@@ -19,13 +19,25 @@ import sys
 from collections import defaultdict
 import ntpath
 import modules.events.systemEvents
+from deprecated.sphinx import deprecated
 
 sys.path.append('../')  # this way main file is visible from this file
 
 
 class UIPathXAML:
+    """
+    Automatically generate RPA script compatible with UiPath. Called by
+    GUI when main process is terminated and csv is available.
+    """
 
     def __init__(self, csv_file_path: str, status_queue: Queue, df: pandas.DataFrame):
+        """
+
+        :param csv_file_path: path of event log csv
+        :param status_queue: queue to print messages on GUI
+        :param df: dataframe of a trace of execution to automate
+        """
+
         # either most frequent dataframe or original dataframe
         self.df = df
         self.df1 = self.__df_without_duplicates()
@@ -61,7 +73,13 @@ class UIPathXAML:
         self.inputDialog = 0
 
     # dataframe utils
+    @deprecated(version='1.2.0', reason="Not in use anymore since decision point analysis now occurs before RPA script generation.")
     def __df_without_duplicates(self):
+        """
+        Filter unsupported events from dataframe, namely events that
+
+        :return: dataframe without unsupported events
+        """
         unsupported = ["selectTab", "closeTab", "selectWorksheet", "WorksheetActivated",
                        "closePresentation", "savePresentation", "newPresentation", "saveDocument",
                        "printWorkbook", "getRange", "getCell", "saveWorkbook"]
@@ -77,9 +95,15 @@ class UIPathXAML:
         # dataframe without duplicates and with 'duplicated' column indicated if the row should go to main sequence or switch
         return self.df.drop_duplicates(subset=duplication_subset, ignore_index=True, keep='first')
 
+    @deprecated(version='1.2.0', reason="Not in use anymore since decision point analysis now occurs before RPA script generation.")
     def __howManyDecisionVariables(self):
-        # return number of groups that will be converted into switch statements in UiPath
-        # used to determine how many variables should be added to main sequence
+        """
+        return number of groups that will be converted into switch statements in UiPath
+        used to determine how many variables should be added to main sequence
+
+        :return: number of decision points
+        """
+
 
         # group rows based on 'duplicated' value
         # rows with duplicated=True should go to main sequence, otherwise they should go in a switch case
@@ -94,7 +118,16 @@ class UIPathXAML:
     #     return g.get_group(a)[duplication_subset].reset_index(drop=True).equals(
     #         g.get_group(b)[duplication_subset].reset_index(drop=True))
 
+    @deprecated(version='1.2.0', reason="Not in use anymore since decision point analysis now occurs before RPA script generation.")
     def __generateTraceKeywords(self, options: list):
+        """
+        Used to generate keywords dataframe to explain different decision to user.
+
+        Not in use anymore since decision point analysis now occurs before RPA script generation.
+
+        :param options: list of traces
+        :return: keywords dataframe
+        """
         keywords = defaultdict(str)
         for trace in options:
             df2 = self.df.loc[(self.df['case:concept:name'] == trace) & (~self.df['duplicated'])]
@@ -121,7 +154,13 @@ class UIPathXAML:
         return list(keywords.values())
 
     # base
-    def __createRoot(self):  # https://stackoverflow.com/a/31074030
+    def __createRoot(self):
+        """
+        Generate XML root with namespace declarations. The base XML file for UiPath starts here.
+
+        reference https://stackoverflow.com/a/31074030
+
+        """
         self.xmlns = "http://schemas.microsoft.com/netfx/2009/xaml/activities"
         self.mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
         self.mva = "clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities"
@@ -172,6 +211,10 @@ class UIPathXAML:
         )
 
     def __createTextExpression(self):
+        """
+        Append required text expressions to XML root
+
+        """
         textExpression = etree.Element(
             'TextExpression.NamespacesForImplementation')
         collection = etree.Element(
@@ -210,6 +253,10 @@ class UIPathXAML:
         self.root.append(textExpression)
 
     def __createMainSequence(self):
+        """
+        Create main sequence that will contain all other sequences and events and append it to root.
+
+        """
         self.sequence_id += 1
         self.mainSequence = etree.Element(
             etree.QName(None, "Sequence"),

@@ -213,7 +213,7 @@ class ProcessMining:
         dfg = dfg_factory.apply(log, variant="frequency", parameters=parameters)
         return dfg, log
 
-    @deprecated(version='1.1.0', reason="Not in use anymore")
+    @deprecated(version='1.2.0', reason="Not in use anymore")
     def save_dfg(self, name="DFG", high_level=False):
         """
         Save DFG to file
@@ -229,7 +229,7 @@ class ProcessMining:
             gviz = dfg_vis_factory.apply(dfg, log=self._log, variant="frequency", parameters=parameters)
         self._create_image(gviz, name)
 
-    @deprecated(version='1.1.0', reason="Not in use anymore")
+    @deprecated(version='1.2.0', reason="Not in use anymore")
     def _create_petri_net(self, remove_duplicates=False):
         """
         Generate low level petri net
@@ -245,7 +245,7 @@ class ProcessMining:
         net, im, fm = dfg_conv_factory.apply(dfg, parameters=parameters)
         return net, im, fm
 
-    @deprecated(version='1.1.0', reason="Not in use anymore")
+    @deprecated(version='1.2.0', reason="Not in use anymore")
     def save_petri_net(self, name):
         """
         Save low level petri net in pdf format from low level event log

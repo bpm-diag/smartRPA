@@ -305,10 +305,10 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN.</span>
 
-<span class="sd">    * rows with specific events are removed because irrelevant for the analysis</span>
+<span class="sd">    * rows with specific events are filtered because irrelevant for the analysis</span>
 <span class="sd">    * rows with empty clipboard are removed because they don&#39;t need to be abstracted to high level</span>
-<span class="sd">    * a new column called &#39;customClassifier&#39; is added to the dataframe, containing the high level description</span>
-<span class="sd">    of each row, generated using _getHighLevelEvent() method</span>
+<span class="sd">    * similar events are grouped together</span>
+<span class="sd">    * a new column called &#39;customClassifier&#39; is added to the dataframe, containing the high level description of each row, generated using _getHighLevelEvent() method</span>
 <span class="sd">    * if remove_duplicates is true, duplicate rows are removed</span>
 <span class="sd">    * dataframe with high level descriptions for each row is returned</span>
 

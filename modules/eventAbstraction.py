@@ -143,10 +143,10 @@ def aggregateData(df: pandas.DataFrame, remove_duplicates=False):
     """
     Transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN.
 
-    * rows with specific events are removed because irrelevant for the analysis
+    * rows with specific events are filtered because irrelevant for the analysis
     * rows with empty clipboard are removed because they don't need to be abstracted to high level
-    * a new column called 'customClassifier' is added to the dataframe, containing the high level description
-    of each row, generated using _getHighLevelEvent() method
+    * similar events are grouped together
+    * a new column called 'customClassifier' is added to the dataframe, containing the high level description of each row, generated using _getHighLevelEvent() method
     * if remove_duplicates is true, duplicate rows are removed
     * dataframe with high level descriptions for each row is returned
 
