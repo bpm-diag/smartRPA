@@ -15,6 +15,14 @@ Decision points
    :members:
    :private-members:
 
+.. note::
+    The it-h row of a routine trace is considered as duplicated if it includes an event that is exactly the same in the it-h row of all the other routine traces. We evaluate two events as identical if the following data fields have the same value for the event in the it-h row in all the recorded routine traces:
+
+    .. literalinclude:: ../../../modules/decisionPoints.py
+       :language: python
+       :linenos:
+       :lines: 31-32
+
 Most frequent routine
 =====================
 

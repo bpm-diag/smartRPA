@@ -474,6 +474,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainSequence</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__createSequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">activities</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Do&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create UiPath sequence element, which is a container for other elements.</span>
+
+<span class="sd">        :param activities: list of activities inside the sequence</span>
+<span class="sd">        :param displayName: name of the sequence</span>
+<span class="sd">        :param key:</span>
+<span class="sd">        :return: sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sequence_id</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">props</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sap2010</span><span class="p">,</span> <span class="s2">&quot;WorkflowViewState.IdRef&quot;</span><span class="p">):</span> <span class="sa">f</span><span class="s2">&quot;Sequence_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -502,12 +510,22 @@
         <span class="p">[</span><span class="n">sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">activities</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">sequence</span>
 
-    <span class="k">def</span> <span class="nf">createBaseFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UIPathXAML.createBaseFile"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.uipath.UIPathXAML.createBaseFile">[docs]</a>    <span class="k">def</span> <span class="nf">createBaseFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create base XAML file for UiPath.</span>
+
+<span class="sd">        * create root element</span>
+<span class="sd">        * add text expressions</span>
+<span class="sd">        * add main sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__createRoot</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__createTextExpression</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__createMainSequence</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__createMainSequence</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="nf">writeXmlToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UIPathXAML.writeXmlToFile"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.uipath.UIPathXAML.writeXmlToFile">[docs]</a>    <span class="k">def</span> <span class="nf">writeXmlToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Copy UiPath template directory into current project and write XAML to file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">RPA_filename</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">getFilename</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">csv_file_path</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;_combined&#39;</span><span class="p">)</span>
         <span class="n">uipath_template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -517,9 +535,14 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">Comment</span><span class="p">(</span><span class="s1">&#39;SmartRPA by marco2012 https://github.com/marco2012/smartRPA&#39;</span><span class="p">),</span>
                                         <span class="n">pretty_print</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-            <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">pretty_print</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">pretty_print</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span></div>
 
     <span class="k">def</span> <span class="nf">__comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create comment element</span>
+<span class="sd">        :param text: text inside the comment</span>
+<span class="sd">        :return: append comment to main sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;Comment&quot;</span><span class="p">),</span>
@@ -530,7 +553,17 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainSequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.2.0&#39;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Not in use anymore since decision point analysis now occurs before RPA script generation.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__inputDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Decision point&quot;</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create input dialog element</span>
+
+<span class="sd">        :param options: list of options to display in dialog</span>
+<span class="sd">        :param label: label of input dialog</span>
+<span class="sd">        :param title: title of input dialog</span>
+<span class="sd">        :param displayName: name of input dialog</span>
+<span class="sd">        :return: input dialog</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">formattedOptions</span> <span class="o">=</span> <span class="s1">&#39;[{&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">options</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;}]&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">displayName</span><span class="p">:</span>
             <span class="n">displayName</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Decision point </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">switch</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -565,8 +598,18 @@
         <span class="n">inputDialog</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">inputDialog</span>
 
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.2.0&#39;</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Not in use anymore since decision point analysis now occurs before RPA script generation.&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">caseActivities</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">defaulActivity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Switch&quot;</span><span class="p">):</span>
-        <span class="c1"># before each switch, an input dialog is needed to ask the user which case to choose</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create switch element. Before each switch, an input dialog is needed to ask the user which case to choose</span>
+
+<span class="sd">        :param caseActivities: dictionary of activities divided by trace</span>
+<span class="sd">        :param defaulActivity: default case to execute</span>
+<span class="sd">        :param condition: switch condition</span>
+<span class="sd">        :param displayName: name of switch element</span>
+<span class="sd">        :return: switch element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">mainSequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__inputDialog</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">caseActivities</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
         <span class="p">)</span>
@@ -607,6 +650,13 @@
 
     <span class="c1"># browser</span>
     <span class="k">def</span> <span class="nf">__openBrowser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">activities</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open browser. This sequence contains browser events and it&#39;s used only once at the beginning of the project.</span>
+
+<span class="sd">        :param url: open at specific url</span>
+<span class="sd">        :param activities: list of activities to append</span>
+<span class="sd">        :return: append open browser sequence to main sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">openBrowser</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;OpenBrowser&quot;</span><span class="p">),</span>
             <span class="p">{</span>
@@ -649,6 +699,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mainSequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">openBrowser</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__attachBrowser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">activities</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attach browser element.</span>
+<span class="sd">        This sequence contains browser events and it attaches to the OpenBrowser sequence created at the beginning.</span>
+<span class="sd">        It is used every time there are browser events.</span>
+
+<span class="sd">        :param activities: list of activities to append</span>
+<span class="sd">        :return: Attach browser element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">browserScope</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">attachBrowser</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;BrowserScope&quot;</span><span class="p">),</span>
@@ -692,7 +750,17 @@
 
     <span class="k">def</span> <span class="nf">__target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xpath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xpath_full</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                  <span class="n">app</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;1000&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Target element to click on.</span>
 
+<span class="sd">        :param xpath: xpath of web element</span>
+<span class="sd">        :param xpath_full: full xpath of web element</span>
+<span class="sd">        :param idx: index of element in page</span>
+<span class="sd">        :param app: name of the browser used to navigate (e.g. google chrome)</span>
+<span class="sd">        :param title: title of the window of the browser</span>
+<span class="sd">        :param timeout: timeout after which action is dismissed if element is not found</span>
+<span class="sd">        :return: target element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">selector</span> <span class="o">=</span> <span class="s2">&quot;{x:Null}&quot;</span>
         <span class="k">if</span> <span class="n">xpath</span> <span class="ow">and</span> <span class="n">xpath_full</span><span class="p">:</span>
             <span class="n">css_selector</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;css-selector=&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__xpathToCssSelector</span><span class="p">(</span><span class="n">xpath_full</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
@@ -752,6 +820,23 @@
                    <span class="n">app</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                    <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Type into &#39;INPUT&#39;&quot;</span><span class="p">,</span> <span class="n">emptyField</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                    <span class="n">timeout</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;1000&quot;</span><span class="p">,</span> <span class="n">newLine</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TypeInto element to type into web fields.</span>
+
+<span class="sd">        Uses __target() method to create target element.</span>
+
+<span class="sd">        :param text: text to be typed</span>
+<span class="sd">        :param xpath: xpath of web element</span>
+<span class="sd">        :param xpath_full: full xpath of web element</span>
+<span class="sd">        :param idx: index  of web element</span>
+<span class="sd">        :param app: name of the program used to navigate (e.g. google chrome)</span>
+<span class="sd">        :param title: title of the window of the browser</span>
+<span class="sd">        :param displayName: name of TypeInto element</span>
+<span class="sd">        :param emptyField: if True, field is empied before typing</span>
+<span class="sd">        :param timeout: timeout after which action is dismissed if element is not found</span>
+<span class="sd">        :param newLine: add new line after typing</span>
+<span class="sd">        :return: TypeInto element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">typeInto_id</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">typeInto</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;TypeInto&quot;</span><span class="p">),</span>
@@ -787,6 +872,16 @@
 
     <span class="k">def</span> <span class="nf">__click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xpath_full</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">clickType</span><span class="o">=</span><span class="s2">&quot;CLICK_SINGLE&quot;</span><span class="p">,</span> <span class="n">mouseButton</span><span class="o">=</span><span class="s2">&quot;BTN_LEFT&quot;</span><span class="p">,</span>
                 <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Click Item&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to click on web objects</span>
+
+<span class="sd">        :param xpath: xpath of web element</span>
+<span class="sd">        :param xpath_full: full xpath of web element</span>
+<span class="sd">        :param clickType: type of click (single, double click)</span>
+<span class="sd">        :param mouseButton: button of mouse to click (left, right, middle)</span>
+<span class="sd">        :param displayName: name of click element in uipath</span>
+<span class="sd">        :return: Click element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">click_id</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">click</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;Click&quot;</span><span class="p">),</span>
@@ -843,14 +938,45 @@
         <span class="k">return</span> <span class="n">click</span>
 
     <span class="k">def</span> <span class="nf">__xpathToCssSelector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert XPATH to CSS selector.</span>
+
+<span class="sd">        The action logger records the XPATH for each web element so it can easily be identified by the SW robot.</span>
+<span class="sd">        UiPath does not support selection of web elements using XPATH (which is more accurate), so conversion to CSS selector is needed.</span>
+
+<span class="sd">        :param xpath:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">css</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\[([0-9]+)\]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">xpath</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
         <span class="n">css</span> <span class="o">=</span> <span class="n">css</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/html/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">css</span>
 
     <span class="k">def</span> <span class="nf">__getIdFromXpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ID of element from xpath</span>
+
+<span class="sd">        :param xpath: xpath of web element</span>
+<span class="sd">        :return: id of element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">xpath</span><span class="p">[</span><span class="n">xpath</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">xpath</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__getIdxFromXpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">list_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compare current xpath to previous one to find differences in index.</span>
+
+<span class="sd">        Since XPATH selection is not supported by UiPath, CSS selection is used.</span>
+<span class="sd">        With this method, web elements are identified using their relative index on the page.</span>
+
+<span class="sd">        This method calculates the index of an element relative to another.</span>
+
+<span class="sd">        For example, in a google form, 3 consecutive text field have index 0 to 3.</span>
+
+<span class="sd">        :param a: xpath of first element</span>
+<span class="sd">        :param b: xpath of second element</span>
+<span class="sd">        :param list_index: list of xpath column in dataframe</span>
+<span class="sd">        :return: index of current element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># if list_index is 0, previous xpath is None so return empty string</span>
         <span class="c1"># to be comparable, xpath should have the same parent but they should not be equal,</span>
         <span class="c1"># otherwise difference would be 0</span>
@@ -867,6 +993,13 @@
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__navigateTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Navigate To&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to navigate on a page</span>
+
+<span class="sd">        :param url: url to open</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: navigateTo element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">navigateTo</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">navigateTo</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;NavigateTo&quot;</span><span class="p">),</span>
@@ -879,13 +1012,18 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">navigateTo</span>
 
-    <span class="k">def</span> <span class="nf">__navigateToInNewTab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">activities</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__openApplication</span><span class="p">(</span><span class="n">arguments</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;-new-tab </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                                      <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;C:\Program Files (x86)\Google\Chrome\Application\chrome.exe&quot;</span><span class="p">,</span>
-                                      <span class="n">selector</span><span class="o">=</span><span class="s2">&quot;&lt;wnd app=&#39;chrome.exe&#39;/&gt;&quot;</span><span class="p">,</span> <span class="n">displayName</span><span class="o">=</span><span class="s2">&quot;Navigate in New Tab&quot;</span><span class="p">,</span>
-                                      <span class="n">activities</span><span class="o">=</span><span class="n">activities</span><span class="p">)</span>
+    <span class="c1"># def __navigateToInNewTab(self, url: str, activities: list = None):</span>
+    <span class="c1">#     return self.__openApplication(arguments=f&quot;-new-tab {url}&quot;,</span>
+    <span class="c1">#                                   fileName=&quot;C:\Program Files (x86)\Google\Chrome\Application\chrome.exe&quot;,</span>
+    <span class="c1">#                                   selector=&quot;&lt;wnd app=&#39;chrome.exe&#39;/&gt;&quot;, displayName=&quot;Navigate in New Tab&quot;,</span>
+    <span class="c1">#                                   activities=activities)</span>
 
     <span class="k">def</span> <span class="nf">__closeTab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to close tab</span>
+
+<span class="sd">        :return: closeTab element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">closeTab</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;CloseTab&quot;</span><span class="p">),</span>
@@ -899,6 +1037,16 @@
     <span class="c1"># excel</span>
     <span class="k">def</span> <span class="nf">__excelSpreadsheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workbookPath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;{x:Null}&quot;</span><span class="p">,</span> <span class="n">attach</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                            <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Excel Application Scope&quot;</span><span class="p">,</span> <span class="n">activities</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to handle excel spreadsheets.</span>
+
+<span class="sd">        :param workbookPath: path of workbook to open</span>
+<span class="sd">        :param password: workbook password (if present)</span>
+<span class="sd">        :param attach: if True, attaches to a workbook already opened by UiPath, without opening it again</span>
+<span class="sd">        :param displayName: name of element in UiPAth</span>
+<span class="sd">        :param activities: list of activities to perform on opened excel workbook</span>
+<span class="sd">        :return: ExcelApplicationScope element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openApplication</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">workbookPath</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="n">workbookPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -948,6 +1096,14 @@
         <span class="k">return</span> <span class="n">excelApplication</span>
 
     <span class="k">def</span> <span class="nf">__writeCell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sheetName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write excel cell</span>
+
+<span class="sd">        :param cell: position cell to write</span>
+<span class="sd">        :param sheetName: name of sheet</span>
+<span class="sd">        :param text: text to write</span>
+<span class="sd">        :return: ExcelWriteCell element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">displayName</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write Cell </span><span class="si">{</span><span class="n">cell</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">writeCell</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
@@ -963,6 +1119,12 @@
         <span class="k">return</span> <span class="n">writeCell</span>
 
     <span class="k">def</span> <span class="nf">__saveWorkbook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Save Workbook&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save opened workbook</span>
+
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: ExcelSaveWorkbook element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">saveWorkbook</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;ExcelSaveWorkbook&quot;</span><span class="p">),</span>
@@ -973,6 +1135,12 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__closeWorkbook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Close Workbook&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close opened workbook</span>
+
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: ExcelCloseWorkbook element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">closeWorkbook</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;ExcelCloseWorkbook&quot;</span><span class="p">),</span>
@@ -986,6 +1154,16 @@
     <span class="c1"># system</span>
     <span class="k">def</span> <span class="nf">__openApplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arguments</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;{x:Null}&quot;</span><span class="p">,</span> <span class="n">fileName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;{x:Null}&quot;</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;{x:Null}&quot;</span><span class="p">,</span>
                           <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Open Application&quot;</span><span class="p">,</span> <span class="n">activities</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        element to open specified application</span>
+
+<span class="sd">        :param arguments: path of program to open</span>
+<span class="sd">        :param fileName: name of program to open</span>
+<span class="sd">        :param selector: windows selector</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :param activities: list of activities</span>
+<span class="sd">        :return: OpenApplication element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openApplication</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">openApplication</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;OpenApplication&quot;</span><span class="p">),</span>
@@ -1029,12 +1207,27 @@
         <span class="k">return</span> <span class="n">openApplication</span>
 
     <span class="k">def</span> <span class="nf">__openFileFolder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">itemName</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        open file or folder in windows explorer</span>
+
+<span class="sd">        :param path: path of file or folder to open</span>
+<span class="sd">        :param itemName: name of file or folder to open</span>
+<span class="sd">        :return: OpenApplication element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__openApplication</span><span class="p">(</span><span class="n">arguments</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
                                       <span class="n">displayName</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Open </span><span class="si">{</span><span class="n">itemName</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                                       <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Windows</span><span class="se">\\</span><span class="s2">explorer.exe&quot;</span><span class="p">,</span>
                                       <span class="n">selector</span><span class="o">=</span><span class="s2">&quot;&lt;wnd app=&#39;explorer.exe&#39; cls=&#39;CabinetWClass&#39; /&gt;&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__closeApplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Start Process&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to close an open application</span>
+
+<span class="sd">        :param app: name of the application to close</span>
+<span class="sd">        :param title: title of the application window</span>
+<span class="sd">        :param displayName: name of the element in UiPath</span>
+<span class="sd">        :return: CloseApplication element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">closeApplication</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">close</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;CloseApplication&quot;</span><span class="p">),</span>
@@ -1054,6 +1247,14 @@
         <span class="k">return</span> <span class="n">close</span>
 
     <span class="k">def</span> <span class="nf">__startProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Start Process&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to start specified process</span>
+
+
+<span class="sd">        :param path: path of process to start</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: StartProcess element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">startProcess</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;StartProcess&quot;</span><span class="p">),</span>
@@ -1068,6 +1269,13 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__setToClipboard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Set to clipboard&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set specified text to clipboard</span>
+
+<span class="sd">        :param text: text to be set to clipboard</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: SetToClipboard element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setToClipboard</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">clipboard</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;SetToClipboard&quot;</span><span class="p">),</span>
@@ -1080,6 +1288,14 @@
         <span class="k">return</span> <span class="n">clipboard</span>
 
     <span class="k">def</span> <span class="nf">__sendHotkey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;{x:Null}&quot;</span><span class="p">,</span> <span class="n">modifiers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Send Hotkey&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to type specified sequence of keys</span>
+
+<span class="sd">        :param key: letter to press</span>
+<span class="sd">        :param modifiers: modifiers to press (like CTRL, ALT, etc)</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: SendHotkey element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sendHotkey</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">hotkey</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;SendHotkey&quot;</span><span class="p">),</span>
@@ -1106,6 +1322,13 @@
         <span class="k">return</span> <span class="n">hotkey</span>
 
     <span class="k">def</span> <span class="nf">__createFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Create file&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to create a file</span>
+
+<span class="sd">        :param path: path of file to be created</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: CreateFile element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">createFile</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;CreateFile&quot;</span><span class="p">),</span>
@@ -1119,6 +1342,13 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__createDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Create file&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to create a directory</span>
+
+<span class="sd">        :param path: path of directory to be created</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: CreateDirectory element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">createDirectory</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;CreateDirectory&quot;</span><span class="p">),</span>
@@ -1131,6 +1361,14 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__moveFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">from_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">to_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Move file&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to move a file/folder</span>
+
+<span class="sd">        :param from_path: path where te file/folder is</span>
+<span class="sd">        :param to_path: destination path where to move the file/folder</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: MoveFile element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moveFile</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;MoveFile&quot;</span><span class="p">),</span>
@@ -1144,7 +1382,14 @@
             <span class="p">},</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Move file&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Delete file&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to delete a file/folder</span>
+
+<span class="sd">        :param path: path where te file/folder is</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: Delete element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moveFile</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s2">&quot;Delete&quot;</span><span class="p">),</span>
@@ -1158,6 +1403,14 @@
 
     <span class="c1"># powerpoint</span>
     <span class="k">def</span> <span class="nf">__powerpointScope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_slides</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">displayName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;PowerPoint Presentation&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Element to handle powerpoint events.</span>
+
+<span class="sd">        :param num_slides: number of slides to add to the presentation</span>
+<span class="sd">        :param path: path of powerpoint presentation. If empty create a new file.</span>
+<span class="sd">        :param displayName: name of element in UiPath</span>
+<span class="sd">        :return: PowerPointApplicationCard element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">powerpointApplicationCard</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">powerpointApplicationCard</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
@@ -1204,6 +1457,12 @@
         <span class="k">return</span> <span class="n">powerpointApplication</span>
 
     <span class="k">def</span> <span class="nf">__insertSlide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add slides to a presentation.</span>
+
+<span class="sd">        :param position: where to add slides</span>
+<span class="sd">        :return: InsertSlideX element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">insertSlide</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span>
             <span class="n">etree</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upab</span><span class="p">,</span> <span class="s2">&quot;InsertSlideX&quot;</span><span class="p">),</span>
@@ -1219,12 +1478,22 @@
 
     <span class="c1"># generate RPA</span>
     <span class="k">def</span> <span class="nf">__createOpenBrowser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to insert openBrowser element at the beginning of the XAML file if browser events are present in the event log.</span>
+
+<span class="sd">        :param df: input dataframe</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># if dataframe contains browser related events add openBrowser element</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;category==&quot;Browser&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Browser&#39;</span><span class="p">,</span> <span class="s1">&#39;browser_url&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__openBrowser</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__createOpenExcel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to insert openExcel element at the beginning of the XAML file if excel events are present in the event log.</span>
+
+<span class="sd">        :param df: input dataframe</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># if dataframe contains excel events, add excel scope element</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;concept:name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="k">if</span> <span class="s1">&#39;newWorkbook&#39;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
@@ -1237,6 +1506,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mainSequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__excelSpreadsheet</span><span class="p">(</span><span class="n">workbookPath</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">attach</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__generateActivities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper method called for each row of the dataframe to convert an event into a UiPath XML node.</span>
+
+<span class="sd">        :param df: input dataframe</span>
+<span class="sd">        :param row: current row of dataframe</span>
+<span class="sd">        :return: XML node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">######</span>
         <span class="c1"># Variables</span>
         <span class="c1">######</span>
@@ -1553,6 +1829,23 @@
     <span class="c1">#     self.status_queue.put(f&quot;[UiPath] Generated UiPath RPA script&quot;)</span>
 
     <span class="k">def</span> <span class="nf">__generateRPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main method to generate UiPath SW robot.</span>
+
+<span class="sd">        The main steps are:</span>
+
+<span class="sd">        1. Add comment with SmartRPA link to UiPath file</span>
+<span class="sd">        2. Create open browser and open excel activities if the corresponding events are present in the dataframe</span>
+<span class="sd">        3. create activities dictionary to store XML nodes divided by category.</span>
+
+<span class="sd">        For each row in the dataframe:</span>
+
+<span class="sd">        * generate XML node from event</span>
+<span class="sd">        * append node to activities dictionary based on its categoru</span>
+<span class="sd">        * when there is a change in category of in the last loop iteration, write nodes to main XAML sequence</span>
+
+<span class="sd">        :param df: input dataframe of trace to automate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># add comment to main sequence</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__comment</span><span class="p">(</span><span class="s2">&quot;// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA&quot;</span><span class="p">)</span>
 
@@ -1619,16 +1912,19 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[UiPath] Generated UiPath RPA script&quot;</span><span class="p">)</span>
 
-    <span class="c1"># If decision is False, dataframe of the most frequent trace is passed,</span>
-    <span class="c1"># else dataframe of the entire process</span>
-    <span class="k">def</span> <span class="nf">generateUiPathRPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decision</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="UIPathXAML.generateUiPathRPA"><a class="viewcode-back" href="../../../modules/rpa.html#modules.RPA.uipath.UIPathXAML.generateUiPathRPA">[docs]</a>    <span class="k">def</span> <span class="nf">generateUiPathRPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decision</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method called by GUI to start UiPath SW Robot generation process.</span>
+
+<span class="sd">        :param decision: If decision is False, dataframe of the most frequent trace is passed, else dataframe of the entire process</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">createBaseFile</span><span class="p">()</span>
         <span class="c1"># if decision, I should use df1, dataframe without duplicates,</span>
         <span class="c1"># duplicated events should go to main sequence only once</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df1</span> <span class="k">if</span> <span class="n">decision</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># self.__generateRPAWithDecision(dataframe, decision)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__generateRPA</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writeXmlToFile</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeXmlToFile</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>

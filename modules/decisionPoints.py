@@ -40,9 +40,12 @@ class DecisionPoints:
     def handle_df(self):
         """
         Pre-process dataframe.
-        Filter irrelevant rows, add hostname column, and finally add duplicated columns to mark duplicated rows.
 
-        :return: processed dataframe
+        * filter irrelevant rows
+        * add hostname column
+        * mark duplicated rows
+
+        :return: processed dataframe df1
         """
         df1 = self.df
 

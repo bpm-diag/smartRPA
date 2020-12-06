@@ -90,8 +90,19 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical User Interface</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Action logger</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-modules.events.systemEvents">Operating System</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-modules.events.officeEvents">Microsoft Office</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#operating-system">Operating System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-modules.events.systemEvents">OS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-modules.events.clipboardEvents">Clipboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-modules.events.mouseEvents">Mouse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#microsoft-office">Microsoft Office</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-modules.events.officeEvents">Excel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-0">Word</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-1">PowerPoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-2">Outlook</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#browser">Browser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#logging-server">Logging Server</a></li>
 </ul>
@@ -175,22 +186,1287 @@
 <div class="figure align-center" style="width: 50%">
 <img alt="../_images/1_action_logger.png" src="../_images/1_action_logger.png" />
 </div>
+<div class="section" id="operating-system">
+<h2>Operating System<a class="headerlink" href="#operating-system" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-modules.events.systemEvents">
-<span id="operating-system"></span><h2>Operating System<a class="headerlink" href="#module-modules.events.systemEvents" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-modules.events.clipboardEvents"></span><span class="target" id="module-modules.events.mouseEvents"></span><div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Mouse events are deprecated, not in use.</p>
+<span id="os"></span><h3>OS<a class="headerlink" href="#module-modules.events.systemEvents" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="modules.events.systemEvents.detectSelectionWindowsExplorer">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">detectSelectionWindowsExplorer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#detectSelectionWindowsExplorer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.detectSelectionWindowsExplorer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log currently selected files in windows explorer</p>
+<p>Every 0.8 seconds it queries File explorer to check for selection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>selectedFile/selectedFolder event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.logHotkeys">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">logHotkeys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#logHotkeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.logHotkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log hotkeys using ‘keyboard’ python package.</p>
+<p>All supported hotkeys are store in ‘keys_to_detect’ dictionary.</p>
+<p>Once a supported hotkey is detected, a new thread is started to handle the event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>hotkeys event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.logPasteHotkey">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">logPasteHotkey</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#logPasteHotkey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.logPasteHotkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paste hotkey is handled separately for performance reasons.
+Once the hotkey is detected, a thread is started to handle the event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>paste hotkey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.logProcessesMac">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">logProcessesMac</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#logProcessesMac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.logProcessesMac" title="Permalink to this definition">¶</a></dt>
+<dd><p>detects programs opened and closed on mac.</p>
+<p>Works by querying list of open programs every 2 seconds and determining if something has been added or removed to that list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.logProcessesWin">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">logProcessesWin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#logProcessesWin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.logProcessesWin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detects programs opened and closed on windows.</p>
+<p>Works by querying list of open programs every 0.5 seconds and determining if something has been added or removed to that list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>programOpen/programClose event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.logUSBDrives">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">logUSBDrives</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#logUSBDrives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.logUSBDrives" title="Permalink to this definition">¶</a></dt>
+<dd><p>logs insertion and removal of usb drives</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>insertUSB event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.printerLogger">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">printerLogger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#printerLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.printerLogger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Watchfor activity at the installed printers (works also with network printers).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>printSubmitted event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.watchFolder">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">watchFolder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#watchFolder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.watchFolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>monitor file/folder changes on windows using system APIs</p>
+<p><a class="reference external" href="https://pythonhosted.org/watchdog/api.html#event-handler-classes">https://pythonhosted.org/watchdog/api.html#event-handler-classes</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>file/folder changes event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.watchFolderMac">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">watchFolderMac</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#watchFolderMac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.watchFolderMac" title="Permalink to this definition">¶</a></dt>
+<dd><p>monitor file/folder changes on mac using system APIs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>file/folder changes event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.systemEvents.watchRecentsFilesWin">
+<code class="sig-prename descclassname">modules.events.systemEvents.</code><code class="sig-name descname">watchRecentsFilesWin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/systemEvents.html#watchRecentsFilesWin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.systemEvents.watchRecentsFilesWin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log files and folders recently opened on Windows</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>openFile/openFolder event</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
+<div class="section" id="module-modules.events.clipboardEvents">
+<span id="clipboard"></span><h3>Clipboard<a class="headerlink" href="#module-modules.events.clipboardEvents" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="modules.events.clipboardEvents.logClipboard">
+<code class="sig-prename descclassname">modules.events.clipboardEvents.</code><code class="sig-name descname">logClipboard</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/clipboardEvents.html#logClipboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.clipboardEvents.logClipboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constantly monitors clipboard for changes.
+Detects ‘copy’ event. ‘paste’ event is detected by systemEvents.handleHotkey</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>JSON containing clipboard event</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-modules.events.mouseEvents">
+<span id="mouse"></span><h3>Mouse<a class="headerlink" href="#module-modules.events.mouseEvents" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="modules.events.mouseEvents.logMouse">
+<code class="sig-prename descclassname">modules.events.mouseEvents.</code><code class="sig-name descname">logMouse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/mouseEvents.html#logMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.mouseEvents.logMouse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log mouse coordinates on click in excel</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.1.0: </span>Not in use anymore.</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="microsoft-office">
+<h2>Microsoft Office<a class="headerlink" href="#microsoft-office" title="Permalink to this headline">¶</a></h2>
+<p>Microsoft Office events are logged using native COM APIs on windows while Excel on macOS is logged using a custom JavaScript AddIn.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For each office application there are two components in the code:</p>
+<ul class="simple">
+<li><p>a function, triggered by the action logger and responsible for handling events</p></li>
+<li><p>a class, which is the interface used to communicate with the application’s APIs</p></li>
+</ul>
 </div>
 <div class="section" id="module-modules.events.officeEvents">
-<span id="microsoft-office"></span><h2>Microsoft Office<a class="headerlink" href="#module-modules.events.officeEvents" title="Permalink to this headline">¶</a></h2>
+<span id="excel"></span><h3>Excel<a class="headerlink" href="#module-modules.events.officeEvents" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="modules.events.officeEvents.excelEvents">
+<code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">excelEvents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_queue</span></em>, <em class="sig-param"><span class="n">filepath</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#excelEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.excelEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle excel events on windows using pythoncom.</p>
+<p>Also manages exception in case excel instance fails to launch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status_queue</strong> – queue to pring messages on GUI</p></li>
+<li><p><strong>filepath</strong> – optional path of excel file to open</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="modules.events.officeEvents.excelEventsMacServer">
+<code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">excelEventsMacServer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_queue</span></em>, <em class="sig-param"><span class="n">excelFilepath</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#excelEventsMacServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.excelEventsMacServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle excel events on macOS using xlwings.</p>
+<p>The logging process is different on macOS.
+An excel Add-in in javascript is installed on excel and it sends data to a node.js server started by this function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status_queue</strong> – queue to print messages on GUI</p></li>
+<li><p><strong>excelFilepath</strong> – optional path of excel file to open</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>openWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="modules.events.officeEvents.ExcelEvents">
+<em class="property">class </em><code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">ExcelEvents</code><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Excel application object events</p>
+<p>The parameters in each method of these class are passed automatically by the APIs when the event occurs.</p>
+<p><a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/excel.application(object">https://docs.microsoft.com/en-us/office/vba/api/excel.application(object</a>)</p>
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnAfterCalculate">
+<code class="sig-name descname">OnAfterCalculate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnAfterCalculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnAfterCalculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This event occurs after a calculation has been performed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>afterCalculate event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnNewWorkbook">
+<code class="sig-name descname">OnNewWorkbook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnNewWorkbook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnNewWorkbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>New workbook is created</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wb</strong> – workbook</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>newWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetActivate">
+<code class="sig-name descname">OnSheetActivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetActivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetActivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a worksheet is selected</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Sh</strong> – worksheet</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>selectWorksheet event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetBeforeDelete">
+<code class="sig-name descname">OnSheetBeforeDelete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetBeforeDelete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetBeforeDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a worksheet is deleted</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Sh</strong> – worksheet</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>deleteWorksheet event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetBeforeDoubleClick">
+<code class="sig-name descname">OnSheetBeforeDoubleClick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em>, <em class="sig-param"><span class="n">Target</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetBeforeDoubleClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetBeforeDoubleClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triggered when double clicking on a cell</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sh</strong> – worksheet</p></li>
+<li><p><strong>Target</strong> – cell clicked</p></li>
+<li><p><strong>Cancel</strong> – true if event is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>doubleClickCellWithValue/doubleClickEmptyCell event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetBeforeRightClick">
+<code class="sig-name descname">OnSheetBeforeRightClick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em>, <em class="sig-param"><span class="n">Target</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetBeforeRightClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetBeforeRightClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triggered when right clicking on a cell</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sh</strong> – worksheet</p></li>
+<li><p><strong>Target</strong> – cell clicked</p></li>
+<li><p><strong>Cancel</strong> – true if event is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rightClickCellWithValue/rightClickEmptyCell event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetCalculate">
+<code class="sig-name descname">OnSheetCalculate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetCalculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetCalculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a calculation is performed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Sh</strong> – worksheet</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sheetCalculate event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetChange">
+<code class="sig-name descname">OnSheetChange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em>, <em class="sig-param"><span class="n">Target</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a cell is edited</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sh</strong> – worksheet</p></li>
+<li><p><strong>Target</strong> – edited cell</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>editCellSheet event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetDeactivate">
+<code class="sig-name descname">OnSheetDeactivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetDeactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetDeactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a worksheet is deselected</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Sh</strong> – worksheet</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>deselectWorksheet event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetFollowHyperlink">
+<code class="sig-name descname">OnSheetFollowHyperlink</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em>, <em class="sig-param"><span class="n">Target</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetFollowHyperlink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetFollowHyperlink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a link is clicked</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sh</strong> – worksheet</p></li>
+<li><p><strong>Target</strong> – cell clicked</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>followHiperlinkSheet event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetPivotTableAfterValueChange">
+<code class="sig-name descname">OnSheetPivotTableAfterValueChange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em>, <em class="sig-param"><span class="n">TargetPivotTable</span></em>, <em class="sig-param"><span class="n">TargetRange</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetPivotTableAfterValueChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetPivotTableAfterValueChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when values in a pivot table change.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sh</strong> – worksheet</p></li>
+<li><p><strong>TargetPivotTable</strong> – target table</p></li>
+<li><p><strong>TargetRange</strong> – range modified</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pivotTableValueChangeSheet event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetSelectionChange">
+<code class="sig-name descname">OnSheetSelectionChange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em>, <em class="sig-param"><span class="n">Target</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetSelectionChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetSelectionChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a cell or range of cells is selected</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sh</strong> – worksheet</p></li>
+<li><p><strong>Target</strong> – selected range</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>getCell/getRange event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnSheetTableUpdate">
+<code class="sig-name descname">OnSheetTableUpdate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em>, <em class="sig-param"><span class="n">Target</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnSheetTableUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnSheetTableUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a table is updated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sh</strong> – worksheet</p></li>
+<li><p><strong>Target</strong> – table</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>worksheetTableUpdated event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWindowActivate">
+<code class="sig-name descname">OnWindowActivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWindowActivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWindowActivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triggers when excel windows is opened</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Wn</strong> – window</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>openWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWindowDeactivate">
+<code class="sig-name descname">OnWindowDeactivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWindowDeactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWindowDeactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triggers when excel windows is closed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Wn</strong> – window</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>closeWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWindowResize">
+<code class="sig-name descname">OnWindowResize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWindowResize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWindowResize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triggers when excel windows is resized</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Wn</strong> – window</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>resizeWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookActivate">
+<code class="sig-name descname">OnWorkbookActivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookActivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookActivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>workbook is activated (occurs when excel window is clicked and goes to foreground)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wb</strong> – workbook</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>activateWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookAddinInstall">
+<code class="sig-name descname">OnWorkbookAddinInstall</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookAddinInstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookAddinInstall" title="Permalink to this definition">¶</a></dt>
+<dd><p>An AddIn is installed in excel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wb</strong> – workbook</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>addinInstalledWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookAddinUninstall">
+<code class="sig-name descname">OnWorkbookAddinUninstall</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookAddinUninstall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookAddinUninstall" title="Permalink to this definition">¶</a></dt>
+<dd><p>An AddIn is uninstalled in excel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wb</strong> – workbook</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>addinUninstalledWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookAfterSave">
+<code class="sig-name descname">OnWorkbookAfterSave</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Success</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookAfterSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookAfterSave" title="Permalink to this definition">¶</a></dt>
+<dd><p>This event is triggered after a workbook has been saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Success</strong> – boolean value to indicate if saving was succesful</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>saveWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookAfterXmlExport">
+<code class="sig-name descname">OnWorkbookAfterXmlExport</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Map</span></em>, <em class="sig-param"><span class="n">Url</span></em>, <em class="sig-param"><span class="n">Result</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookAfterXmlExport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookAfterXmlExport" title="Permalink to this definition">¶</a></dt>
+<dd><p>XML is exported from excel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Map</strong> – </p></li>
+<li><p><strong>Url</strong> – </p></li>
+<li><p><strong>Result</strong> – import result</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>XMLExportWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookAfterXmlImport">
+<code class="sig-name descname">OnWorkbookAfterXmlImport</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Map</span></em>, <em class="sig-param"><span class="n">Url</span></em>, <em class="sig-param"><span class="n">Result</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookAfterXmlImport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookAfterXmlImport" title="Permalink to this definition">¶</a></dt>
+<dd><p>XML is imported into excel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Map</strong> – </p></li>
+<li><p><strong>Url</strong> – </p></li>
+<li><p><strong>Result</strong> – import result</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>XMLImportWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookBeforeClose">
+<code class="sig-name descname">OnWorkbookBeforeClose</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookBeforeClose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookBeforeClose" title="Permalink to this definition">¶</a></dt>
+<dd><p>workbook is closed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Cancel</strong> – true if close is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>closeWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookBeforePrint">
+<code class="sig-name descname">OnWorkbookBeforePrint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookBeforePrint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookBeforePrint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print action is triggered in a workbook</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Cancel</strong> – true if print is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>printWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookBeforeSave">
+<code class="sig-name descname">OnWorkbookBeforeSave</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">SaveAsUI</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookBeforeSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookBeforeSave" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is triggered right before a workbook is saved</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>SaveAsUI</strong> – ‘save as’ dialog box displayed to user</p></li>
+<li><p><strong>Cancel</strong> – saving is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>beforeSaveWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookDeactivate">
+<code class="sig-name descname">OnWorkbookDeactivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookDeactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookDeactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>workbook is deactivated (occurs when excel window is not visible anymore)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wb</strong> – workbook</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>deactivateWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookNewChart">
+<code class="sig-name descname">OnWorkbookNewChart</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Ch</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookNewChart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookNewChart" title="Permalink to this definition">¶</a></dt>
+<dd><p>A new chart is added to the open workbook</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Ch</strong> – chart</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>newChartWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookNewSheet">
+<code class="sig-name descname">OnWorkbookNewSheet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em>, <em class="sig-param"><span class="n">Sh</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookNewSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookNewSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>New sheet is created</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wb</strong> – workbook</p></li>
+<li><p><strong>Sh</strong> – worksheet</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>addWorksheet event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.OnWorkbookOpen">
+<code class="sig-name descname">OnWorkbookOpen</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wb</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.OnWorkbookOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.OnWorkbookOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Workbook is opened</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wb</strong> – workbook</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>openWorkbook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.filterNoneRangeValues">
+<code class="sig-name descname">filterNoneRangeValues</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.filterNoneRangeValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.filterNoneRangeValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>When a range of cells is selected, Target.Value is a Tuple of tuples containing the value of every
+selected cell Target.Value = ((None, None, None, None), (None, ‘prova’, None, None)). I’m
+interested only in cells with meaningful value, so I create a single list with all the tuples in
+Target.Value (by chaining the tuples using chain.from_iterable(list)) obtaining [None, None, None,
+None, None, ‘prova’, None, None] Now I remove the elements that are None by applying a filter
+operator to the previous list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>values</strong> – tuple of values</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of values without None values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.ExcelEvents.getWorksheets">
+<code class="sig-name descname">getWorksheets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sh</span></em>, <em class="sig-param"><span class="n">Wb</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#ExcelEvents.getWorksheets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.ExcelEvents.getWorksheets" title="Permalink to this definition">¶</a></dt>
+<dd><p>return list of active worksheet in workbook</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sh</strong> – worksheet</p></li>
+<li><p><strong>Wb</strong> – workbook</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of active worksheet in workbook</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-0">
+<span id="word"></span><h3>Word<a class="headerlink" href="#module-0" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="modules.events.officeEvents.wordEvents">
+<code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">wordEvents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#wordEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.wordEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle word events on windows using pythoncom.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> – optional name of file to open</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="modules.events.officeEvents.WordEvents">
+<em class="property">class </em><code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">WordEvents</code><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Application object events
+<a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/word.application">https://docs.microsoft.com/en-us/office/vba/api/word.application</a></p>
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnDocumentBeforePrint">
+<code class="sig-name descname">OnDocumentBeforePrint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Doc</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnDocumentBeforePrint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnDocumentBeforePrint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a document is printed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Doc</strong> – document</p></li>
+<li><p><strong>Cancel</strong> – true if event is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>saveDocument event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnDocumentBeforeSave">
+<code class="sig-name descname">OnDocumentBeforeSave</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Doc</span></em>, <em class="sig-param"><span class="n">SaveAsUI</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnDocumentBeforeSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnDocumentBeforeSave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a document is saved</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Doc</strong> – document</p></li>
+<li><p><strong>SaveAsUI</strong> – true if ‘save as’ dialog is displayed</p></li>
+<li><p><strong>Cancel</strong> – true if event is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>saveDocument event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnDocumentChange">
+<code class="sig-name descname">OnDocumentChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnDocumentChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnDocumentChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a document is changed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>changeDocument event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnDocumentOpen">
+<code class="sig-name descname">OnDocumentOpen</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Doc</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnDocumentOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnDocumentOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a new document is opened</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Doc</strong> – document</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>openDocument event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnNewDocument">
+<code class="sig-name descname">OnNewDocument</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Doc</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnNewDocument"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnNewDocument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a new document is created</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Doc</strong> – document</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>newDocument event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnWindowActivate">
+<code class="sig-name descname">OnWindowActivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Doc</span></em>, <em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnWindowActivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnWindowActivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when window is activated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Doc</strong> – document</p></li>
+<li><p><strong>Wn</strong> – window</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>activateWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnWindowBeforeDoubleClick">
+<code class="sig-name descname">OnWindowBeforeDoubleClick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sel</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnWindowBeforeDoubleClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnWindowBeforeDoubleClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when double clicking on document</p>
+<p><a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/word.selection#properties">https://docs.microsoft.com/en-us/office/vba/api/word.selection#properties</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sel</strong> – selection</p></li>
+<li><p><strong>Cancel</strong> – true if action is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>doubleClickWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnWindowBeforeRightClick">
+<code class="sig-name descname">OnWindowBeforeRightClick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sel</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnWindowBeforeRightClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnWindowBeforeRightClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when right clicking on document</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sel</strong> – selection</p></li>
+<li><p><strong>Cancel</strong> – true if action is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rightClickWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.OnWindowDeactivate">
+<code class="sig-name descname">OnWindowDeactivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Doc</span></em>, <em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.OnWindowDeactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.OnWindowDeactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when window is deactivated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Doc</strong> – document</p></li>
+<li><p><strong>Wn</strong> – window</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>activateWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.WordEvents.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#WordEvents.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.WordEvents.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-1">
+<span id="powerpoint"></span><h3>PowerPoint<a class="headerlink" href="#module-1" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="modules.events.officeEvents.powerpointEvents">
+<code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">powerpointEvents</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#powerpointEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.powerpointEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle powerpoint events on windows using pythoncom.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> – optional name of file to open</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="modules.events.officeEvents.PowerpointEvents">
+<em class="property">class </em><code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">PowerpointEvents</code><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Application object events
+<a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/powerpoint.application">https://docs.microsoft.com/en-us/office/vba/api/powerpoint.application</a></p>
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnAfterPresentationOpen">
+<code class="sig-name descname">OnAfterPresentationOpen</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Pres</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnAfterPresentationOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnAfterPresentationOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a presentation is opened</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Pres</strong> – presentation</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>savePresentation event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnAfterShapeSizeChange">
+<code class="sig-name descname">OnAfterShapeSizeChange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shp</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnAfterShapeSizeChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnAfterShapeSizeChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a shape in a presentation is resized</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>shp</strong> – shape</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>shapeSizeChangePresentation event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnNewPresentation">
+<code class="sig-name descname">OnNewPresentation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Pres</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnNewPresentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnNewPresentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>New presentation is created</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Pres</strong> – presentation</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>newPresentation event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnPresentationBeforeClose">
+<code class="sig-name descname">OnPresentationBeforeClose</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Pres</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnPresentationBeforeClose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnPresentationBeforeClose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a presentation is closed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Pres</strong> – presentation</p></li>
+<li><p><strong>Cancel</strong> – true if event is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>closePresentation event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnPresentationBeforeSave">
+<code class="sig-name descname">OnPresentationBeforeSave</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Pres</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnPresentationBeforeSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnPresentationBeforeSave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a presentation is saved</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Pres</strong> – presentation</p></li>
+<li><p><strong>Cancel</strong> – true if event is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>savePresentation event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnPresentationNewSlide">
+<code class="sig-name descname">OnPresentationNewSlide</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sld</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnPresentationNewSlide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnPresentationNewSlide" title="Permalink to this definition">¶</a></dt>
+<dd><p>A slide is added to an open presentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Sld</strong> – slide</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>newPresentationSlide event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnPresentationPrint">
+<code class="sig-name descname">OnPresentationPrint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Pres</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnPresentationPrint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnPresentationPrint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a presentation is printed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Pres</strong> – presentation</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>printPresentation event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnSlideSelectionChanged">
+<code class="sig-name descname">OnSlideSelectionChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">SldRange</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnSlideSelectionChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnSlideSelectionChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>occurs when text selection on a slide changes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>SldRange</strong> – range of slides</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SlideSelectionChanged event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnSlideShowBegin">
+<code class="sig-name descname">OnSlideShowBegin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnSlideShowBegin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnSlideShowBegin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when slideshow begins</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wn</strong> – slideshowview <a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview">https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>slideshowBegin event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnSlideShowEnd">
+<code class="sig-name descname">OnSlideShowEnd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Pres</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnSlideShowEnd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnSlideShowEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a slideshow ends</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Pres</strong> – presentation</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>slideshowEnd event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnSlideShowNextClick">
+<code class="sig-name descname">OnSlideShowNextClick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wn</span></em>, <em class="sig-param"><span class="n">nEffect</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnSlideShowNextClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnSlideShowNextClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when the next slide in a presentation is clicked during a slideshow</p>
+<p><a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/powerpoint.effect#properties">https://docs.microsoft.com/en-us/office/vba/api/powerpoint.effect#properties</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Wn</strong> – slideshowview <a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview">https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview</a></p></li>
+<li><p><strong>nEffect</strong> – transition type</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>clickNextSlideshow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnSlideShowOnNext">
+<code class="sig-name descname">OnSlideShowOnNext</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnSlideShowOnNext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnSlideShowOnNext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when next slide is displayed during a slideshow</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wn</strong> – slideshowview <a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview">https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>nextSlideshow</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnSlideShowOnPrevious">
+<code class="sig-name descname">OnSlideShowOnPrevious</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnSlideShowOnPrevious"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnSlideShowOnPrevious" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when previous slide is clicked during a slideshow</p>
+<p><a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview.state">https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview.state</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Wn</strong> – slideshowview <a class="reference external" href="https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview">https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>previousSlideshow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnWindowActivate">
+<code class="sig-name descname">OnWindowActivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Pres</span></em>, <em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnWindowActivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnWindowActivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when powerpoint window is activated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Pres</strong> – powerpoint presentation</p></li>
+<li><p><strong>Wn</strong> – window</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>activateWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnWindowBeforeDoubleClick">
+<code class="sig-name descname">OnWindowBeforeDoubleClick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sel</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnWindowBeforeDoubleClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnWindowBeforeDoubleClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs on right click on presentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sel</strong> – selection</p></li>
+<li><p><strong>Cancel</strong> – true if event is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>doubleClickPresentation event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnWindowBeforeRightClick">
+<code class="sig-name descname">OnWindowBeforeRightClick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Sel</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnWindowBeforeRightClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnWindowBeforeRightClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs on right click on presentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sel</strong> – selection</p></li>
+<li><p><strong>Cancel</strong> – true if event is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rightClickPresentation event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.OnWindowDeactivate">
+<code class="sig-name descname">OnWindowDeactivate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Pres</span></em>, <em class="sig-param"><span class="n">Wn</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.OnWindowDeactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.OnWindowDeactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when powerpoint window is deactivated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Pres</strong> – powerpoint presentation</p></li>
+<li><p><strong>Wn</strong> – window</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>deactivateWindow event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.PowerpointEvents.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#PowerpointEvents.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.PowerpointEvents.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-2">
+<span id="outlook"></span><h3>Outlook<a class="headerlink" href="#module-2" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="modules.events.officeEvents.outlookEvents">
+<code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">outlookEvents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#outlookEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.outlookEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle outlook events using pythoncom</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="modules.events.officeEvents.OutlookEvents">
+<em class="property">class </em><code class="sig-prename descclassname">modules.events.officeEvents.</code><code class="sig-name descname">OutlookEvents</code><a class="reference internal" href="../_modules/modules/events/officeEvents.html#OutlookEvents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.OutlookEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://stackoverflow.com/questions/49695160/how-to-continuously-monitor-a-new-mail-in-outlook-and-unread-mails-of-a-specific">https://stackoverflow.com/questions/49695160/how-to-continuously-monitor-a-new-mail-in-outlook-and-unread-mails-of-a-specific</a></p>
+<dl class="py method">
+<dt id="modules.events.officeEvents.OutlookEvents.OnItemSend">
+<code class="sig-name descname">OnItemSend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Item</span></em>, <em class="sig-param"><span class="n">Cancel</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#OutlookEvents.OnItemSend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.OutlookEvents.OnItemSend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a new message is sent</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Item</strong> – message</p></li>
+<li><p><strong>Cancel</strong> – true if action is canceled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sendMail event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.OutlookEvents.OnMAPILogonComplete">
+<code class="sig-name descname">OnMAPILogonComplete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#OutlookEvents.OnMAPILogonComplete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.OutlookEvents.OnMAPILogonComplete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when outlook checks for new mails</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>logonComplete event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.OutlookEvents.OnNewMailEx">
+<code class="sig-name descname">OnNewMailEx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">receivedItemsIDs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#OutlookEvents.OnNewMailEx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.OutlookEvents.OnNewMailEx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when a new mail is received</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>receivedItemsIDs</strong> – id of received mail</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>receiveMail event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.OutlookEvents.OnQuit">
+<code class="sig-name descname">OnQuit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#OutlookEvents.OnQuit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.OutlookEvents.OnQuit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when outlook quits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>quitOutlook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.OutlookEvents.OnReminder">
+<code class="sig-name descname">OnReminder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Item</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#OutlookEvents.OnReminder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.OutlookEvents.OnReminder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when there is a new reminder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Item</strong> – reminder item</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>newReminder event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.OutlookEvents.OnStartup">
+<code class="sig-name descname">OnStartup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#OutlookEvents.OnStartup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.OutlookEvents.OnStartup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occurs when outlook starts</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>startupOutlook event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.events.officeEvents.OutlookEvents.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/events/officeEvents.html#OutlookEvents.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.events.officeEvents.OutlookEvents.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 <div class="section" id="browser">
 <h2>Browser<a class="headerlink" href="#browser" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Browser events are handled in the browser extension written in JavaScript.
-It is available under <code class="docutils literal notranslate"><span class="pre">extensions/browserLogger</span></code></p>
+<p>Browser events are handled in the browser extension written in JavaScript.</p>
+<p>In particular:</p>
+<ul class="simple">
+<li><p>Browser application events (e.g. newTab, zoomTab, resizeWindow, …) are handled in <code class="docutils literal notranslate"><span class="pre">extensions/browserLogger/background_script.js</span></code></p></li>
+<li><p>Web page events (e.g. click, type, submit, …) are handled in <code class="docutils literal notranslate"><span class="pre">extensions/browserLogger/content_script.js</span></code></p></li>
+</ul>
 </div>
 </div>
 <div class="section" id="logging-server">

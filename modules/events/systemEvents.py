@@ -45,9 +45,14 @@ programs_to_ignore = ["sppsvc.exe", "WMIC.exe", "git.exe", "BackgroundTransferHo
                       "cmd.exe", "WmiPrvSE.exe", "AppHostRegistrationVerifier.exe", "SgrmBroker.exe"]
 
 
-# monitor file/folder changes on windows
 def watchFolder():
-    #  https://pythonhosted.org/watchdog/api.html#event-handler-classes
+    """
+    monitor file/folder changes on windows using system APIs
+
+    https://pythonhosted.org/watchdog/api.html#event-handler-classes
+
+    :return: file/folder changes event
+    """
     class WatchFilesHandler(RegexMatchingEventHandler):
         def __init__(self):
             # ignore hidden files
@@ -103,8 +108,12 @@ def watchFolder():
         my_observer.join()
 
 
-# monitor file/folder changes on mac
 def watchFolderMac():
+    """
+    monitor file/folder changes on mac using system APIs
+
+    :return: file/folder changes event
+    """
     from _fsevents import (
         loop,
         stop,
@@ -212,8 +221,14 @@ def watchFolderMac():
     observer.schedule(stream)
 
 
-# detects programs opened and closed
 def logProcessesWin():
+    """
+    Detects programs opened and closed on windows.
+
+    Works by querying list of open programs every 0.5 seconds and determining if something has been added or removed to that list.
+
+    :return: programOpen/programClose event
+    """
     print("[systemEvents] WIN Processes logging started")
 
     def _logProcessData(app, event):
@@ -264,8 +279,12 @@ def logProcessesWin():
         sleep(0.5)  # seconds
 
 
-# logs recently opened files and folders
 def watchRecentsFilesWin():
+    """
+    Log files and folders recently opened on Windows
+
+    :return: openFile/openFolder event
+    """
     ACTIONS = {
         1: "Created",
         2: "Deleted",
@@ -368,8 +387,14 @@ def watchRecentsFilesWin():
         sleep(1)
 
 
-# logs currently selected files in windows explorer
 def detectSelectionWindowsExplorer():
+    """
+    Log currently selected files in windows explorer
+
+    Every 0.8 seconds it queries File explorer to check for selection.
+
+    :return: selectedFile/selectedFolder event
+    """
     print("[systemEvents] detectSelectionWindowsExplorer logging started")
     # used for threads
     pythoncom.CoInitialize()
@@ -416,8 +441,16 @@ def detectSelectionWindowsExplorer():
         sleep(0.8)
 
 
-# logs hotkeys
 def logHotkeys():
+    """
+    Log hotkeys using 'keyboard' python package.
+
+    All supported hotkeys are store in 'keys_to_detect' dictionary.
+
+    Once a supported hotkey is detected, a new thread is started to handle the event.
+
+    :return: hotkeys event
+    """
     print("[systemEvents] Hotkey logging started...")
     # https://www.hongkiat.com/blog/100-keyboard-shortcuts-windows/
     keys_to_detect = {
@@ -498,6 +531,12 @@ def logHotkeys():
 
 
 def logPasteHotkey():
+    """
+    Paste hotkey is handled separately for performance reasons.
+    Once the hotkey is detected, a thread is started to handle the event.
+
+    :return: paste hotkey
+    """
     def handleCB():
         # paste event in browser is handled separately so this should log only if I'm not in browser
         browsers = ["chrome", "edge", "firefox", "opera"]
@@ -531,8 +570,12 @@ def logPasteHotkey():
     keyboard.wait()
 
 
-# logs insertion and removal of usb drives
 def logUSBDrives():
+    """
+    logs insertion and removal of usb drives
+
+    :return: insertUSB event
+    """
     def _queryWinDrives():
         pythoncom.CoInitialize()
         strComputer = "."
@@ -585,8 +628,14 @@ def logUSBDrives():
         sleep(10)
 
 
-# detects programs opened and closed on mac
 def logProcessesMac():
+    """
+    detects programs opened and closed on mac.
+
+    Works by querying list of open programs every 2 seconds and determining if something has been added or removed to that list.
+
+    :return:
+    """
     print("[systemEvents] MAC Processes logging started")
     running = applescript.tell.app("System Events", "name of every process where background only is false").out.split(
         ',')
@@ -633,8 +682,12 @@ def logProcessesMac():
         sleep(2)
 
 
-# This script watches for activity at the installed printers (works also with network printers).
 def printerLogger():
+    """
+    Watchfor activity at the installed printers (works also with network printers).
+
+    :return: printSubmitted event
+    """
     print("[systemEvents] Printer logging started")
     pythoncom.CoInitialize()
     c = wmi.WMI()

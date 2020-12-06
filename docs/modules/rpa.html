@@ -277,15 +277,167 @@
 </div>
 <div class="section" id="uipath-rpa-project">
 <h2>UiPath RPA project<a class="headerlink" href="#uipath-rpa-project" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The primary methods of this class to work with are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#modules.RPA.uipath.UIPathXAML.generateUiPathRPA">generateUiPathRPA()</a> - method called to start UiPath SW Robot generation process</p></li>
+<li><p><a class="reference external" href="#modules.RPA.uipath.UIPathXAML.__generateRPA">__generateRPA()</a> - Main method to generate UiPath SW robot</p></li>
+<li><p><a class="reference external" href="#modules.RPA.uipath.UIPathXAML.__generateActivities">__generateActivities()</a> - convert an event into a UiPath XML node</p></li>
+</ul>
+</div>
 <dl class="py class">
 <dt id="modules.RPA.uipath.UIPathXAML">
 <em class="property">class </em><code class="sig-prename descclassname">modules.RPA.uipath.</code><code class="sig-name descname">UIPathXAML</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">csv_file_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">status_queue</span><span class="p">:</span> <span class="n">multiprocessing.queues.Queue</span></em>, <em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/RPA/uipath.html#UIPathXAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Automatically generate RPA script compatible with UiPath. Called by
 GUI when main process is terminated and csv is available.</p>
 <dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__attachBrowser">
+<code class="sig-name descname">__attachBrowser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">activities</span><span class="p">:</span> <span class="n">list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__attachBrowser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attach browser element.
+This sequence contains browser events and it attaches to the OpenBrowser sequence created at the beginning.
+It is used every time there are browser events.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>activities</strong> – list of activities to append</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Attach browser element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__click">
+<code class="sig-name descname">__click</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xpath</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">xpath_full</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">clickType</span><span class="o">=</span><span class="default_value">'CLICK_SINGLE'</span></em>, <em class="sig-param"><span class="n">mouseButton</span><span class="o">=</span><span class="default_value">'BTN_LEFT'</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Click Item'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__click" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to click on web objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xpath</strong> – xpath of web element</p></li>
+<li><p><strong>xpath_full</strong> – full xpath of web element</p></li>
+<li><p><strong>clickType</strong> – type of click (single, double click)</p></li>
+<li><p><strong>mouseButton</strong> – button of mouse to click (left, right, middle)</p></li>
+<li><p><strong>displayName</strong> – name of click element in uipath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Click element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__closeApplication">
+<code class="sig-name descname">__closeApplication</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">app</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Start Process'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__closeApplication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to close an open application</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app</strong> – name of the application to close</p></li>
+<li><p><strong>title</strong> – title of the application window</p></li>
+<li><p><strong>displayName</strong> – name of the element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>CloseApplication element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__closeTab">
+<code class="sig-name descname">__closeTab</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__closeTab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to close tab</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>closeTab element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__closeWorkbook">
+<code class="sig-name descname">__closeWorkbook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Close Workbook'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__closeWorkbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close opened workbook</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>displayName</strong> – name of element in UiPath</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ExcelCloseWorkbook element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__comment">
+<code class="sig-name descname">__comment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create comment element
+:param text: text inside the comment
+:return: append comment to main sequence</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__createDirectory">
+<code class="sig-name descname">__createDirectory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Create file'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__createDirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to create a directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – path of directory to be created</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>CreateDirectory element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__createFile">
+<code class="sig-name descname">__createFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Create file'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__createFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to create a file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – path of file to be created</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>CreateFile element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="modules.RPA.uipath.UIPathXAML.__createMainSequence">
 <code class="sig-name descname">__createMainSequence</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__createMainSequence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create main sequence that will contain all other sequences and events and append it to root.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__createOpenBrowser">
+<code class="sig-name descname">__createOpenBrowser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__createOpenBrowser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to insert openBrowser element at the beginning of the XAML file if browser events are present in the event log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – input dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__createOpenExcel">
+<code class="sig-name descname">__createOpenExcel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__createOpenExcel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to insert openExcel element at the beginning of the XAML file if excel events are present in the event log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – input dataframe</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -296,9 +448,44 @@ GUI when main process is terminated and csv is available.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__createSequence">
+<code class="sig-name descname">__createSequence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">activities</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Do'</span></em>, <em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__createSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create UiPath sequence element, which is a container for other elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>activities</strong> – list of activities inside the sequence</p></li>
+<li><p><strong>displayName</strong> – name of the sequence</p></li>
+<li><p><strong>key</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sequence</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="modules.RPA.uipath.UIPathXAML.__createTextExpression">
 <code class="sig-name descname">__createTextExpression</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__createTextExpression" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append required text expressions to XML root</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__delete">
+<code class="sig-name descname">__delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Delete file'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to delete a file/folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – path where te file/folder is</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Delete element</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -314,6 +501,66 @@ GUI when main process is terminated and csv is available.</p>
 <p><span class="versionmodified deprecated">Deprecated since version 1.2.0: </span>Not in use anymore since decision point analysis now occurs before
 RPA script generation.</p>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__excelSpreadsheet">
+<code class="sig-name descname">__excelSpreadsheet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">workbookPath</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">password</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'{x:Null}'</span></em>, <em class="sig-param"><span class="n">attach</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Excel Application Scope'</span></em>, <em class="sig-param"><span class="n">activities</span><span class="p">:</span> <span class="n">list</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__excelSpreadsheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to handle excel spreadsheets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>workbookPath</strong> – path of workbook to open</p></li>
+<li><p><strong>password</strong> – workbook password (if present)</p></li>
+<li><p><strong>attach</strong> – if True, attaches to a workbook already opened by UiPath, without opening it again</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPAth</p></li>
+<li><p><strong>activities</strong> – list of activities to perform on opened excel workbook</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ExcelApplicationScope element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__generateActivities">
+<code class="sig-name descname">__generateActivities</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">row</span><span class="p">:</span> <span class="n">pandas.core.series.Series</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__generateActivities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper method called for each row of the dataframe to convert an event into a UiPath XML node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> – input dataframe</p></li>
+<li><p><strong>row</strong> – current row of dataframe</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>XML node</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__generateRPA">
+<code class="sig-name descname">__generateRPA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__generateRPA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main method to generate UiPath SW robot.</p>
+<p>The main steps are:</p>
+<ol class="arabic simple">
+<li><p>Add comment with SmartRPA link to UiPath file</p></li>
+<li><p>Create open browser and open excel activities if the corresponding events are present in the dataframe</p></li>
+<li><p>create activities dictionary to store XML nodes divided by category.</p></li>
+</ol>
+<p>For each row in the dataframe:</p>
+<ul class="simple">
+<li><p>generate XML node from event</p></li>
+<li><p>append node to activities dictionary based on its categoru</p></li>
+<li><p>when there is a change in category of in the last loop iteration, write nodes to main XAML sequence</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – input dataframe of trace to automate</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -333,6 +580,42 @@ RPA script generation.</p>
 <p><span class="versionmodified deprecated">Deprecated since version 1.2.0: </span>Not in use anymore since decision point analysis now occurs before
 RPA script generation.</p>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__getIdFromXpath">
+<code class="sig-name descname">__getIdFromXpath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xpath</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__getIdFromXpath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get ID of element from xpath</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>xpath</strong> – xpath of web element</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>id of element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__getIdxFromXpath">
+<code class="sig-name descname">__getIdxFromXpath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">b</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">list_index</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__getIdxFromXpath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare current xpath to previous one to find differences in index.</p>
+<p>Since XPATH selection is not supported by UiPath, CSS selection is used.
+With this method, web elements are identified using their relative index on the page.</p>
+<p>This method calculates the index of an element relative to another.</p>
+<p>For example, in a google form, 3 consecutive text field have index 0 to 3.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> – xpath of first element</p></li>
+<li><p><strong>b</strong> – xpath of second element</p></li>
+<li><p><strong>list_index</strong> – list of xpath column in dataframe</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of current element</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -363,6 +646,348 @@ RPA script generation.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__inputDialog">
+<code class="sig-name descname">__inputDialog</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">options</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Decision point'</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__inputDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create input dialog element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>options</strong> – list of options to display in dialog</p></li>
+<li><p><strong>label</strong> – label of input dialog</p></li>
+<li><p><strong>title</strong> – title of input dialog</p></li>
+<li><p><strong>displayName</strong> – name of input dialog</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>input dialog</p>
+</dd>
+</dl>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.2.0: </span>Not in use anymore since decision point analysis now occurs before
+RPA script generation.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__insertSlide">
+<code class="sig-name descname">__insertSlide</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">position</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__insertSlide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add slides to a presentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>position</strong> – where to add slides</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>InsertSlideX element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__moveFile">
+<code class="sig-name descname">__moveFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">from_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">to_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Move file'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__moveFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to move a file/folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>from_path</strong> – path where te file/folder is</p></li>
+<li><p><strong>to_path</strong> – destination path where to move the file/folder</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>MoveFile element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__navigateTo">
+<code class="sig-name descname">__navigateTo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">url</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Navigate To'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__navigateTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to navigate on a page</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – url to open</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>navigateTo element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__openApplication">
+<code class="sig-name descname">__openApplication</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arguments</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'{x:Null}'</span></em>, <em class="sig-param"><span class="n">fileName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'{x:Null}'</span></em>, <em class="sig-param"><span class="n">selector</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'{x:Null}'</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Open Application'</span></em>, <em class="sig-param"><span class="n">activities</span><span class="p">:</span> <span class="n">list</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__openApplication" title="Permalink to this definition">¶</a></dt>
+<dd><p>element to open specified application</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arguments</strong> – path of program to open</p></li>
+<li><p><strong>fileName</strong> – name of program to open</p></li>
+<li><p><strong>selector</strong> – windows selector</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+<li><p><strong>activities</strong> – list of activities</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>OpenApplication element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__openBrowser">
+<code class="sig-name descname">__openBrowser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">url</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">activities</span><span class="p">:</span> <span class="n">list</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__openBrowser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open browser. This sequence contains browser events and it’s used only once at the beginning of the project.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – open at specific url</p></li>
+<li><p><strong>activities</strong> – list of activities to append</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>append open browser sequence to main sequence</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__openFileFolder">
+<code class="sig-name descname">__openFileFolder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">itemName</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__openFileFolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>open file or folder in windows explorer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – path of file or folder to open</p></li>
+<li><p><strong>itemName</strong> – name of file or folder to open</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>OpenApplication element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__powerpointScope">
+<code class="sig-name descname">__powerpointScope</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_slides</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'PowerPoint Presentation'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__powerpointScope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to handle powerpoint events.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_slides</strong> – number of slides to add to the presentation</p></li>
+<li><p><strong>path</strong> – path of powerpoint presentation. If empty create a new file.</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>PowerPointApplicationCard element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__saveWorkbook">
+<code class="sig-name descname">__saveWorkbook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Save Workbook'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__saveWorkbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save opened workbook</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>displayName</strong> – name of element in UiPath</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ExcelSaveWorkbook element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__sendHotkey">
+<code class="sig-name descname">__sendHotkey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'{x:Null}'</span></em>, <em class="sig-param"><span class="n">modifiers</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'None'</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Send Hotkey'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__sendHotkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to type specified sequence of keys</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – letter to press</p></li>
+<li><p><strong>modifiers</strong> – modifiers to press (like CTRL, ALT, etc)</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SendHotkey element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__setToClipboard">
+<code class="sig-name descname">__setToClipboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Set to clipboard'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__setToClipboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set specified text to clipboard</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – text to be set to clipboard</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SetToClipboard element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__startProcess">
+<code class="sig-name descname">__startProcess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Start Process'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__startProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element to start specified process</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – path of process to start</p></li>
+<li><p><strong>displayName</strong> – name of element in UiPath</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>StartProcess element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__switch">
+<code class="sig-name descname">__switch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">caseActivities</span><span class="p">:</span> <span class="n">dict</span></em>, <em class="sig-param"><span class="n">defaulActivity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">condition</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'Switch'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__switch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create switch element. Before each switch, an input dialog is needed to ask the user which case to choose</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>caseActivities</strong> – dictionary of activities divided by trace</p></li>
+<li><p><strong>defaulActivity</strong> – default case to execute</p></li>
+<li><p><strong>condition</strong> – switch condition</p></li>
+<li><p><strong>displayName</strong> – name of switch element</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>switch element</p>
+</dd>
+</dl>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.2.0: </span>Not in use anymore since decision point analysis now occurs before
+RPA script generation.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__target">
+<code class="sig-name descname">__target</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xpath</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">xpath_full</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">idx</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">app</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'1000'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Target element to click on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xpath</strong> – xpath of web element</p></li>
+<li><p><strong>xpath_full</strong> – full xpath of web element</p></li>
+<li><p><strong>idx</strong> – index of element in page</p></li>
+<li><p><strong>app</strong> – name of the browser used to navigate (e.g. google chrome)</p></li>
+<li><p><strong>title</strong> – title of the window of the browser</p></li>
+<li><p><strong>timeout</strong> – timeout after which action is dismissed if element is not found</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>target element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__typeInto">
+<code class="sig-name descname">__typeInto</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">xpath</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">xpath_full</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">idx</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">app</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">displayName</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">&quot;Type into 'INPUT'&quot;</span></em>, <em class="sig-param"><span class="n">emptyField</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'1000'</span></em>, <em class="sig-param"><span class="n">newLine</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__typeInto" title="Permalink to this definition">¶</a></dt>
+<dd><p>TypeInto element to type into web fields.</p>
+<p>Uses __target() method to create target element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – text to be typed</p></li>
+<li><p><strong>xpath</strong> – xpath of web element</p></li>
+<li><p><strong>xpath_full</strong> – full xpath of web element</p></li>
+<li><p><strong>idx</strong> – index  of web element</p></li>
+<li><p><strong>app</strong> – name of the program used to navigate (e.g. google chrome)</p></li>
+<li><p><strong>title</strong> – title of the window of the browser</p></li>
+<li><p><strong>displayName</strong> – name of TypeInto element</p></li>
+<li><p><strong>emptyField</strong> – if True, field is empied before typing</p></li>
+<li><p><strong>timeout</strong> – timeout after which action is dismissed if element is not found</p></li>
+<li><p><strong>newLine</strong> – add new line after typing</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>TypeInto element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__writeCell">
+<code class="sig-name descname">__writeCell</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">sheetName</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__writeCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write excel cell</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell</strong> – position cell to write</p></li>
+<li><p><strong>sheetName</strong> – name of sheet</p></li>
+<li><p><strong>text</strong> – text to write</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ExcelWriteCell element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.__xpathToCssSelector">
+<code class="sig-name descname">__xpathToCssSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xpath</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.__xpathToCssSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert XPATH to CSS selector.</p>
+<p>The action logger records the XPATH for each web element so it can easily be identified by the SW robot.
+UiPath does not support selection of web elements using XPATH (which is more accurate), so conversion to CSS selector is needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>xpath</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.createBaseFile">
+<code class="sig-name descname">createBaseFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/RPA/uipath.html#UIPathXAML.createBaseFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.createBaseFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create base XAML file for UiPath.</p>
+<ul class="simple">
+<li><p>create root element</p></li>
+<li><p>add text expressions</p></li>
+<li><p>add main sequence</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.generateUiPathRPA">
+<code class="sig-name descname">generateUiPathRPA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">decision</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/RPA/uipath.html#UIPathXAML.generateUiPathRPA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.generateUiPathRPA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method called by GUI to start UiPath SW Robot generation process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>decision</strong> – If decision is False, dataframe of the most frequent trace is passed, else dataframe of the entire process</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.RPA.uipath.UIPathXAML.writeXmlToFile">
+<code class="sig-name descname">writeXmlToFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/RPA/uipath.html#UIPathXAML.writeXmlToFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.RPA.uipath.UIPathXAML.writeXmlToFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy UiPath template directory into current project and write XAML to file</p>
 </dd></dl>
 
 </dd></dl>

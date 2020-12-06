@@ -22,6 +22,13 @@ Python RPA script
 UiPath RPA project
 ==================
 
+.. note::
+    The primary methods of this class to work with are:
+
+    * `generateUiPathRPA() <#modules.RPA.uipath.UIPathXAML.generateUiPathRPA>`_ - method called to start UiPath SW Robot generation process
+    * `__generateRPA() <#modules.RPA.uipath.UIPathXAML.__generateRPA>`_ - Main method to generate UiPath SW robot
+    * `__generateActivities() <#modules.RPA.uipath.UIPathXAML.__generateActivities>`_ - convert an event into a UiPath XML node
+
 .. autoclass:: modules.RPA.uipath.UIPathXAML
    :members:
    :private-members:

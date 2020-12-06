@@ -11,9 +11,13 @@ from modules import consumerServer
 from utils.utils import *
 
 
-# constantly monitors clipboard for changes
-# detects 'copy' event. 'paste' event is detected by systemEvents.handleHotkey
 def logClipboard():
+    """
+    Constantly monitors clipboard for changes.
+    Detects 'copy' event. 'paste' event is detected by systemEvents.handleHotkey
+
+    :return: JSON containing clipboard event
+    """
     print("[Clipboard] Clipboard logging started...")
     recent_value = pyperclip.paste()
     while 1:

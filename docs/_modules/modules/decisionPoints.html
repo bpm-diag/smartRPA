@@ -202,9 +202,12 @@
 <div class="viewcode-block" id="DecisionPoints.handle_df"><a class="viewcode-back" href="../../modules/process_discovery.html#modules.decisionPoints.DecisionPoints.handle_df">[docs]</a>    <span class="k">def</span> <span class="nf">handle_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pre-process dataframe.</span>
-<span class="sd">        Filter irrelevant rows, add hostname column, and finally add duplicated columns to mark duplicated rows.</span>
 
-<span class="sd">        :return: processed dataframe</span>
+<span class="sd">        * filter irrelevant rows</span>
+<span class="sd">        * add hostname column</span>
+<span class="sd">        * mark duplicated rows</span>
+
+<span class="sd">        :return: processed dataframe df1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span>
 

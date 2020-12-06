@@ -1,0 +1,921 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.events.systemEvents &mdash; SmartRPA</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>modules.events.systemEvents</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.events.systemEvents</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ****************************** #</span>
+<span class="c1"># System events</span>
+<span class="c1"># Files/Folders, Clipboard, programs, hotkeys, usb</span>
+<span class="c1"># https://docs.microsoft.com/en-us/windows/win32/api/</span>
+<span class="c1"># ****************************** #</span>
+
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">path</span>
+
+<span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../&#39;</span><span class="p">)</span>  <span class="c1"># this way main file is visible from this file</span>
+<span class="kn">import</span> <span class="nn">keyboard</span>
+<span class="kn">import</span> <span class="nn">pyperclip</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">watchdog.observers</span> <span class="kn">import</span> <span class="n">Observer</span>
+<span class="kn">from</span> <span class="nn">watchdog.events</span> <span class="kn">import</span> <span class="n">RegexMatchingEventHandler</span>
+<span class="kn">from</span> <span class="nn">modules</span> <span class="kn">import</span> <span class="n">consumerServer</span>
+<span class="kn">from</span> <span class="nn">utils.utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
+<span class="kn">import</span> <span class="nn">pynput</span>
+
+<span class="n">mouse</span> <span class="o">=</span> <span class="n">pynput</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">Controller</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">WINDOWS</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pythoncom</span>  <span class="c1"># for win32 thread</span>
+    <span class="kn">import</span> <span class="nn">win32com.client</span>  <span class="c1"># access running programs, part of pywin32</span>
+    <span class="kn">import</span> <span class="nn">win32file</span>
+    <span class="kn">import</span> <span class="nn">win32event</span>
+    <span class="kn">import</span> <span class="nn">win32con</span>
+    <span class="kn">import</span> <span class="nn">wmi</span>
+    <span class="kn">from</span> <span class="nn">win32com.shell</span> <span class="kn">import</span> <span class="n">shell</span><span class="p">,</span> <span class="n">shellcon</span>
+
+<span class="k">if</span> <span class="n">MAC</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">applescript</span>
+    <span class="kn">import</span> <span class="nn">fsevents</span>
+
+<span class="n">programs_to_ignore</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sppsvc.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;WMIC.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;git.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;BackgroundTransferHost.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;backgroundTaskHost.exe&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;MusNotification.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;usocoreworker.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;GoogleUpdate.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;plugin_host.exe&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;LocalBridge.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;SearchProtocolHost.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;SearchFilterHost.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;splwow64.exe&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;printfilterpipelinesvc.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;smartscreen.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;HxTsr.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;GoogleCrashHandler.exe&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;WmiApSrv.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;ChromeNativeMessaging.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;chromenativemessaging.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;wmiapsrv.exe&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;software_reporter_tool.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;chrome.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;OUTLOOK.EXE&quot;</span><span class="p">,</span> <span class="s2">&quot;WMIADAP.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;audiodg.exe&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;OfficeC2RClient.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;FileCoAuth.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;setup.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;MicrosoftEdgeUpdate.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;MpCmdRun.exe&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;cmd.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;WmiPrvSE.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;AppHostRegistrationVerifier.exe&quot;</span><span class="p">,</span> <span class="s2">&quot;SgrmBroker.exe&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="watchFolder"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.watchFolder">[docs]</a><span class="k">def</span> <span class="nf">watchFolder</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    monitor file/folder changes on windows using system APIs</span>
+
+<span class="sd">    https://pythonhosted.org/watchdog/api.html#event-handler-classes</span>
+
+<span class="sd">    :return: file/folder changes event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">class</span> <span class="nc">WatchFilesHandler</span><span class="p">(</span><span class="n">RegexMatchingEventHandler</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="c1"># ignore hidden files</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">WatchFilesHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ignore_regexes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;^[.]</span><span class="si">{1}</span><span class="s1">.*&#39;</span><span class="p">,</span> <span class="s1">&#39;.*/[.]</span><span class="si">{1}</span><span class="s1">.*&#39;</span><span class="p">,</span> <span class="s1">&#39;.*</span><span class="se">\\</span><span class="s1">[.]</span><span class="si">{1}</span><span class="s1">.*&#39;</span><span class="p">])</span>
+
+        <span class="k">def</span> <span class="nf">on_any_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">s</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span>
+                   <span class="p">[</span><span class="s1">&#39;AppData&#39;</span><span class="p">,</span> <span class="s1">&#39;.pylint&#39;</span><span class="p">,</span> <span class="s1">&#39;.ini&#39;</span><span class="p">,</span> <span class="s1">&#39;.DS_Store&#39;</span><span class="p">,</span> <span class="s1">&#39;node_modules&#39;</span><span class="p">,</span> <span class="s1">&#39;.TMP&#39;</span><span class="p">,</span> <span class="s1">&#39;.wine&#39;</span><span class="p">]):</span>  <span class="c1"># exclude folders</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">event_type</span> <span class="o">==</span> <span class="s2">&quot;moved&quot;</span><span class="p">:</span>  <span class="c1"># destination path is available</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> OperatingSystem </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">event_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">dest_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+                        <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="s2">&quot;Finder&quot;</span> <span class="k">if</span> <span class="n">MAC</span> <span class="k">else</span> <span class="s2">&quot;Explorer&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">event_type</span><span class="p">,</span>
+                        <span class="s2">&quot;event_src_path&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">,</span>
+                        <span class="s2">&quot;event_dest_path&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">dest_path</span><span class="p">,</span>
+                        <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+                    <span class="p">})</span>
+                    <span class="c1"># return</span>
+                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">event_type</span> <span class="o">==</span> <span class="s2">&quot;modified&quot;</span><span class="p">:</span>  <span class="c1"># avoid spam</span>
+                    <span class="k">return</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># created, deleted</span>
+                    <span class="c1"># do not log temporary windows files</span>
+                    <span class="k">if</span> <span class="s2">&quot;~$&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> OperatingSystem </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">event_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+                            <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="s2">&quot;Finder&quot;</span> <span class="k">if</span> <span class="n">MAC</span> <span class="k">else</span> <span class="s2">&quot;Explorer&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">event_type</span><span class="p">,</span>
+                            <span class="s2">&quot;event_src_path&quot;</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">,</span>
+                            <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+                        <span class="p">})</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] Files/Folder logging started&quot;</span><span class="p">)</span>
+
+    <span class="n">my_observer</span> <span class="o">=</span> <span class="n">Observer</span><span class="p">()</span>
+    <span class="n">my_observer</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">WatchFilesHandler</span><span class="p">(),</span> <span class="n">HOME_FOLDER</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">my_observer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="n">my_observer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="n">my_observer</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="watchFolderMac"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.watchFolderMac">[docs]</a><span class="k">def</span> <span class="nf">watchFolderMac</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    monitor file/folder changes on mac using system APIs</span>
+
+<span class="sd">    :return: file/folder changes event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">_fsevents</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">loop</span><span class="p">,</span>
+        <span class="n">stop</span><span class="p">,</span>
+        <span class="n">schedule</span><span class="p">,</span>
+        <span class="n">unschedule</span><span class="p">,</span>
+        <span class="n">CF_POLLIN</span><span class="p">,</span>
+        <span class="n">CF_POLLOUT</span><span class="p">,</span>
+        <span class="n">FS_IGNORESELF</span><span class="p">,</span>
+        <span class="n">FS_FILEEVENTS</span><span class="p">,</span>
+        <span class="n">FS_ITEMCREATED</span><span class="p">,</span>
+        <span class="n">FS_ITEMREMOVED</span><span class="p">,</span>
+        <span class="n">FS_ITEMINODEMETAMOD</span><span class="p">,</span>
+        <span class="n">FS_ITEMRENAMED</span><span class="p">,</span>
+        <span class="n">FS_ITEMMODIFIED</span><span class="p">,</span>
+        <span class="n">FS_ITEMFINDERINFOMOD</span><span class="p">,</span>
+        <span class="n">FS_ITEMCHANGEOWNER</span><span class="p">,</span>
+        <span class="n">FS_ITEMXATTRMOD</span><span class="p">,</span>
+        <span class="n">FS_ITEMISFILE</span><span class="p">,</span>
+        <span class="n">FS_ITEMISDIR</span><span class="p">,</span>
+        <span class="n">FS_ITEMISSYMLINK</span><span class="p">,</span>
+        <span class="n">FS_EVENTIDSINCENOW</span><span class="p">,</span>
+        <span class="n">FS_FLAGEVENTIDSWRAPPED</span><span class="p">,</span>
+        <span class="n">FS_FLAGNONE</span><span class="p">,</span>
+        <span class="n">FS_FLAGHISTORYDONE</span><span class="p">,</span>
+        <span class="n">FS_FLAGROOTCHANGED</span><span class="p">,</span>
+        <span class="n">FS_FLAGKERNELDROPPED</span><span class="p">,</span>
+        <span class="n">FS_FLAGUNMOUNT</span><span class="p">,</span>
+        <span class="n">FS_FLAGMOUNT</span><span class="p">,</span>
+        <span class="n">FS_FLAGUSERDROPPED</span><span class="p">,</span>
+        <span class="n">FS_FLAGMUSTSCANSUBDIRS</span><span class="p">,</span>
+        <span class="n">FS_CFLAGFILEEVENTS</span><span class="p">,</span>
+        <span class="n">FS_CFLAGNONE</span><span class="p">,</span>
+        <span class="n">FS_CFLAGIGNORESELF</span><span class="p">,</span>
+        <span class="n">FS_CFLAGUSECFTYPES</span><span class="p">,</span>
+        <span class="n">FS_CFLAGNODEFER</span><span class="p">,</span>
+        <span class="n">FS_CFLAGWATCHROOT</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">stringmap</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">FS_FLAGMUSTSCANSUBDIRS</span><span class="p">:</span> <span class="s1">&#39;MustScanSubDirs&#39;</span><span class="p">,</span>
+        <span class="n">FS_FLAGUSERDROPPED</span><span class="p">:</span> <span class="s1">&#39;UserDropped&#39;</span><span class="p">,</span>
+        <span class="n">FS_FLAGKERNELDROPPED</span><span class="p">:</span> <span class="s1">&#39;KernelDropped&#39;</span><span class="p">,</span>
+        <span class="n">FS_FLAGEVENTIDSWRAPPED</span><span class="p">:</span> <span class="s1">&#39;EventIDsWrapped&#39;</span><span class="p">,</span>
+        <span class="n">FS_FLAGHISTORYDONE</span><span class="p">:</span> <span class="s1">&#39;HistoryDone&#39;</span><span class="p">,</span>
+        <span class="n">FS_FLAGROOTCHANGED</span><span class="p">:</span> <span class="s1">&#39;RootChanged&#39;</span><span class="p">,</span>
+        <span class="n">FS_FLAGMOUNT</span><span class="p">:</span> <span class="s1">&#39;Mount&#39;</span><span class="p">,</span>
+        <span class="n">FS_FLAGUNMOUNT</span><span class="p">:</span> <span class="s1">&#39;Unmount&#39;</span><span class="p">,</span>
+        <span class="c1"># Flags when creating the stream.</span>
+        <span class="n">FS_ITEMCREATED</span><span class="p">:</span> <span class="s1">&#39;created&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMREMOVED</span><span class="p">:</span> <span class="s1">&#39;deleted&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMINODEMETAMOD</span><span class="p">:</span> <span class="s1">&#39;ItemInodeMetaMod&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMRENAMED</span><span class="p">:</span> <span class="s1">&#39;moved&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMMODIFIED</span><span class="p">:</span> <span class="s1">&#39;modified&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMFINDERINFOMOD</span><span class="p">:</span> <span class="s1">&#39;ItemFinderInfoMod&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMCHANGEOWNER</span><span class="p">:</span> <span class="s1">&#39;ItemChangedOwner&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMXATTRMOD</span><span class="p">:</span> <span class="s1">&#39;ItemXAttrMod&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMISFILE</span><span class="p">:</span> <span class="s1">&#39;ItemIsFile&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMISDIR</span><span class="p">:</span> <span class="s1">&#39;ItemIsDir&#39;</span><span class="p">,</span>
+        <span class="n">FS_ITEMISSYMLINK</span><span class="p">:</span> <span class="s1">&#39;ItemIsSymlink&#39;</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_maskToString</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">stringmap</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="n">k</span><span class="p">:</span>
+                <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vals</span>
+
+    <span class="c1"># I need to save events already logged for each path otherwise the callback is called in loop after every event</span>
+    <span class="n">logged</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">file_event</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">file_event</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">event_type</span> <span class="o">=</span> <span class="n">_maskToString</span><span class="p">(</span><span class="n">file_event</span><span class="o">.</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># this callback is called endlessly by the stream but I want to log the event only once. To fix this I create</span>
+        <span class="c1"># a dictionary with the file_path as key and the event_type occurred as value. In this way I log an event for</span>
+        <span class="c1"># the same path only once. Every time, the event type for a specific path is updated. The dictionary is like</span>
+        <span class="c1"># {&#39;/Users/marco/Desktop/test.txt&#39;: &#39;ItemCreated&#39;}</span>
+        <span class="c1"># insert key and value in dictionary the first time if doesn&#39;t exist</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">logged</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="n">logged</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1"># ~ means temporary file</span>
+        <span class="k">if</span> <span class="n">event_type</span> <span class="o">!=</span> <span class="s2">&quot;UserDropped&quot;</span> <span class="ow">and</span> <span class="n">event_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">logged</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;~&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_event</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">logged</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_type</span>
+            <span class="c1"># file_extension = os.path.splitext(path)[1]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> OperatingSystem </span><span class="si">{</span><span class="n">event_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">file_event</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+                <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="s2">&quot;Finder&quot;</span> <span class="k">if</span> <span class="n">MAC</span> <span class="k">else</span> <span class="s2">&quot;Explorer&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span>
+                <span class="s2">&quot;event_src_path&quot;</span><span class="p">:</span> <span class="n">file_event</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+            <span class="p">})</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] Files/Folder logging started&quot;</span><span class="p">)</span>
+    <span class="n">observer</span> <span class="o">=</span> <span class="n">fsevents</span><span class="o">.</span><span class="n">Observer</span><span class="p">()</span>
+    <span class="c1"># Streams can observe any number of paths so I have to pass each path manually. In windows version I just pass</span>
+    <span class="c1"># the HOME directory and it recursively observes all other folders but this does not work on macOS. Moreover the</span>
+    <span class="c1"># home directory itself can&#39;t be observed.</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">fsevents</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span>
+                             <span class="n">DESKTOP</span><span class="p">,</span> <span class="n">DOCUMENTS</span><span class="p">,</span> <span class="n">DOWNLOADS</span><span class="p">,</span>
+                             <span class="n">file_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">observer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">observer</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logProcessesWin"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.logProcessesWin">[docs]</a><span class="k">def</span> <span class="nf">logProcessesWin</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Detects programs opened and closed on windows.</span>
+
+<span class="sd">    Works by querying list of open programs every 0.5 seconds and determining if something has been added or removed to that list.</span>
+
+<span class="sd">    :return: programOpen/programClose event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] WIN Processes logging started&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_logProcessData</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exe</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">exe</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">psutil</span><span class="o">.</span><span class="n">process_iter</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="o">==</span> <span class="n">app</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">PermissionError</span><span class="p">,</span> <span class="n">psutil</span><span class="o">.</span><span class="n">AccessDenied</span><span class="p">):</span>
+            <span class="n">exe</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">exe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">exe</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+            <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="n">app</span><span class="p">,</span>
+            <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">event</span><span class="p">,</span>
+            <span class="s2">&quot;event_src_path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+            <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+        <span class="p">})</span>
+
+    <span class="n">new_programs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># needed later to initialize &#39;closed&#39; set</span>
+    <span class="n">new_programs_len</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># needed later to check if &#39;new_programs&#39; set changes</span>
+    <span class="n">open_programs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># maintain set of open programs so I don&#39;t have duplicates when logging events</span>
+
+    <span class="n">running</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">psutil</span><span class="o">.</span><span class="n">process_iter</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">programs_to_ignore</span><span class="p">]</span>
+
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">started</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">psutil</span><span class="o">.</span><span class="n">process_iter</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">programs_to_ignore</span><span class="p">]</span>
+
+        <span class="n">closed</span> <span class="o">=</span> <span class="n">new_programs</span>
+        <span class="c1"># check the difference between the new set and the original to find new processes</span>
+        <span class="n">new_programs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">started</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">running</span><span class="p">)</span>
+        <span class="c1"># find programs that are not in new_programs set anymore so they have been closed</span>
+        <span class="n">closed_programs</span> <span class="o">=</span> <span class="n">closed</span> <span class="o">-</span> <span class="n">new_programs</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_programs</span><span class="p">)</span> <span class="o">!=</span> <span class="n">new_programs_len</span><span class="p">:</span>  <span class="c1"># set is changed</span>
+            <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">new_programs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">app</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">open_programs</span><span class="p">:</span>
+                    <span class="n">open_programs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+                    <span class="n">_logProcessData</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s2">&quot;programOpen&quot;</span><span class="p">)</span>
+            <span class="n">new_programs_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_programs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">closed_programs</span><span class="p">):</span>  <span class="c1"># set is not empty</span>
+            <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">closed_programs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">open_programs</span><span class="p">:</span>
+                    <span class="n">open_programs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+                    <span class="n">_logProcessData</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s2">&quot;programClose&quot;</span><span class="p">)</span>
+
+        <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># seconds</span></div>
+
+
+<div class="viewcode-block" id="watchRecentsFilesWin"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.watchRecentsFilesWin">[docs]</a><span class="k">def</span> <span class="nf">watchRecentsFilesWin</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Log files and folders recently opened on Windows</span>
+
+<span class="sd">    :return: openFile/openFolder event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ACTIONS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Created&quot;</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Deleted&quot;</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Updated&quot;</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;Renamed to something&quot;</span><span class="p">,</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="s2">&quot;Renamed from something&quot;</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_watch_path</span><span class="p">(</span><span class="n">path_to_watch</span><span class="p">,</span> <span class="n">include_subdirectories</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">FILE_LIST_DIRECTORY</span> <span class="o">=</span> <span class="mh">0x0001</span>
+        <span class="n">hDir</span> <span class="o">=</span> <span class="n">win32file</span><span class="o">.</span><span class="n">CreateFile</span><span class="p">(</span>
+            <span class="n">path_to_watch</span><span class="p">,</span>
+            <span class="n">FILE_LIST_DIRECTORY</span><span class="p">,</span>
+            <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_SHARE_READ</span> <span class="o">|</span> <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_SHARE_WRITE</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="n">win32con</span><span class="o">.</span><span class="n">OPEN_EXISTING</span><span class="p">,</span>
+            <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_FLAG_BACKUP_SEMANTICS</span><span class="p">,</span>
+            <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">win32file</span><span class="o">.</span><span class="n">ReadDirectoryChangesW</span><span class="p">(</span>
+                <span class="n">hDir</span><span class="p">,</span>
+                <span class="mi">1024</span><span class="p">,</span>
+                <span class="n">include_subdirectories</span><span class="p">,</span>
+                <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_NOTIFY_CHANGE_FILE_NAME</span> <span class="o">|</span>
+                <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_NOTIFY_CHANGE_DIR_NAME</span> <span class="o">|</span>
+                <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_NOTIFY_CHANGE_ATTRIBUTES</span> <span class="o">|</span>
+                <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_NOTIFY_CHANGE_SIZE</span> <span class="o">|</span>
+                <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_NOTIFY_CHANGE_LAST_WRITE</span> <span class="o">|</span>
+                <span class="n">win32con</span><span class="o">.</span><span class="n">FILE_NOTIFY_CHANGE_SECURITY</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">action</span><span class="p">,</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="n">full_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_watch</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_filename</span><span class="p">):</span>
+                    <span class="n">file_type</span> <span class="o">=</span> <span class="s2">&quot;&lt;deleted&gt;&quot;</span>
+                <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">full_filename</span><span class="p">):</span>
+                    <span class="n">file_type</span> <span class="o">=</span> <span class="s1">&#39;folder&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_type</span> <span class="o">=</span> <span class="s1">&#39;file&#39;</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">file_type</span><span class="p">,</span> <span class="n">full_filename</span><span class="p">,</span> <span class="n">ACTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">))</span>
+
+    <span class="k">class</span> <span class="nc">Watcher</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_watch</span><span class="p">,</span> <span class="n">results_queue</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+            <span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path_to_watch</span> <span class="o">=</span> <span class="n">path_to_watch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results_queue</span> <span class="o">=</span> <span class="n">results_queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">_watch_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_watch</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">results_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="c1"># return full path of shortcut lnk</span>
+    <span class="k">def</span> <span class="nf">_shortcut_target</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="n">pythoncom</span><span class="o">.</span><span class="n">CoInitialize</span><span class="p">()</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">pythoncom</span><span class="o">.</span><span class="n">CoCreateInstance</span><span class="p">(</span>
+            <span class="n">shell</span><span class="o">.</span><span class="n">CLSID_ShellLink</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="n">pythoncom</span><span class="o">.</span><span class="n">CLSCTX_INPROC_SERVER</span><span class="p">,</span>
+            <span class="n">shell</span><span class="o">.</span><span class="n">IID_IShellLink</span>
+        <span class="p">)</span>
+        <span class="n">link</span><span class="o">.</span><span class="n">QueryInterface</span><span class="p">(</span><span class="n">pythoncom</span><span class="o">.</span><span class="n">IID_IPersistFile</span><span class="p">)</span><span class="o">.</span><span class="n">Load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">GetPath</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">SLGP_UNCPRIORITY</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">name</span>
+
+    <span class="n">files_changed</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+    <span class="n">Watcher</span><span class="p">(</span><span class="n">RECENT_ITEMS_PATH_WIN</span><span class="p">,</span> <span class="n">files_changed</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] Recent files/folders logging started&quot;</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_type</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">action</span> <span class="o">=</span> <span class="n">files_changed</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;Created&quot;</span><span class="p">:</span>
+                <span class="n">lnk_target</span> <span class="o">=</span> <span class="n">_shortcut_target</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">file_extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">lnk_target</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">file_extension</span><span class="p">:</span>
+                    <span class="n">eventType</span> <span class="o">=</span> <span class="s2">&quot;openFile&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">eventType</span> <span class="o">=</span> <span class="s2">&quot;openFolder&quot;</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> OperatingSystem </span><span class="si">{</span><span class="n">eventType</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">lnk_target</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+                    <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                    <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="s2">&quot;Finder&quot;</span> <span class="k">if</span> <span class="n">MAC</span> <span class="k">else</span> <span class="s2">&quot;Explorer&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">eventType</span><span class="p">,</span>
+                    <span class="s2">&quot;event_src_path&quot;</span><span class="p">:</span> <span class="n">lnk_target</span><span class="p">,</span>
+                    <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+                <span class="p">})</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="detectSelectionWindowsExplorer"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.detectSelectionWindowsExplorer">[docs]</a><span class="k">def</span> <span class="nf">detectSelectionWindowsExplorer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Log currently selected files in windows explorer</span>
+
+<span class="sd">    Every 0.8 seconds it queries File explorer to check for selection.</span>
+
+<span class="sd">    :return: selectedFile/selectedFolder event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] detectSelectionWindowsExplorer logging started&quot;</span><span class="p">)</span>
+    <span class="c1"># used for threads</span>
+    <span class="n">pythoncom</span><span class="o">.</span><span class="n">CoInitialize</span><span class="p">()</span>
+    <span class="c1"># look in the makepy output for IE for the &#39;CLSIDToClassMap&#39; dictionary, and find the entry for &#39;ShellWindows&#39;</span>
+    <span class="n">CLSID</span> <span class="o">=</span> <span class="s1">&#39;{9BA05972-F6A8-11CF-A442-00A0C90A8F39}&#39;</span>
+    <span class="n">ShellWindows</span> <span class="o">=</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">(</span><span class="n">CLSID</span><span class="p">)</span>
+    <span class="c1"># contains selected files. Used dictionary instead of list because I have to keep track of selected files for</span>
+    <span class="c1"># each window in explorer, so the dictionary key is the window id and the value is a list of all selected files</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ShellWindows</span><span class="o">.</span><span class="n">Count</span><span class="p">):</span>
+                <span class="c1"># add key to dictionary</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">selected</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                    <span class="n">selected</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># explorerPath = ShellWindows[i].LocationURL</span>
+                <span class="n">selectedItems</span> <span class="o">=</span> <span class="n">ShellWindows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Document</span><span class="o">.</span><span class="n">SelectedItems</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">selectedItems</span><span class="o">.</span><span class="n">Count</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">selected</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">selectedItems</span><span class="o">.</span><span class="n">Count</span><span class="p">):</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="n">selectedItems</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">.</span><span class="n">Path</span>
+                        <span class="k">if</span> <span class="n">path</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selected</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                            <span class="n">selected</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                            <span class="c1"># file_extension = os.path.splitext(path)[1]</span>
+                            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                                <span class="n">eventType</span> <span class="o">=</span> <span class="s2">&quot;selectedFile&quot;</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">eventType</span> <span class="o">=</span> <span class="s2">&quot;selectedFolder&quot;</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> OperatingSystem </span><span class="si">{</span><span class="n">eventType</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+                                <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="s2">&quot;Explorer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">eventType</span><span class="p">,</span>
+                                <span class="s2">&quot;event_src_path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+                                <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+                            <span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># print(e)</span>
+            <span class="k">continue</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logHotkeys"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.logHotkeys">[docs]</a><span class="k">def</span> <span class="nf">logHotkeys</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Log hotkeys using &#39;keyboard&#39; python package.</span>
+
+<span class="sd">    All supported hotkeys are store in &#39;keys_to_detect&#39; dictionary.</span>
+
+<span class="sd">    Once a supported hotkey is detected, a new thread is started to handle the event.</span>
+
+<span class="sd">    :return: hotkeys event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] Hotkey logging started...&quot;</span><span class="p">)</span>
+    <span class="c1"># https://www.hongkiat.com/blog/100-keyboard-shortcuts-windows/</span>
+    <span class="n">keys_to_detect</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;alt+d&#39;</span><span class="p">:</span> <span class="s1">&#39;Select address bar&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;alt+F4&#39;</span><span class="p">:</span> <span class="s1">&#39;Close window&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;alt+esc&#39;</span><span class="p">:</span> <span class="s1">&#39;Cycle through windows&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;alt+tab&#39;</span><span class="p">:</span> <span class="s1">&#39;Cycle through open apps&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;alt+enter&#39;</span><span class="p">:</span> <span class="s1">&#39;Display item properties&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;alt+space+n&#39;</span><span class="p">:</span> <span class="s1">&#39;Minimise window&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;alt+space+x&#39;</span><span class="p">:</span> <span class="s1">&#39;Maximise window&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+a&#39;</span><span class="p">:</span> <span class="s1">&#39;Select all&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;ctrl+c&#39;: &#39;Copy&#39;, # handled by clipboardEvents</span>
+        <span class="s1">&#39;ctrl+d&#39;</span><span class="p">:</span> <span class="s1">&#39;Delete selected item&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+e&#39;</span><span class="p">:</span> <span class="s1">&#39;Select search box&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+f&#39;</span><span class="p">:</span> <span class="s1">&#39;Find&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+h&#39;</span><span class="p">:</span> <span class="s1">&#39;Find and replace&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+n&#39;</span><span class="p">:</span> <span class="s1">&#39;New&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+r&#39;</span><span class="p">:</span> <span class="s1">&#39;Refresh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+s&#39;</span><span class="p">:</span> <span class="s1">&#39;Save&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+p&#39;</span><span class="p">:</span> <span class="s1">&#39;Print&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;ctrl+v&#39;: &#39;Paste&#39;,</span>
+        <span class="s1">&#39;ctrl+w&#39;</span><span class="p">:</span> <span class="s1">&#39;Close window&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+x&#39;</span><span class="p">:</span> <span class="s1">&#39;Cut&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+y&#39;</span><span class="p">:</span> <span class="s1">&#39;Undo&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+z&#39;</span><span class="p">:</span> <span class="s1">&#39;Redo&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ctrl+shift+t&#39;</span><span class="p">:</span> <span class="s1">&#39;Reopen closed tab&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;win+tab&#39;</span><span class="p">:</span> <span class="s1">&#39;Cycle through apps&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;win+d&#39;</span><span class="p">:</span> <span class="s1">&#39;Show/Hide desktop&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;win+e&#39;</span><span class="p">:</span> <span class="s1">&#39;Open explorer&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;win+f&#39;</span><span class="p">:</span> <span class="s1">&#39;Search for files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;win+i&#39;</span><span class="p">:</span> <span class="s1">&#39;Open settings&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;win+m&#39;</span><span class="p">:</span> <span class="s1">&#39;Minimize all windows&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;win+p&#39;</span><span class="p">:</span> <span class="s1">&#39;Choose presentation display mode&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;win+r&#39;</span><span class="p">:</span> <span class="s1">&#39;Run&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F1&#39;</span><span class="p">:</span> <span class="s1">&#39;Help&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F2&#39;</span><span class="p">:</span> <span class="s1">&#39;Rename&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F3&#39;</span><span class="p">:</span> <span class="s1">&#39;Search&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F5&#39;</span><span class="p">:</span> <span class="s1">&#39;Refresh&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">handleH</span><span class="p">(</span><span class="n">hotkey</span><span class="p">):</span>
+        <span class="n">window_name</span> <span class="o">=</span> <span class="n">getActiveWindowName</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">appName</span> <span class="o">=</span> <span class="n">window_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">appName</span> <span class="o">=</span> <span class="s2">&quot;Keyboard&quot;</span>
+        <span class="n">meaning</span> <span class="o">=</span> <span class="n">keys_to_detect</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hotkey</span><span class="p">)</span>
+        <span class="n">event_type</span> <span class="o">=</span> <span class="s2">&quot;hotkey&quot;</span>
+        <span class="n">clipboard_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">hotkey</span> <span class="o">==</span> <span class="s2">&quot;ctrl+x&quot;</span><span class="p">:</span>
+            <span class="n">event_type</span> <span class="o">=</span> <span class="s2">&quot;cut&quot;</span>
+            <span class="n">clipboard_content</span> <span class="o">=</span> <span class="n">pyperclip</span><span class="o">.</span><span class="n">paste</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">hotkey</span> <span class="o">==</span> <span class="s2">&quot;ctrl+h&quot;</span> <span class="ow">and</span> <span class="s1">&#39;chrome&#39;</span> <span class="ow">in</span> <span class="n">appName</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">meaning</span> <span class="o">=</span> <span class="s2">&quot;Show history&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> OperatingSystem </span><span class="si">{</span><span class="n">event_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">hotkey</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">meaning</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">clipboard_content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+            <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="n">appName</span><span class="p">,</span>
+            <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">window_name</span><span class="p">,</span>
+            <span class="s2">&quot;hotkey&quot;</span><span class="p">:</span> <span class="n">hotkey</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">meaning</span><span class="p">,</span>
+            <span class="s2">&quot;clipboard_content&quot;</span><span class="p">:</span> <span class="n">clipboard_content</span><span class="p">,</span>
+            <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+        <span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">handleHotkey</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">handleH</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys_to_detect</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">keyboard</span><span class="o">.</span><span class="n">add_hotkey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">handleHotkey</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="n">keyboard</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="logPasteHotkey"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.logPasteHotkey">[docs]</a><span class="k">def</span> <span class="nf">logPasteHotkey</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Paste hotkey is handled separately for performance reasons.</span>
+<span class="sd">    Once the hotkey is detected, a thread is started to handle the event.</span>
+
+<span class="sd">    :return: paste hotkey</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">handleCB</span><span class="p">():</span>
+        <span class="c1"># paste event in browser is handled separately so this should log only if I&#39;m not in browser</span>
+        <span class="n">browsers</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;chrome&quot;</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;firefox&quot;</span><span class="p">,</span> <span class="s2">&quot;opera&quot;</span><span class="p">]</span>
+        <span class="n">window_name</span> <span class="o">=</span> <span class="n">getActiveWindowName</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">any</span><span class="p">(</span><span class="n">b</span> <span class="ow">in</span> <span class="n">window_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">browsers</span><span class="p">)):</span>
+            <span class="n">clipboard_content</span> <span class="o">=</span> <span class="n">pyperclip</span><span class="o">.</span><span class="n">paste</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">appName</span> <span class="o">=</span> <span class="n">window_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">appName</span> <span class="o">=</span> <span class="s2">&quot;Clipboard&quot;</span>
+            <span class="c1"># remove milliseconds from timestamp so duplicated events are easier to remove</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">()[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;000&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> OperatingSystem paste CTRL+V Paste </span><span class="si">{</span><span class="n">clipboard_content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">ts</span><span class="p">,</span>
+                <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="n">appName</span><span class="p">,</span>
+                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">window_name</span><span class="p">,</span>
+                <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="s1">&#39;paste&#39;</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s1">&#39;Paste&#39;</span><span class="p">,</span>
+                <span class="s2">&quot;clipboard_content&quot;</span><span class="p">:</span> <span class="n">clipboard_content</span>
+            <span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">handleHotkey</span><span class="p">():</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">handleCB</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="n">keyboard</span><span class="o">.</span><span class="n">add_hotkey</span><span class="p">(</span><span class="s1">&#39;ctrl+v&#39;</span><span class="p">,</span> <span class="n">handleHotkey</span><span class="p">)</span>
+    <span class="n">keyboard</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="logUSBDrives"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.logUSBDrives">[docs]</a><span class="k">def</span> <span class="nf">logUSBDrives</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    logs insertion and removal of usb drives</span>
+
+<span class="sd">    :return: insertUSB event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_queryWinDrives</span><span class="p">():</span>
+        <span class="n">pythoncom</span><span class="o">.</span><span class="n">CoInitialize</span><span class="p">()</span>
+        <span class="n">strComputer</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span>
+        <span class="n">objWMIService</span> <span class="o">=</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">(</span><span class="s2">&quot;WbemScripting.SWbemLocator&quot;</span><span class="p">)</span>
+        <span class="n">objSWbemServices</span> <span class="o">=</span> <span class="n">objWMIService</span><span class="o">.</span><span class="n">ConnectServer</span><span class="p">(</span><span class="n">strComputer</span><span class="p">,</span> <span class="s2">&quot;root\cimv2&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 1. Win32_DiskDrive</span>
+        <span class="n">colItems</span> <span class="o">=</span> <span class="n">objSWbemServices</span><span class="o">.</span><span class="n">ExecQuery</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM Win32_DiskDrive WHERE InterfaceType = </span><span class="se">\&quot;</span><span class="s2">USB</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">colItems</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">DiskDrive_DeviceID</span> <span class="o">=</span> <span class="n">colItems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">DeviceID</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">DiskDrive_Caption</span> <span class="o">=</span> <span class="n">colItems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Caption</span>
+
+            <span class="c1"># 2. Win32_DiskDriveToDiskPartition</span>
+            <span class="n">colItems</span> <span class="o">=</span> <span class="n">objSWbemServices</span><span class="o">.</span><span class="n">ExecQuery</span><span class="p">(</span><span class="s2">&quot;SELECT * from Win32_DiskDriveToDiskPartition&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">objItem</span> <span class="ow">in</span> <span class="n">colItems</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">DiskDrive_DeviceID</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">objItem</span><span class="o">.</span><span class="n">Antecedent</span><span class="p">):</span>
+                    <span class="n">DiskPartition_DeviceID</span> <span class="o">=</span> <span class="n">objItem</span><span class="o">.</span><span class="n">Dependent</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="c1"># 3. Win32_LogicalDiskToPartition</span>
+            <span class="n">colItems</span> <span class="o">=</span> <span class="n">objSWbemServices</span><span class="o">.</span><span class="n">ExecQuery</span><span class="p">(</span><span class="s2">&quot;SELECT * from Win32_LogicalDiskToPartition&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">objItem</span> <span class="ow">in</span> <span class="n">colItems</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">DiskPartition_DeviceID</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">objItem</span><span class="o">.</span><span class="n">Antecedent</span><span class="p">):</span>
+                    <span class="n">LogicalDisk_DeviceID</span> <span class="o">=</span> <span class="n">objItem</span><span class="o">.</span><span class="n">Dependent</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">LogicalDisk_DeviceID</span><span class="p">,</span> <span class="n">DiskDrive_Caption</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] USB drives logging started...&quot;</span><span class="p">)</span>
+    <span class="n">drive_list</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">LogicalDisk_DeviceID</span><span class="p">,</span> <span class="n">DiskDrive_Caption</span> <span class="o">=</span> <span class="n">_queryWinDrives</span><span class="p">()</span>
+        <span class="c1"># if there is at least one usb drive insterted</span>
+        <span class="k">if</span> <span class="n">LogicalDisk_DeviceID</span> <span class="ow">and</span> <span class="n">DiskDrive_Caption</span><span class="p">:</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="n">LogicalDisk_DeviceID</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">drive_list</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">drive_list</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">DiskDrive_Caption</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> OperatingSystem insertUSB </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">DiskDrive_Caption</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+                    <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                    <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="s2">&quot;Explorer&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="s2">&quot;insertUSB&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">id</span><span class="p">,</span>
+                    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">DiskDrive_Caption</span><span class="p">,</span>
+                <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">drive_list</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logProcessesMac"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.logProcessesMac">[docs]</a><span class="k">def</span> <span class="nf">logProcessesMac</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    detects programs opened and closed on mac.</span>
+
+<span class="sd">    Works by querying list of open programs every 2 seconds and determining if something has been added or removed to that list.</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] MAC Processes logging started&quot;</span><span class="p">)</span>
+    <span class="n">running</span> <span class="o">=</span> <span class="n">applescript</span><span class="o">.</span><span class="n">tell</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="s2">&quot;System Events&quot;</span><span class="p">,</span> <span class="s2">&quot;name of every process where background only is false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+        <span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">new_programs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># needed later to initialize &#39;closed&#39; set</span>
+    <span class="n">new_programs_len</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">open_programs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">started</span> <span class="o">=</span> <span class="n">applescript</span><span class="o">.</span><span class="n">tell</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="s2">&quot;System Events&quot;</span><span class="p">,</span>
+                                       <span class="s2">&quot;name of every process where background only is false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">closed</span> <span class="o">=</span> <span class="n">new_programs</span>
+        <span class="n">new_programs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">started</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">running</span><span class="p">)</span>
+        <span class="n">closed_programs</span> <span class="o">=</span> <span class="n">closed</span> <span class="o">-</span> <span class="n">new_programs</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_programs</span><span class="p">)</span> <span class="o">!=</span> <span class="n">new_programs_len</span><span class="p">:</span>  <span class="c1"># set is changed</span>
+            <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">new_programs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">app</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">open_programs</span><span class="p">:</span>
+                    <span class="n">open_programs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> programOpen </span><span class="si">{</span><span class="n">app</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">.app&quot;</span><span class="p">)</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+                        <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="n">app</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                        <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="s2">&quot;programOpen&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;event_src_path&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/Applications/</span><span class="si">{</span><span class="n">app</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">.app&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+                    <span class="p">})</span>
+            <span class="n">new_programs_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_programs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">closed_programs</span><span class="p">):</span>  <span class="c1"># set is not empty</span>
+            <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">closed_programs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">open_programs</span><span class="p">:</span>
+                    <span class="n">open_programs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">USER</span><span class="si">}</span><span class="s2"> programClose </span><span class="si">{</span><span class="n">app</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">.app&quot;</span><span class="p">)</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+                        <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+                        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="n">app</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                        <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="s2">&quot;programClose&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;event_src_path&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;/Applications/</span><span class="si">{</span><span class="n">app</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">.app&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;mouse_coord&quot;</span><span class="p">:</span> <span class="n">mouse</span><span class="o">.</span><span class="n">position</span>
+                    <span class="p">})</span>
+
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="printerLogger"><a class="viewcode-back" href="../../../modules/action_logger.html#modules.events.systemEvents.printerLogger">[docs]</a><span class="k">def</span> <span class="nf">printerLogger</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Watchfor activity at the installed printers (works also with network printers).</span>
+
+<span class="sd">    :return: printSubmitted event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[systemEvents] Printer logging started&quot;</span><span class="p">)</span>
+    <span class="n">pythoncom</span><span class="o">.</span><span class="n">CoInitialize</span><span class="p">()</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">wmi</span><span class="o">.</span><span class="n">WMI</span><span class="p">()</span>
+    <span class="n">print_job_watcher</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">watch_for</span><span class="p">(</span>
+        <span class="n">notification_type</span><span class="o">=</span><span class="s2">&quot;Creation&quot;</span><span class="p">,</span>
+        <span class="n">wmi_class</span><span class="o">=</span><span class="s2">&quot;Win32_PrintJob&quot;</span><span class="p">,</span>
+        <span class="n">delay_secs</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">pj</span> <span class="o">=</span> <span class="n">print_job_watcher</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">timestamp</span><span class="p">()</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">pj</span><span class="o">.</span><span class="n">Owner</span><span class="si">}</span><span class="s2"> OperatingSystem printSubmitted </span><span class="si">{</span><span class="n">pj</span><span class="o">.</span><span class="n">Name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">SERVER_ADDR</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span>
+            <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">USER</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;OperatingSystem&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;application&quot;</span><span class="p">:</span> <span class="s2">&quot;Printer&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="s2">&quot;printSubmitted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">pj</span><span class="o">.</span><span class="n">Name</span>
+        <span class="p">})</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, marco2012
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

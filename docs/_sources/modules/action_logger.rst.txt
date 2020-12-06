@@ -11,25 +11,79 @@ The Action Logger can be used to record a wide range of UI actions from multiple
 Operating System
 ================
 
+OS
+--
+
 .. automodule:: modules.events.systemEvents
    :members:
    :private-members:
+
+Clipboard
+---------
 
 .. automodule:: modules.events.clipboardEvents
    :members:
    :private-members:
 
+Mouse
+-----
+
 .. automodule:: modules.events.mouseEvents
    :members:
    :private-members:
 
-.. note::
-    Mouse events are deprecated, not in use.
-
 Microsoft Office
 ================
 
+Microsoft Office events are logged using native COM APIs on windows while Excel on macOS is logged using a custom JavaScript AddIn.
+
+.. note::
+    For each office application there are two components in the code:
+
+    * a function, triggered by the action logger and responsible for handling events
+    * a class, which is the interface used to communicate with the application's APIs
+
+Excel
+-----
+
 .. automodule:: modules.events.officeEvents
+   :members: excelEvents, excelEventsMacServer
+   :private-members:
+
+.. autoclass:: modules.events.officeEvents.ExcelEvents
+   :members:
+   :private-members:
+
+Word
+----
+
+.. automodule:: modules.events.officeEvents
+   :members: wordEvents
+   :private-members:
+
+.. autoclass:: modules.events.officeEvents.WordEvents
+   :members:
+   :private-members:
+
+PowerPoint
+----------
+
+.. automodule:: modules.events.officeEvents
+   :members: powerpointEvents
+   :private-members:
+
+.. autoclass:: modules.events.officeEvents.PowerpointEvents
+   :members:
+   :private-members:
+
+Outlook
+-------
+
+.. automodule:: modules.events.officeEvents
+   :members: outlookEvents
+   :private-members:
+
+.. autoclass:: modules.events.officeEvents.OutlookEvents
    :members:
    :private-members:
 
@@ -38,7 +92,11 @@ Browser
 
 .. note::
     Browser events are handled in the browser extension written in JavaScript.
-    It is available under ``extensions/browserLogger``
+
+    In particular:
+
+    * Browser application events (e.g. newTab, zoomTab, resizeWindow, ...) are handled in ``extensions/browserLogger/background_script.js``
+    * Web page events (e.g. click, type, submit, ...) are handled in ``extensions/browserLogger/content_script.js``
 
 Logging Server
 ==============

@@ -2,6 +2,10 @@
 SmartRPA documentation
 ======================
 
+.. figure:: ../../images/readme-header.png
+   :figwidth: 80%
+   :align: center
+
 What is SmartRPA
 ================
 
@@ -33,7 +37,7 @@ Architecture
 The architecture of SmartRPA integrates five main SW components.
 
 .. figure:: ../../images/architecture.jpeg
-   :figwidth: 450px
+   :figwidth: 60%
    :align: center
 
 Key features include:
@@ -49,6 +53,9 @@ A list of events supported by the Action Logger is available in `SmartRPA_events
 
 `Installation and execution  <https://github.com/bpm-diag/smartRPA/#installation-and-execution>`_
 =================================================================================================
+
+`Download  <https://github.com/bpm-diag/smartRPA/releases>`_
+============================================================
 
 Contents
 ========

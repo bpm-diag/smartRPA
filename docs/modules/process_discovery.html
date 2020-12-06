@@ -222,11 +222,15 @@
 <dl class="py method">
 <dt id="modules.decisionPoints.DecisionPoints.handle_df">
 <code class="sig-name descname">handle_df</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/decisionPoints.html#DecisionPoints.handle_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.decisionPoints.DecisionPoints.handle_df" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pre-process dataframe.
-Filter irrelevant rows, add hostname column, and finally add duplicated columns to mark duplicated rows.</p>
+<dd><p>Pre-process dataframe.</p>
+<ul class="simple">
+<li><p>filter irrelevant rows</p></li>
+<li><p>add hostname column</p></li>
+<li><p>mark duplicated rows</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>processed dataframe</p>
+<dd class="field-odd"><p>processed dataframe df1</p>
 </dd>
 </dl>
 </dd></dl>
@@ -244,6 +248,15 @@ Filter irrelevant rows, add hostname column, and finally add duplicated columns 
 
 </dd></dl>
 
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The it-h row of a routine trace is considered as duplicated if it includes an event that is exactly the same in the it-h row of all the other routine traces. We evaluate two events as identical if the following data fields have the same value for the event in the it-h row in all the recorded routine traces:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span>        <span class="bp">self</span><span class="o">.</span><span class="n">duplication_subset</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="s1">&#39;application&#39;</span><span class="p">,</span> <span class="s1">&#39;concept:name&#39;</span><span class="p">,</span> <span class="s1">&#39;event_src_path&#39;</span><span class="p">,</span> <span class="s1">&#39;event_dest_path&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;browser_url_hostname&#39;</span><span class="p">,</span> <span class="s1">&#39;xpath&#39;</span><span class="p">]</span>  <span class="c1"># &#39;tag_value&#39;, &#39;clipboard_content&#39;, &#39;cell_range&#39;</span>
+</pre></div>
+</td></tr></table></div>
+</div>
 </div>
 <div class="section" id="most-frequent-routine">
 <h2>Most frequent routine<a class="headerlink" href="#most-frequent-routine" title="Permalink to this headline">¶</a></h2>

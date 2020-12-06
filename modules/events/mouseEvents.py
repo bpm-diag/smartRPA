@@ -3,9 +3,15 @@ path.append('../../')  # this way main file is visible from this file
 from pynput import mouse
 import utils.utils
 from modules import consumerServer
+from deprecated.sphinx import deprecated
 
 
+@deprecated(version='1.1.0',
+            reason="Not in use anymore.")
 def logMouse():
+    """
+    Log mouse coordinates on click in excel
+    """
     print("[Mouse] Mouse logging started...")
 
     def _on_click(x, y, button, pressed):

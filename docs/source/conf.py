@@ -35,7 +35,7 @@ copyright = '2020, marco2012'
 author = 'marco2012'
 
 # The full version, including alpha/beta/rc tags
-release = '1.1'
+release = '1.2'
 
 # -- General configuration ---------------------------------------------------
 
@@ -72,7 +72,7 @@ html_theme_options = {
     'logo_only': True,
     'display_version': False,
 }
-# html_theme = 'sphinx_material'
+#html_theme = 'sphinx_material'
 #html_theme = 'sphinxawesome_theme'
 
 

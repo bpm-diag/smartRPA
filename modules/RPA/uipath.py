@@ -312,6 +312,14 @@ class UIPathXAML:
         self.root.append(self.mainSequence)
 
     def __createSequence(self, activities: list, displayName: str = "Do", key=None):
+        """
+        Create UiPath sequence element, which is a container for other elements.
+
+        :param activities: list of activities inside the sequence
+        :param displayName: name of the sequence
+        :param key:
+        :return: sequence
+        """
         self.sequence_id += 1
         props = {
             etree.QName(self.sap2010, "WorkflowViewState.IdRef"): f"Sequence_{self.sequence_id}",
@@ -341,11 +349,21 @@ class UIPathXAML:
         return sequence
 
     def createBaseFile(self):
+        """
+        Create base XAML file for UiPath.
+
+        * create root element
+        * add text expressions
+        * add main sequence
+        """
         self.__createRoot()
         self.__createTextExpression()
         self.__createMainSequence()
 
     def writeXmlToFile(self):
+        """
+        Copy UiPath template directory into current project and write XAML to file
+        """
         RPA_filename = utils.utils.getFilename(
             self.csv_file_path).strip('_combined')
         uipath_template = os.path.join(
@@ -358,6 +376,11 @@ class UIPathXAML:
             writer.write(etree.tostring(self.root, pretty_print=True))
 
     def __comment(self, text: str):
+        """
+        Create comment element
+        :param text: text inside the comment
+        :return: append comment to main sequence
+        """
         self.comment += 1
         c = etree.Element(
             etree.QName(self.ui, "Comment"),
@@ -368,7 +391,17 @@ class UIPathXAML:
         )
         self.mainSequence.append(c)
 
+    @deprecated(version='1.2.0', reason="Not in use anymore since decision point analysis now occurs before RPA script generation.")
     def __inputDialog(self, options: list, label: str = None, title: str = "Decision point", displayName: str = None):
+        """
+        Create input dialog element
+
+        :param options: list of options to display in dialog
+        :param label: label of input dialog
+        :param title: title of input dialog
+        :param displayName: name of input dialog
+        :return: input dialog
+        """
         formattedOptions = '[{' + ', '.join(['"%s"' % x for x in options]) + '}]'
         if not displayName:
             displayName = f"Decision point {self.switch}"
@@ -403,8 +436,18 @@ class UIPathXAML:
         inputDialog.append(result)
         return inputDialog
 
+    @deprecated(version='1.2.0', reason="Not in use anymore since decision point analysis now occurs before RPA script generation.")
     def __switch(self, caseActivities: dict, defaulActivity=None, condition=None, displayName: str = "Switch"):
-        # before each switch, an input dialog is needed to ask the user which case to choose
+        """
+        Create switch element. Before each switch, an input dialog is needed to ask the user which case to choose
+
+        :param caseActivities: dictionary of activities divided by trace
+        :param defaulActivity: default case to execute
+        :param condition: switch condition
+        :param displayName: name of switch element
+        :return: switch element
+        """
+
         self.mainSequence.append(
             self.__inputDialog(options=list(caseActivities.keys()))
         )
@@ -445,6 +488,13 @@ class UIPathXAML:
 
     # browser
     def __openBrowser(self, url: str = "", activities: list = None):
+        """
+        Open browser. This sequence contains browser events and it's used only once at the beginning of the project.
+
+        :param url: open at specific url
+        :param activities: list of activities to append
+        :return: append open browser sequence to main sequence
+        """
         openBrowser = etree.Element(
             etree.QName(self.ui, "OpenBrowser"),
             {
@@ -487,6 +537,14 @@ class UIPathXAML:
         self.mainSequence.append(openBrowser)
 
     def __attachBrowser(self, activities: list):
+        """
+        Attach browser element.
+        This sequence contains browser events and it attaches to the OpenBrowser sequence created at the beginning.
+        It is used every time there are browser events.
+
+        :param activities: list of activities to append
+        :return: Attach browser element
+        """
         self.browserScope += 1
         attachBrowser = etree.Element(
             etree.QName(self.ui, "BrowserScope"),
@@ -530,7 +588,17 @@ class UIPathXAML:
 
     def __target(self, xpath: str = "", xpath_full: str = "", idx: str = "",
                  app: str = "", title: str = "", timeout: str = "1000"):
+        """
+        Target element to click on.
 
+        :param xpath: xpath of web element
+        :param xpath_full: full xpath of web element
+        :param idx: index of element in page
+        :param app: name of the browser used to navigate (e.g. google chrome)
+        :param title: title of the window of the browser
+        :param timeout: timeout after which action is dismissed if element is not found
+        :return: target element
+        """
         selector = "{x:Null}"
         if xpath and xpath_full:
             css_selector = f"css-selector='{self.__xpathToCssSelector(xpath_full)}'"
@@ -590,6 +658,23 @@ class UIPathXAML:
                    app: str = "", title: str = "",
                    displayName: str = "Type into 'INPUT'", emptyField: bool = True,
                    timeout: str = "1000", newLine: bool = False):
+        """
+        TypeInto element to type into web fields.
+
+        Uses __target() method to create target element.
+
+        :param text: text to be typed
+        :param xpath: xpath of web element
+        :param xpath_full: full xpath of web element
+        :param idx: index  of web element
+        :param app: name of the program used to navigate (e.g. google chrome)
+        :param title: title of the window of the browser
+        :param displayName: name of TypeInto element
+        :param emptyField: if True, field is empied before typing
+        :param timeout: timeout after which action is dismissed if element is not found
+        :param newLine: add new line after typing
+        :return: TypeInto element
+        """
         self.typeInto_id += 1
         typeInto = etree.Element(
             etree.QName(self.ui, "TypeInto"),
@@ -625,6 +710,16 @@ class UIPathXAML:
 
     def __click(self, xpath: str, xpath_full: str, clickType="CLICK_SINGLE", mouseButton="BTN_LEFT",
                 displayName: str = "Click Item"):
+        """
+        Element to click on web objects
+
+        :param xpath: xpath of web element
+        :param xpath_full: full xpath of web element
+        :param clickType: type of click (single, double click)
+        :param mouseButton: button of mouse to click (left, right, middle)
+        :param displayName: name of click element in uipath
+        :return: Click element
+        """
         self.click_id += 1
         click = etree.Element(
             etree.QName(self.ui, "Click"),
@@ -681,14 +776,45 @@ class UIPathXAML:
         return click
 
     def __xpathToCssSelector(self, xpath: str):
+        """
+        Convert XPATH to CSS selector.
+
+        The action logger records the XPATH for each web element so it can easily be identified by the SW robot.
+        UiPath does not support selection of web elements using XPATH (which is more accurate), so conversion to CSS selector is needed.
+
+        :param xpath:
+        :return:
+        """
         css = re.sub(r'\[([0-9]+)\]', '', xpath.lower())
         css = css.replace('/html/', '').replace('/', '>')
         return css
 
     def __getIdFromXpath(self, xpath: str):
+        """
+        Get ID of element from xpath
+
+        :param xpath: xpath of web element
+        :return: id of element
+        """
         return xpath[xpath.find("(") + 1:xpath.find(")")].replace('"', '')
 
     def __getIdxFromXpath(self, a: str, b: str, list_index: int):
+        """
+        Compare current xpath to previous one to find differences in index.
+
+        Since XPATH selection is not supported by UiPath, CSS selection is used.
+        With this method, web elements are identified using their relative index on the page.
+
+        This method calculates the index of an element relative to another.
+
+        For example, in a google form, 3 consecutive text field have index 0 to 3.
+
+        :param a: xpath of first element
+        :param b: xpath of second element
+        :param list_index: list of xpath column in dataframe
+        :return: index of current element
+        """
+
         # if list_index is 0, previous xpath is None so return empty string
         # to be comparable, xpath should have the same parent but they should not be equal,
         # otherwise difference would be 0
@@ -705,6 +831,13 @@ class UIPathXAML:
             return ""
 
     def __navigateTo(self, url: str, displayName: str = "Navigate To"):
+        """
+        Element to navigate on a page
+
+        :param url: url to open
+        :param displayName: name of element in UiPath
+        :return: navigateTo element
+        """
         self.navigateTo += 1
         navigateTo = etree.Element(
             etree.QName(self.ui, "NavigateTo"),
@@ -717,13 +850,18 @@ class UIPathXAML:
         )
         return navigateTo
 
-    def __navigateToInNewTab(self, url: str, activities: list = None):
-        return self.__openApplication(arguments=f"-new-tab {url}",
-                                      fileName="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-                                      selector="<wnd app='chrome.exe'/>", displayName="Navigate in New Tab",
-                                      activities=activities)
+    # def __navigateToInNewTab(self, url: str, activities: list = None):
+    #     return self.__openApplication(arguments=f"-new-tab {url}",
+    #                                   fileName="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    #                                   selector="<wnd app='chrome.exe'/>", displayName="Navigate in New Tab",
+    #                                   activities=activities)
 
     def __closeTab(self):
+        """
+        Element to close tab
+
+        :return: closeTab element
+        """
         self.closeTab += 1
         return etree.Element(
             etree.QName(self.ui, "CloseTab"),
@@ -737,6 +875,16 @@ class UIPathXAML:
     # excel
     def __excelSpreadsheet(self, workbookPath: str = "", password: str = "{x:Null}", attach=True,
                            displayName: str = "Excel Application Scope", activities: list = None):
+        """
+        Element to handle excel spreadsheets.
+
+        :param workbookPath: path of workbook to open
+        :param password: workbook password (if present)
+        :param attach: if True, attaches to a workbook already opened by UiPath, without opening it again
+        :param displayName: name of element in UiPAth
+        :param activities: list of activities to perform on opened excel workbook
+        :return: ExcelApplicationScope element
+        """
         self.openApplication += 1
         if workbookPath == "":
             workbookPath = os.path.join(
@@ -786,6 +934,14 @@ class UIPathXAML:
         return excelApplication
 
     def __writeCell(self, cell: str, sheetName: str, text: str):
+        """
+        Write excel cell
+
+        :param cell: position cell to write
+        :param sheetName: name of sheet
+        :param text: text to write
+        :return: ExcelWriteCell element
+        """
         self.writeCell += 1
         displayName = f"Write Cell {cell}"
         writeCell = etree.Element(
@@ -801,6 +957,12 @@ class UIPathXAML:
         return writeCell
 
     def __saveWorkbook(self, displayName: str = "Save Workbook"):
+        """
+        Save opened workbook
+
+        :param displayName: name of element in UiPath
+        :return: ExcelSaveWorkbook element
+        """
         self.saveWorkbook += 1
         return etree.Element(
             etree.QName(self.ui, "ExcelSaveWorkbook"),
@@ -811,6 +973,12 @@ class UIPathXAML:
         )
 
     def __closeWorkbook(self, displayName: str = "Close Workbook"):
+        """
+        Close opened workbook
+
+        :param displayName: name of element in UiPath
+        :return: ExcelCloseWorkbook element
+        """
         self.closeWorkbook += 1
         return etree.Element(
             etree.QName(self.ui, "ExcelCloseWorkbook"),
@@ -824,6 +992,16 @@ class UIPathXAML:
     # system
     def __openApplication(self, arguments: str = "{x:Null}", fileName: str = "{x:Null}", selector: str = "{x:Null}",
                           displayName: str = "Open Application", activities: list = None):
+        """
+        element to open specified application
+
+        :param arguments: path of program to open
+        :param fileName: name of program to open
+        :param selector: windows selector
+        :param displayName: name of element in UiPath
+        :param activities: list of activities
+        :return: OpenApplication element
+        """
         self.openApplication += 1
         openApplication = etree.Element(
             etree.QName(self.ui, "OpenApplication"),
@@ -867,12 +1045,27 @@ class UIPathXAML:
         return openApplication
 
     def __openFileFolder(self, path: str, itemName: str):
+        """
+        open file or folder in windows explorer
+
+        :param path: path of file or folder to open
+        :param itemName: name of file or folder to open
+        :return: OpenApplication element
+        """
         return self.__openApplication(arguments=path,
                                       displayName=f"Open {itemName}",
                                       fileName="C:\\Windows\\explorer.exe",
                                       selector="<wnd app='explorer.exe' cls='CabinetWClass' />")
 
     def __closeApplication(self, app: str, title: str, displayName: str = "Start Process"):
+        """
+        Element to close an open application
+
+        :param app: name of the application to close
+        :param title: title of the application window
+        :param displayName: name of the element in UiPath
+        :return: CloseApplication element
+        """
         self.closeApplication += 1
         close = etree.Element(
             etree.QName(self.ui, "CloseApplication"),
@@ -892,6 +1085,14 @@ class UIPathXAML:
         return close
 
     def __startProcess(self, path: str, displayName: str = "Start Process"):
+        """
+        Element to start specified process
+
+
+        :param path: path of process to start
+        :param displayName: name of element in UiPath
+        :return: StartProcess element
+        """
         self.startProcess += 1
         return etree.Element(
             etree.QName(self.ui, "StartProcess"),
@@ -906,6 +1107,13 @@ class UIPathXAML:
         )
 
     def __setToClipboard(self, text: str, displayName: str = "Set to clipboard"):
+        """
+        Set specified text to clipboard
+
+        :param text: text to be set to clipboard
+        :param displayName: name of element in UiPath
+        :return: SetToClipboard element
+        """
         self.setToClipboard += 1
         clipboard = etree.Element(
             etree.QName(self.ui, "SetToClipboard"),
@@ -918,6 +1126,14 @@ class UIPathXAML:
         return clipboard
 
     def __sendHotkey(self, key: str = "{x:Null}", modifiers: str = "None", displayName: str = "Send Hotkey"):
+        """
+        Element to type specified sequence of keys
+
+        :param key: letter to press
+        :param modifiers: modifiers to press (like CTRL, ALT, etc)
+        :param displayName: name of element in UiPath
+        :return: SendHotkey element
+        """
         self.sendHotkey += 1
         hotkey = etree.Element(
             etree.QName(self.ui, "SendHotkey"),
@@ -944,6 +1160,13 @@ class UIPathXAML:
         return hotkey
 
     def __createFile(self, path: str, displayName: str = "Create file"):
+        """
+        Element to create a file
+
+        :param path: path of file to be created
+        :param displayName: name of element in UiPath
+        :return: CreateFile element
+        """
         self.createFile += 1
         return etree.Element(
             etree.QName(self.ui, "CreateFile"),
@@ -957,6 +1180,13 @@ class UIPathXAML:
         )
 
     def __createDirectory(self, path: str, displayName: str = "Create file"):
+        """
+        Element to create a directory
+
+        :param path: path of directory to be created
+        :param displayName: name of element in UiPath
+        :return: CreateDirectory element
+        """
         self.createDirectory += 1
         return etree.Element(
             etree.QName(self.ui, "CreateDirectory"),
@@ -969,6 +1199,14 @@ class UIPathXAML:
         )
 
     def __moveFile(self, from_path: str, to_path: str, displayName: str = "Move file"):
+        """
+        Element to move a file/folder
+
+        :param from_path: path where te file/folder is
+        :param to_path: destination path where to move the file/folder
+        :param displayName: name of element in UiPath
+        :return: MoveFile element
+        """
         self.moveFile += 1
         return etree.Element(
             etree.QName(self.ui, "MoveFile"),
@@ -982,7 +1220,14 @@ class UIPathXAML:
             },
         )
 
-    def __delete(self, path: str, displayName: str = "Move file"):
+    def __delete(self, path: str, displayName: str = "Delete file"):
+        """
+        Element to delete a file/folder
+
+        :param path: path where te file/folder is
+        :param displayName: name of element in UiPath
+        :return: Delete element
+        """
         self.moveFile += 1
         return etree.Element(
             etree.QName(self.ui, "Delete"),
@@ -996,6 +1241,14 @@ class UIPathXAML:
 
     # powerpoint
     def __powerpointScope(self, num_slides: int, path: str = "", displayName: str = "PowerPoint Presentation"):
+        """
+        Element to handle powerpoint events.
+
+        :param num_slides: number of slides to add to the presentation
+        :param path: path of powerpoint presentation. If empty create a new file.
+        :param displayName: name of element in UiPath
+        :return: PowerPointApplicationCard element
+        """
         self.powerpointApplicationCard += 1
         position = self.powerpointApplicationCard
         if not path:
@@ -1042,6 +1295,12 @@ class UIPathXAML:
         return powerpointApplication
 
     def __insertSlide(self, position):
+        """
+        Add slides to a presentation.
+
+        :param position: where to add slides
+        :return: InsertSlideX element
+        """
         self.insertSlide += 1
         return etree.Element(
             etree.QName(self.upab, "InsertSlideX"),
@@ -1057,12 +1316,22 @@ class UIPathXAML:
 
     # generate RPA
     def __createOpenBrowser(self, df: pandas.DataFrame):
+        """
+        Method to insert openBrowser element at the beginning of the XAML file if browser events are present in the event log.
+
+        :param df: input dataframe
+        """
         # if dataframe contains browser related events add openBrowser element
         if not df.query('category=="Browser"').empty:
             url = df.loc[df['category'] == 'Browser', 'browser_url'].iloc[0]
             self.__openBrowser(url=url)
 
     def __createOpenExcel(self, df: pandas.DataFrame):
+        """
+        Method to insert openExcel element at the beginning of the XAML file if excel events are present in the event log.
+
+        :param df: input dataframe
+        """
         # if dataframe contains excel events, add excel scope element
         v = df['concept:name'].values
         if 'newWorkbook' in v:
@@ -1075,6 +1344,13 @@ class UIPathXAML:
             self.mainSequence.append(self.__excelSpreadsheet(workbookPath=path, attach=False))
 
     def __generateActivities(self, df: pandas.DataFrame, row: pandas.Series):
+        """
+        Helper method called for each row of the dataframe to convert an event into a UiPath XML node.
+
+        :param df: input dataframe
+        :param row: current row of dataframe
+        :return: XML node
+        """
         ######
         # Variables
         ######
@@ -1391,6 +1667,23 @@ class UIPathXAML:
     #     self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
     def __generateRPA(self, df: pandas.DataFrame):
+        """
+        Main method to generate UiPath SW robot.
+
+        The main steps are:
+
+        1. Add comment with SmartRPA link to UiPath file
+        2. Create open browser and open excel activities if the corresponding events are present in the dataframe
+        3. create activities dictionary to store XML nodes divided by category.
+
+        For each row in the dataframe:
+
+        * generate XML node from event
+        * append node to activities dictionary based on its categoru
+        * when there is a change in category of in the last loop iteration, write nodes to main XAML sequence
+
+        :param df: input dataframe of trace to automate
+        """
         # add comment to main sequence
         self.__comment("// Generated using SmartRPA available at https://github.com/bpm-diag/smartRPA")
 
@@ -1457,9 +1750,12 @@ class UIPathXAML:
 
         self.status_queue.put(f"[UiPath] Generated UiPath RPA script")
 
-    # If decision is False, dataframe of the most frequent trace is passed,
-    # else dataframe of the entire process
     def generateUiPathRPA(self, decision: bool = False):
+        """
+        Method called by GUI to start UiPath SW Robot generation process.
+
+        :param decision: If decision is False, dataframe of the most frequent trace is passed, else dataframe of the entire process
+        """
         self.createBaseFile()
         # if decision, I should use df1, dataframe without duplicates,
         # duplicated events should go to main sequence only once
