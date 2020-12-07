@@ -63,9 +63,13 @@ The architecture of SmartRPA integrates five main SW components.
 - [x] **Decision Points**, discover differencies between multiple traces in a process and build a new routine based on user decisions;
 - [x] **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform _Python script_ and as a _UiPath_ project.
 
-A list of events supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf).
+A **list of events** supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf).
+
+The full **documentation** of the tool is available [here](https://bpm-diag.github.io/smartRPA/).
 
 # Installation and execution:
+
+**NOTE**: If you only want the action logger to record event logs without further analysis, you can find it [here](https://github.com/bpm-diag/smartRPA/tree/action_logger).
 
 ### 1. **Install dependencies**
 

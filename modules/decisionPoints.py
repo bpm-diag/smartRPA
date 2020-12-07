@@ -81,6 +81,7 @@ class DecisionPoints:
         # remove query parameters from formSubmit url
         formSubmitMask = df1['concept:name'] == 'formSubmit'
         df1.loc[formSubmitMask, 'browser_url'] = df1.loc[formSubmitMask, 'browser_url'].apply(lambda url: url.split('?')[0])
+
         # *************
         # marking duplicates among all distinct groups
         # *************
