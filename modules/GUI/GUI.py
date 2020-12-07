@@ -79,6 +79,10 @@ class MainApplication(QMainWindow, QDialog):
         self.runCount = 0
         self.csv_to_join = list()
 
+        # In action logger version, set preferences statically here
+        utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = 1
+        utils.config.MyConfig.get_instance().perform_process_discovery = False
+
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
         self.systemLoggerPrograms = self.systemLoggerProgramsCB.isChecked()
@@ -124,15 +128,17 @@ class MainApplication(QMainWindow, QDialog):
         """
         menu = self.menuBar()
 
+        # In the action logger version of the tool, I don't need RPA analysis so I remove reference
+
         fileMenu = menu.addMenu('File')
-        preferencesAction = fileMenu.addAction('Preferences...')
-        preferencesAction.triggered.connect(self.handlePreferences)
+        #preferencesAction = fileMenu.addAction('Preferences...')
+        #preferencesAction.triggered.connect(self.handlePreferences)
         mergeAction = fileMenu.addAction('Merge multiple CSV...')
         mergeAction.triggered.connect(self.handleMerge)
-        runLogAction = fileMenu.addAction('RPA from log...')
-        runLogAction.triggered.connect(self.handleRunLogAction)
-        self.preferencesDialog = modules.GUI.PreferencesWindow.Preferences(
-            self, self.status_queue)
+        #runLogAction = fileMenu.addAction('RPA from log...')
+        #runLogAction.triggered.connect(self.handleRunLogAction)
+        # self.preferencesDialog = modules.GUI.PreferencesWindow.Preferences(
+        #     self, self.status_queue)
 
         helpMenu = menu.addMenu('Help')
         about = helpMenu.addAction('About')

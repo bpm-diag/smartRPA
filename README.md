@@ -26,44 +26,9 @@
 
 </p>
 
-# What is SmartRPA
+# This version only includes the Action Logger.
 
-**Robotic Process Automation (RPA)** is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines.
-The current generation of RPA tools is driven by predefined rules and manual configurations made by expert users rather than automated techniques.
-
-**SmartRPA** is a cross-platform tool that tackles such issues. It allows to easily record event logs and to automatically generating executable RPA scripts that will drive a SW robots in emulating an observed user behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
-
-## Authors
-
-**SmartRPA** has been developed at **DIAG**, Department of Computer, Control, and Management Engineering _Antonio Ruberti_ in **Sapienza University of Rome** by:
-
-- [Simone Agostinelli](https://phd.uniroma1.it/web/SIMONE-AGOSTINELLI_nP1523559_IT.aspx)
-- [Marco Lupia](https://marco2012.github.io/)
-- [Andrea Marrella](http://www.dis.uniroma1.it/marrella/)
-- [Massimo Mecella](http://www.diag.uniroma1.it/users/massimo%20mecella)
-
-The **associated paper** is available on [Springer](https://doi.org/10.1007/978-3-030-58779-6_8), and has been presented at the [RPA Forum](https://congreso.us.es/bpm2020/calls/rpa/) of _18th International Conference on Business Process Management_.
-
-A **screencast** of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA).
-
-## Architecture
-
-The architecture of SmartRPA integrates five main SW components.
-
-<p align="center">
-  <img width="55%" src="images/architecture.jpeg"/>
-</p>
-
-**Key features** include:
-
-- [x] **Action Logger**, log user behaviour, cross-platform, modular, supports wide range of applications;
-- [x] **Log Processing**, generates both CSV and XES event log;
-- [x] **Event abstraction**, abstracts events to a higher level;
-- [x] **Process Discovery**, selects the most suitable routine variant to automate and generates high-level flowchart diagram, thus skipping completely the manual modeling activity;
-- [x] **Decision Points**, discover differencies between multiple traces in a process and build a new routine based on user decisions;
-- [x] **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform _Python script_ and as a _UiPath_ project.
-
-A list of events supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf).
+If you want the full tool with process discovery and RPA capabilities, check the [`master` branch](https://github.com/bpm-diag/smartRPA/tree/master).
 
 # Installation and execution:
 
@@ -71,20 +36,30 @@ A list of events supported by the Action Logger is available in [`SmartRPA_event
 
 [Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required.
 
-- Install [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only) on Windows and [Brew](https://brew.sh) on MacOS
-- Install **project** dependencies _(required to record UI log)_
+- <details>
+  <summary>
+      Install <a href="https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16">Visual Studio C/C++ Build Tools</a> on Windows
+  </summary>
+  </br>
+
+  <img width="40%" src="images/visual_studio.png">
+
+  It is vital to install all C++ related development tools like:
+
+  - Windows 10 SDK
+  - Visual C++ tools for CMake
+  - C++ x64/x86 build tools
+
+  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://www.scivision.co/python-windows-visual-c-14-required/).
+
+  </details>
+
+- Install [Brew](https://brew.sh) on MacOS
+- Install **project** dependencies
 
   ```bash
   pip3 install -r requirements.txt
   ```
-
-- Install **Process Discovery** dependencies _(required to perform process discovery analysis)_
-
-  [Details here](#process-discovery-dependencies)
-
-- Install **RPA** dependencies _(required to run RPA SW Robot)_
-
-  [Details here](#rpa-dependencies)
 
 ### 2. **Install browser extension**
 
@@ -154,172 +129,4 @@ py main.py
 </details>
 <br>
 
-The resulting event log will be saved in `/logs` directory.
-
-## Process Discovery dependencies
-
-The following dependencies are required to enable process discovery analysis, a key component of the tool.
-
-#### 0) Visual Studio (Windows Only)
-
-<img width="40%" src="images/visual_studio.png">
-
-- On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
-  It is vital to install all C++ related development tools like:
-
-  - Windows 10 SDK
-  - Visual C++ tools for CMake
-  - C++ x64/x86 build tools
-
-  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://www.scivision.co/python-windows-visual-c-14-required/).
-
-#### 1) PM4PY
-
-To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
-
-- On **Windows**:
-
-  1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
-  2. Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
-  3. `pip3 install pm4py==1.5.0.1`
-
-    <details>
-    <summary>
-        Click to show how to <b>fix installation errors</b> on Windows
-    </summary>
-    </br>
-
-  If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/downloads/windows/">64bit version of Python3</a>.
-
-    </details>
-  <br>
-
-- On **MacOS**:
-
-  1. Make sure you installed [brew](https://brew.sh/) package manager
-  2. Install graphviz with `brew install graphviz`
-  3. `pip3 install pm4py==1.5.0.1`
-
-    <details>
-    <summary>
-        Click to show how to <b>fix installation errors</b> on MacOS
-    </summary>
-    </br>
-
-  If you get an error during installation:
-
-  - If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, install `pm4py` again
-
-    ```
-    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-    ```
-
-  - If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, install `pm4py` again
-
-    ```
-    export CPATH=`xcrun --show-sdk-path`/usr/include
-    ```
-
-  - If you're on **MacOS 11.0 Big Sur**, install the latest nightly build version of `scikit-learn` running the following command and then install `pm4py` again
-
-    ```
-    pip3 install --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
-    ```
-
-    </details>
-
-#### 2) Python-Levenshtein (Windows Only)
-
-This package provides a 4-10x speedup in String Matching.
-
-- On **Windows**:
-  1.  Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only)
-  2.  `pip3 install python-Levenshtein==0.12.0`
-
-## RPA dependencies
-
-SmartRPA generates two types of SW Robots in the `/RPA` directory:
-
-1. a cross-platform executable **Python script**, available on both Windows and MacOS
-2. a **UiPath project**, available only on Windows
-
-The advantages of the UiPath integration is that the generated SW Robot can be easily customized by the end user.
-
-### Python script
-
-The cross-platform python script requires the following dependencies to work.
-
-#### 1) Automagica
-
-To run the generated RPA scripts you must install `automagica` module available in the `libraries` directory.
-
-`pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
-
-  <details>
-  <summary>
-      Click to show how to <b>fix installation errors</b> on Windows
-  </summary>
-  </br>
-
-1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
-2. Install `Win64 OpenSSL v1.1.1` from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
-3. Open CMD as <i>admin</i> and type (one command per line):
-
-```cmd
-set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
-set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
-pip3 install libraries/Automagica-2.0.25-py3-none-any.whl
-```
-
-</details>
-
-#### 2) Chromedriver
-
-Install _chromedriver_ to enable automation in Google Chrome.
-
-Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history).
-
-```bash
-pip3 install chromedriver-binary
-```
-
-<details>
-<summary>
-    Click to show how to <b>fix installation errors</b> on MacOS
-</summary>
-<br>
-If you get the error <code>RuntimeError: Failed to download chromedriver archive</code>
-
-1. Navigate to `/Applications/Python 3.x/` folder
-2. Run `Install Certificates.command` file
-3. Install the package again
-
-<a href="https://stackoverflow.com/a/42107877">Reference</a>
-
-If you don't find the `Python 3.8` folder under `/Applications`, make sure you installed Python using <a href="https://www.python.org/downloads/mac-osx/">the official installer</a> and not from a package manager like brew.
-
-</details>
-
-### UiPath (Windows Only)
-
-The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
-
-# Recap
-
-To sum up, you should have installed:
-
-- Action Logger dependencies
-  - `pip3 install -r requirements.txt`
-  - [Browser extension](#2-install-browser-extension)
-  - [Excel AddIn (MacOS Only)](#3-install-excel-addin-macos-only)
-- [Process Discovery dependencies](#process-discovery-dependencies)
-  - [Visual Studio C/C++ Build Tools (Windows Only)](#0-visual-studio-windows-only)
-  - [PM4PY](#1-pm4py)
-  - [Python Levenshtein (Windows Only)](#2-python-levenshtein-windows-only)
-- [RPA dependencies](#rpa-dependencies)
-  - [Python script](#python-script)
-    - [Automagica](#1-automagica)
-    - [Chromedriver](#2-chromedriver)
-  - [UiPath](#uipath-windows-only)
-
-After installing the dependencies, you can [run the tool](#4-run-main-logger).
+The resulting event log will be saved in `/RPA` directory.

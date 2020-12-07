@@ -79,8 +79,8 @@ class ProcessMining:
                                                                      self.filepath,
                                                                      self.save_path,
                                                                      self.RPA_log_path)
-        self.dfg_path = os.path.join(self.discovery_path, f"{self.filename}_DFG_model.pdf")
-        self.bpmn_path = os.path.join(self.discovery_path, f"{self.filename}_BPMN.pdf")
+        # self.dfg_path = os.path.join(self.discovery_path, f"{self.filename}_DFG_model.pdf")
+        # self.bpmn_path = os.path.join(self.discovery_path, f"{self.filename}_BPMN.pdf")
 
         if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
             print(f"[PROCESS MINING] Performing process discovery")
@@ -102,12 +102,12 @@ class ProcessMining:
         self.RPA_log_path = os.path.join(self.save_path, utils.utils.EVENT_LOG_FOLDER)
         utils.utils.createDirectory(self.RPA_log_path)
 
-        self.discovery_path = os.path.join(self.save_path, utils.utils.PROCESS_DISCOVERY_FOLDER)
-        utils.utils.createDirectory(self.discovery_path)
-
-        utils.utils.createDirectory(os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER))
-        utils.utils.createDirectory(
-            os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER, utils.utils.UIPATH_FOLDER))
+        # self.discovery_path = os.path.join(self.save_path, utils.utils.PROCESS_DISCOVERY_FOLDER)
+        # utils.utils.createDirectory(self.discovery_path)
+        #
+        # utils.utils.createDirectory(os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER))
+        # utils.utils.createDirectory(
+        #     os.path.join(self.save_path, utils.utils.SW_ROBOT_FOLDER, utils.utils.UIPATH_FOLDER))
 
     def _create_image(self, gviz, img_name, verbose=False):
         """
