@@ -154,7 +154,7 @@ py main.py
 </details>
 <br>
 
-The resulting event log will be saved in `/logs` directory.
+The resulting event log will be saved in `/RPA` directory.
 
 ## Process Discovery dependencies
 
