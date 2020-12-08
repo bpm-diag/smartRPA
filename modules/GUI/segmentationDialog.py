@@ -4,6 +4,7 @@ import darkdetect
 import utils.utils
 from modules.GUI.filenameDialog import getFilenameDialog
 import os
+import numpy as np
 try:
     import pm4py
 except ImportError as e:
@@ -15,7 +16,6 @@ class PandasModel(QtCore.QAbstractTableModel):
     """
     Class to populate a table view with a pandas dataframe
     """
-
     def __init__(self, data, parent=None, rows_to_color=None, row_color='red'):
         """
         Initialize class to populate table view
@@ -25,11 +25,12 @@ class PandasModel(QtCore.QAbstractTableModel):
         :param row_color: optional, color of rows (default is red). Supports HTML color names https://www.w3schools.com/colors/colors_names.asp
         """
         QtCore.QAbstractTableModel.__init__(self, parent)
-        if rows_to_color is None:
-            rows_to_color = []
-        self._data = data
-        self.rows_to_color = rows_to_color
+        self._data = np.array(data.values)
+        self._cols = data.columns
+        self.r, self.c = np.shape(self._data)
+
         self.row_color = row_color
+        self.rows_to_color = rows_to_color if rows_to_color is not None else []
 
     def rowCount(self, parent=None):
         """
@@ -37,7 +38,7 @@ class PandasModel(QtCore.QAbstractTableModel):
 
         :return: number of rows in dataframe
         """
-        return len(self._data.values)
+        return self.r
 
     def columnCount(self, parent=None):
         """
@@ -45,21 +46,21 @@ class PandasModel(QtCore.QAbstractTableModel):
 
         :return: number of columns in dataframe
         """
-        return self._data.columns.size
+        return self.c
 
-    def data(self, index, role):
+    def data(self, index, role=QtCore.Qt.DisplayRole):
         """
         Handle data.
 
         This also colors rows based on index number.
 
-        :param index:
+        :param index: current index
         :param role:
         :return: processed data
         """
         if index.isValid():
             if role == QtCore.Qt.DisplayRole:
-                return str(self._data.values[index.row()][index.column()])
+                return str(self._data[index.row(),index.column()])
             # background color for rows is set here
             if role == QtCore.Qt.BackgroundColorRole:
                 row = index.row()
@@ -68,28 +69,21 @@ class PandasModel(QtCore.QAbstractTableModel):
                     return QtGui.QColor(self.row_color)
         return None
 
-    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
+    def headerData(self, p_int, orientation, role):
         """
         Handle header, display row number and column names.
 
-        :param section:
+        :param p_int:
         :param orientation: either rows or columns
         :param role:
         :return: processed data
         """
-        if role != QtCore.Qt.DisplayRole:
-            return QtCore.QVariant()
-
-        if orientation == QtCore.Qt.Horizontal:
-            try:
-                return self._data.columns.tolist()[section]
-            except (IndexError,):
-                return QtCore.QVariant()
-        elif orientation == QtCore.Qt.Vertical:
-            try:
-                return self._data.index.tolist()[section]
-            except (IndexError,):
-                return QtCore.QVariant()
+        if role == QtCore.Qt.DisplayRole:
+            if orientation == QtCore.Qt.Horizontal:
+                return self._cols[p_int]
+            elif orientation == QtCore.Qt.Vertical:
+                return p_int
+        return None
 
 
 class SegmentationDialog(QtWidgets.QWidget):
@@ -162,15 +156,12 @@ class SegmentationDialog(QtWidgets.QWidget):
             df = df[first_columns + remaining_columns]
         else:  # import CSV into pandas dataframe
             try:
-                df = pandas.read_csv(event_log_path)\
-                    .dropna(subset=["time:timestamp"]) \
-                    .fillna('') \
-                    .sort_values(by='time:timestamp')
+                df = pandas.read_csv(event_log_path).fillna('')
             except pandas.errors.ParserError:  # occurs if csv separator is ';' instead of ','
-                df = pandas.read_csv(event_log_path, sep=';')\
-                    .dropna(subset=["time:timestamp"]) \
-                    .fillna('') \
-                    .sort_values(by='time:timestamp')
+                df = pandas.read_csv(event_log_path, sep=';').fillna('')
+            if 'time:timestamp' in df.columns:
+                df = df.dropna(subset=["time:timestamp"]).sort_values(by='time:timestamp')
+
         return df
 
     def _loadDataframeInTable(self):
