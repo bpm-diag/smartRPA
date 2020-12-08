@@ -119,6 +119,8 @@ class SegmentationDialog(QtWidgets.QWidget):
         self.tableView = QtWidgets.QTableView(self)
         # select entire row on click
         self.tableView.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        # resize columns to content
+        self.tableView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         # add table view to GUI
         vLayout.addWidget(self.tableView)
 
@@ -186,6 +188,8 @@ class SegmentationDialog(QtWidgets.QWidget):
 
         # set table model
         self.tableView.setModel(model)
+        # resize columns to content
+        self.tableView.resizeColumnsToContents()
 
 
 
