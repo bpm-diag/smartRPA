@@ -137,28 +137,33 @@ class SegmentationDialog(QtWidgets.QWidget):
                                           title="Open event log",
                                           multipleItems=False,
                                           filter_format="Event log (*.csv *.xes)")
+        # custom dialog returns list of paths, select the first one
         event_log_path = selectedFiles[0]
-        # event_log_path = "/Users/marco/Downloads/data.csv"  # DEBUG
+        # set text field path
         self.pathLE.setText(event_log_path)
+        # get extension from path
         filename, extension = os.path.splitext(event_log_path)
 
-        if extension == '.xes':  # convert xes to pandas dataframe
+        # convert xes to pandas dataframe
+        if extension == '.xes':
             log = pm4py.read_xes(event_log_path)
             df = pm4py.convert_to_dataframe(log)
-            # when importing XES files, the order of columns is lost, so it needs to be set manually
-            # columns that should go first in the dataframe
-            first_columns = ['case:concept:name', 'time:timestamp', 'category', 'application']
-            # all other columns
-            remaining_columns = list(set(df.columns) - set(first_columns))
-            # reorder columns
-            df = df[first_columns + remaining_columns]
-        else:  # import CSV into pandas dataframe
+        # import CSV into pandas dataframe
+        else:
             try:
                 df = pandas.read_csv(event_log_path).fillna('')
             except pandas.errors.ParserError:  # occurs if csv separator is ';' instead of ','
                 df = pandas.read_csv(event_log_path, sep=';').fillna('')
             if 'time:timestamp' in df.columns:
                 df = df.dropna(subset=["time:timestamp"]).sort_values(by='time:timestamp')
+
+        # take only selected columns from dataframe
+        columns_to_take = ["time:timestamp", "concept:name", "category", "application",
+                "event_src_path", "event_dest_path", "clipboard_content", "workbook", "current_worksheet",
+                "cell_content", "cell_range", "browser_url"]
+        # make sure columns_to_take are present in dataframe before taking them
+        if all(a in df.columns for a in columns_to_take):
+            df = df[columns_to_take]
 
         return df
 
@@ -171,7 +176,8 @@ class SegmentationDialog(QtWidgets.QWidget):
         df = self._loadEventLogInDataframe()
 
         # calculate rows to color
-        # (questi sono valori di prova, qui va la funzione che restituisce gli indici delle righe da colorare)
+        # (questi sono valori di prova, qui va la funzione che restituisce
+        # una lista con gli indici delle righe da colorare)
         rows_to_color = [1, 3, 5]
 
         # create model for tableview
