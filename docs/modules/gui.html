@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#file-dialog">File dialog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#choices-dialog">Choices dialog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#decision-dialog">Decision dialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-modules.GUI.segmentationDialog">Segmentation dialog</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="action_logger.html">Action logger</a></li>
@@ -605,6 +606,118 @@ and displayed in a webview.</p>
 <dd class="field-even"><p>HTML page with table</p>
 </dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-modules.GUI.segmentationDialog">
+<span id="segmentation-dialog"></span><h2>Segmentation dialog<a class="headerlink" href="#module-modules.GUI.segmentationDialog" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="modules.GUI.segmentationDialog.PandasModel">
+<em class="property">class </em><code class="sig-prename descclassname">modules.GUI.segmentationDialog.</code><code class="sig-name descname">PandasModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rows_to_color</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">row_color</span><span class="o">=</span><span class="default_value">'red'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#PandasModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.PandasModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to populate a table view with a pandas dataframe</p>
+<dl class="py method">
+<dt id="modules.GUI.segmentationDialog.PandasModel.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rows_to_color</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">row_color</span><span class="o">=</span><span class="default_value">'red'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#PandasModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.PandasModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize class to populate table view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – pandas dataframe</p></li>
+<li><p><strong>rows_to_color</strong> – optional, list of integers representig rows to color</p></li>
+<li><p><strong>row_color</strong> – optional, color of rows (default is red). Supports HTML color names <a class="reference external" href="https://www.w3schools.com/colors/colors_names.asp">https://www.w3schools.com/colors/colors_names.asp</a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.segmentationDialog.PandasModel.columnCount">
+<code class="sig-name descname">columnCount</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#PandasModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.PandasModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate column count</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of columns in dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.segmentationDialog.PandasModel.data">
+<code class="sig-name descname">data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span></em>, <em class="sig-param"><span class="n">role</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#PandasModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.PandasModel.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle data.</p>
+<p>This also colors rows based on index number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – </p></li>
+<li><p><strong>role</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>processed data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.segmentationDialog.PandasModel.headerData">
+<code class="sig-name descname">headerData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">section</span></em>, <em class="sig-param"><span class="n">orientation</span></em>, <em class="sig-param"><span class="n">role</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#PandasModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.PandasModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle header, display row number and column names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> – </p></li>
+<li><p><strong>orientation</strong> – either rows or columns</p></li>
+<li><p><strong>role</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>processed data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.segmentationDialog.PandasModel.rowCount">
+<code class="sig-name descname">rowCount</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#PandasModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.PandasModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate row count</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of rows in dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="modules.GUI.segmentationDialog.SegmentationDialog">
+<em class="property">class </em><code class="sig-prename descclassname">modules.GUI.segmentationDialog.</code><code class="sig-name descname">SegmentationDialog</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">status_queue</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#SegmentationDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.SegmentationDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create tableview to display event log and segmentation data</p>
+<p>GUI is taken from <a class="reference external" href="https://github.com/eyllanesc/stackoverflow/tree/master/questions/44603119">https://github.com/eyllanesc/stackoverflow/tree/master/questions/44603119</a></p>
+<dl class="py method">
+<dt id="modules.GUI.segmentationDialog.SegmentationDialog.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">status_queue</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#SegmentationDialog.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.SegmentationDialog.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.segmentationDialog.SegmentationDialog._loadDataframeInTable">
+<code class="sig-name descname">_loadDataframeInTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#SegmentationDialog._loadDataframeInTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.SegmentationDialog._loadDataframeInTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display dataframe in tableview with colored rows.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="modules.GUI.segmentationDialog.SegmentationDialog._loadEventLogInDataframe">
+<code class="sig-name descname">_loadEventLogInDataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/GUI/segmentationDialog.html#SegmentationDialog._loadEventLogInDataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.GUI.segmentationDialog.SegmentationDialog._loadEventLogInDataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load event log into pandas dataframe</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>event log as dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

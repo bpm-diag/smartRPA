@@ -93,3 +93,9 @@ The user can choose which user actions enact by means of a decision dialog, whic
    :members: dataframeToHTML
    :private-members:
 
+Segmentation dialog
+-------------------
+
+.. automodule:: modules.GUI.segmentationDialog
+   :members:
+   :private-members:

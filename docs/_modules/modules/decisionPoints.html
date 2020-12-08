@@ -243,6 +243,7 @@
         <span class="c1"># remove query parameters from formSubmit url</span>
         <span class="n">formSubmitMask</span> <span class="o">=</span> <span class="n">df1</span><span class="p">[</span><span class="s1">&#39;concept:name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;formSubmit&#39;</span>
         <span class="n">df1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">formSubmitMask</span><span class="p">,</span> <span class="s1">&#39;browser_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">formSubmitMask</span><span class="p">,</span> <span class="s1">&#39;browser_url&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">url</span><span class="p">:</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
         <span class="c1"># *************</span>
         <span class="c1"># marking duplicates among all distinct groups</span>
         <span class="c1"># *************</span>

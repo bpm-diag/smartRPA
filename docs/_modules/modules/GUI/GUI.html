@@ -287,14 +287,22 @@
         <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">menuBar</span><span class="p">()</span>
 
         <span class="n">fileMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s1">&#39;File&#39;</span><span class="p">)</span>
+
         <span class="n">preferencesAction</span> <span class="o">=</span> <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Preferences...&#39;</span><span class="p">)</span>
         <span class="n">preferencesAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlePreferences</span><span class="p">)</span>
+
         <span class="n">mergeAction</span> <span class="o">=</span> <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Merge multiple CSV...&#39;</span><span class="p">)</span>
         <span class="n">mergeAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleMerge</span><span class="p">)</span>
+
         <span class="n">runLogAction</span> <span class="o">=</span> <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;RPA from log...&#39;</span><span class="p">)</span>
         <span class="n">runLogAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleRunLogAction</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preferencesDialog</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">GUI</span><span class="o">.</span><span class="n">PreferencesWindow</span><span class="o">.</span><span class="n">Preferences</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span>
+
+        <span class="n">runLogAction</span> <span class="o">=</span> <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Segmentation...&#39;</span><span class="p">)</span>
+        <span class="n">runLogAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handleSegmentation</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferencesDialog</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">GUI</span><span class="o">.</span><span class="n">PreferencesWindow</span><span class="o">.</span><span class="n">Preferences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">segmentationDialog</span> <span class="o">=</span> <span class="n">modules</span><span class="o">.</span><span class="n">GUI</span><span class="o">.</span><span class="n">segmentationDialog</span><span class="o">.</span><span class="n">SegmentationDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status_queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="p">)</span>
 
         <span class="n">helpMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s1">&#39;Help&#39;</span><span class="p">)</span>
         <span class="n">about</span> <span class="o">=</span> <span class="n">helpMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;About&#39;</span><span class="p">)</span>
@@ -447,7 +455,7 @@
 <span class="sd">        create button to start and stop action logger</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Start logger&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">()</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ENABLE_DARK_MODE</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
                 <span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runButton</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -467,7 +475,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Enable all&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">()</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ENABLE_DARK_MODE</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QPushButton {color: white;}&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -586,7 +594,7 @@
 <span class="sd">        set app icon with support to dark mode</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">app_icon</span> <span class="o">=</span> <span class="n">QIcon</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">()</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ENABLE_DARK_MODE</span><span class="p">:</span>
             <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-16-dark.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
             <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-32-dark.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
             <span class="n">app_icon</span><span class="o">.</span><span class="n">addFile</span><span class="p">(</span><span class="s1">&#39;utils/icons/icon-48-dark.png&#39;</span><span class="p">,</span> <span class="n">QSize</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">))</span>
@@ -654,7 +662,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bottomLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">()</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ENABLE_DARK_MODE</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">statusListWidget</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
                     <span class="s2">&quot;QListWidget{background: #3A3B3B;}&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -802,6 +810,9 @@
     <span class="k">def</span> <span class="nf">handlePreferences</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferencesDialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">handleSegmentation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">segmentationDialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
 <div class="viewcode-block" id="MainApplication.handleRunLogAction"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.GUI.MainApplication.handleRunLogAction">[docs]</a>    <span class="k">def</span> <span class="nf">handleRunLogAction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is called when the user wants to perform RPA analysis on an event log.</span>
@@ -831,7 +842,7 @@
         <span class="n">csv_to_merge</span> <span class="o">=</span> <span class="n">getFilenameDialog</span><span class="p">(</span><span class="n">customDialog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                          <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
                                          <span class="n">multipleItems</span><span class="o">=</span><span class="n">multipleItems</span><span class="p">,</span>
-                                         <span class="n">filter_format</span><span class="o">=</span><span class="s2">&quot;CSV log files (*.csv)&quot;</span><span class="p">)</span>
+                                         <span class="n">filter_format</span><span class="o">=</span><span class="s2">&quot;CSV event logs (*.csv)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">csv_to_merge</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">merged</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Merging selected files...&quot;</span><span class="p">)</span>
@@ -1087,7 +1098,7 @@
             <span class="s1">&#39;https://github.com/bpm-diag/smartRPA&#39;</span><span class="p">))</span>
         <span class="n">msgBox</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">websiteBtn</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">AcceptRole</span><span class="p">)</span>
         <span class="n">closeBtn</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Close&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">()</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ENABLE_DARK_MODE</span><span class="p">:</span>
             <span class="n">closeBtn</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
         <span class="n">msgBox</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">closeBtn</span><span class="p">,</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">RejectRole</span><span class="p">)</span>
         <span class="n">msgBox</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
@@ -1103,7 +1114,7 @@
                 <span class="s2">&quot;Do you want to open an existing Excel spreadsheet or create a new one?&quot;</span><span class="p">)</span>
             <span class="n">existing</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Open existing spreadsheet&#39;</span><span class="p">)</span>
             <span class="n">new</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Create new spreadsheet&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">()</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ENABLE_DARK_MODE</span><span class="p">:</span>
                 <span class="n">existing</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
                     <span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
                 <span class="n">new</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;QPushButton {background-color: #656565;}&#39;</span><span class="p">)</span>
@@ -1266,7 +1277,7 @@
     <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">BrightText</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">)</span>
     <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Highlight</span><span class="p">,</span> <span class="n">QColor</span><span class="p">(</span><span class="mi">142</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">197</span><span class="p">)</span><span class="o">.</span><span class="n">lighter</span><span class="p">())</span>
     <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">HighlightedText</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">darkdetect</span><span class="o">.</span><span class="n">isDark</span><span class="p">()</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ENABLE_DARK_MODE</span><span class="p">:</span>
         <span class="n">app</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span>
 
     <span class="n">mainApplication</span> <span class="o">=</span> <span class="n">MainApplication</span><span class="p">()</span>
