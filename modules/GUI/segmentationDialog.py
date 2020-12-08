@@ -89,8 +89,6 @@ class PandasModel(QtCore.QAbstractTableModel):
 class SegmentationDialog(QtWidgets.QWidget):
     """
     Create tableview to display event log and segmentation data
-
-    GUI is taken from https://github.com/eyllanesc/stackoverflow/tree/master/questions/44603119
     """
 
     def __init__(self, parent, status_queue):
@@ -182,3 +180,15 @@ class SegmentationDialog(QtWidgets.QWidget):
 
         # set table model
         self.tableView.setModel(model)
+
+
+
+
+
+
+
+
+
+
+
+
