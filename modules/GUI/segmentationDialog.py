@@ -162,9 +162,15 @@ class SegmentationDialog(QtWidgets.QWidget):
             df = df[first_columns + remaining_columns]
         else:  # import CSV into pandas dataframe
             try:
-                df = pandas.read_csv(event_log_path)
-            except pandas.errors.ParserError:
-                df = pandas.read_csv(event_log_path, sep=';')
+                df = pandas.read_csv(event_log_path)\
+                    .dropna(subset=["time:timestamp"]) \
+                    .fillna('') \
+                    .sort_values(by='time:timestamp')
+            except pandas.errors.ParserError:  # occurs if csv separator is ';' instead of ','
+                df = pandas.read_csv(event_log_path, sep=';')\
+                    .dropna(subset=["time:timestamp"]) \
+                    .fillna('') \
+                    .sort_values(by='time:timestamp')
         return df
 
     def _loadDataframeInTable(self):
