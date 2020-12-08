@@ -125,14 +125,22 @@ class MainApplication(QMainWindow, QDialog):
         menu = self.menuBar()
 
         fileMenu = menu.addMenu('File')
+
         preferencesAction = fileMenu.addAction('Preferences...')
         preferencesAction.triggered.connect(self.handlePreferences)
+
         mergeAction = fileMenu.addAction('Merge multiple CSV...')
         mergeAction.triggered.connect(self.handleMerge)
+
         runLogAction = fileMenu.addAction('RPA from log...')
         runLogAction.triggered.connect(self.handleRunLogAction)
-        self.preferencesDialog = modules.GUI.PreferencesWindow.Preferences(
-            self, self.status_queue)
+
+        runLogAction = fileMenu.addAction('Segmentation...')
+        runLogAction.triggered.connect(self.handleSegmentation)
+
+        self.preferencesDialog = modules.GUI.PreferencesWindow.Preferences(self, self.status_queue)
+
+        self.segmentationDialog = modules.GUI.segmentationDialog.SegmentationDialog(self, status_queue=self.status_queue)
 
         helpMenu = menu.addMenu('Help')
         about = helpMenu.addAction('About')
@@ -285,7 +293,7 @@ class MainApplication(QMainWindow, QDialog):
         create button to start and stop action logger
         """
         self.runButton = QPushButton("Start logger")
-        if darkdetect.isDark():
+        if darkdetect.isDark() and utils.utils.ENABLE_DARK_MODE:
             self.runButton.setStyleSheet(
                 'QPushButton {background-color: #656565;}')
         self.runButton.setCheckable(True)
@@ -305,7 +313,7 @@ class MainApplication(QMainWindow, QDialog):
 
         self.topLayout.addStretch(1)
         self.checkButton = QPushButton("Enable all")
-        if darkdetect.isDark():
+        if darkdetect.isDark() and utils.utils.ENABLE_DARK_MODE:
             self.checkButton.setStyleSheet('QPushButton {color: white;}')
         self.checkButton.setCheckable(True)
         self.checkButton.setChecked(False)
@@ -424,7 +432,7 @@ class MainApplication(QMainWindow, QDialog):
         set app icon with support to dark mode
         """
         app_icon = QIcon()
-        if darkdetect.isDark():
+        if darkdetect.isDark() and utils.utils.ENABLE_DARK_MODE:
             app_icon.addFile('utils/icons/icon-16-dark.png', QSize(16, 16))
             app_icon.addFile('utils/icons/icon-32-dark.png', QSize(32, 32))
             app_icon.addFile('utils/icons/icon-48-dark.png', QSize(48, 48))
@@ -492,7 +500,7 @@ class MainApplication(QMainWindow, QDialog):
             self.topLayout.setContentsMargins(0, 0, 0, 10)
             self.bottomLayout.setContentsMargins(0, 0, 0, 0)
 
-            if darkdetect.isDark():
+            if darkdetect.isDark() and utils.utils.ENABLE_DARK_MODE:
                 self.statusListWidget.setStyleSheet(
                     "QListWidget{background: #3A3B3B;}")
             else:
@@ -640,6 +648,9 @@ class MainApplication(QMainWindow, QDialog):
     def handlePreferences(self):
         self.preferencesDialog.show()
 
+    def handleSegmentation(self):
+        self.segmentationDialog.show()
+
     def handleRunLogAction(self):
         """
         This method is called when the user wants to perform RPA analysis on an event log.
@@ -669,7 +680,7 @@ class MainApplication(QMainWindow, QDialog):
         csv_to_merge = getFilenameDialog(customDialog=False,
                                          title=title,
                                          multipleItems=multipleItems,
-                                         filter_format="CSV log files (*.csv)")
+                                         filter_format="CSV event logs (*.csv)")
         if csv_to_merge:
             if merged:
                 self.status_queue.put("[GUI] Merging selected files...")
@@ -925,7 +936,7 @@ class MainApplication(QMainWindow, QDialog):
             'https://github.com/bpm-diag/smartRPA'))
         msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
         closeBtn = QPushButton('Close')
-        if darkdetect.isDark():
+        if darkdetect.isDark() and utils.utils.ENABLE_DARK_MODE:
             closeBtn.setStyleSheet('QPushButton {background-color: #656565;}')
         msgBox.addButton(closeBtn, QMessageBox.RejectRole)
         msgBox.exec_()
@@ -941,7 +952,7 @@ class MainApplication(QMainWindow, QDialog):
                 "Do you want to open an existing Excel spreadsheet or create a new one?")
             existing = QPushButton('Open existing spreadsheet')
             new = QPushButton('Create new spreadsheet')
-            if darkdetect.isDark():
+            if darkdetect.isDark() and utils.utils.ENABLE_DARK_MODE:
                 existing.setStyleSheet(
                     'QPushButton {background-color: #656565;}')
                 new.setStyleSheet('QPushButton {background-color: #656565;}')
@@ -1104,7 +1115,7 @@ def buildGUI():
     palette.setColor(QPalette.BrightText, Qt.red)
     palette.setColor(QPalette.Highlight, QColor(142, 45, 197).lighter())
     palette.setColor(QPalette.HighlightedText, Qt.black)
-    if darkdetect.isDark():
+    if darkdetect.isDark() and utils.utils.ENABLE_DARK_MODE:
         app.setPalette(palette)
 
     mainApplication = MainApplication()
