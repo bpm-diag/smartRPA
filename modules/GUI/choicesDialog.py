@@ -55,7 +55,7 @@ class ChoicesDialog(QDialog):
 
             buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
             buttonBox.accepted.connect(self.handleReturn)
-            if darkdetect.isDark():
+            if darkdetect.isDark() and utils.ENABLE_DARK_MODE:
                 buttonBox.setStyleSheet('QPushButton {background-color: #656565;}')
 
             formGroupBox = QGroupBox()

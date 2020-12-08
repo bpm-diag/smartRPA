@@ -67,7 +67,7 @@ EVENT_LOG_FOLDER = "event_log"
 PROCESS_DISCOVERY_FOLDER = "process_discovery"
 SW_ROBOT_FOLDER = "SW_Robot"
 UIPATH_FOLDER = "UiPath"
-
+ENABLE_DARK_MODE = False
 # ************
 # Functions
 # ************

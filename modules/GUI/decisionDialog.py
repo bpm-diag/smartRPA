@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QLabel, QVBoxLayout, QStyle, QSizePolicy
 import pandas
 from deprecated.sphinx import deprecated
+import sys
 
 
 @deprecated(version='1.2.0', reason="Not in use anymore, replaced with web view version which is more versatile")
@@ -86,19 +87,21 @@ class DecisionDialog(QDialog):
             index = [i.row() for i in sorted(self.table.selectionModel().selectedRows())][0]
         except IndexError:
             index = 0
+
         # caseID of chosen trace
-        self.selectedTrace = self.df.at[index, 'case:concept:name']
+        # self.selectedTrace = self.df.at[index, 'case:concept:name']
+
 
 # test
-# if __name__ == '__main__':
-#     app = QtWidgets.QApplication(sys.argv)
-#     df = pandas.DataFrame([
-#         [1, 9, 2],
-#         [1, 0, -1],
-#         [3, 5, 2],
-#         [3, 3, 2],
-#         [5, 8, 9],
-#     ], columns=['A', 'B', 'C'], index=['Row 1', 'Row 2', 'Row 3', 'Row 4', 'Row 5'])
-#     window = DecisionDialog(df)
-#     window.show()
-#     app.exec_()
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    df = pandas.DataFrame([
+        [1, 9, 2],
+        [1, 0, -1],
+        [3, 5, 2],
+        [3, 3, 2],
+        [5, 8, 9],
+    ], columns=['A', 'B', 'C'], index=['Row 1', 'Row 2', 'Row 3', 'Row 4', 'Row 5'])
+    window = DecisionDialog(df)
+    window.show()
+    app.exec_()

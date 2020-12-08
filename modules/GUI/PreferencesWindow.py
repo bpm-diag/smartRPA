@@ -104,7 +104,7 @@ class Preferences(QMainWindow):
         confirmButton.setCheckable(True)
         confirmButton.setChecked(False)
         confirmButton.clicked.connect(self.handleButton)
-        if darkdetect.isDark():
+        if darkdetect.isDark() and utils.utils.ENABLE_DARK_MODE:
             confirmButton.setStyleSheet(
                 'QPushButton {background-color: #656565;}')
 

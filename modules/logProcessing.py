@@ -71,7 +71,7 @@ def handle_log(status_queue: Queue,
                     .dropna(subset=["time:timestamp"]) \
                     .fillna('') \
                     .sort_values(by='time:timestamp')
-            except pandas.errors.ParserError:
+            except pandas.errors.ParserError:  # occurs when CSV has semicolon separator (;) instead of comma (,)
                 df = pandas \
                     .read_csv(csv_path, encoding='utf-8-sig', sep=';') \
                     .rename(columns={'event_type': 'concept:name',
