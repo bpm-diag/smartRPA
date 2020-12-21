@@ -130,3 +130,5 @@ py main.py
 <br>
 
 The resulting event log will be saved in `/RPA` directory.
+
+**NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
