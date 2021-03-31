@@ -22,7 +22,7 @@ fuzzywuzzy==0.18.0
 Unidecode==1.1.1
 psutil==5.4.6
 #lxml==4.5.2
-lxml==4.6.1
+lxml==4.6.3
 pydot==1.4.1
 deprecated
 
