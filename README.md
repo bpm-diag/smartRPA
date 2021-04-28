@@ -331,7 +331,7 @@ After installing the dependencies, you can [run the tool](#4-run-main-logger).
 
 # Publications
 
-- Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.: SmartRPA: A Tool to Reactively Synthesize Software Robots from User Interface Logs. In: 33rd International Conference on Advanced Information Systems Engineering (CAiSE Forum). To appear (2021)
+- **Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.**: _SmartRPA: A Tool to Reactively Synthesize Software Robots from User Interface Logs_. In: 33rd International Conference on Advanced Information Systems Engineering (CAiSE Forum). To appear (2021)
   - The synthetic UI logs generated for the test are available at: https://tinyurl.com/yyk68psx.
   - The complete results can be analyzed at: https://tinyurl.com/y55v56qa.
-- Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.: Automated Generation of Executable RPA Scripts from User Interface Logs. In: 18th Int. Conf. on Business Process Management (RPA Forum). pp. 116-131 (2020)
+- **Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.**: _Automated Generation of Executable RPA Scripts from User Interface Logs_. In: 18th Int. Conf. on Business Process Management (RPA Forum). pp. 116-131 (2020)
