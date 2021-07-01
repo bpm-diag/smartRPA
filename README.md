@@ -43,7 +43,7 @@ The current generation of RPA tools is driven by predefined rules and manual con
 
 <!--The **associated paper** is available on [Springer](https://doi.org/10.1007/978-3-030-58779-6_8), and has been presented at the [RPA Forum](https://congreso.us.es/bpm2020/calls/rpa/) of _18th International Conference on Business Process Management_.-->
 
-A **screencast** of the tool is available on [Vimeo](https://vimeo.com/marco2012/smartRPA).
+**Screencasts** of the tool are available on Vimeo \[[1](https://vimeo.com/marco2012/smartRPA)\] \[[2](https://vimeo.com/569988752)\].
 
 ## Architecture
 
@@ -331,7 +331,7 @@ After installing the dependencies, you can [run the tool](#4-run-main-logger).
 
 # Publications
 
-- **Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.**: _SmartRPA: A Tool to Reactively Synthesize Software Robots from User Interface Logs_. In: 33rd Int. Conf. on Advanced Information Systems Engineering (CAiSE Forum). To appear (2021)
+- **Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.**: _SmartRPA: A Tool to Reactively Synthesize Software Robots from User Interface Logs_. In: 33rd Int. Conf. on Advanced Information Systems Engineering (CAiSE Forum). pp. 137-145 (2021)
   - The synthetic UI logs generated for the test are available at: https://tinyurl.com/yyk68psx.
   - The complete results can be analyzed at: https://tinyurl.com/y55v56qa.
 - **Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.**: _Automated Generation of Executable RPA Scripts from User Interface Logs_. In: 18th Int. Conf. on Business Process Management (RPA Forum). pp. 116-131 (2020)
