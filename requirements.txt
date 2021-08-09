@@ -27,7 +27,7 @@ pydot==1.4.1
 deprecated
 
 # Windows specific dependencies
-pywin32==227; platform_system == "Windows"
+pywin32==301; platform_system == "Windows"
 WMI==1.4.9; platform_system == "Windows"
 
 # MacOS specific dependencies
