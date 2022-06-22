@@ -13,7 +13,7 @@ PyQtWebEngine==5.15.1; platform_system == "Windows"
 beautifulsoup4==4.9.3
 watchdog==0.10.2
 pandas==1.1.4
-numpy==1.19.3
+numpy==1.22.0
 nativeconfig==3.4.0
 pynput==1.6.7
 selenium==3.7.0
