@@ -131,7 +131,6 @@ def createLogFile():
         f.writerow(modules.consumerServer.HEADER)
     return log_filepath
 
-
 def getRPADirectory(csv_file_path):
     """
     Genreate path to save RPA files.
@@ -436,6 +435,19 @@ def previous_and_next(some_iterable):
     nexts = chain(islice(nexts, 1, None), [None])
     return zip(prevs, items, nexts)
 
+def takeScreenshot(scrshtFormat: str ="png"):
+    """
+    Takes a screenshot of all attached and visible screens
+    Stores the screenshot in the location logs/screenshots
+
+    :param scrshtFormat: (Optional) File format of screenshot, Default type is png
+    :return: Name of the screenshot file
+    """
+    screenshot = ImageGrab.grab(all_screens=True)
+    imageName = "scrsht" + timestamp("%Y-%m-%d_%H-%M-%S") + "." + scrshtFormat
+    imagePath = "screenshots/" + imageName
+    screenshot.save(imagePath, format=scrshtFormat)
+    return imageName
 
 # ************
 # Class
@@ -530,19 +542,4 @@ else:
     FIREFOX = isInstalledLinux('firefox')
     EDGE = False
     OPERA = isInstalledLinux('opera')
-
-def takeScreenshot(scrshtFormat: str ="png"):
-    """
-    Takes a screenshot of all attached and visible screens
-    Stores the screenshot in the location logs/screenshots
-
-    :param scrshtFormat: (Optional) File format of screenshot, Default type is png
-    :return: Name of the screenshot file
-    """
-    screenshot = ImageGrab.grab(all_screens=True)
-    stamp = timestamp("%Y-%m-%d_%H-%M-%S")
-    folder = "screenshots/"
-    imageName = folder + "scrsht" + stamp + "." + scrshtFormat
-    screenshot.save(imageName, format=scrshtFormat)
-    
 
