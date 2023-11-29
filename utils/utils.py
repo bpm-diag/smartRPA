@@ -501,7 +501,7 @@ def takeScreenshot(save_image=True, scrshtFormat: str ="png"):
             
             # Guarda la imagen y elimina compresión
             Image.fromarray(img).save(filename, compress_level=0)
-    print(filename)
+    # print(filename)
     return filename
 
 # ************
