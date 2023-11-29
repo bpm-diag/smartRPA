@@ -120,6 +120,8 @@ def createLogFile():
     # logs = os.path.join(current_directory, 'logs')
     logs = os.path.join(MAIN_DIRECTORY, 'logs')
     createDirectory(logs)
+    screenshots = os.path.join(MAIN_DIRECTORY, 'screenshots')
+    createDirectory(screenshots)
     filename = timestamp("%Y-%m-%d_%H-%M-%S") + '.csv'
     log_filepath = os.path.join(logs, filename)
     # utils.config.MyConfig.get_instance().log_filepath = log_filepath
