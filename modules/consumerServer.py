@@ -90,6 +90,7 @@ def writeLog():
     with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
         f.writerow(row)
+        print("i have added a row")
 
     # empty the list for next use
     row.clear()

@@ -228,7 +228,7 @@ def isPortInUse(port):
         return s.connect_ex(('127.0.0.1', port)) == 0
 
 
-def CSVEmpty(log_filepath, min_len=1):
+def CSVEmpty(log_filepath, min_len=0):
     """
     Check if given csv is empty by counting number of rows
 
@@ -240,6 +240,7 @@ def CSVEmpty(log_filepath, min_len=1):
         df = pandas.read_csv(log_filepath, encoding='utf-8-sig')
     except pandas.errors.EmptyDataError:
         return True
+    print(len(df))
     return df.empty or len(df) <= min_len
 
 
