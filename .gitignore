@@ -1,6 +1,8 @@
 /dist/
 /node_modules/
 /case_study/
+logs/
+screenshots/
 stuff_to_delete/
 PythonProgrammingOnWin32.pdf
 latex

@@ -120,7 +120,7 @@ def createLogFile():
     # logs = os.path.join(current_directory, 'logs')
     logs = os.path.join(MAIN_DIRECTORY, 'logs')
     createDirectory(logs)
-    filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
+    filename = timestamp("%Y-%m-%d_%H-%M-%S") + '.csv'
     log_filepath = os.path.join(logs, filename)
     # utils.config.MyConfig.get_instance().log_filepath = log_filepath
     # create HEADER
@@ -136,7 +136,7 @@ def getRPADirectory(csv_file_path):
 
     RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
 
-    :param csv_file_path: path of event log in input
+    :param csv_file_path str: path of event log in input
     :return: path of RPA directory
     """
     csv_filename = getFilename(csv_file_path)
@@ -529,17 +529,18 @@ else:
     EDGE = False
     OPERA = isInstalledLinux('opera')
 
-def takeScreenshot():
+def takeScreenshot(scrshtFormat: str ="png"):
     """
     Takes a screenshot of all attached and visible screens
     Stores the screenshot in the location logs/screenshots
+
+    :param scrshtFormat: (Optional) File format of screenshot, Default type is png
+    :return: Name of the screenshot file
     """
     screenshot = ImageGrab.grab(all_screens=True)
-
-    timestamp=timestamp()
-    print(timestamp)
-    folder = "../log/images"
-    imageName = folder + "scrsht_" + str(timestamp) + ".png"
-    screenshot.save(imageName, format='PNG')
+    stamp = timestamp("%Y-%m-%d_%H-%M-%S")
+    folder = "screenshots/"
+    imageName = folder + "scrsht" + stamp + "." + scrshtFormat
+    screenshot.save(imageName, format=scrshtFormat)
     
 

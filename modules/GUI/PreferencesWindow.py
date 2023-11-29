@@ -24,6 +24,7 @@ class Preferences(QMainWindow):
         * enable or disable process discovery analysis
         * select the number of runs after which event log is generated
         * select analysis type (either decision points or most frequent routine)
+        * Future: enable or disable the screenshot recording feature
 
         :param status_queue: queue to send messages to main GUI
         """
@@ -62,6 +63,15 @@ class Preferences(QMainWindow):
         perform_process_discovery = utils.config.MyConfig.get_instance().perform_process_discovery
         self.process_discovery_cb.setChecked(perform_process_discovery)
         self.decisionGroupBox.setEnabled(perform_process_discovery)
+
+        # Additional Box to check the capture screenshots feature
+        self.screenshot_cb = QCheckBox(
+            "Enable screenshot feature on event logging")
+        self.screenshot_cb.setToolTip("If enabled, screenshots will be stored for each recorded event in the log")
+        self.screenshot_cb.tag = "screenshot_cb"
+        self.screenshot_cb.stateChanged.connect(self.handle_cb_scrsht)
+        capture_screenshots = utils.config.MyConfig.get_instance().capture_screenshots
+        # self.decisionGroupBox.setEnabled(capture_screenshots)
 
         self.mfr = QRadioButton("Most frequent routine")
         self.mfr.clicked.connect(self.handle_radio)
@@ -113,6 +123,11 @@ class Preferences(QMainWindow):
         vbox.addWidget(self.process_discovery_cb)
         processDiscoveryGroupBox.setLayout(vbox)
 
+        captureScreenshotsGroupBox = QGroupBox("capture Screenshots")
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.screenshot_cb)
+        captureScreenshotsGroupBox.setLayout(vbox)
+
         vbox = QVBoxLayout()
         vbox.addWidget(self.mfr)
         vbox.addWidget(self.decision)
@@ -132,6 +147,7 @@ class Preferences(QMainWindow):
         xesGroupBox.setLayout(vbox)
 
         mainLayout = QVBoxLayout()
+        mainLayout.addWidget(captureScreenshotsGroupBox)
         mainLayout.addWidget(processDiscoveryGroupBox)
         mainLayout.addWidget(self.decisionGroupBox)
         mainLayout.addWidget(xesGroupBox)
@@ -156,6 +172,15 @@ class Preferences(QMainWindow):
             self.status_queue.put("[GUI] Process discovery enabled")
         else:
             self.status_queue.put("[GUI] Process discovery disabled")
+
+    def handle_cb_scrsht(self):
+        perform = self.screenshot_cb.isChecked()
+        # self.decisionGroupBox.setEnabled(perform)
+        utils.config.MyConfig.get_instance().capture_screenshot = perform
+        if perform:
+            self.status_queue.put("[GUI] Screenshot capture enabled")
+        else:
+            self.status_queue.put("[GUI] Screenshot capture disabled")
 
     def handle_radio(self):
         mfr_checked = self.mfr.isChecked()
