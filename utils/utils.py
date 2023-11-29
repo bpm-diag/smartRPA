@@ -24,6 +24,9 @@ from itertools import tee, islice, chain
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
 
+# screenshot recording feature
+from PIL import ImageGrab
+
 session = FuturesSession()
 
 # ************
@@ -73,15 +76,18 @@ UIPATH_FOLDER = "UiPath"
 # ************
 
 
-def timestamp():
+def timestamp(format=None):
     """
     Generate current timestamp in ISO format (e.g. '2020-08-29T16:42:30.690')
 
-    :return: timestamp in ISO format
-    """
+    :param format: format (Default None) specifies the datetime format, if none it is ISO Format
 
-    #return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")  # [:-3]
-    return datetime.now().isoformat(timespec='milliseconds')
+    :return: timestamp in (ISO) format
+    """
+    if format == None:
+        return datetime.now().isoformat(timespec='milliseconds')
+    else:
+        return datetime.now().strftime(format)
 
 
 def createDirectory(path):
@@ -522,3 +528,18 @@ else:
     FIREFOX = isInstalledLinux('firefox')
     EDGE = False
     OPERA = isInstalledLinux('opera')
+
+def takeScreenshot():
+    """
+    Takes a screenshot of all attached and visible screens
+    Stores the screenshot in the location logs/screenshots
+    """
+    screenshot = ImageGrab.grab(all_screens=True)
+
+    timestamp=timestamp()
+    print(timestamp)
+    folder = "../log/images"
+    imageName = folder + "scrsht_" + str(timestamp) + ".png"
+    screenshot.save(imageName, format='PNG')
+    
+

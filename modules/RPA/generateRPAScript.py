@@ -98,6 +98,15 @@ except ImportError as e:
 
         :return: browser import statement
         """
+        # In the following we can add edge driver as an element, to allow the execution of the RPA bot in Edge
+        # The following changes are necessary:
+        # broowser = webdriver.Chrome() < is replaced by:
+        # browser = webdriver.Edge(r"C:\Users\tomho\OneDrive\Documents\VSCode\smartRPA\smartRPA\libraries\msedgedriver.exe")
+        #
+        # The link to the file must be relative to the installation to find the Edge Driver.
+        # The file produced by the automated creation of the RPA bot needs to reference this msedgedriver.exe
+        #
+        # More on msedge Driver: https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
         return f"""
 try:
     import importlib
