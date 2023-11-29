@@ -456,7 +456,7 @@ def get_last_directory_name(path):
     else:
         return None
 
-def takeScreenshot(save_image=True, scrshtFormat: str ="png"):
+def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().capture_screenshots, scrshtFormat: str ="png"):
     """
     Takes a screenshot and saves it to a directory with a filename based on its hash, current date/time and order of capture.
 
@@ -466,32 +466,32 @@ def takeScreenshot(save_image=True, scrshtFormat: str ="png"):
     """
     # Future improvement: use onlx dxcam to capture multiple screens, because it is faster
     filename = ""
-    if dxcam.output_info().count("Output[") > 1:
-        # If there are more than two screens attached it is easier to use the pillow impage capture
-        screenshot = ImageGrab.grab(all_screens=True)
-        imageName = "scrsht" + timestamp("%Y-%m-%d_%H-%M-%S") + "." + scrshtFormat
-        filename = "screenshots/" + imageName
-        screenshot.save(filename, format=scrshtFormat)
+    if save_image:
+        if dxcam.output_info().count("Output[") > 1:
+            # If there are more than two screens attached it is easier to use the pillow impage capture
+            screenshot = ImageGrab.grab(all_screens=True)
+            imageName = "scrsht" + timestamp("%Y-%m-%d_%H-%M-%S") + "." + scrshtFormat
+            filename = "screenshots/" + imageName
+            screenshot.save(filename, format=scrshtFormat)
 
-    else:
-        global camera  # usa la variable global camera
+        else:
+            global camera  # usa la variable global camera
 
-        # Si no hay instancia de cámara, crear una nueva instancia
-        if camera is None:
-            camera = dxcam.create()
-            print("Creating new camera instance")
-        img = camera.grab()
+            # Si no hay instancia de cámara, crear una nueva instancia
+            if camera is None:
+                camera = dxcam.create()
+                print("Creating new camera instance")
+            img = camera.grab()
 
-        # Calculamos el hash de la imagen
-        sha256_hash = hashlib.sha256()
-        sha256_hash.update(img)
-        hashed_img = sha256_hash.hexdigest()
+            # Calculamos el hash de la imagen
+            sha256_hash = hashlib.sha256()
+            sha256_hash.update(img)
+            hashed_img = sha256_hash.hexdigest()
 
-        # Acortar el hash para el nombre
-        short_hash = hashed_img[:8]
+            # Acortar el hash para el nombre
+            short_hash = hashed_img[:8]
 
-        # Guardar la imagen en el directorio correspondiente. Nombre dependiente de hash
-        if save_image:
+            # Guardar la imagen en el directorio correspondiente. Nombre dependiente de hash
             directory = "screenshots/"
             if not os.path.exists(directory):
                 createDirectory(directory)
@@ -501,7 +501,7 @@ def takeScreenshot(save_image=True, scrshtFormat: str ="png"):
             
             # Guarda la imagen y elimina compresión
             Image.fromarray(img).save(filename, compress_level=0)
-    # print(filename)
+
     return filename
 
 # ************

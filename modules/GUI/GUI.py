@@ -311,6 +311,11 @@ class MainApplication(QMainWindow, QDialog):
         self.runButton.toggled.connect(self.officeGroupBox.setDisabled)
 
     def updateStartButtonState(self):
+        """
+        Controls the status of the "start logger" button.
+        If any CB is clicked it does update the status.
+        If any CB is active, the button stays active.
+        """
         if self.runButton.isEnabled() and not any([self.systemLoggerFilesFolder,
                     self.systemLoggerPrograms,
                     self.systemLoggerClipboard,

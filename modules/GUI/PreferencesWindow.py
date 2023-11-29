@@ -70,7 +70,8 @@ class Preferences(QMainWindow):
         self.screenshot_cb.setToolTip("If enabled, screenshots will be stored for each recorded event in the log")
         self.screenshot_cb.tag = "screenshot_cb"
         self.screenshot_cb.stateChanged.connect(self.handle_cb_scrsht)
-        capture_screenshots = utils.config.MyConfig.get_instance().capture_screenshots
+        self.handle_cb_scrsht()
+        
         # self.decisionGroupBox.setEnabled(capture_screenshots)
 
         self.mfr = QRadioButton("Most frequent routine")
@@ -176,7 +177,7 @@ class Preferences(QMainWindow):
     def handle_cb_scrsht(self):
         perform = self.screenshot_cb.isChecked()
         # self.decisionGroupBox.setEnabled(perform)
-        utils.config.MyConfig.get_instance().capture_screenshot = perform
+        utils.config.MyConfig.get_instance().capture_screenshots = perform
         if perform:
             self.status_queue.put("[GUI] Screenshot capture enabled")
         else:
