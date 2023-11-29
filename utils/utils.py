@@ -24,7 +24,14 @@ from itertools import tee, islice, chain
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
 
-# screenshot recording feature
+# screenshot recording feature for single screen
+from PIL import Image
+import os
+import dxcam
+import hashlib
+from datetime import datetime
+
+# screenshot recording feature for multiple screen
 from PIL import ImageGrab
 
 session = FuturesSession()
@@ -70,6 +77,8 @@ EVENT_LOG_FOLDER = "event_log"
 PROCESS_DISCOVERY_FOLDER = "process_discovery"
 SW_ROBOT_FOLDER = "SW_Robot"
 UIPATH_FOLDER = "UiPath"
+# Global variable for camera on taking screenshots
+camera = None
 
 # ************
 # Functions
@@ -435,19 +444,65 @@ def previous_and_next(some_iterable):
     nexts = chain(islice(nexts, 1, None), [None])
     return zip(prevs, items, nexts)
 
-def takeScreenshot(scrshtFormat: str ="png"):
+# Methods copied from https://github.com/RPA-US/screen-action-logger
+def get_last_directory_name(path):
     """
-    Takes a screenshot of all attached and visible screens
-    Stores the screenshot in the location logs/screenshots
+    Returns the name of the last directory within a given directory path.
+    """
+    directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+    if directories:
+        last_directory = max(directories, key=lambda d: os.path.getmtime(os.path.join(path, d)))
+        return os.path.basename(last_directory)
+    else:
+        return None
+
+def takeScreenshot(save_image=True, scrshtFormat: str ="png"):
+    """
+    Takes a screenshot and saves it to a directory with a filename based on its hash, current date/time and order of capture.
 
     :param scrshtFormat: (Optional) File format of screenshot, Default type is png
+    :param save_image: (Boolean) Default True
     :return: Name of the screenshot file
     """
-    screenshot = ImageGrab.grab(all_screens=True)
-    imageName = "scrsht" + timestamp("%Y-%m-%d_%H-%M-%S") + "." + scrshtFormat
-    imagePath = "screenshots/" + imageName
-    screenshot.save(imagePath, format=scrshtFormat)
-    return imageName
+    # Future improvement: use onlx dxcam to capture multiple screens, because it is faster
+    filename = ""
+    if dxcam.output_info().count("Output[") > 1:
+        # If there are more than two screens attached it is easier to use the pillow impage capture
+        screenshot = ImageGrab.grab(all_screens=True)
+        imageName = "scrsht" + timestamp("%Y-%m-%d_%H-%M-%S") + "." + scrshtFormat
+        filename = "screenshots/" + imageName
+        screenshot.save(filename, format=scrshtFormat)
+
+    else:
+        global camera  # usa la variable global camera
+
+        # Si no hay instancia de cámara, crear una nueva instancia
+        if camera is None:
+            camera = dxcam.create()
+            print("Creating new camera instance")
+        img = camera.grab()
+
+        # Calculamos el hash de la imagen
+        sha256_hash = hashlib.sha256()
+        sha256_hash.update(img)
+        hashed_img = sha256_hash.hexdigest()
+
+        # Acortar el hash para el nombre
+        short_hash = hashed_img[:8]
+
+        # Guardar la imagen en el directorio correspondiente. Nombre dependiente de hash
+        if save_image:
+            directory = "screenshots/"
+            if not os.path.exists(directory):
+                createDirectory(directory)
+            stamp = timestamp("%Y-%m-%d_%H-%M-%S")
+            # counter = len([filename for filename in os.listdir(directory) if filename.endswith('.png')])
+            filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
+            
+            # Guarda la imagen y elimina compresión
+            Image.fromarray(img).save(filename, compress_level=0)
+    print(filename)
+    return filename
 
 # ************
 # Class
