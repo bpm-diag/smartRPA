@@ -1,7 +1,7 @@
 from sys import path
 path.append('../../')  # this way main file is visible from this file
 from pynput import mouse
-import utils.utils
+from utils.utils import *
 from modules import consumerServer
 from deprecated.sphinx import deprecated
 
@@ -19,13 +19,15 @@ def logMouse():
             if 'Excel' in utils.utils.getActiveWindowInfo('name') and pressed:
                 coord = f"{x},{y}"
                 print(f"{utils.utils.timestamp()} {utils.utils.USER} OperatingSystem click {coord}")
+                screenshot = takeScreenshot()
                 utils.utils.session.post(consumerServer.SERVER_ADDR, json={
                     "timestamp": utils.utils.timestamp(),
                     "user": utils.utils.USER,
                     "category": "MouseClick",
                     "application": "OperatingSystem",
                     "event_type": "click",
-                    "mouse_coord": coord
+                    "mouse_coord": coord,
+                    "screenshot": screenshot
                 })
         except Exception:
             pass

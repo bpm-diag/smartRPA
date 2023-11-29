@@ -66,6 +66,7 @@ def watchFolder():
                 if event.event_type == "moved":  # destination path is available
                     print(
                         f"{timestamp()} {USER} OperatingSystem {event.event_type} {event.src_path} {event.dest_path}")
+                    screenshot = takeScreenshot()
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
                         "user": USER,
@@ -74,7 +75,8 @@ def watchFolder():
                         "event_type": event.event_type,
                         "event_src_path": event.src_path,
                         "event_dest_path": event.dest_path,
-                        "mouse_coord": mouse.position
+                        "mouse_coord": mouse.position,
+                        "screenshot": screenshot
                     })
                     # return
                 elif event.event_type == "modified":  # avoid spam
@@ -84,6 +86,7 @@ def watchFolder():
                     if "~$" not in event.src_path:
                         print(
                             f"{timestamp()} {USER} OperatingSystem {event.event_type} {event.src_path}")
+                        screenshot = takeScreenshot()
                         session.post(consumerServer.SERVER_ADDR, json={
                             "timestamp": timestamp(),
                             "user": USER,
@@ -91,7 +94,8 @@ def watchFolder():
                             "application": "Finder" if MAC else "Explorer",
                             "event_type": event.event_type,
                             "event_src_path": event.src_path,
-                            "mouse_coord": mouse.position
+                            "mouse_coord": mouse.position,
+                            "screenshot": screenshot
                         })
 
     print("[systemEvents] Files/Folder logging started")
@@ -199,6 +203,7 @@ def watchFolderMac():
             logged[path] = event_type
             # file_extension = os.path.splitext(path)[1]
             print(f"{timestamp()} {USER} OperatingSystem {event_type} {file_event.name}")
+            screenshot = takeScreenshot()
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
@@ -206,7 +211,8 @@ def watchFolderMac():
                 "application": "Finder" if MAC else "Explorer",
                 "event_type": event_type,
                 "event_src_path": file_event.name,
-                "mouse_coord": mouse.position
+                "mouse_coord": mouse.position,
+                "screenshot": screenshot
             })
 
     print("[systemEvents] Files/Folder logging started")
@@ -238,6 +244,7 @@ def logProcessesWin():
             exe = []
         path = exe[0] if exe else ""
         print(f"{timestamp()} {USER} {event} {app} {path}")
+        screenshot = takeScreenshot()
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),
             "user": USER,
@@ -245,7 +252,8 @@ def logProcessesWin():
             "application": app,
             "event_type": event,
             "event_src_path": path,
-            "mouse_coord": mouse.position
+            "mouse_coord": mouse.position,
+            "screenshot": screenshot
         })
 
     new_programs = set()  # needed later to initialize 'closed' set
@@ -371,6 +379,7 @@ def watchRecentsFilesWin():
                     eventType = "openFolder"
 
                 print(f"{timestamp()} {USER} OperatingSystem {eventType} {lnk_target}")
+                screenshot = takeScreenshot()
                 session.post(consumerServer.SERVER_ADDR, json={
                     "timestamp": timestamp(),
                     "user": USER,
@@ -378,7 +387,8 @@ def watchRecentsFilesWin():
                     "application": "Finder" if MAC else "Explorer",
                     "event_type": eventType,
                     "event_src_path": lnk_target,
-                    "mouse_coord": mouse.position
+                    "mouse_coord": mouse.position,
+                    "screenshot": screenshot
                 })
 
         except Exception:
@@ -426,6 +436,7 @@ def detectSelectionWindowsExplorer():
                             else:
                                 eventType = "selectedFolder"
                             print(f"{timestamp()} {USER} OperatingSystem {eventType} {path}")
+                            screenshot = takeScreenshot()
                             session.post(consumerServer.SERVER_ADDR, json={
                                 "timestamp": timestamp(),
                                 "user": USER,
@@ -433,7 +444,8 @@ def detectSelectionWindowsExplorer():
                                 "application": "Explorer",
                                 "event_type": eventType,
                                 "event_src_path": path,
-                                "mouse_coord": mouse.position
+                                "mouse_coord": mouse.position,
+                                "screenshot": screenshot
                             })
         except Exception as e:
             # print(e)
@@ -506,6 +518,7 @@ def logHotkeys():
         if hotkey == "ctrl+h" and 'chrome' in appName.lower():
             meaning = "Show history"
         print(f"{timestamp()} {USER} OperatingSystem {event_type} {hotkey.upper()} {meaning} {clipboard_content}")
+        screenshot = takeScreenshot()
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),
             "user": USER,
@@ -516,7 +529,8 @@ def logHotkeys():
             "hotkey": hotkey.upper(),
             "description": meaning,
             "clipboard_content": clipboard_content,
-            "mouse_coord": mouse.position
+            "mouse_coord": mouse.position,
+            "screenshot": screenshot
         })
 
     def handleHotkey(key):
@@ -550,6 +564,7 @@ def logPasteHotkey():
             # remove milliseconds from timestamp so duplicated events are easier to remove
             ts = timestamp()[:-3] + '000'
             print(f"{ts} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
+            screenshot = takeScreenshot()
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": ts,
                 "user": USER,
@@ -558,7 +573,8 @@ def logPasteHotkey():
                 "title": window_name,
                 "event_type": 'paste',
                 "description": 'Paste',
-                "clipboard_content": clipboard_content
+                "clipboard_content": clipboard_content,
+                "screenshot": screenshot
             })
 
     def handleHotkey():
@@ -613,6 +629,7 @@ def logUSBDrives():
             if id not in drive_list.keys():
                 drive_list[id] = DiskDrive_Caption
                 print(f"{timestamp()} {USER} OperatingSystem insertUSB {id} {DiskDrive_Caption}")
+                screenshot = takeScreenshot()
                 session.post(consumerServer.SERVER_ADDR, json={
                     "timestamp": timestamp(),
                     "user": USER,
@@ -621,6 +638,7 @@ def logUSBDrives():
                     "event_type": "insertUSB",
                     "id": id,
                     "title": DiskDrive_Caption,
+                    "screenshot": screenshot
                 })
         else:
             drive_list.clear()
@@ -653,6 +671,7 @@ def logProcessesMac():
                 if app not in open_programs:
                     open_programs.append(app)
                     print(f"{timestamp()} {USER} programOpen {app.strip()}.app")
+                    screenshot = takeScreenshot()
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
                         "user": USER,
@@ -660,7 +679,8 @@ def logProcessesMac():
                         "application": app.strip(),
                         "event_type": "programOpen",
                         "event_src_path": f"/Applications/{app.strip()}.app",
-                        "mouse_coord": mouse.position
+                        "mouse_coord": mouse.position,
+                        "screenshot": screenshot
                     })
             new_programs_len = len(new_programs)
 
@@ -669,6 +689,7 @@ def logProcessesMac():
                 if app in open_programs:
                     open_programs.remove(app)
                     print(f"{timestamp()} {USER} programClose {app.strip()}.app")
+                    screenshot = takeScreenshot()
                     session.post(consumerServer.SERVER_ADDR, json={
                         "timestamp": timestamp(),
                         "user": USER,
@@ -676,7 +697,8 @@ def logProcessesMac():
                         "application": app.strip(),
                         "event_type": "programClose",
                         "event_src_path": f"/Applications/{app.strip()}.app",
-                        "mouse_coord": mouse.position
+                        "mouse_coord": mouse.position,
+                        "screenshot": screenshot
                     })
 
         sleep(2)
@@ -700,11 +722,13 @@ def printerLogger():
         pj = print_job_watcher()
         print(
             f"{timestamp()} {pj.Owner} OperatingSystem printSubmitted {pj.Name}")
+        screenshot = takeScreenshot()
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),
             "user": USER,
             "category": "OperatingSystem",
             "application": "Printer",
             "event_type": "printSubmitted",
-            "title": pj.Name
+            "title": pj.Name,
+            "screenshot": screenshot
         })
