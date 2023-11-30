@@ -505,6 +505,21 @@ def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().captu
 
     return filename
 
+def add_json_element(node, key, value):
+    """
+    Adds a JSON element to the specified node.
+
+    Args:
+        node (dict): The node to add the element to.
+        key (str): The key of the element.
+        value (any): The value of the element.
+    """
+
+    if isinstance(node, dict):
+        node[key] = value
+    else:
+        raise TypeError("Node must be a dictionary")
+
 # ************
 # Class
 # ************
