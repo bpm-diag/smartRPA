@@ -24,6 +24,16 @@ from itertools import tee, islice, chain
 # asynchronous session.post requests to log server, used by multiple modules
 from requests_futures.sessions import FuturesSession
 
+# screenshot recording feature for single screen
+from PIL import Image
+import os
+import dxcam
+import hashlib
+from datetime import datetime
+
+# screenshot recording feature for multiple screen
+from PIL import ImageGrab
+
 session = FuturesSession()
 
 # ************
@@ -67,21 +77,26 @@ EVENT_LOG_FOLDER = "event_log"
 PROCESS_DISCOVERY_FOLDER = "process_discovery"
 SW_ROBOT_FOLDER = "SW_Robot"
 UIPATH_FOLDER = "UiPath"
+# Global variable for camera on taking screenshots
+camera = None
 
 # ************
 # Functions
 # ************
 
 
-def timestamp():
+def timestamp(format=None):
     """
     Generate current timestamp in ISO format (e.g. '2020-08-29T16:42:30.690')
 
-    :return: timestamp in ISO format
-    """
+    :param format: format (Default None) specifies the datetime format, if none it is ISO Format
 
-    #return datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")  # [:-3]
-    return datetime.now().isoformat(timespec='milliseconds')
+    :return: timestamp in (ISO) format
+    """
+    if format == None:
+        return datetime.now().isoformat(timespec='milliseconds')
+    else:
+        return datetime.now().strftime(format)
 
 
 def createDirectory(path):
@@ -114,7 +129,9 @@ def createLogFile():
     # logs = os.path.join(current_directory, 'logs')
     logs = os.path.join(MAIN_DIRECTORY, 'logs')
     createDirectory(logs)
-    filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
+    screenshots = os.path.join(MAIN_DIRECTORY, 'screenshots')
+    createDirectory(screenshots)
+    filename = timestamp("%Y-%m-%d_%H-%M-%S") + '.csv'
     log_filepath = os.path.join(logs, filename)
     # utils.config.MyConfig.get_instance().log_filepath = log_filepath
     # create HEADER
@@ -123,14 +140,13 @@ def createLogFile():
         f.writerow(modules.consumerServer.HEADER)
     return log_filepath
 
-
 def getRPADirectory(csv_file_path):
     """
     Genreate path to save RPA files.
 
     RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57
 
-    :param csv_file_path: path of event log in input
+    :param csv_file_path str: path of event log in input
     :return: path of RPA directory
     """
     csv_filename = getFilename(csv_file_path)
@@ -212,7 +228,7 @@ def isPortInUse(port):
         return s.connect_ex(('127.0.0.1', port)) == 0
 
 
-def CSVEmpty(log_filepath, min_len=1):
+def CSVEmpty(log_filepath, min_len=0):
     """
     Check if given csv is empty by counting number of rows
 
@@ -224,6 +240,7 @@ def CSVEmpty(log_filepath, min_len=1):
         df = pandas.read_csv(log_filepath, encoding='utf-8-sig')
     except pandas.errors.EmptyDataError:
         return True
+    print(len(df))
     return df.empty or len(df) <= min_len
 
 
@@ -428,6 +445,80 @@ def previous_and_next(some_iterable):
     nexts = chain(islice(nexts, 1, None), [None])
     return zip(prevs, items, nexts)
 
+# Methods copied from https://github.com/RPA-US/screen-action-logger
+def get_last_directory_name(path):
+    """
+    Returns the name of the last directory within a given directory path.
+    """
+    directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+    if directories:
+        last_directory = max(directories, key=lambda d: os.path.getmtime(os.path.join(path, d)))
+        return os.path.basename(last_directory)
+    else:
+        return None
+
+def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().capture_screenshots, scrshtFormat: str ="png"):
+    """
+    Takes a screenshot and saves it to a directory with a filename based on its hash, current date/time and order of capture.
+
+    :param scrshtFormat: (Optional) File format of screenshot, Default type is png
+    :param save_image: (Boolean) Default True
+    :return: Name of the screenshot file
+    """
+    # Future improvement: use onlx dxcam to capture multiple screens, because it is faster
+    filename = ""
+    if save_image:
+        if dxcam.output_info().count("Output[") > 1:
+            # If there are more than two screens attached it is easier to use the pillow impage capture
+            screenshot = ImageGrab.grab(all_screens=True)
+            imageName = "scrsht" + timestamp("%Y-%m-%d_%H-%M-%S") + "." + scrshtFormat
+            filename = "screenshots/" + imageName
+            screenshot.save(filename, format=scrshtFormat)
+
+        else:
+            global camera  # usa la variable global camera
+
+            # Si no hay instancia de cámara, crear una nueva instancia
+            if camera is None:
+                camera = dxcam.create()
+                print("Creating new camera instance")
+            img = camera.grab()
+
+            # Calculamos el hash de la imagen
+            sha256_hash = hashlib.sha256()
+            sha256_hash.update(img)
+            hashed_img = sha256_hash.hexdigest()
+
+            # Acortar el hash para el nombre
+            short_hash = hashed_img[:8]
+
+            # Guardar la imagen en el directorio correspondiente. Nombre dependiente de hash
+            directory = "screenshots/"
+            if not os.path.exists(directory):
+                createDirectory(directory)
+            stamp = timestamp("%Y-%m-%d_%H-%M-%S")
+            # counter = len([filename for filename in os.listdir(directory) if filename.endswith('.png')])
+            filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
+            
+            # Guarda la imagen y elimina compresión
+            Image.fromarray(img).save(filename, compress_level=0)
+
+    return filename
+
+def add_json_element(node, key, value):
+    """
+    Adds a JSON element to the specified node.
+
+    Args:
+        node (dict): The node to add the element to.
+        key (str): The key of the element.
+        value (any): The value of the element.
+    """
+
+    if isinstance(node, dict):
+        node[key] = value
+    else:
+        raise TypeError("Node must be a dictionary")
 
 # ************
 # Class
@@ -522,3 +613,4 @@ else:
     FIREFOX = isInstalledLinux('firefox')
     EDGE = False
     OPERA = isInstalledLinux('opera')
+

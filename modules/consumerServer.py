@@ -10,6 +10,7 @@ from logging import getLogger
 import utils.config
 import utils.utils
 # import utils.GUI
+import datetime
 
 # server port
 PORT = 4444
@@ -39,7 +40,7 @@ HEADER = [
     "id", "title", "description", "browser_url", "eventQual", "tab_moved_from_index", "tab_moved_to_index",
     "newZoomFactor", "oldZoomFactor", "tab_pinned", "tab_audible", "tab_muted", "window_ingognito", "file_size",
     "tag_category", "tag_type", "tag_name", "tag_title", "tag_value", "tag_checked", "tag_html", "tag_href",
-    "tag_innerText", "tag_option", "tag_attributes", "xpath", "xpath_full"
+    "tag_innerText", "tag_option", "tag_attributes", "xpath", "xpath_full", "screenshot"
 ]
 
 
@@ -59,7 +60,6 @@ def writeLog():
     All this data is appended to the csv event log.
     """
     content = request.json
-
     print(f"\nPOST received with content: {content}\n")
 
     # check if user enabled browser logging
@@ -70,6 +70,14 @@ def writeLog():
             (application == "Opera" and not log_opera):
         print(f"{application} logging disabled by user.")
         return content
+    elif(content["category"] == "Browser" and not "screenshot" in content):
+        # Take a screenshot for all incoming browser events
+        screenshot = utils.utils.takeScreenshot()
+        timeAfterScreenshot = utils.utils.timestamp()
+        content["screenshot"] = screenshot
+        # Double check the delay between the browser event logged and the screenshot taken here
+        # Latest check TOHO: For multiple screens ~0.5 sec, for single screen ~0.25 sec
+        print(str(timeAfterScreenshot) + " " + str(content["timestamp"]))
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))

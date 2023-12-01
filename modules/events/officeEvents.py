@@ -9,7 +9,7 @@ from re import findall
 import os
 from shutil import rmtree
 from itertools import chain
-import utils.utils
+from utils.utils import *
 from modules.consumerServer import SERVER_ADDR
 import utils.config
 
@@ -73,6 +73,7 @@ class ExcelEvents:
 
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} openWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -83,7 +84,8 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "id": Wn.WindowNumber,
-            "event_src_path": Wb.Path
+            "event_src_path": Wb.Path,
+            "screenshot": screenshot
         })
 
     def OnWindowDeactivate(self, Wb, Wn):
@@ -95,6 +97,7 @@ class ExcelEvents:
         :return: closeWindow event
         """
         self.seen_events["OnWindowDeactivate"] = None
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} closeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
         utils.utils.session.post(SERVER_ADDR, json={
@@ -107,7 +110,8 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "id": Wn.WindowNumber,
-            "event_src_path": Wb.Path
+            "event_src_path": Wb.Path,
+            "screenshot": screenshot
         })
 
     def OnWindowResize(self, Wb, Wn):
@@ -119,6 +123,7 @@ class ExcelEvents:
         :return: resizeWindow event
         """
         x, y, width, height = utils.utils.getActiveWindowInfo('size')
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} resizeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} size {x},{y},{width},{height} ")
         utils.utils.session.post(SERVER_ADDR, json={
@@ -132,7 +137,8 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "id": Wn.WindowNumber,
             "event_src_path": Wb.Path,
-            "window_size": f"{x},{y},{width},{height}"
+            "window_size": f"{x},{y},{width},{height}",
+            "screenshot": screenshot
             # "window_size": f"{Wn.Width},{Wn.Height}"
         })
 
@@ -152,6 +158,7 @@ class ExcelEvents:
         x, y, width, height = utils.utils.getActiveWindowInfo('size')
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} newWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path} window_size {x},{y},{width},{height}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -162,7 +169,8 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
-            "window_size": f"{x},{y},{width},{height}"
+            "window_size": f"{x},{y},{width},{height}",
+            "screenshot": screenshot
         })
 
     def OnWorkbookOpen(self, Wb):
@@ -175,6 +183,7 @@ class ExcelEvents:
         path = os.path.join(Wb.Path, Wb.Name)
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} openWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -184,7 +193,8 @@ class ExcelEvents:
             "workbook": Wb.Name,
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
-            "event_src_path": path
+            "event_src_path": path,
+            "screenshot": screenshot
         })
 
     def OnWorkbookNewSheet(self, Wb, Sh):
@@ -197,6 +207,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} addWorksheet workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -207,7 +218,7 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
-
+            "screenshot": screenshot
         })
 
     def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
@@ -225,6 +236,7 @@ class ExcelEvents:
             description = "SaveAs dialog box displayed"
         else:
             description = "SaveAs dialog box not displayed"
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -235,7 +247,7 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "description": description,
-
+            "screenshot": screenshot
         })
 
     def OnWorkbookAfterSave(self, Wb, Success):
@@ -249,6 +261,7 @@ class ExcelEvents:
         savedPath = os.path.join(Wb.Path, Wb.Name)
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {savedPath}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -259,7 +272,7 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": savedPath,
-
+            "screenshot": screenshot
         })
 
     def OnWorkbookAddinInstall(self, Wb):
@@ -271,6 +284,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} addinInstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -280,7 +294,8 @@ class ExcelEvents:
             "workbook": Wb.Name,
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
-            "event_src_path": Wb.Path
+            "event_src_path": Wb.Path,
+            "screenshot": screenshot
         })
 
     def OnWorkbookAddinUninstall(self, Wb):
@@ -292,6 +307,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} addinUninstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -301,7 +317,8 @@ class ExcelEvents:
             "workbook": Wb.Name,
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
-            "event_src_path": Wb.Path
+            "event_src_path": Wb.Path,
+            "screenshot": screenshot
         })
 
     def OnWorkbookAfterXmlImport(self, Wb, Map, Url, Result):
@@ -316,6 +333,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} XMLImportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -325,7 +343,8 @@ class ExcelEvents:
             "workbook": Wb.Name,
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
-            "event_src_path": Wb.Path
+            "event_src_path": Wb.Path,
+            "screenshot": screenshot
         })
 
     def OnWorkbookAfterXmlExport(self, Wb, Map, Url, Result):
@@ -340,6 +359,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} XMLExportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -349,7 +369,8 @@ class ExcelEvents:
             "workbook": Wb.Name,
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
-            "event_src_path": Wb.Path
+            "event_src_path": Wb.Path,
+            "screenshot": screenshot
         })
 
     def OnWorkbookBeforePrint(self, Wb, Cancel):
@@ -362,6 +383,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} printWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -372,7 +394,7 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
-
+            "screenshot": screenshot
         })
 
     def OnWorkbookBeforeClose(self, Wb, Cancel):
@@ -385,6 +407,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} closeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -395,7 +418,7 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
-
+            "screenshot": screenshot
         })
 
     def OnWorkbookActivate(self, Wb):
@@ -407,6 +430,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} activateWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -417,7 +441,7 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
-
+            "screenshot": screenshot
         })
 
     def OnWorkbookDeactivate(self, Wb):
@@ -429,6 +453,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} deactivateWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -439,12 +464,13 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
-
+            "screenshot": screenshot
         })
 
     def OnWorkbookModelChange(self, Wb, Changes):
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} modelChangeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -454,7 +480,8 @@ class ExcelEvents:
             "workbook": Wb.Name,
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
-            "event_src_path": Wb.Path
+            "event_src_path": Wb.Path,
+            "screenshot": screenshot
         })
 
     def OnWorkbookNewChart(self, Wb, Ch):
@@ -467,6 +494,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} newChartWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -477,7 +505,8 @@ class ExcelEvents:
             "current_worksheet": Wb.ActiveSheet.Name,
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
-            "title": Ch.Name
+            "title": Ch.Name,
+            "screenshot": screenshot
         })
 
     def OnAfterCalculate(self):
@@ -488,12 +517,14 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} afterCalculate")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Excel",
             "event_type": "afterCalculate",
+            "screenshot": screenshot
         })
 
     # ************
@@ -532,6 +563,7 @@ class ExcelEvents:
         # to get the list of active worksheet names, I cycle through the parent which is the workbook
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel selectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -542,6 +574,7 @@ class ExcelEvents:
             "current_worksheet": Sh.Name,
             "worksheets": self.getWorksheets(Sh, None),
             "event_src_path": Sh.Parent.Path,
+            "screenshot": screenshot
 
         })
 
@@ -554,6 +587,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel deleteWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -563,6 +597,7 @@ class ExcelEvents:
             "workbook": Sh.Parent.Name,
             "current_worksheet": Sh.Name,
             "worksheets": self.getWorksheets(Sh, None),
+            "screenshot": screenshot
 
         }),
 
@@ -583,6 +618,7 @@ class ExcelEvents:
 
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -593,6 +629,7 @@ class ExcelEvents:
             "current_worksheet": Sh.Name,
             "cell_range": Target.Address.replace('$', ''),
             "cell_content": value,
+            "screenshot": screenshot
 
         })
 
@@ -612,6 +649,7 @@ class ExcelEvents:
             value = Target.Value
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -622,6 +660,7 @@ class ExcelEvents:
             "current_worksheet": Sh.Name,
             "cell_range": Target.Address.replace('$', ''),
             "cell_content": value,
+            "screenshot": screenshot
 
         })
 
@@ -634,6 +673,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel sheetCalculate {Sh.Name} {Sh.Parent.Name} ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -642,6 +682,7 @@ class ExcelEvents:
             "event_type": "sheetCalculate",
             "workbook": Sh.Parent.Name,
             "current_worksheet": Sh.Name,
+            "screenshot": screenshot
 
         })
 
@@ -683,6 +724,7 @@ class ExcelEvents:
 
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel editCellSheet {Sh.Name} {Sh.Parent.Name} {cell_range} ({cell_range_number}) {value}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -694,6 +736,7 @@ class ExcelEvents:
             "cell_range": cell_range,
             "cell_range_number": cell_range_number,
             "cell_content": value,
+            "screenshot": screenshot
 
         })
 
@@ -707,6 +750,7 @@ class ExcelEvents:
         self.seen_events["OnSheetDeactivate"] = None
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel deselectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -717,6 +761,7 @@ class ExcelEvents:
             "current_worksheet": Sh.Name,
             "worksheets": self.getWorksheets(Sh, None),
             "event_src_path": Sh.Parent.Path,
+            "screenshot": screenshot
 
         })
 
@@ -730,6 +775,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel followHiperlinkSheet {Sh.Name} {Sh.Parent.Name} {Target.Range.Address.replace('$', '')} {Target.Address}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -740,6 +786,7 @@ class ExcelEvents:
             "current_worksheet": Sh.Name,
             "cell_range": Target.Range.Address.replace('$', ''),
             "browser_url": Target.Address,
+            "screenshot": screenshot
 
         })
 
@@ -754,6 +801,7 @@ class ExcelEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel pivotTableValueChangeSheet {Sh.Name} {Sh.Parent.Name} {TargetRange.Address.replace('$', '')} {TargetRange.Value}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -763,7 +811,8 @@ class ExcelEvents:
             "workbook": Sh.Parent.Name,
             "current_worksheet": Sh.Name,
             "cell_range": TargetRange.Address.replace('$', ''),
-            "cell_content": TargetRange.Value if TargetRange.Value else ""
+            "cell_content": TargetRange.Value if TargetRange.Value else "",
+            "screenshot": screenshot
         })
 
     def OnSheetSelectionChange(self, Sh, Target):
@@ -790,6 +839,7 @@ class ExcelEvents:
         if rangeSelected or self.LOG_EVERY_CELL:
             print(
                 f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} ({cell_range_number}) {value}")
+            screenshot = takeScreenshot()
             utils.utils.session.post(SERVER_ADDR, json={
                 "timestamp": utils.utils.timestamp(),
                 "user": utils.utils.USER,
@@ -801,6 +851,7 @@ class ExcelEvents:
                 "cell_range": cells_selected,
                 "cell_range_number": cell_range_number,
                 "cell_content": value,
+                "screenshot": screenshot
 
             })
 
@@ -813,6 +864,7 @@ class ExcelEvents:
         :return: worksheetTableUpdated event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel worksheetTableUpdated {Sh.Name} {Sh.Parent.Name} ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -821,6 +873,7 @@ class ExcelEvents:
             "event_type": "worksheetTableUpdated",
             "workbook": Sh.Parent.Name,
             "current_worksheet": Sh.Name,
+            "screenshot": screenshot
         })
 
 
@@ -889,13 +942,15 @@ def excelEventsMacServer(status_queue, excelFilepath=None):
     macExcelAddinPath = os.path.join(utils.utils.MAIN_DIRECTORY, 'extensions', 'excelAddinMac')
     # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1") # hide output
     if not utils.utils.utils.utils.isPortInUse(3000):
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Excel (MacOS)",
             "event_type": "openWorkbook",
-            "event_src_path": excelFilepath if excelFilepath else ""
+            "event_src_path": excelFilepath if excelFilepath else "",
+            "screenshot": screenshot
         })
         if excelFilepath:
             app = xw.App(visible=True)
@@ -936,12 +991,14 @@ class WordEvents:
         self.seen_events["OnWindowActivate"] = None
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} activateWindow")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "activateWindow",
+            "screenshot": screenshot
         })
 
     def OnWindowDeactivate(self, Doc, Wn):
@@ -956,12 +1013,14 @@ class WordEvents:
         self.seen_events["OnWindowActivate"] = None
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} deactivateWindow")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "deactivateWindow",
+            "screenshot": screenshot
         })
 
     def OnWindowBeforeDoubleClick(self, Sel, Cancel):
@@ -976,12 +1035,14 @@ class WordEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} doubleClickWindow")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "doubleClickWindow",
+            "screenshot": screenshot
         })
 
     def OnWindowBeforeRightClick(self, Sel, Cancel):
@@ -994,12 +1055,14 @@ class WordEvents:
         """
 
         print(f"{utils.utils.timestamp()} {utils.utils.USER} rightClickWindow")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "rightClickWindow",
+            "screenshot": screenshot
         })
 
     # Too much spam
@@ -1026,12 +1089,14 @@ class WordEvents:
         """
         self.seen_events["OnNewDocument"] = None
         print(f"{utils.utils.timestamp()} {utils.utils.USER} newDocument")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "newDocument",
+            "screenshot": screenshot
         })
 
     def OnDocumentOpen(self, Doc):
@@ -1042,12 +1107,14 @@ class WordEvents:
         :return: openDocument event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} openDocument")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "openDocument",
+            "screenshot": screenshot
         })
 
     def OnDocumentChange(self):
@@ -1058,12 +1125,14 @@ class WordEvents:
         """
         self.seen_events["OnDocumentChange"] = None
         print(f"{utils.utils.timestamp()} {utils.utils.USER} changeDocument")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "changeDocument",
+            "screenshot": screenshot
         })
 
     def OnDocumentBeforeSave(self, Doc, SaveAsUI, Cancel):
@@ -1076,12 +1145,14 @@ class WordEvents:
         :return: saveDocument event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} saveDocument")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "saveDocument",
+            "screenshot": screenshot
         })
 
     def OnDocumentBeforePrint(self, Doc, Cancel):
@@ -1093,12 +1164,14 @@ class WordEvents:
        :return: saveDocument event
        """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} printDocument")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "printDocument",
+            "screenshot": screenshot
         })
 
     def OnQuit(self):
@@ -1179,6 +1252,7 @@ class PowerpointEvents:
         :return: activateWindow event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint activateWindow {Pres.Name} {Pres.Path} ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1187,6 +1261,7 @@ class PowerpointEvents:
             "event_type": "activateWindow",
             "title": Pres.Name,
             "event_src_path": Pres.Path,
+            "screenshot": screenshot
 
         })
 
@@ -1199,6 +1274,7 @@ class PowerpointEvents:
         :return: deactivateWindow event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint deactivateWindow {Pres.Name} {Pres.Path} ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1207,6 +1283,7 @@ class PowerpointEvents:
             "event_type": "deactivateWindow",
             "title": Pres.Name,
             "event_src_path": Pres.Path,
+            "screenshot": screenshot
 
         })
 
@@ -1221,12 +1298,14 @@ class PowerpointEvents:
         print(Sel.SlideRange)
         print(Sel.TextRange)
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint rightClickPresentation ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Powerpoint",
             "event_type": "rightClickPresentation",
+            "screenshot": screenshot
 
         })
 
@@ -1241,12 +1320,14 @@ class PowerpointEvents:
         print(Sel.SlideRange)
         print(Sel.TextRange)
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint doubleClickPresentation ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Powerpoint",
             "event_type": "doubleClickPresentation",
+            "screenshot": screenshot
 
         })
 
@@ -1263,6 +1344,7 @@ class PowerpointEvents:
         """
         self.presentationSlides.clear()
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint newPresentation {Pres.Name} {Pres.Path}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1271,6 +1353,7 @@ class PowerpointEvents:
             "event_type": "newPresentation",
             "title": Pres.Name,
             "event_src_path": Pres.Path,
+            "screenshot": screenshot
 
         })
 
@@ -1284,6 +1367,7 @@ class PowerpointEvents:
         self.addSlide(Sld)
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint newPresentationSlide {Sld.Name} {Sld.SlideNumber} {self.getSlides()}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1293,6 +1377,7 @@ class PowerpointEvents:
             "title": Sld.Name,
             "id": Sld.SlideNumber,
             "slides": self.getSlides(),
+            "screenshot": screenshot
 
         })
 
@@ -1306,6 +1391,7 @@ class PowerpointEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint closePresentation {Pres.Name} {self.getSlides()}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1315,6 +1401,7 @@ class PowerpointEvents:
             "title": Pres.Name,
             "event_src_path": Pres.Path,
             "slides": self.getSlides(),
+            "screenshot": screenshot
 
         })
         self.presentationSlides.clear()
@@ -1329,6 +1416,7 @@ class PowerpointEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint savePresentation {Pres.Name} {self.getSlides()}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1338,7 +1426,7 @@ class PowerpointEvents:
             "title": Pres.Name,
             "event_src_path": Pres.Path,
             "slides": self.getSlides(),
-
+            "screenshot": screenshot
         })
 
     def OnAfterPresentationOpen(self, Pres):
@@ -1351,6 +1439,7 @@ class PowerpointEvents:
         self.presentationSlides.clear()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint openPresentation {Pres.Name} {self.getSlides()}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1359,7 +1448,8 @@ class PowerpointEvents:
             "event_type": "openPresentation",
             "title": Pres.Name,
             "event_src_path": Pres.Path,
-            "slides": self.getSlides()
+            "slides": self.getSlides(),
+            "screenshot": screenshot
         })
 
     def OnAfterShapeSizeChange(self, shp):
@@ -1371,13 +1461,15 @@ class PowerpointEvents:
         """
         self.presentationSlides.clear()
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint shapeSizeChangePresentation {shp.Type} ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Powerpoint",
             "event_type": "shapeSizeChangePresentation",
-            "description": shp.Type
+            "description": shp.Type,
+            "screenshot": screenshot
         })
 
     def OnPresentationPrint(self, Pres):
@@ -1389,6 +1481,7 @@ class PowerpointEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint printPresentation {Pres.Name} {self.getSlides()}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1397,7 +1490,8 @@ class PowerpointEvents:
             "event_type": "printPresentation",
             "title": Pres.Name,
             "event_src_path": Pres.Path,
-            "slides": self.getSlides()
+            "slides": self.getSlides(),
+            "screenshot": screenshot
         })
 
     def OnSlideShowBegin(self, Wn):
@@ -1408,6 +1502,7 @@ class PowerpointEvents:
         :return: slideshowBegin event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint slideshowBegin ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1418,7 +1513,8 @@ class PowerpointEvents:
             "description": Wn.State,
             # https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview.state
             "newZoomFactor": Wn.Zoom,
-            "slides": Wn.Slide.Name
+            "slides": Wn.Slide.Name,
+            "screenshot": screenshot
         })
 
     def OnSlideShowOnNext(self, Wn):
@@ -1429,6 +1525,7 @@ class PowerpointEvents:
         :return: nextSlideshow
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint nextSlideshow ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1439,7 +1536,8 @@ class PowerpointEvents:
             "description": Wn.State,
             # https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview.state
             "newZoomFactor": Wn.Zoom,
-            "slides": Wn.Slide.Name
+            "slides": Wn.Slide.Name,
+            "screenshot": screenshot
         })
 
     def OnSlideShowNextClick(self, Wn, nEffect):
@@ -1453,6 +1551,7 @@ class PowerpointEvents:
         :return: clickNextSlideshow event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint clickNextSlideshow ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1464,7 +1563,8 @@ class PowerpointEvents:
             # https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview.state
             "newZoomFactor": Wn.Zoom,
             "slides": Wn.Slide.Name,
-            "effect": nEffect.EffectType
+            "effect": nEffect.EffectType,
+            "screenshot": screenshot
         })
 
     def OnSlideShowOnPrevious(self, Wn):
@@ -1477,6 +1577,7 @@ class PowerpointEvents:
         :return: previousSlideshow event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint previousSlideshow ")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1486,7 +1587,8 @@ class PowerpointEvents:
             "title": Wn.SlideShowName,
             "description": Wn.State,
             "newZoomFactor": Wn.Zoom,
-            "slides": Wn.Slide.Name
+            "slides": Wn.Slide.Name,
+            "screenshot": screenshot
         })
 
     def OnSlideShowEnd(self, Pres):
@@ -1498,6 +1600,7 @@ class PowerpointEvents:
         """
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint slideshowEnd {Pres.Name} {self.getSlides()}")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
@@ -1506,7 +1609,8 @@ class PowerpointEvents:
             "event_type": "slideshowEnd",
             "title": Pres.Name,
             "event_src_path": Pres.Path,
-            "slides": self.getSlides()
+            "slides": self.getSlides(),
+            "screenshot": screenshot
         })
 
     def OnSlideSelectionChanged(self, SldRange):
@@ -1517,12 +1621,14 @@ class PowerpointEvents:
         :return: SlideSelectionChanged event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint SlideSelectionChanged")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Powerpoint",
             "event_type": "SlideSelectionChanged",
+            "screenshot": screenshot
         })
 
 
@@ -1580,12 +1686,14 @@ class OutlookEvents:
         :return: startupOutlook event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook startupOutlook")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "startupOutlook",
+            "screenshot": screenshot
         })
 
     def OnQuit(self):
@@ -1596,12 +1704,14 @@ class OutlookEvents:
         """
         self.seen_events["OnQuit"] = None
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook quitOutlook")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "quitOutlook",
+            "screenshot": screenshot
         })
         # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
         # To stop PumpMessages() when Outlook Quit
@@ -1616,12 +1726,14 @@ class OutlookEvents:
         :return: receiveMail event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook receiveMail")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "receiveMail",
+            "screenshot": screenshot
         })
         # RecrivedItemIDs is a collection of mail IDs separated by a ",".
         # You know, sometimes more than 1 mail is received at the same moment.
@@ -1640,12 +1752,14 @@ class OutlookEvents:
         """
         print(Item)
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook sendMail")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "sendMail",
+            "screenshot": screenshot
         })
 
     def OnMAPILogonComplete(self):
@@ -1655,12 +1769,14 @@ class OutlookEvents:
         :return: logonComplete event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook logonComplete")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "logonComplete",
+            "screenshot": screenshot
         })
 
     def OnReminder(self, Item):
@@ -1671,12 +1787,14 @@ class OutlookEvents:
         :return: newReminder event
         """
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook newReminder")
+        screenshot = takeScreenshot()
         utils.utils.session.post(SERVER_ADDR, json={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "newReminder",
+            "screenshot": screenshot
         })
 
 

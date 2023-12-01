@@ -146,36 +146,41 @@ class MainApplication(QMainWindow, QDialog):
 
         self.systemLoggerFilesFolderCB = QCheckBox("Files/Folders")
         self.systemLoggerFilesFolderCB.tag = "systemLoggerFilesFolder"
-        self.systemLoggerFilesFolderCB.stateChanged.connect(
-            self.handleCheckBox)
+        self.systemLoggerFilesFolderCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerFilesFolderCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerFilesFolderCB.setToolTip(
             "Log edits on files and folder like create, modify, delete and more")
 
         self.systemLoggerClipboardCB = QCheckBox("Clipboard")
         self.systemLoggerClipboardCB.tag = "systemLoggerClipboard"
         self.systemLoggerClipboardCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerClipboardCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerClipboardCB.setToolTip("Log clipboard copy")
 
         self.systemLoggerProgramsCB = QCheckBox("Programs")
         self.systemLoggerProgramsCB.tag = "systemLoggerPrograms"
         self.systemLoggerProgramsCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerProgramsCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerProgramsCB.setToolTip(
             "Log opening and closing of programs")
 
         self.systemLoggerHotkeysCB = QCheckBox("Hotkeys")
         self.systemLoggerHotkeysCB.tag = "systemLoggerHotkeys"
         self.systemLoggerHotkeysCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerHotkeysCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerHotkeysCB.setToolTip("Log system-wide hotkeys")
 
         self.systemLoggerUSBCB = QCheckBox("USB Drives")
         self.systemLoggerUSBCB.tag = "systemLoggerUSB"
         self.systemLoggerUSBCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerUSBCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerUSBCB.setToolTip(
             "Log insertion and removal of usb drives")
 
         self.systemLoggerEventsCB = QCheckBox("Events")
         self.systemLoggerEventsCB.tag = "systemLoggerEvents"
         self.systemLoggerEventsCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerEventsCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerEventsCB.setToolTip("Log edits on files and folder")
 
         layout = QVBoxLayout()
@@ -201,6 +206,7 @@ class MainApplication(QMainWindow, QDialog):
         self.officeExcelCB = QCheckBox("Excel")
         self.officeExcelCB.tag = "officeExcel"
         self.officeExcelCB.stateChanged.connect(self.handleCheckBox)
+        self.officeExcelCB.stateChanged.connect(self.updateStartButtonState)
         self.officeExcelNewRB = QRadioButton("New File")
         self.officeExcelNewRB.setChecked(True)
         self.officeExcelNewRB.setAutoExclusive(True)
@@ -214,6 +220,7 @@ class MainApplication(QMainWindow, QDialog):
         self.officeWordCB = QCheckBox("Word")
         self.officeWordCB.tag = "officeWord"
         self.officeWordCB.stateChanged.connect(self.handleCheckBox)
+        self.officeWordCB.stateChanged.connect(self.updateStartButtonState)
         self.officeWordNewRB = QRadioButton("New File")
         self.officeWordNewRB.setChecked(True)
         self.officeWordOpenRB = QRadioButton("Open File")
@@ -225,6 +232,7 @@ class MainApplication(QMainWindow, QDialog):
         self.officePowerpointCB = QCheckBox("PowerPoint")
         self.officePowerpointCB.tag = "officePowerpoint"
         self.officePowerpointCB.stateChanged.connect(self.handleCheckBox)
+        self.officePowerpointCB.stateChanged.connect(self.updateStartButtonState)
         self.officePowerpointNewRB = QRadioButton("New File")
         self.officePowerpointNewRB.setChecked(True)
         self.officePowerpointOpenRB = QRadioButton("Open File")
@@ -235,6 +243,7 @@ class MainApplication(QMainWindow, QDialog):
         self.officeOutlookCB = QCheckBox("Outlook")
         self.officeOutlookCB.tag = "officeOutlook"
         self.officeOutlookCB.stateChanged.connect(self.handleCheckBox)
+        self.officeOutlookCB.stateChanged.connect(self.updateStartButtonState)
 
         layout = QVBoxLayout()
         layout.addWidget(self.officeExcelCB)
@@ -259,18 +268,22 @@ class MainApplication(QMainWindow, QDialog):
         self.browserChromeCB = QCheckBox("Google Chrome")
         self.browserChromeCB.tag = "browserChrome"
         self.browserChromeCB.stateChanged.connect(self.handleCheckBox)
+        self.browserChromeCB.stateChanged.connect(self.updateStartButtonState)
 
         self.browserFirefoxCB = QCheckBox("Mozilla Firefox")
         self.browserFirefoxCB.tag = "browserFirefox"
         self.browserFirefoxCB.stateChanged.connect(self.handleCheckBox)
+        self.browserFirefoxCB.stateChanged.connect(self.updateStartButtonState)
 
         self.browserEdgeCB = QCheckBox("Microsoft Edge")
         self.browserEdgeCB.tag = "browserEdge"
         self.browserEdgeCB.stateChanged.connect(self.handleCheckBox)
+        self.browserEdgeCB.stateChanged.connect(self.updateStartButtonState)
 
         self.browserOperaCB = QCheckBox("Opera")
         self.browserOperaCB.tag = "browserOpera"
         self.browserOperaCB.stateChanged.connect(self.handleCheckBox)
+        self.browserOperaCB.stateChanged.connect(self.updateStartButtonState)
 
         layout = QVBoxLayout()
         layout.addWidget(self.browserChromeCB)
@@ -290,11 +303,37 @@ class MainApplication(QMainWindow, QDialog):
                 'QPushButton {background-color: #656565;}')
         self.runButton.setCheckable(True)
         self.runButton.setChecked(False)
+        self.runButton.setEnabled(False)
         self.runButton.clicked.connect(self.onButtonClick)
         self.runButton.toggled.connect(self.systemGroupBox.setDisabled)
         self.runButton.toggled.connect(self.browserGroupBox.setDisabled)
         self.runButton.toggled.connect(self.checkButton.setDisabled)
         self.runButton.toggled.connect(self.officeGroupBox.setDisabled)
+
+    def updateStartButtonState(self):
+        """
+        Controls the status of the "start logger" button.
+        If any CB is clicked it does update the status.
+        If any CB is active, the button stays active.
+        """
+        if self.runButton.isEnabled() and not any([self.systemLoggerFilesFolder,
+                    self.systemLoggerPrograms,
+                    self.systemLoggerClipboard,
+                    self.systemLoggerHotkeys,
+                    self.systemLoggerUSB,
+                    self.systemLoggerEvents,
+                    self.officeFilepath,
+                    self.officeExcel,
+                    self.officeWord,
+                    self.officePowerpoint,
+                    self.officeOutlook,
+                    self.browserChrome,
+                    self.browserFirefox,
+                    self.browserEdge,
+                    self.browserOpera]):
+            self.runButton.setEnabled(False)
+        else:
+            self.runButton.setEnabled(True)
 
     def createTopLayout(self):
         """

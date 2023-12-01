@@ -26,6 +26,10 @@ class MyConfig(PreferredConfig):
     # into one and a XES file is automatically generated, to be used for process mining techniques
     totalNumberOfRunGuiXes = IntOption('totalNumberOfRunGuiXes', default=1)
 
+    # Option in settings to control screenshot feature, if enabled, each event creats a screenshot of all screens visible
+    # and stores it in folder "screenshots"
+    capture_screenshots = BooleanOption('capture_screenshots', default=False)
+
     # Option in settings to control process discovery, if disabled, csv is generated but process discovery techniques
     # are not applied
     perform_process_discovery = BooleanOption('perform_process_discovery', default=True)
