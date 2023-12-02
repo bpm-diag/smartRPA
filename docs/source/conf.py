@@ -31,11 +31,11 @@ def setup(app):
 # -- Project information -----------------------------------------------------
 
 project = 'SmartRPA'
-copyright = '2020, marco2012'
-author = 'marco2012'
+copyright = '2023, marco2012'
+author = 'marco2012,thohenadl'
 
 # The full version, including alpha/beta/rc tags
-release = '1.2'
+release = '1.3'
 
 # -- General configuration ---------------------------------------------------
 
