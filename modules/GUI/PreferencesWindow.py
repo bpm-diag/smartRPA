@@ -71,6 +71,14 @@ class Preferences(QMainWindow):
         self.screenshot_cb.tag = "screenshot_cb"
         self.screenshot_cb.stateChanged.connect(self.handle_cb_scrsht)
         self.handle_cb_scrsht()
+    
+        # Additional Box to check the capture screenshots feature
+        self.supervision_cb = QCheckBox(
+            "Lets users add relevancy tag after each event")
+        self.supervision_cb.setToolTip("If enabled, after each event users are asked to rate the previous event.")
+        self.supervision_cb.tag = "supervision_cb"
+        self.supervision_cb.stateChanged.connect(self.handle_cb_supervision)
+        self.handle_cb_supervision()
         
         # self.decisionGroupBox.setEnabled(capture_screenshots)
 
@@ -124,10 +132,15 @@ class Preferences(QMainWindow):
         vbox.addWidget(self.process_discovery_cb)
         processDiscoveryGroupBox.setLayout(vbox)
 
-        captureScreenshotsGroupBox = QGroupBox("capture Screenshots")
+        captureScreenshotsGroupBox = QGroupBox("Capture Screenshots")
         vbox = QVBoxLayout()
         vbox.addWidget(self.screenshot_cb)
         captureScreenshotsGroupBox.setLayout(vbox)
+
+        supervisionFeatureGroupBox = QGroupBox("Supervision Feature")
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.supervision_cb)
+        supervisionFeatureGroupBox.setLayout(vbox)
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.mfr)
@@ -149,6 +162,7 @@ class Preferences(QMainWindow):
 
         mainLayout = QVBoxLayout()
         mainLayout.addWidget(captureScreenshotsGroupBox)
+        mainLayout.addWidget(supervisionFeatureGroupBox)
         mainLayout.addWidget(processDiscoveryGroupBox)
         mainLayout.addWidget(self.decisionGroupBox)
         mainLayout.addWidget(xesGroupBox)
@@ -182,6 +196,15 @@ class Preferences(QMainWindow):
             self.status_queue.put("[GUI] Screenshot capture enabled")
         else:
             self.status_queue.put("[GUI] Screenshot capture disabled")
+
+    def handle_cb_supervision(self):
+        perform = self.screenshot_cb.isChecked()
+        # self.decisionGroupBox.setEnabled(perform)
+        utils.config.MyConfig.get_instance().supervisionFeature = perform
+        if perform:
+            self.status_queue.put("[GUI] Action supervision enabled")
+        else:
+            self.status_queue.put("[GUI] Action supervision disabled")
 
     def handle_radio(self):
         mfr_checked = self.mfr.isChecked()

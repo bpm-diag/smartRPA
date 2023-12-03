@@ -120,7 +120,7 @@ class MainApplication(QMainWindow, QDialog):
 
     def createMenu(self):
         """
-        Create file menu with preferences and options to merge multiple CSV event logs and to analyze one event log.
+        Create file menu with preferences option, supervision option and options to merge multiple CSV event logs and to analyze one event log.
         """
         menu = self.menuBar()
 
