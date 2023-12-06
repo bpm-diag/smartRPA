@@ -13,12 +13,13 @@ import modules.GUI.GUI
 import utils.config
 import modules.consumerServer
 import utils.utils
-from modules.events import systemEvents, officeEvents, clipboardEvents
+from modules.events import systemEvents, officeEvents, clipboardEvents, standardEvents
 
 
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
                 systemLoggerClipboard,
+                systemLoggerStandard,
                 systemLoggerHotkeys,
                 systemLoggerUSB,
                 systemLoggerEvents,
@@ -43,6 +44,7 @@ def startLogger(systemLoggerFilesFolder,
     :param systemLoggerFilesFolder: true if files/folder checkbox is checked in GUI
     :param systemLoggerPrograms: true if programs checkbox is checked in GUI
     :param systemLoggerClipboard: true if clipboard checkbox is checked in GUI
+    :param systemLoggerStandard: true if mouse and keyboard checkbox is checked in GUI
     :param systemLoggerHotkeys: true if hotkeys checkbox is checked in GUI
     :param systemLoggerUSB: true if usb checkbox is checked in GUI
     :param systemLoggerEvents: deprecated
@@ -93,6 +95,15 @@ def startLogger(systemLoggerFilesFolder,
                 # t9.daemon = True
                 t9.start()
                 processesPID.put(t9.pid)
+
+        if systemLoggerStandard:
+            t17 = Thread(target=standardEvents.logMouse)
+            t17.daemon = True
+            t17.start()
+
+            t18 = Thread(target=standardEvents.logKeyboard)
+            t18.daemon = True
+            t18.start()
 
         if systemLoggerFilesFolder:
 

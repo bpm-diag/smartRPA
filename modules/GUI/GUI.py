@@ -79,6 +79,11 @@ class MainApplication(QMainWindow, QDialog):
         self.runCount = 0
         self.csv_to_join = list()
 
+        # In action logger version, set preferences statically here
+        # Defined by josaloroc and a8081 - Is this necessary?
+        # utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = 1
+        # utils.config.MyConfig.get_instance().perform_process_discovery = False
+
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
         self.systemLoggerPrograms = self.systemLoggerProgramsCB.isChecked()
@@ -94,6 +99,9 @@ class MainApplication(QMainWindow, QDialog):
         self.browserFirefox = self.browserFirefoxCB.isChecked()
         self.browserEdge = self.browserEdgeCB.isChecked()
         self.browserOpera = self.browserOperaCB.isChecked()
+        ### Added by josaloroc / a8081
+        self.systemLoggerStandard = self.systemLoggerStandard.isChecked()
+        ###
 
         mainLayout = QGridLayout()
         mainLayout.addLayout(self.topLayout, 0, 0, 1, 2)
@@ -157,6 +165,14 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerClipboardCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerClipboardCB.setToolTip("Log clipboard copy")
 
+        # Added by josaloroc and a8081
+        self.systemLoggerStandard = QCheckBox("Standard")
+        self.systemLoggerStandard.tag = "systemLoggerStandard"
+        self.systemLoggerStandard.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerStandard.stateChanged.connect(self.updateStartButtonState)
+        self.systemLoggerStandard.setToolTip("Log clicks and keystroke")
+        #####
+
         self.systemLoggerProgramsCB = QCheckBox("Programs")
         self.systemLoggerProgramsCB.tag = "systemLoggerPrograms"
         self.systemLoggerProgramsCB.stateChanged.connect(self.handleCheckBox)
@@ -187,6 +203,9 @@ class MainApplication(QMainWindow, QDialog):
         layout.addWidget(self.systemLoggerFilesFolderCB)
         layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerClipboardCB)
+        # Added by josaloroc / a8081
+        layout.addWidget(self.systemLoggerStandard)
+        ###
         layout.addWidget(self.systemLoggerHotkeysCB)
         layout.addWidget(self.systemLoggerUSBCB)
         # layout.addWidget(self.systemLoggerEventsCB)
@@ -319,6 +338,7 @@ class MainApplication(QMainWindow, QDialog):
         if self.runButton.isEnabled() and not any([self.systemLoggerFilesFolder,
                     self.systemLoggerPrograms,
                     self.systemLoggerClipboard,
+                    self.systemLoggerStandard,
                     self.systemLoggerHotkeys,
                     self.systemLoggerUSB,
                     self.systemLoggerEvents,
@@ -602,6 +622,9 @@ class MainApplication(QMainWindow, QDialog):
         # System checkboxes
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
         self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
+        ####
+        self.systemLoggerStandard.setChecked(self.allCBChecked)
+        ####
         self.officeExcelCB.setChecked(self.allCBChecked)
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
 
@@ -653,6 +676,9 @@ class MainApplication(QMainWindow, QDialog):
             self.systemLoggerPrograms = checked
         elif (tag == "systemLoggerClipboard"):
             self.systemLoggerClipboard = checked
+        elif (tag == "systemLoggerStandard"):
+            # Added for Standard Mouse Events by josaloroc and a8081
+            self.systemLoggerStandard = checked
         elif (tag == "systemLoggerHotkeys"):
             self.systemLoggerHotkeys = checked
         elif (tag == "systemLoggerUSB"):
@@ -1018,6 +1044,9 @@ class MainApplication(QMainWindow, QDialog):
         if not any([self.systemLoggerFilesFolder,
                     self.systemLoggerPrograms,
                     self.systemLoggerClipboard,
+                    ### Added by josaloroc and a8081
+                    self.systemLoggerStandard,
+                    ###
                     self.systemLoggerHotkeys,
                     self.systemLoggerUSB,
                     self.systemLoggerEvents,
@@ -1049,10 +1078,15 @@ class MainApplication(QMainWindow, QDialog):
             # start main process with the options selected in GUI. It handles all other methods main method is
             # started as a process so it can be terminated once the button is clicked all the methods in the main
             # process are started as daemon threads so they are closed automatically when the main process is closed
+            # !! Sequence is important as the function otherwise assigns the wrong true/false values in main.py
+            # !! Cross reference the sequence here with startLogger function in main.py if anything changes
             self.mainProcess = Process(target=main.startLogger, args=(
                 self.systemLoggerFilesFolder,
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
+                ### Added by josaloroc and a8081 -> transferred to main.py
+                self.systemLoggerStandard,
+                ###
                 self.systemLoggerHotkeys,
                 self.systemLoggerUSB,
                 self.systemLoggerEvents,
