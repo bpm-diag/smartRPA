@@ -97,6 +97,7 @@ def startLogger(systemLoggerFilesFolder,
                 processesPID.put(t9.pid)
 
         if systemLoggerStandard:
+            # Added by 
             t17 = Thread(target=standardEvents.logMouse)
             t17.daemon = True
             t17.start()
