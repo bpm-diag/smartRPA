@@ -213,10 +213,10 @@ class Preferences(QMainWindow):
         Sets supervision option in confi.py
         If enabled, after each event the user is asked for tagging the event
         """
-        perform = self.screenshot_cb.isChecked()
+        perform = self.supervision_cb.isChecked()
         # self.decisionGroupBox.setEnabled(perform)
         utils.config.MyConfig.get_instance().supervisionFeature = perform
-        if perform:
+        if utils.config.MyConfig.get_instance().supervisionFeature:
             self.status_queue.put("[GUI] Action supervision enabled")
         else:
             self.status_queue.put("[GUI] Action supervision disabled")

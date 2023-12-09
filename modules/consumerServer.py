@@ -11,6 +11,7 @@ import utils.config
 import utils.utils
 # import utils.GUI
 import datetime
+import modules.supervision as sp
 
 # server port
 PORT = 4444
@@ -52,7 +53,7 @@ def index():
 @app.route('/', methods=['POST'])
 def writeLog():
     """
-    route where json event is received and processed.
+    Route where json event is received and processed.
 
     JSON event includes metadata about the event, such as the timestamp, category, application, concept:name
     and other information depending on the event type.
@@ -61,6 +62,15 @@ def writeLog():
     """
     content = request.json
     print(f"\nPOST received with content: {content}\n")
+
+    # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
+    if utils.config.MyConfig.get_instance().supervisionFeature:
+        print("i should do something here")
+        answer =  sp.getResponse(content)
+        if answer:
+            print("User clicked Yes")
+        else:
+            print("User clicked No")
 
     # check if user enabled browser logging
     application = content.get("application")
