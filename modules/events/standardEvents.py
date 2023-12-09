@@ -173,6 +173,9 @@ def logKeyboard():
     modifier_state = {'alt': False, 'ctrl': False, 'win': False}  # Variables de estado de teclas / Key status variables
 
     def on_press(key):
+        """
+        Processes pressed keys and updates pressed_keys variable 
+        """
         nonlocal last_key_time, pressed_keys, timer
         # Verificar las teclas modificadoras
         if key in {pynput_keyboard.Key.alt_l, pynput_keyboard.Key.alt_r}:
@@ -224,6 +227,9 @@ def logKeyboard():
             timer.start()
 
     def on_release(key):
+        """
+        Update the status of modifier keys when they are released
+        """
         # Actualizar el estado de las teclas modificadoras cuando se sueltan
         # Update the status of modifier keys when they are released
         if key in {pynput_keyboard.Key.alt_l, pynput_keyboard.Key.alt_r}:
