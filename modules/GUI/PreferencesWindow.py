@@ -175,11 +175,18 @@ class Preferences(QMainWindow):
         wid.show()
 
     def handle_slider(self):
+        """
+        Sets number of runs before mining in config.py
+        """
         value = self.sld.value()
         self.lcd.display(value)
         utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = value
 
     def handle_cb(self):
+        """
+        Sets process discovery option in config.py
+        Triggered after number of GUI Runs specified in preferences
+        """
         perform = self.process_discovery_cb.isChecked()
         self.decisionGroupBox.setEnabled(perform)
         utils.config.MyConfig.get_instance().perform_process_discovery = perform
@@ -189,6 +196,10 @@ class Preferences(QMainWindow):
             self.status_queue.put("[GUI] Process discovery disabled")
 
     def handle_cb_scrsht(self):
+        """
+        Sets screenshot option in config.py
+        If enabled each event stored creates a screenshot
+        """
         perform = self.screenshot_cb.isChecked()
         # self.decisionGroupBox.setEnabled(perform)
         utils.config.MyConfig.get_instance().capture_screenshots = perform
@@ -198,6 +209,10 @@ class Preferences(QMainWindow):
             self.status_queue.put("[GUI] Screenshot capture disabled")
 
     def handle_cb_supervision(self):
+        """
+        Sets supervision option in confi.py
+        If enabled, after each event the user is asked for tagging the event
+        """
         perform = self.screenshot_cb.isChecked()
         # self.decisionGroupBox.setEnabled(perform)
         utils.config.MyConfig.get_instance().supervisionFeature = perform
@@ -207,6 +222,9 @@ class Preferences(QMainWindow):
             self.status_queue.put("[GUI] Action supervision disabled")
 
     def handle_radio(self):
+        """
+        Sets most frequent or decision point analysis in config.py
+        """
         mfr_checked = self.mfr.isChecked()
         decision_checked = self.decision.isChecked()
         decisionRPA_checked = self.decisionRPA.isChecked()
@@ -232,4 +250,7 @@ class Preferences(QMainWindow):
         self.status_queue.put(msg)
 
     def handleButton(self):
+        """
+        Closes preference window
+        """
         self.close()
