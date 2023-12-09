@@ -90,6 +90,12 @@ def logMouse():
 
 
 def get_key_str(key):
+    """
+    Triggered when a key is pressed and returns pressed ASCII key
+
+    :param key: Takes a pynput library key object
+    :return: String with key input
+    """
     # Condición para verificar si la tecla es una tecla de función
     # Condition for verifying whether the key is a function key
     if isinstance(key, pynput_keyboard.Key) and 'f' in str(key):
@@ -121,7 +127,11 @@ def translate_control_chars(char_sequence):
 # -----------------------------------------------------------------------------
 
 def logKeyboard():
-    # Should the Information be presented in the GUI?
+    """
+    Logger to get Hot-Keys from the current input, e.g. "CTRL" and "ALT"
+    """
+    # Maybe the loggers of hotkeys can be improved
+    # https://pynput.readthedocs.io/en/latest/keyboard.html#monitoring-the-keyboard
     print("[Keyboard] Keyboard logging started...")
     pressed_keys = []
     last_key_time = time()

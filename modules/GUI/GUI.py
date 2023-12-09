@@ -41,7 +41,6 @@ class MainApplication(QMainWindow, QDialog):
     def __init__(self, parent=None):
         """
         Initialize GUI
-
         """
 
         super(MainApplication, self).__init__(parent)
@@ -666,7 +665,7 @@ class MainApplication(QMainWindow, QDialog):
 
     def handleCheckBox(self):
         """
-        detect which modules should be run based on selected checkboxes in UI
+        Detect which modules should be run based on selected checkboxes in UI
         """
         tag = self.sender().tag
         checked = self.sender().isChecked()
@@ -703,6 +702,9 @@ class MainApplication(QMainWindow, QDialog):
             self.browserOpera = checked
 
     def handlePreferences(self):
+        """
+        Calling this mentod shows the preferences dialog window
+        """
         self.preferencesDialog.show()
 
     def handleRunLogAction(self):
@@ -805,6 +807,11 @@ class MainApplication(QMainWindow, QDialog):
             self.choices(pm, log_filepath)
 
     def handleRPA(self, log_filepath):
+        """
+        Generates an RPA Script from the log file under log_filepath
+
+        :param log_filepath: Filepath to a csv file containing a UI log
+        """
         rpa = modules.RPA.generateRPAScript.RPAScript(
             log_filepath, self.status_queue)
         rpa_success = rpa.run()
@@ -1038,7 +1045,6 @@ class MainApplication(QMainWindow, QDialog):
         * kill active processes using their PID before closing main
         * terminate main
         * call handleRunCount() method to check counter and generate event log file
-
         """
 
         if not any([self.systemLoggerFilesFolder,
