@@ -4,7 +4,7 @@ setuptools
 pyperclip==1.7.0
 keyboard==0.13.4
 requests_futures==1.0.0
-Flask==1.1.1
+Flask==2.2.5
 darkdetect==0.1.1
 PyQt5==5.13.0; platform_system == "Darwin" # only version compatible with macOS 11 (big sur)
 PyQtWebEngine==5.13.0; platform_system == "Darwin"
