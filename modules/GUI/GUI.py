@@ -99,7 +99,7 @@ class MainApplication(QMainWindow, QDialog):
         self.browserEdge = self.browserEdgeCB.isChecked()
         self.browserOpera = self.browserOperaCB.isChecked()
         ### Added by josaloroc / a8081
-        self.systemLoggerStandard = self.systemLoggerStandard.isChecked()
+        self.systemLoggerStandard = self.systemLoggerStandardCB.isChecked()
         ###
 
         mainLayout = QGridLayout()
@@ -164,12 +164,12 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerClipboardCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerClipboardCB.setToolTip("Log clipboard copy")
 
-        # Added by josaloroc and a8081
-        self.systemLoggerStandard = QCheckBox("Standard")
-        self.systemLoggerStandard.tag = "systemLoggerStandard"
-        self.systemLoggerStandard.stateChanged.connect(self.handleCheckBox)
-        self.systemLoggerStandard.stateChanged.connect(self.updateStartButtonState)
-        self.systemLoggerStandard.setToolTip("Log clicks and keystroke")
+        # Added by josaloroc and a8081 / small rename by Tom
+        self.systemLoggerStandardCB = QCheckBox("Standard")
+        self.systemLoggerStandardCB.tag = "systemLoggerStandard"
+        self.systemLoggerStandardCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerStandardCB.stateChanged.connect(self.updateStartButtonState)
+        self.systemLoggerStandardCB.setToolTip("Log clicks and keystroke")
         #####
 
         self.systemLoggerProgramsCB = QCheckBox("Programs")
@@ -203,7 +203,7 @@ class MainApplication(QMainWindow, QDialog):
         layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerClipboardCB)
         # Added by josaloroc / a8081
-        layout.addWidget(self.systemLoggerStandard)
+        layout.addWidget(self.systemLoggerStandardCB)
         ###
         layout.addWidget(self.systemLoggerHotkeysCB)
         layout.addWidget(self.systemLoggerUSBCB)
@@ -622,7 +622,7 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
         self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
         ####
-        self.systemLoggerStandard.setChecked(self.allCBChecked)
+        self.systemLoggerStandardCB.setChecked(self.allCBChecked)
         ####
         self.officeExcelCB.setChecked(self.allCBChecked)
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
@@ -675,9 +675,9 @@ class MainApplication(QMainWindow, QDialog):
             self.systemLoggerPrograms = checked
         elif (tag == "systemLoggerClipboard"):
             self.systemLoggerClipboard = checked
-        elif (tag == "systemLoggerStandard"):
+        elif (tag == "systemLoggerStandardCB"):
             # Added for Standard Mouse Events by josaloroc and a8081
-            self.systemLoggerStandard = checked
+            self.systemLoggerStandardCB = checked
         elif (tag == "systemLoggerHotkeys"):
             self.systemLoggerHotkeys = checked
         elif (tag == "systemLoggerUSB"):
@@ -1051,7 +1051,7 @@ class MainApplication(QMainWindow, QDialog):
                     self.systemLoggerPrograms,
                     self.systemLoggerClipboard,
                     ### Added by josaloroc and a8081
-                    self.systemLoggerStandard,
+                    self.systemLoggerStandardCB,
                     ###
                     self.systemLoggerHotkeys,
                     self.systemLoggerUSB,
@@ -1091,7 +1091,7 @@ class MainApplication(QMainWindow, QDialog):
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
                 ### Added by josaloroc and a8081 -> transferred to main.py
-                self.systemLoggerStandard,
+                self.systemLoggerStandardCB,
                 ###
                 self.systemLoggerHotkeys,
                 self.systemLoggerUSB,
