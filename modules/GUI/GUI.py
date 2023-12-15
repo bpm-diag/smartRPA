@@ -1091,7 +1091,7 @@ class MainApplication(QMainWindow, QDialog):
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
                 ### Added by josaloroc and a8081 -> transferred to main.py
-                self.systemLoggerStandardCB,
+                self.systemLoggerStandard,
                 ###
                 self.systemLoggerHotkeys,
                 self.systemLoggerUSB,
@@ -1155,6 +1155,10 @@ class MainApplication(QMainWindow, QDialog):
             else:
                 self.status_queue.put(
                     f"[GUI] Could not locate log file.")
+            
+            # Remove Screenshot Folder if empty
+            # Issue 27: If folder with same filename is in main_log_filepath exists in
+            #   Screenshots and this folder is empty, than delete the folder
 
             # kill node server when closing python server, otherwise port remains busy
             if MAC and self.officeExcel:

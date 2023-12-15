@@ -115,7 +115,7 @@ def createDirectory(path):
                 raise
 
 
-def createLogFile():
+def createLogFile(screenshots: bool):
     """
     Creates new log file with the current timestamp in /logs directory at the root of the project. used by main.
 
@@ -129,9 +129,19 @@ def createLogFile():
     # logs = os.path.join(current_directory, 'logs')
     logs = os.path.join(MAIN_DIRECTORY, 'logs')
     createDirectory(logs)
-    screenshots = os.path.join(MAIN_DIRECTORY, 'screenshots')
-    createDirectory(screenshots)
+
     filename = timestamp("%Y-%m-%d_%H-%M-%S") + '.csv'
+
+    if screenshots:
+        # If config capture_screenshots = True, we create a screenshot and screenshots sub folder
+        screenshots_dir = os.path.join(MAIN_DIRECTORY, 'screenshots')
+        createDirectory(screenshots_dir)
+        subdirectory = os.path.splitext(filename)[0]
+        # Added to store screenshot files in the same named folder
+        # if config capture_screenshots = TRUE create a dir, otherwise do not:
+        screenshots_subdir = os.path.join(screenshots_dir, subdirectory)
+        createDirectory(screenshots_subdir)
+
     log_filepath = os.path.join(logs, filename)
     # utils.config.MyConfig.get_instance().log_filepath = log_filepath
     # create HEADER
@@ -457,6 +467,25 @@ def get_last_directory_name(path):
     else:
         return None
 
+def get_last_directory_name(path):
+    """
+    Returns the name of the last directory within a given directory path.
+    """
+    directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+    print("Directories is:")
+    print(directories)
+    if directories:
+        last_directory = max(directories, key=lambda d: os.path.getmtime(os.path.join(path, d)))
+        return os.path.basename(last_directory)
+    else:
+        return None
+
+def calculateImageHash(img):
+    # Calculamos el hash de la imagen
+    sha256_hash = hashlib.sha256()
+    sha256_hash.update(img)
+    return sha256_hash.hexdigest()
+
 def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().capture_screenshots, scrshtFormat: str ="png"):
     """
     Takes a screenshot and saves it to a directory with a filename based on its hash, current date/time and order of capture.
@@ -468,11 +497,16 @@ def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().captu
     # Future improvement: use onlx dxcam to capture multiple screens, because it is faster
     filename = ""
     if save_image:
+        directory = os.path.join("screenshots", get_last_directory_name("screenshots"))
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         if dxcam.output_info().count("Output[") > 1:
             # If there are more than two screens attached it is easier to use the pillow impage capture
             screenshot = ImageGrab.grab(all_screens=True)
-            imageName = "scrsht" + timestamp("%Y-%m-%d_%H-%M-%S") + "." + scrshtFormat
-            filename = "screenshots/" + imageName
+            short_hash = calculateImageHash(screenshot)
+            stamp = timestamp("%Y-%m-%d_%H-%M-%S")
+            filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
             screenshot.save(filename, format=scrshtFormat)
 
         else:
@@ -484,16 +518,11 @@ def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().captu
                 print("Creating new camera instance")
             img = camera.grab()
 
-            # Calculamos el hash de la imagen
-            sha256_hash = hashlib.sha256()
-            sha256_hash.update(img)
-            hashed_img = sha256_hash.hexdigest()
-
             # Acortar el hash para el nombre
-            short_hash = hashed_img[:8]
+            short_hash = calculateImageHash(img)
 
             # Guardar la imagen en el directorio correspondiente. Nombre dependiente de hash
-            directory = "screenshots/"
+            # directory = "screenshots/"
             if not os.path.exists(directory):
                 createDirectory(directory)
             stamp = timestamp("%Y-%m-%d_%H-%M-%S")

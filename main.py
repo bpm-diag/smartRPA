@@ -87,8 +87,8 @@ def startLogger(systemLoggerFilesFolder,
 
         # ************
         # main logging server
-        # ************
-        log_filepath = utils.utils.createLogFile()
+        # ************     
+        log_filepath = utils.utils.createLogFile(utils.config.MyConfig.get_instance().capture_screenshots)
         # return log file to GUI so it can be processed
         LOG_FILEPATH.put(log_filepath)
 
