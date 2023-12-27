@@ -8,6 +8,7 @@ path.append('../../')  # this way main file is visible from this file
 import pyperclip
 from time import sleep
 from modules import consumerServer
+import modules.supervision as sp
 from utils.utils import *
 
 
@@ -26,6 +27,7 @@ def logClipboard():
             recent_value = temp_value
             print(f"{timestamp()} {USER} Clipboard copy {recent_value}")
             screenshot = takeScreenshot()
+            answer =  sp.getResponse()
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
@@ -33,7 +35,8 @@ def logClipboard():
                 "application": "Clipboard",
                 "event_type": "copy",
                 "clipboard_content": recent_value,
-                "screenshot": screenshot
+                "screenshot": screenshot,
+                "event_relevance": answer
             })
         sleep(0.2)
 

@@ -2,7 +2,7 @@
 import tkinter as tk
 import json
 
-def getResponse(jsonSTR: str):
+def getResponse(jsonSTR=""):
     def yes_clicked():
         global response
         response = True
@@ -13,6 +13,11 @@ def getResponse(jsonSTR: str):
         response = False
         root.destroy()
 
+    def close_clicked():
+        global response
+        response = None
+        root.destroy()
+
     root = tk.Tk()
     
     # Create a label to display the formatted JSON data
@@ -20,7 +25,7 @@ def getResponse(jsonSTR: str):
     label.pack(fill="both", expand=True, padx=10, pady=10)
 
     # Create a button to close the window
-    button = tk.Button(root, text="Close", command=root.destroy)
+    button = tk.Button(root, text="Close", command=close_clicked)
     button.pack()
 
     label = tk.Label(root, text="Is the displayed action necessary?")
@@ -31,7 +36,7 @@ def getResponse(jsonSTR: str):
 
     no_button = tk.Button(root, text="No", command=no_clicked)
     no_button.pack()
-    print("lets see")
+
     root.mainloop()
 
     return response

@@ -34,7 +34,7 @@ environ['WERKZEUG_RUN_MAIN'] = 'true'
 
 # Header to use for the csv logging file, written by main when file is first created
 HEADER = [
-    "timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path",
+    "timestamp", "user", "category", "application", "event_type", "event_relevance", "event_src_path", "event_dest_path",
     "clipboard_content", "mouse_coord",
     "workbook", "current_worksheet", "worksheets", "sheets", "cell_content", "cell_range", "cell_range_number", "window_size",
     "slides", "effect", "hotkey",
@@ -64,13 +64,10 @@ def writeLog():
     print(f"\nPOST received with content: {content}\n")
 
     # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
-    if utils.config.MyConfig.get_instance().supervisionFeature:
-        print("i should do something here")
+    if utils.config.MyConfig.get_instance().supervisionFeature and not "event_relevance" in content:
+        print("Triggered Supervision Element")
         answer =  sp.getResponse(content)
-        if answer:
-            print("User clicked Yes")
-        else:
-            print("User clicked No")
+        content["event_relevance"] = answer
 
     # check if user enabled browser logging
     application = content.get("application")
