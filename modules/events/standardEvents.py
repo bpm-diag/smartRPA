@@ -1,7 +1,8 @@
 from sys import path
 path.append('../../')  # Evitar problema de importación circular
 from pynput import mouse
-from modules import consumerServer
+from modules import consumerServer, supervision
+from modules.consumerServer import SERVER_ADDR
 from utils.utils import *
 from pynput import mouse, keyboard as pynput_keyboard
 from time import time
@@ -30,11 +31,11 @@ def logMouse():
     global last_click_time, click_timer, click_type
 
     def send_click_event(x, y, button, category):
+        img = takeScreenshot() 
         window_name = getActiveWindowInfo("name")
-        img = takeScreenshot()  # Guardar imagen / Save image
-        print(img)
+         # Guardar imagen / Save image
         print(window_name)
-        session.post(consumerServer.SERVER_ADDR, json={
+        json_string={
             "timestamp": timestamp(),
             "user": USER,
             "category": category,
@@ -44,7 +45,11 @@ def logMouse():
             "coordX": x, 
             "coordY": y,  
             "screenshot": img
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def _on_click(x, y, button, pressed):
         global last_click_time, click_timer, click_type
@@ -140,6 +145,7 @@ def logKeyboard():
     def send_data():
         nonlocal pressed_keys
         if pressed_keys:
+            img = takeScreenshot()
             window_name = getActiveWindowInfo("name")
             typed_word = ''.join([k for k in pressed_keys if k])  # Filtrar cualquier valor None / # Filter any None value
 
@@ -156,9 +162,8 @@ def logKeyboard():
             if typed_word.startswith(incorrect_sequence):
                 typed_word = typed_word[len(incorrect_sequence):]  # Eliminar la secuencia incorrecta / # Eliminate the incorrect sequence
 
-            img = takeScreenshot()
             print(f"{timestamp()} {USER} {window_name} typed: {typed_word}")
-            session.post(consumerServer.SERVER_ADDR, json={
+            json_string={
                 "timestamp": timestamp(),
                 "user": USER,
                 "category": "Keyboard",
@@ -166,7 +171,11 @@ def logKeyboard():
                 "event_type": "keypress",
                 "typed_word": typed_word,
                 "screenshot": img
-            })
+            }
+            # Get supervision feature if active, otherwise returns None value
+            answer =  supervision.getResponse(json_string)
+            json_string["event_relevance"] = answer
+            utils.utils.session.post(SERVER_ADDR, json=json_string)
             pressed_keys = []  # Limpiar pressed_keys / Clear pressed_keys
 
 

@@ -15,7 +15,8 @@ from threading import Thread
 from queue import Queue
 from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
-from modules import consumerServer
+from modules import consumerServer, supervision
+from modules.consumerServer import SERVER_ADDR
 from utils.utils import *
 import psutil
 import pynput
@@ -200,11 +201,11 @@ def watchFolderMac():
         if path not in logged.keys(): logged[path] = ""
         # ~ means temporary file
         if event_type != "UserDropped" and event_type not in logged.get(path) and "~" not in file_event.name:
+            screenshot = takeScreenshot()
             logged[path] = event_type
             # file_extension = os.path.splitext(path)[1]
             print(f"{timestamp()} {USER} OperatingSystem {event_type} {file_event.name}")
-            screenshot = takeScreenshot()
-            session.post(consumerServer.SERVER_ADDR, json={
+            json_string={
                 "timestamp": timestamp(),
                 "user": USER,
                 "category": "OperatingSystem",
@@ -213,7 +214,11 @@ def watchFolderMac():
                 "event_src_path": file_event.name,
                 "mouse_coord": mouse.position,
                 "screenshot": screenshot
-            })
+            }
+            # Get supervision feature if active, otherwise returns None value
+            answer =  supervision.getResponse(json_string)
+            json_string["event_relevance"] = answer
+            utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     print("[systemEvents] Files/Folder logging started")
     observer = fsevents.Observer()
@@ -238,14 +243,14 @@ def logProcessesWin():
     print("[systemEvents] WIN Processes logging started")
 
     def _logProcessData(app, event):
+        screenshot = takeScreenshot()
         try:
             exe = [p.exe() for p in psutil.process_iter() if p.name() == app]
         except (PermissionError, psutil.AccessDenied):
             exe = []
         path = exe[0] if exe else ""
         print(f"{timestamp()} {USER} {event} {app} {path}")
-        screenshot = takeScreenshot()
-        session.post(consumerServer.SERVER_ADDR, json={
+        json_string={
             "timestamp": timestamp(),
             "user": USER,
             "category": "OperatingSystem",
@@ -254,7 +259,11 @@ def logProcessesWin():
             "event_src_path": path,
             "mouse_coord": mouse.position,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     new_programs = set()  # needed later to initialize 'closed' set
     new_programs_len = 0  # needed later to check if 'new_programs' set changes
@@ -371,16 +380,15 @@ def watchRecentsFilesWin():
         try:
             file_type, filename, action = files_changed.get_nowait()
             if action == "Created":
+                screenshot = takeScreenshot()
                 lnk_target = _shortcut_target(filename)
                 file_extension = os.path.splitext(lnk_target)[1]
                 if file_extension:
                     eventType = "openFile"
                 else:
                     eventType = "openFolder"
-
                 print(f"{timestamp()} {USER} OperatingSystem {eventType} {lnk_target}")
-                screenshot = takeScreenshot()
-                session.post(consumerServer.SERVER_ADDR, json={
+                json_string={
                     "timestamp": timestamp(),
                     "user": USER,
                     "category": "OperatingSystem",
@@ -389,7 +397,11 @@ def watchRecentsFilesWin():
                     "event_src_path": lnk_target,
                     "mouse_coord": mouse.position,
                     "screenshot": screenshot
-                })
+                }
+                # Get supervision feature if active, otherwise returns None value
+                answer =  supervision.getResponse(json_string)
+                json_string["event_relevance"] = answer
+                utils.utils.session.post(SERVER_ADDR, json=json_string)
 
         except Exception:
             pass
@@ -429,6 +441,7 @@ def detectSelectionWindowsExplorer():
                     for j in range(selectedItems.Count):
                         path = selectedItems.Item(j).Path
                         if path != [] and path not in selected.get(i):
+                            screenshot = takeScreenshot()
                             selected[i].append(path)
                             # file_extension = os.path.splitext(path)[1]
                             if os.path.isfile(path):
@@ -436,8 +449,7 @@ def detectSelectionWindowsExplorer():
                             else:
                                 eventType = "selectedFolder"
                             print(f"{timestamp()} {USER} OperatingSystem {eventType} {path}")
-                            screenshot = takeScreenshot()
-                            session.post(consumerServer.SERVER_ADDR, json={
+                            json_string={
                                 "timestamp": timestamp(),
                                 "user": USER,
                                 "category": "OperatingSystem",
@@ -446,7 +458,11 @@ def detectSelectionWindowsExplorer():
                                 "event_src_path": path,
                                 "mouse_coord": mouse.position,
                                 "screenshot": screenshot
-                            })
+                            }
+                            # Get supervision feature if active, otherwise returns None value
+                            answer =  supervision.getResponse(json_string)
+                            json_string["event_relevance"] = answer
+                            utils.utils.session.post(SERVER_ADDR, json=json_string)
         except Exception as e:
             # print(e)
             continue
@@ -504,6 +520,7 @@ def logHotkeys():
     }
 
     def handleH(hotkey):
+        screenshot = takeScreenshot()
         window_name = getActiveWindowName()
         try:
             appName = window_name.split('-')[-1].strip()
@@ -518,8 +535,7 @@ def logHotkeys():
         if hotkey == "ctrl+h" and 'chrome' in appName.lower():
             meaning = "Show history"
         print(f"{timestamp()} {USER} OperatingSystem {event_type} {hotkey.upper()} {meaning} {clipboard_content}")
-        screenshot = takeScreenshot()
-        session.post(consumerServer.SERVER_ADDR, json={
+        json_string={
             "timestamp": timestamp(),
             "user": USER,
             "category": "OperatingSystem",
@@ -531,7 +547,11 @@ def logHotkeys():
             "clipboard_content": clipboard_content,
             "mouse_coord": mouse.position,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def handleHotkey(key):
         t = Thread(target=handleH, args=[key])
@@ -556,6 +576,7 @@ def logPasteHotkey():
         browsers = ["chrome", "edge", "firefox", "opera"]
         window_name = getActiveWindowName()
         if not (any(b in window_name.lower() for b in browsers)):
+            screenshot = takeScreenshot()
             clipboard_content = pyperclip.paste()
             try:
                 appName = window_name.split('-')[-1].strip()
@@ -564,8 +585,7 @@ def logPasteHotkey():
             # remove milliseconds from timestamp so duplicated events are easier to remove
             ts = timestamp()[:-3] + '000'
             print(f"{ts} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
-            screenshot = takeScreenshot()
-            session.post(consumerServer.SERVER_ADDR, json={
+            json_string={
                 "timestamp": ts,
                 "user": USER,
                 "category": "OperatingSystem",
@@ -575,7 +595,11 @@ def logPasteHotkey():
                 "description": 'Paste',
                 "clipboard_content": clipboard_content,
                 "screenshot": screenshot
-            })
+            }
+            # Get supervision feature if active, otherwise returns None value
+            answer =  supervision.getResponse(json_string)
+            json_string["event_relevance"] = answer
+            utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def handleHotkey():
         cb = Thread(target=handleCB)
@@ -627,10 +651,10 @@ def logUSBDrives():
         if LogicalDisk_DeviceID and DiskDrive_Caption:
             id = LogicalDisk_DeviceID[:-1]
             if id not in drive_list.keys():
+                screenshot = takeScreenshot()
                 drive_list[id] = DiskDrive_Caption
                 print(f"{timestamp()} {USER} OperatingSystem insertUSB {id} {DiskDrive_Caption}")
-                screenshot = takeScreenshot()
-                session.post(consumerServer.SERVER_ADDR, json={
+                json_string={
                     "timestamp": timestamp(),
                     "user": USER,
                     "category": "OperatingSystem",
@@ -639,7 +663,11 @@ def logUSBDrives():
                     "id": id,
                     "title": DiskDrive_Caption,
                     "screenshot": screenshot
-                })
+                }
+                # Get supervision feature if active, otherwise returns None value
+                answer =  supervision.getResponse(json_string)
+                json_string["event_relevance"] = answer
+                utils.utils.session.post(SERVER_ADDR, json=json_string)
         else:
             drive_list.clear()
 
@@ -669,10 +697,10 @@ def logProcessesMac():
         if len(new_programs) != new_programs_len:  # set is changed
             for app in new_programs:
                 if app not in open_programs:
+                    screenshot = takeScreenshot()
                     open_programs.append(app)
                     print(f"{timestamp()} {USER} programOpen {app.strip()}.app")
-                    screenshot = takeScreenshot()
-                    session.post(consumerServer.SERVER_ADDR, json={
+                    json_string={
                         "timestamp": timestamp(),
                         "user": USER,
                         "category": "OperatingSystem",
@@ -681,7 +709,11 @@ def logProcessesMac():
                         "event_src_path": f"/Applications/{app.strip()}.app",
                         "mouse_coord": mouse.position,
                         "screenshot": screenshot
-                    })
+                    }
+                    # Get supervision feature if active, otherwise returns None value
+                    answer =  supervision.getResponse(json_string)
+                    json_string["event_relevance"] = answer
+                    utils.utils.session.post(SERVER_ADDR, json=json_string)
             new_programs_len = len(new_programs)
 
         if len(closed_programs):  # set is not empty
@@ -719,11 +751,11 @@ def printerLogger():
         delay_secs=1
     )
     while 1:
+        screenshot = takeScreenshot()
         pj = print_job_watcher()
         print(
             f"{timestamp()} {pj.Owner} OperatingSystem printSubmitted {pj.Name}")
-        screenshot = takeScreenshot()
-        session.post(consumerServer.SERVER_ADDR, json={
+        json_string={
             "timestamp": timestamp(),
             "user": USER,
             "category": "OperatingSystem",
@@ -731,4 +763,8 @@ def printerLogger():
             "event_type": "printSubmitted",
             "title": pj.Name,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)

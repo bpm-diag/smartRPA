@@ -64,8 +64,8 @@ def writeLog():
     print(f"\nPOST received with content: {content}\n")
 
     # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
+    # Could be removed if it was added to all: Currently missing browser logger, thus has to be in place
     if utils.config.MyConfig.get_instance().supervisionFeature and not "event_relevance" in content:
-        print("Triggered Supervision Element")
         answer =  sp.getResponse(content)
         content["event_relevance"] = answer
 
