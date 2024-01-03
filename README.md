@@ -37,9 +37,11 @@ The current generation of RPA tools is driven by predefined rules and manual con
 
 **SmartRPA** has been developed at **DIAG**, Department of Computer, Control, and Management Engineering _Antonio Ruberti_ in **Sapienza University of Rome** by:
 
-- [Simone Agostinelli](https://phd.uniroma1.it/web/SIMONE-AGOSTINELLI_nP1523559_IT.aspx)
+- [Simone Agostinelli](https://www.diag.uniroma1.it/users/simone_agostinelli)
 - [Marco Lupia](https://marco2012.github.io/)
 - [Andrea Marrella](http://www.dis.uniroma1.it/marrella/)
+
+Many thanks also to [Tom Hohenadl](https://www.linkedin.com/in/thohenadl/) (**Technische Hochschule Ingolstadt**) and [Antonio Martínez-Rojas](https://personal.us.es/amrojas/) (**Universidad de Sevilla**) for the ongoing updates of the tool.
 
 <!--The **associated paper** is available on [Springer](https://doi.org/10.1007/978-3-030-58779-6_8), and has been presented at the [RPA Forum](https://congreso.us.es/bpm2020/calls/rpa/) of _18th International Conference on Business Process Management_.-->
 
