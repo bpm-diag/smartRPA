@@ -84,7 +84,7 @@ def writeLog():
         content["screenshot"] = screenshot
         # Double check the delay between the browser event logged and the screenshot taken here
         # Latest check TOHO: For multiple screens ~0.5 sec, for single screen ~0.25 sec
-        print(str(timeAfterScreenshot) + " " + str(content["timestamp"]))
+        # print(str(timeAfterScreenshot) + " " + str(content["timestamp"]))
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))

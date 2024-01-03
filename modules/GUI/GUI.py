@@ -1145,7 +1145,6 @@ class MainApplication(QMainWindow, QDialog):
             self.mainProcess.terminate()
 
             self.status_queue.put(f"[GUI] Logger stopped")
-
             # once log file is created, RPA actions are automatically generated for each category
             # log_filepath = utils.config.MyConfig.get_instance().log_filepath
             if not self.LOG_FILEPATH.empty():
