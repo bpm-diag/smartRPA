@@ -549,6 +549,33 @@ def add_json_element(node, key, value):
     else:
         raise TypeError("Node must be a dictionary")
 
+def staticNoiseFilter(uilog: pandas.DataFrame) -> pandas.DataFrame:
+    """
+    Gets a UI log and checks for attribute noise using standard format definitions.
+    The cleaned dataframe does not contain attribute values that are incorrectly formated
+
+    :param uilog: User interaction log dataframe
+    :return: Cleaned dataframe 
+    """
+
+def staticNoiseTagger(uilog: pandas.DataFrame) -> pandas.DataFrame:
+    """
+    Adding information on noisy attributes in a UI logs as key-values
+
+    :param uilog: User interaction log dataframe
+    :return: UILog with additional column containing noisy attributes
+    
+    """
+
+def staticNoiseIdentification(uilog: pandas.DataFrame) -> dict:
+    """
+    Gets a UI log and identifies all cells containing static noise
+    Static noise is noise that is identified using attributes default formats
+    
+    :param uilog: User interaction log dataframe
+    :return: Cell identifiers of noisy cells
+    """
+
 # ************
 # Class
 # ************
