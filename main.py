@@ -13,12 +13,13 @@ import modules.GUI.GUI
 import utils.config
 import modules.consumerServer
 import utils.utils
-from modules.events import systemEvents, officeEvents, clipboardEvents
+from modules.events import systemEvents, officeEvents, clipboardEvents, standardEvents
 
 
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
                 systemLoggerClipboard,
+                systemLoggerStandard,
                 systemLoggerHotkeys,
                 systemLoggerUSB,
                 systemLoggerEvents,
@@ -43,6 +44,7 @@ def startLogger(systemLoggerFilesFolder,
     :param systemLoggerFilesFolder: true if files/folder checkbox is checked in GUI
     :param systemLoggerPrograms: true if programs checkbox is checked in GUI
     :param systemLoggerClipboard: true if clipboard checkbox is checked in GUI
+    :param systemLoggerStandard: true if mouse and keyboard checkbox is checked in GUI
     :param systemLoggerHotkeys: true if hotkeys checkbox is checked in GUI
     :param systemLoggerUSB: true if usb checkbox is checked in GUI
     :param systemLoggerEvents: deprecated
@@ -59,14 +61,34 @@ def startLogger(systemLoggerFilesFolder,
     :param LOG_FILEPATH: path of the event log file
     :param processesPID: PID of started processes, used to kill them when logger is stopped
     """
-
+    # Thread names in use
+    # t0: Main Logger 
+    # t8 = Thread(target=clipboardEvents.logClipboard)
+    # t9 = Process(target=systemEvents.logPasteHotkey)
+    # t17 = Thread(target=standardEvents.logMouse)
+    # t18 = Thread(target=standardEvents.logKeyboard)
+    # t1 = Thread(target=systemEvents.watchFolder)
+    # t2 = Process(target=systemEvents.watchRecentsFilesWin)
+    # Not in use > t3 = Thread(target=systemEvents.detectSelectionWindowsExplorer)
+    # Not in use > t4 = Thread(target=systemEvents.printerLogger)
+    # t5 = Thread(target=systemEvents.watchFolderMac)
+    # t6 = Thread(target=systemEvents.logProcessesWin)
+    # t7 = Thread(target=systemEvents.logProcessesMac)
+    # t10 = Process(target=systemEvents.logHotkeys)
+    # t11 = Thread(target=systemEvents.logUSBDrives)
+    # t12 = Process(target=officeEvents.excelEvents, args=(status_queue, excelFilepath,))
+    # t13 = Thread(target=officeEvents.excelEventsMacServer, args=[status_queue, excelFilepath])
+    # Deprecated > t18 = Thread(target=mouseEvents.logMouse)
+    # t14 = Process(target=officeEvents.wordEvents)
+    # t15 = Process(target=officeEvents.powerpointEvents)
+    # t16 = Process(target=officeEvents.outlookEvents)
     try:
         # create the threads as daemons so they are closed when main ends
 
         # ************
         # main logging server
-        # ************
-        log_filepath = utils.utils.createLogFile()
+        # ************     
+        log_filepath = utils.utils.createLogFile(utils.config.MyConfig.get_instance().capture_screenshots)
         # return log file to GUI so it can be processed
         LOG_FILEPATH.put(log_filepath)
 
@@ -94,8 +116,17 @@ def startLogger(systemLoggerFilesFolder,
                 t9.start()
                 processesPID.put(t9.pid)
 
-        if systemLoggerFilesFolder:
+        if systemLoggerStandard:
+            # Added by josaloroc & a8081
+            t17 = Thread(target=standardEvents.logMouse)
+            t17.daemon = True
+            t17.start()
 
+            t18 = Thread(target=standardEvents.logKeyboard)
+            t18.daemon = True
+            t18.start()
+
+        if systemLoggerFilesFolder:
             if utils.utils.WINDOWS:
                 t1 = Thread(target=systemEvents.watchFolder)
                 t1.daemon = True
@@ -154,9 +185,9 @@ def startLogger(systemLoggerFilesFolder,
                 t12.start()
                 processesPID.put(t12.pid)
 
-                # t14 = Thread(target=mouseEvents.logMouse)
-                # t14.daemon = True
-                # t14.start()
+                # t18 = Thread(target=mouseEvents.logMouse)
+                # t18.daemon = True
+                # t18.start()
 
             if utils.utils.MAC:
                 if utils.utils.isPortInUse(3000):

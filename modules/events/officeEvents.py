@@ -11,6 +11,7 @@ from shutil import rmtree
 from itertools import chain
 from utils.utils import *
 from modules.consumerServer import SERVER_ADDR
+from modules import supervision
 import utils.config
 
 if utils.utils.WINDOWS:
@@ -71,10 +72,10 @@ class ExcelEvents:
         """
         self.seen_events["OnWindowActivate"] = None
 
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} openWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -86,7 +87,11 @@ class ExcelEvents:
             "id": Wn.WindowNumber,
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWindowDeactivate(self, Wb, Wn):
         """
@@ -100,7 +105,7 @@ class ExcelEvents:
         screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} closeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} path: {Wb.Path}")
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -112,7 +117,11 @@ class ExcelEvents:
             "id": Wn.WindowNumber,
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWindowResize(self, Wb, Wn):
         """
@@ -126,7 +135,7 @@ class ExcelEvents:
         screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} resizeWindow workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} window id:{Wn.WindowNumber} size {x},{y},{width},{height} ")
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -140,7 +149,11 @@ class ExcelEvents:
             "window_size": f"{x},{y},{width},{height}",
             "screenshot": screenshot
             # "window_size": f"{Wn.Width},{Wn.Height}"
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     # ************
     # Workbook
@@ -154,12 +167,13 @@ class ExcelEvents:
         :return: newWorkbook event
         """
         self.seen_events["OnNewWorkbook"] = None
+        
+        screenshot = takeScreenshot()
         # get excel window size
         x, y, width, height = utils.utils.getActiveWindowInfo('size')
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} newWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path} window_size {x},{y},{width},{height}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -171,7 +185,11 @@ class ExcelEvents:
             "event_src_path": Wb.Path,
             "window_size": f"{x},{y},{width},{height}",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookOpen(self, Wb):
         """
@@ -180,11 +198,11 @@ class ExcelEvents:
         :param Wb: workbook
         :return: openWorkbook event
         """
+        screenshot = takeScreenshot()
         path = os.path.join(Wb.Path, Wb.Name)
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} openWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -195,7 +213,12 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
+
 
     def OnWorkbookNewSheet(self, Wb, Sh):
         """
@@ -205,10 +228,10 @@ class ExcelEvents:
         :param Sh: worksheet
         :return: addWorksheet event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} addWorksheet workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -219,7 +242,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookBeforeSave(self, Wb, SaveAsUI, Cancel):
         """
@@ -230,14 +257,14 @@ class ExcelEvents:
         :param Cancel: saving is canceled
         :return: beforeSaveWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} saveAs dialog {SaveAsUI}")
         if SaveAsUI:
             description = "SaveAs dialog box displayed"
         else:
             description = "SaveAs dialog box not displayed"
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -248,7 +275,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "description": description,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookAfterSave(self, Wb, Success):
         """
@@ -258,11 +289,11 @@ class ExcelEvents:
         :param Success: boolean value to indicate if saving was succesful
         :return: saveWorkbook event
         """
+        screenshot = takeScreenshot()
         savedPath = os.path.join(Wb.Path, Wb.Name)
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} saveWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {savedPath}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -273,7 +304,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": savedPath,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookAddinInstall(self, Wb):
         """
@@ -282,10 +317,10 @@ class ExcelEvents:
         :param Wb: workbook
         :return: addinInstalledWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} addinInstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -296,7 +331,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookAddinUninstall(self, Wb):
         """
@@ -305,10 +344,10 @@ class ExcelEvents:
         :param Wb: workbook
         :return: addinUninstalledWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} addinUninstalledWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -319,7 +358,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookAfterXmlImport(self, Wb, Map, Url, Result):
         """
@@ -331,10 +374,10 @@ class ExcelEvents:
         :param Result: import result
         :return: XMLImportWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} XMLImportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -345,7 +388,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookAfterXmlExport(self, Wb, Map, Url, Result):
         """
@@ -357,10 +404,10 @@ class ExcelEvents:
         :param Result: import result
         :return: XMLExportWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} XMLExportWOrkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -371,7 +418,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookBeforePrint(self, Wb, Cancel):
         """
@@ -381,10 +432,10 @@ class ExcelEvents:
         :param Cancel: true if print is canceled
         :return: printWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} printWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -395,7 +446,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookBeforeClose(self, Wb, Cancel):
         """
@@ -405,10 +460,10 @@ class ExcelEvents:
         :param Cancel: true if close is canceled
         :return: closeWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} closeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -419,7 +474,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookActivate(self, Wb):
         """
@@ -428,10 +487,10 @@ class ExcelEvents:
         :param Wb: workbook
         :return: activateWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} activateWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -442,7 +501,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookDeactivate(self, Wb):
         """
@@ -451,10 +514,10 @@ class ExcelEvents:
         :param Wb: workbook
         :return: deactivateWorkbook event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} deactivateWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -465,13 +528,18 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookModelChange(self, Wb, Changes):
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} modelChangeWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -482,7 +550,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(None, Wb),
             "event_src_path": Wb.Path,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWorkbookNewChart(self, Wb, Ch):
         """
@@ -495,7 +567,7 @@ class ExcelEvents:
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} newChartWorkbook workbook: {Wb.Name} Worksheet:{Wb.ActiveSheet.Name} path: {Wb.Path}")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -507,7 +579,11 @@ class ExcelEvents:
             "event_src_path": Wb.Path,
             "title": Ch.Name,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnAfterCalculate(self):
         """
@@ -515,17 +591,21 @@ class ExcelEvents:
 
         :return: afterCalculate event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} afterCalculate")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Excel",
             "event_type": "afterCalculate",
             "screenshot": screenshot
-        })
+        } 
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     # ************
     # Worksheet
@@ -560,11 +640,11 @@ class ExcelEvents:
         :param Sh: worksheet
         :return: selectWorksheet event
         """
+        screenshot = takeScreenshot()
         # to get the list of active worksheet names, I cycle through the parent which is the workbook
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel selectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -575,8 +655,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(Sh, None),
             "event_src_path": Sh.Parent.Path,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetBeforeDelete(self, Sh):
         """
@@ -585,10 +668,10 @@ class ExcelEvents:
         :param Sh: worksheet
         :return: deleteWorksheet event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel deleteWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -598,8 +681,11 @@ class ExcelEvents:
             "current_worksheet": Sh.Name,
             "worksheets": self.getWorksheets(Sh, None),
             "screenshot": screenshot
-
-        }),
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetBeforeDoubleClick(self, Sh, Target, Cancel):
         """
@@ -610,16 +696,15 @@ class ExcelEvents:
         :param Cancel: true if event is canceled
         :return: doubleClickCellWithValue/doubleClickEmptyCell event
         """
+        screenshot = takeScreenshot()
         event_type = "doubleClickEmptyCell"
         value = ""
         if Target.Value:  # cell has value
             event_type = "doubleClickCellWithValue"
             value = Target.Value
-
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -630,8 +715,11 @@ class ExcelEvents:
             "cell_range": Target.Address.replace('$', ''),
             "cell_content": value,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetBeforeRightClick(self, Sh, Target, Cancel):
         """
@@ -642,6 +730,7 @@ class ExcelEvents:
         :param Cancel: true if event is canceled
         :return: rightClickCellWithValue/rightClickEmptyCell event
         """
+        screenshot = takeScreenshot()
         event_type = "rightClickEmptyCell"
         value = ""
         if Target.Value:  # cell has value
@@ -649,8 +738,8 @@ class ExcelEvents:
             value = Target.Value
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {Target.Address.replace('$', '')} {value}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -661,8 +750,11 @@ class ExcelEvents:
             "cell_range": Target.Address.replace('$', ''),
             "cell_content": value,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetCalculate(self, Sh):
         """
@@ -671,10 +763,10 @@ class ExcelEvents:
         :param Sh: worksheet
         :return: sheetCalculate event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel sheetCalculate {Sh.Name} {Sh.Parent.Name} ")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -683,8 +775,11 @@ class ExcelEvents:
             "workbook": Sh.Parent.Name,
             "current_worksheet": Sh.Name,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetChange(self, Sh, Target):
         """
@@ -694,7 +789,7 @@ class ExcelEvents:
         :param Target: edited cell
         :return: editCellSheet event
         """
-
+        screenshot = takeScreenshot()
         # if entire row/column is selected, get only the first 8000 occurrences to save space
         value = self.filterNoneRangeValues(Target.Value)
         cell_range_number = f"{Target.Column},{Target.Row}"
@@ -724,8 +819,8 @@ class ExcelEvents:
 
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel editCellSheet {Sh.Name} {Sh.Parent.Name} {cell_range} ({cell_range_number}) {value}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -737,8 +832,11 @@ class ExcelEvents:
             "cell_range_number": cell_range_number,
             "cell_content": value,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetDeactivate(self, Sh):
         """
@@ -747,11 +845,11 @@ class ExcelEvents:
         :param Sh: worksheet
         :return: deselectWorksheet event
         """
+        screenshot = takeScreenshot()
         self.seen_events["OnSheetDeactivate"] = None
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel deselectWorksheet {Sh.Name} {Sh.Parent.Name} {self.getWorksheets(Sh, None)}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -762,8 +860,11 @@ class ExcelEvents:
             "worksheets": self.getWorksheets(Sh, None),
             "event_src_path": Sh.Parent.Path,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetFollowHyperlink(self, Sh, Target):
         """
@@ -773,10 +874,10 @@ class ExcelEvents:
         :param Target: cell clicked
         :return: followHiperlinkSheet event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel followHiperlinkSheet {Sh.Name} {Sh.Parent.Name} {Target.Range.Address.replace('$', '')} {Target.Address}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -788,7 +889,11 @@ class ExcelEvents:
             "browser_url": Target.Address,
             "screenshot": screenshot
 
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetPivotTableAfterValueChange(self, Sh, TargetPivotTable, TargetRange):
         """
@@ -799,10 +904,10 @@ class ExcelEvents:
         :param TargetRange: range modified
         :return: pivotTableValueChangeSheet event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel pivotTableValueChangeSheet {Sh.Name} {Sh.Parent.Name} {TargetRange.Address.replace('$', '')} {TargetRange.Value}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -813,7 +918,11 @@ class ExcelEvents:
             "cell_range": TargetRange.Address.replace('$', ''),
             "cell_content": TargetRange.Value if TargetRange.Value else "",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetSelectionChange(self, Sh, Target):
         """
@@ -837,10 +946,10 @@ class ExcelEvents:
 
         # If LOG_EVERY_CELL is False and a user selects a single cell the event is not logged
         if rangeSelected or self.LOG_EVERY_CELL:
+            screenshot = takeScreenshot()
             print(
                 f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel {event_type} {Sh.Name} {Sh.Parent.Name} {cells_selected} ({cell_range_number}) {value}")
-            screenshot = takeScreenshot()
-            utils.utils.session.post(SERVER_ADDR, json={
+            json_string={
                 "timestamp": utils.utils.timestamp(),
                 "user": utils.utils.USER,
                 "category": "MicrosoftOffice",
@@ -853,7 +962,11 @@ class ExcelEvents:
                 "cell_content": value,
                 "screenshot": screenshot
 
-            })
+            }
+            # Get supervision feature if active, otherwise returns None value
+            answer =  supervision.getResponse(json_string)
+            json_string["event_relevance"] = answer
+            utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSheetTableUpdate(self, Sh, Target):
         """
@@ -863,9 +976,9 @@ class ExcelEvents:
         :param Target: table
         :return: worksheetTableUpdated event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel worksheetTableUpdated {Sh.Name} {Sh.Parent.Name} ")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Microsoft Excel worksheetTableUpdated {Sh.Name} {Sh.Parent.Name} ")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -874,7 +987,11 @@ class ExcelEvents:
             "workbook": Sh.Parent.Name,
             "current_worksheet": Sh.Name,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
 
 # Takes filename as input if user wants to open existing file
@@ -943,7 +1060,7 @@ def excelEventsMacServer(status_queue, excelFilepath=None):
     # os.system(f"cd {macExcelAddinPath} && npm run dev-server >/dev/null 2>&1") # hide output
     if not utils.utils.utils.utils.isPortInUse(3000):
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -951,7 +1068,11 @@ def excelEventsMacServer(status_queue, excelFilepath=None):
             "event_type": "openWorkbook",
             "event_src_path": excelFilepath if excelFilepath else "",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
         if excelFilepath:
             app = xw.App(visible=True)
             book = xw.Book(excelFilepath)
@@ -988,18 +1109,22 @@ class WordEvents:
         :param Wn: window
         :return: activateWindow event
         """
+        screenshot = takeScreenshot()
         self.seen_events["OnWindowActivate"] = None
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} activateWindow")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "activateWindow",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWindowDeactivate(self, Doc, Wn):
         """
@@ -1009,19 +1134,23 @@ class WordEvents:
         :param Wn: window
         :return: activateWindow event
         """
+        screenshot = takeScreenshot()
         self.seen_events["OnWindowDeactivate"] = None
         self.seen_events["OnWindowActivate"] = None
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} deactivateWindow")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "deactivateWindow",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWindowBeforeDoubleClick(self, Sel, Cancel):
         """
@@ -1033,17 +1162,21 @@ class WordEvents:
         :param Cancel: true if action is canceled
         :return: doubleClickWindow event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} doubleClickWindow")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "doubleClickWindow",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWindowBeforeRightClick(self, Sel, Cancel):
         """
@@ -1053,17 +1186,20 @@ class WordEvents:
         :param Cancel: true if action is canceled
         :return: rightClickWindow event
         """
-
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} rightClickWindow")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} rightClickWindow")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "rightClickWindow",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     # Too much spam
     # def OnWindowSelectionChange(self, Sel):
@@ -1087,17 +1223,21 @@ class WordEvents:
         :param Doc: document
         :return: newDocument event
         """
+        screenshot = takeScreenshot()
         self.seen_events["OnNewDocument"] = None
         print(f"{utils.utils.timestamp()} {utils.utils.USER} newDocument")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "newDocument",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnDocumentOpen(self, Doc):
         """
@@ -1106,16 +1246,20 @@ class WordEvents:
         :param Doc: document
         :return: openDocument event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} openDocument")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} openDocument")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "openDocument",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnDocumentChange(self):
         """
@@ -1123,17 +1267,21 @@ class WordEvents:
 
         :return: changeDocument event
         """
+        screenshot = takeScreenshot()
         self.seen_events["OnDocumentChange"] = None
         print(f"{utils.utils.timestamp()} {utils.utils.USER} changeDocument")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "changeDocument",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnDocumentBeforeSave(self, Doc, SaveAsUI, Cancel):
         """
@@ -1144,35 +1292,44 @@ class WordEvents:
         :param Cancel: true if event is canceled
         :return: saveDocument event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} saveDocument")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} saveDocument")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "saveDocument",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnDocumentBeforePrint(self, Doc, Cancel):
         """
-       Occurs when a document is printed
+        Occurs when a document is printed
 
-       :param Doc: document
-       :param Cancel: true if event is canceled
-       :return: saveDocument event
-       """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} printDocument")
+        :param Doc: document
+        :param Cancel: true if event is canceled
+        :return: saveDocument event
+        """
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} printDocument")
+        
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Word",
             "event_type": "printDocument",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnQuit(self):
         self.seen_events["OnQuit"] = None
@@ -1251,9 +1408,10 @@ class PowerpointEvents:
         :param Wn: window
         :return: activateWindow event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint activateWindow {Pres.Name} {Pres.Path} ")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint activateWindow {Pres.Name} {Pres.Path} ")
+        
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1262,8 +1420,11 @@ class PowerpointEvents:
             "title": Pres.Name,
             "event_src_path": Pres.Path,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWindowDeactivate(self, Pres, Wn):
         """
@@ -1273,9 +1434,9 @@ class PowerpointEvents:
         :param Wn: window
         :return: deactivateWindow event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint deactivateWindow {Pres.Name} {Pres.Path} ")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint deactivateWindow {Pres.Name} {Pres.Path} ")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1284,8 +1445,11 @@ class PowerpointEvents:
             "title": Pres.Name,
             "event_src_path": Pres.Path,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWindowBeforeRightClick(self, Sel, Cancel):
         """
@@ -1295,19 +1459,22 @@ class PowerpointEvents:
         :param Cancel: true if event is canceled
         :return: rightClickPresentation event
         """
+        screenshot = takeScreenshot()
         print(Sel.SlideRange)
         print(Sel.TextRange)
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint rightClickPresentation ")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Powerpoint",
             "event_type": "rightClickPresentation",
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnWindowBeforeDoubleClick(self, Sel, Cancel):
         """
@@ -1317,19 +1484,22 @@ class PowerpointEvents:
         :param Cancel: true if event is canceled
         :return: doubleClickPresentation event
         """
+        screenshot = takeScreenshot()
         print(Sel.SlideRange)
         print(Sel.TextRange)
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint doubleClickPresentation ")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Powerpoint",
             "event_type": "doubleClickPresentation",
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     # ************
     # Presentation
@@ -1342,10 +1512,10 @@ class PowerpointEvents:
         :param Pres: presentation
         :return: newPresentation event
         """
+        screenshot = takeScreenshot()
         self.presentationSlides.clear()
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint newPresentation {Pres.Name} {Pres.Path}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1354,8 +1524,11 @@ class PowerpointEvents:
             "title": Pres.Name,
             "event_src_path": Pres.Path,
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnPresentationNewSlide(self, Sld):
         """
@@ -1364,11 +1537,11 @@ class PowerpointEvents:
         :param Sld: slide
         :return: newPresentationSlide event
         """
+        screenshot = takeScreenshot()
         self.addSlide(Sld)
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint newPresentationSlide {Sld.Name} {Sld.SlideNumber} {self.getSlides()}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1378,8 +1551,11 @@ class PowerpointEvents:
             "id": Sld.SlideNumber,
             "slides": self.getSlides(),
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnPresentationBeforeClose(self, Pres, Cancel):
         """
@@ -1389,10 +1565,10 @@ class PowerpointEvents:
         :param Cancel: true if event is canceled
         :return: closePresentation event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint closePresentation {Pres.Name} {self.getSlides()}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1402,8 +1578,11 @@ class PowerpointEvents:
             "event_src_path": Pres.Path,
             "slides": self.getSlides(),
             "screenshot": screenshot
-
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
         self.presentationSlides.clear()
 
     def OnPresentationBeforeSave(self, Pres, Cancel):
@@ -1414,10 +1593,10 @@ class PowerpointEvents:
         :param Cancel: true if event is canceled
         :return: savePresentation event
         """
-        print(
-            f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint savePresentation {Pres.Name} {self.getSlides()}")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(
+            f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint savePresentation {Pres.Name} {self.getSlides()}")  
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1427,7 +1606,11 @@ class PowerpointEvents:
             "event_src_path": Pres.Path,
             "slides": self.getSlides(),
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnAfterPresentationOpen(self, Pres):
         """
@@ -1436,11 +1619,11 @@ class PowerpointEvents:
         :param Pres: presentation
         :return: savePresentation event
         """
+        screenshot = takeScreenshot()
         self.presentationSlides.clear()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint openPresentation {Pres.Name} {self.getSlides()}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1450,7 +1633,11 @@ class PowerpointEvents:
             "event_src_path": Pres.Path,
             "slides": self.getSlides(),
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnAfterShapeSizeChange(self, shp):
         """
@@ -1459,10 +1646,10 @@ class PowerpointEvents:
         :param shp: shape
         :return: shapeSizeChangePresentation event
         """
+        screenshot = takeScreenshot()
         self.presentationSlides.clear()
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint shapeSizeChangePresentation {shp.Type} ")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1470,7 +1657,11 @@ class PowerpointEvents:
             "event_type": "shapeSizeChangePresentation",
             "description": shp.Type,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnPresentationPrint(self, Pres):
         """
@@ -1479,10 +1670,11 @@ class PowerpointEvents:
         :param Pres: presentation
         :return: printPresentation event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint printPresentation {Pres.Name} {self.getSlides()}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1492,7 +1684,11 @@ class PowerpointEvents:
             "event_src_path": Pres.Path,
             "slides": self.getSlides(),
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSlideShowBegin(self, Wn):
         """
@@ -1501,9 +1697,9 @@ class PowerpointEvents:
         :param Wn: slideshowview https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview
         :return: slideshowBegin event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint slideshowBegin ")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint slideshowBegin ")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1515,7 +1711,12 @@ class PowerpointEvents:
             "newZoomFactor": Wn.Zoom,
             "slides": Wn.Slide.Name,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
+
 
     def OnSlideShowOnNext(self, Wn):
         """
@@ -1524,9 +1725,9 @@ class PowerpointEvents:
         :param Wn: slideshowview https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview
         :return: nextSlideshow
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint nextSlideshow ")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint nextSlideshow ")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1538,7 +1739,11 @@ class PowerpointEvents:
             "newZoomFactor": Wn.Zoom,
             "slides": Wn.Slide.Name,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSlideShowNextClick(self, Wn, nEffect):
         """
@@ -1550,9 +1755,9 @@ class PowerpointEvents:
         :param nEffect: transition type
         :return: clickNextSlideshow event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint clickNextSlideshow ")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint clickNextSlideshow ")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1565,7 +1770,11 @@ class PowerpointEvents:
             "slides": Wn.Slide.Name,
             "effect": nEffect.EffectType,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSlideShowOnPrevious(self, Wn):
         """
@@ -1576,9 +1785,9 @@ class PowerpointEvents:
         :param Wn: slideshowview https://docs.microsoft.com/en-us/office/vba/api/powerpoint.slideshowview
         :return: previousSlideshow event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint previousSlideshow ")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint previousSlideshow ")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1589,7 +1798,11 @@ class PowerpointEvents:
             "newZoomFactor": Wn.Zoom,
             "slides": Wn.Slide.Name,
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSlideShowEnd(self, Pres):
         """
@@ -1598,10 +1811,10 @@ class PowerpointEvents:
         :param Pres: presentation
         :return: slideshowEnd event
         """
+        screenshot = takeScreenshot()
         print(
             f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint slideshowEnd {Pres.Name} {self.getSlides()}")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
@@ -1611,7 +1824,11 @@ class PowerpointEvents:
             "event_src_path": Pres.Path,
             "slides": self.getSlides(),
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnSlideSelectionChanged(self, SldRange):
         """
@@ -1620,16 +1837,20 @@ class PowerpointEvents:
         :param SldRange: range of slides
         :return: SlideSelectionChanged event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint SlideSelectionChanged")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Powerpoint SlideSelectionChanged")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Powerpoint",
             "event_type": "SlideSelectionChanged",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
 
 def powerpointEvents(filename=None):
@@ -1685,16 +1906,20 @@ class OutlookEvents:
 
         :return: startupOutlook event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook startupOutlook")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook startupOutlook")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "startupOutlook",
             "screenshot": screenshot
-        })
+        } 
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnQuit(self):
         """
@@ -1702,17 +1927,21 @@ class OutlookEvents:
 
         :return: quitOutlook event
         """
+        screenshot = takeScreenshot()
         self.seen_events["OnQuit"] = None
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook quitOutlook")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "quitOutlook",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
         # stopEvent.set() #Set the internal flag to true. All threads waiting for it to become true are awakened
         # To stop PumpMessages() when Outlook Quit
         #     # Note: Not sure it works when disconnecting!!
@@ -1725,16 +1954,20 @@ class OutlookEvents:
         :param receivedItemsIDs: id of received mail
         :return: receiveMail event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook receiveMail")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook receiveMail")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "receiveMail",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
         # RecrivedItemIDs is a collection of mail IDs separated by a ",".
         # You know, sometimes more than 1 mail is received at the same moment.
         for ID in receivedItemsIDs.split(","):
@@ -1750,17 +1983,21 @@ class OutlookEvents:
         :param Cancel: true if action is canceled
         :return: sendMail event
         """
+        screenshot = takeScreenshot()
         print(Item)
         print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook sendMail")
-        screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "sendMail",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnMAPILogonComplete(self):
         """
@@ -1768,16 +2005,20 @@ class OutlookEvents:
 
         :return: logonComplete event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook logonComplete")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook logonComplete")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "logonComplete",
             "screenshot": screenshot
-        })
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
     def OnReminder(self, Item):
         """
@@ -1786,17 +2027,20 @@ class OutlookEvents:
         :param Item: reminder item
         :return: newReminder event
         """
-        print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook newReminder")
         screenshot = takeScreenshot()
-        utils.utils.session.post(SERVER_ADDR, json={
+        print(f"{utils.utils.timestamp()} {utils.utils.USER} Outlook newReminder")
+        json_string={
             "timestamp": utils.utils.timestamp(),
             "user": utils.utils.USER,
             "category": "MicrosoftOffice",
             "application": "Microsoft Outlook",
             "event_type": "newReminder",
             "screenshot": screenshot
-        })
-
+        }
+        # Get supervision feature if active, otherwise returns None value
+        answer =  supervision.getResponse(json_string)
+        json_string["event_relevance"] = answer
+        utils.utils.session.post(SERVER_ADDR, json=json_string)
 
 def outlookEvents():
     """

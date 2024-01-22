@@ -11,6 +11,7 @@ import utils.config
 import utils.utils
 # import utils.GUI
 import datetime
+import modules.supervision as sp
 
 # server port
 PORT = 4444
@@ -33,7 +34,7 @@ environ['WERKZEUG_RUN_MAIN'] = 'true'
 
 # Header to use for the csv logging file, written by main when file is first created
 HEADER = [
-    "timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path",
+    "timestamp", "user", "category", "application", "event_type", "event_relevance", "event_src_path", "event_dest_path",
     "clipboard_content", "mouse_coord",
     "workbook", "current_worksheet", "worksheets", "sheets", "cell_content", "cell_range", "cell_range_number", "window_size",
     "slides", "effect", "hotkey",
@@ -52,7 +53,7 @@ def index():
 @app.route('/', methods=['POST'])
 def writeLog():
     """
-    route where json event is received and processed.
+    Route where json event is received and processed.
 
     JSON event includes metadata about the event, such as the timestamp, category, application, concept:name
     and other information depending on the event type.
@@ -61,6 +62,12 @@ def writeLog():
     """
     content = request.json
     print(f"\nPOST received with content: {content}\n")
+
+    # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
+    # Could be removed if it was added to all: Currently missing browser logger, thus has to be in place
+    if utils.config.MyConfig.get_instance().supervisionFeature and not "event_relevance" in content:
+        answer =  sp.getResponse(content)
+        content["event_relevance"] = answer
 
     # check if user enabled browser logging
     application = content.get("application")
@@ -77,7 +84,7 @@ def writeLog():
         content["screenshot"] = screenshot
         # Double check the delay between the browser event logged and the screenshot taken here
         # Latest check TOHO: For multiple screens ~0.5 sec, for single screen ~0.25 sec
-        print(str(timeAfterScreenshot) + " " + str(content["timestamp"]))
+        # print(str(timeAfterScreenshot) + " " + str(content["timestamp"]))
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))

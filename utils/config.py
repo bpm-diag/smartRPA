@@ -30,6 +30,10 @@ class MyConfig(PreferredConfig):
     # and stores it in folder "screenshots"
     capture_screenshots = BooleanOption('capture_screenshots', default=False)
 
+    # Option in settings to control supervision feature, if enabled, after each event the user is asked to provide a noise tag
+    # "was the action relevant/necessary or irrelevant/unnecessary"
+    supervisionFeature = BooleanOption('supervisionFeature', default=False)
+
     # Option in settings to control process discovery, if disabled, csv is generated but process discovery techniques
     # are not applied
     perform_process_discovery = BooleanOption('perform_process_discovery', default=True)

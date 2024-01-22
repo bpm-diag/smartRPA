@@ -41,7 +41,6 @@ class MainApplication(QMainWindow, QDialog):
     def __init__(self, parent=None):
         """
         Initialize GUI
-
         """
 
         super(MainApplication, self).__init__(parent)
@@ -79,6 +78,11 @@ class MainApplication(QMainWindow, QDialog):
         self.runCount = 0
         self.csv_to_join = list()
 
+        # In action logger version, set preferences statically here
+        # Defined by josaloroc and a8081 - Is this necessary?
+        # utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = 1
+        # utils.config.MyConfig.get_instance().perform_process_discovery = False
+
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
         self.systemLoggerPrograms = self.systemLoggerProgramsCB.isChecked()
@@ -94,6 +98,9 @@ class MainApplication(QMainWindow, QDialog):
         self.browserFirefox = self.browserFirefoxCB.isChecked()
         self.browserEdge = self.browserEdgeCB.isChecked()
         self.browserOpera = self.browserOperaCB.isChecked()
+        ### Added by josaloroc / a8081
+        self.systemLoggerStandard = self.systemLoggerStandardCB.isChecked()
+        ###
 
         mainLayout = QGridLayout()
         mainLayout.addLayout(self.topLayout, 0, 0, 1, 2)
@@ -120,7 +127,7 @@ class MainApplication(QMainWindow, QDialog):
 
     def createMenu(self):
         """
-        Create file menu with preferences and options to merge multiple CSV event logs and to analyze one event log.
+        Create file menu with preferences option, supervision option and options to merge multiple CSV event logs and to analyze one event log.
         """
         menu = self.menuBar()
 
@@ -157,6 +164,14 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerClipboardCB.stateChanged.connect(self.updateStartButtonState)
         self.systemLoggerClipboardCB.setToolTip("Log clipboard copy")
 
+        # Added by josaloroc and a8081 / small rename by Tom
+        self.systemLoggerStandardCB = QCheckBox("Standard")
+        self.systemLoggerStandardCB.tag = "systemLoggerStandard"
+        self.systemLoggerStandardCB.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerStandardCB.stateChanged.connect(self.updateStartButtonState)
+        self.systemLoggerStandardCB.setToolTip("Log clicks and keystroke")
+        #####
+
         self.systemLoggerProgramsCB = QCheckBox("Programs")
         self.systemLoggerProgramsCB.tag = "systemLoggerPrograms"
         self.systemLoggerProgramsCB.stateChanged.connect(self.handleCheckBox)
@@ -187,6 +202,9 @@ class MainApplication(QMainWindow, QDialog):
         layout.addWidget(self.systemLoggerFilesFolderCB)
         layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerClipboardCB)
+        # Added by josaloroc / a8081
+        layout.addWidget(self.systemLoggerStandardCB)
+        ###
         layout.addWidget(self.systemLoggerHotkeysCB)
         layout.addWidget(self.systemLoggerUSBCB)
         # layout.addWidget(self.systemLoggerEventsCB)
@@ -319,6 +337,7 @@ class MainApplication(QMainWindow, QDialog):
         if self.runButton.isEnabled() and not any([self.systemLoggerFilesFolder,
                     self.systemLoggerPrograms,
                     self.systemLoggerClipboard,
+                    self.systemLoggerStandard,
                     self.systemLoggerHotkeys,
                     self.systemLoggerUSB,
                     self.systemLoggerEvents,
@@ -602,6 +621,9 @@ class MainApplication(QMainWindow, QDialog):
         # System checkboxes
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
         self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
+        ####
+        self.systemLoggerStandardCB.setChecked(self.allCBChecked)
+        ####
         self.officeExcelCB.setChecked(self.allCBChecked)
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
 
@@ -643,7 +665,7 @@ class MainApplication(QMainWindow, QDialog):
 
     def handleCheckBox(self):
         """
-        detect which modules should be run based on selected checkboxes in UI
+        Detect which modules should be run based on selected checkboxes in UI
         """
         tag = self.sender().tag
         checked = self.sender().isChecked()
@@ -653,6 +675,9 @@ class MainApplication(QMainWindow, QDialog):
             self.systemLoggerPrograms = checked
         elif (tag == "systemLoggerClipboard"):
             self.systemLoggerClipboard = checked
+        elif (tag == "systemLoggerStandardCB"):
+            # Added for Standard Mouse Events by josaloroc and a8081
+            self.systemLoggerStandardCB = checked
         elif (tag == "systemLoggerHotkeys"):
             self.systemLoggerHotkeys = checked
         elif (tag == "systemLoggerUSB"):
@@ -677,6 +702,9 @@ class MainApplication(QMainWindow, QDialog):
             self.browserOpera = checked
 
     def handlePreferences(self):
+        """
+        Calling this mentod shows the preferences dialog window
+        """
         self.preferencesDialog.show()
 
     def handleRunLogAction(self):
@@ -779,6 +807,11 @@ class MainApplication(QMainWindow, QDialog):
             self.choices(pm, log_filepath)
 
     def handleRPA(self, log_filepath):
+        """
+        Generates an RPA Script from the log file under log_filepath
+
+        :param log_filepath: Filepath to a csv file containing a UI log
+        """
         rpa = modules.RPA.generateRPAScript.RPAScript(
             log_filepath, self.status_queue)
         rpa_success = rpa.run()
@@ -1012,12 +1045,14 @@ class MainApplication(QMainWindow, QDialog):
         * kill active processes using their PID before closing main
         * terminate main
         * call handleRunCount() method to check counter and generate event log file
-
         """
 
         if not any([self.systemLoggerFilesFolder,
                     self.systemLoggerPrograms,
                     self.systemLoggerClipboard,
+                    ### Added by josaloroc and a8081
+                    self.systemLoggerStandardCB,
+                    ###
                     self.systemLoggerHotkeys,
                     self.systemLoggerUSB,
                     self.systemLoggerEvents,
@@ -1049,10 +1084,15 @@ class MainApplication(QMainWindow, QDialog):
             # start main process with the options selected in GUI. It handles all other methods main method is
             # started as a process so it can be terminated once the button is clicked all the methods in the main
             # process are started as daemon threads so they are closed automatically when the main process is closed
+            # !! Sequence is important as the function otherwise assigns the wrong true/false values in main.py
+            # !! Cross reference the sequence here with startLogger function in main.py if anything changes
             self.mainProcess = Process(target=main.startLogger, args=(
                 self.systemLoggerFilesFolder,
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
+                ### Added by josaloroc and a8081 -> transferred to main.py
+                self.systemLoggerStandard,
+                ###
                 self.systemLoggerHotkeys,
                 self.systemLoggerUSB,
                 self.systemLoggerEvents,
@@ -1105,7 +1145,6 @@ class MainApplication(QMainWindow, QDialog):
             self.mainProcess.terminate()
 
             self.status_queue.put(f"[GUI] Logger stopped")
-
             # once log file is created, RPA actions are automatically generated for each category
             # log_filepath = utils.config.MyConfig.get_instance().log_filepath
             if not self.LOG_FILEPATH.empty():
@@ -1115,6 +1154,10 @@ class MainApplication(QMainWindow, QDialog):
             else:
                 self.status_queue.put(
                     f"[GUI] Could not locate log file.")
+            
+            # Remove Screenshot Folder if empty
+            # Issue 27: If folder with same filename is in main_log_filepath exists in
+            #   Screenshots and this folder is empty, than delete the folder
 
             # kill node server when closing python server, otherwise port remains busy
             if MAC and self.officeExcel:

@@ -71,6 +71,14 @@ class Preferences(QMainWindow):
         self.screenshot_cb.tag = "screenshot_cb"
         self.screenshot_cb.stateChanged.connect(self.handle_cb_scrsht)
         self.handle_cb_scrsht()
+    
+        # Additional Box to check the capture screenshots feature
+        self.supervision_cb = QCheckBox(
+            "Lets users add relevancy tag after each event")
+        self.supervision_cb.setToolTip("If enabled, after each event users are asked to rate the previous event.")
+        self.supervision_cb.tag = "supervision_cb"
+        self.supervision_cb.stateChanged.connect(self.handle_cb_supervision)
+        self.handle_cb_supervision()
         
         # self.decisionGroupBox.setEnabled(capture_screenshots)
 
@@ -124,10 +132,15 @@ class Preferences(QMainWindow):
         vbox.addWidget(self.process_discovery_cb)
         processDiscoveryGroupBox.setLayout(vbox)
 
-        captureScreenshotsGroupBox = QGroupBox("capture Screenshots")
+        captureScreenshotsGroupBox = QGroupBox("Capture Screenshots")
         vbox = QVBoxLayout()
         vbox.addWidget(self.screenshot_cb)
         captureScreenshotsGroupBox.setLayout(vbox)
+
+        supervisionFeatureGroupBox = QGroupBox("Supervision Feature")
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.supervision_cb)
+        supervisionFeatureGroupBox.setLayout(vbox)
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.mfr)
@@ -149,6 +162,7 @@ class Preferences(QMainWindow):
 
         mainLayout = QVBoxLayout()
         mainLayout.addWidget(captureScreenshotsGroupBox)
+        mainLayout.addWidget(supervisionFeatureGroupBox)
         mainLayout.addWidget(processDiscoveryGroupBox)
         mainLayout.addWidget(self.decisionGroupBox)
         mainLayout.addWidget(xesGroupBox)
@@ -161,11 +175,18 @@ class Preferences(QMainWindow):
         wid.show()
 
     def handle_slider(self):
+        """
+        Sets number of runs before mining in config.py
+        """
         value = self.sld.value()
         self.lcd.display(value)
         utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = value
 
     def handle_cb(self):
+        """
+        Sets process discovery option in config.py
+        Triggered after number of GUI Runs specified in preferences
+        """
         perform = self.process_discovery_cb.isChecked()
         self.decisionGroupBox.setEnabled(perform)
         utils.config.MyConfig.get_instance().perform_process_discovery = perform
@@ -175,6 +196,10 @@ class Preferences(QMainWindow):
             self.status_queue.put("[GUI] Process discovery disabled")
 
     def handle_cb_scrsht(self):
+        """
+        Sets screenshot option in config.py
+        If enabled each event stored creates a screenshot
+        """
         perform = self.screenshot_cb.isChecked()
         # self.decisionGroupBox.setEnabled(perform)
         utils.config.MyConfig.get_instance().capture_screenshots = perform
@@ -183,7 +208,23 @@ class Preferences(QMainWindow):
         else:
             self.status_queue.put("[GUI] Screenshot capture disabled")
 
+    def handle_cb_supervision(self):
+        """
+        Sets supervision option in confi.py
+        If enabled, after each event the user is asked for tagging the event
+        """
+        perform = self.supervision_cb.isChecked()
+        # self.decisionGroupBox.setEnabled(perform)
+        utils.config.MyConfig.get_instance().supervisionFeature = perform
+        if utils.config.MyConfig.get_instance().supervisionFeature:
+            self.status_queue.put("[GUI] Action supervision enabled")
+        else:
+            self.status_queue.put("[GUI] Action supervision disabled")
+
     def handle_radio(self):
+        """
+        Sets most frequent or decision point analysis in config.py
+        """
         mfr_checked = self.mfr.isChecked()
         decision_checked = self.decision.isChecked()
         decisionRPA_checked = self.decisionRPA.isChecked()
@@ -209,4 +250,7 @@ class Preferences(QMainWindow):
         self.status_queue.put(msg)
 
     def handleButton(self):
+        """
+        Closes preference window
+        """
         self.close()

@@ -31,6 +31,13 @@ SmartRPA has been developed at DIAG, *Department of Computer, Control, and Manag
 * Andrea Marrella
 * Massimo Mecella
 
+Contributors
+=======
+
+* Jose Luis Alonso Rocha 
+* Antonio Martinez Rojas
+* Tom Hohenadl
+
 Architecture
 ============
 
