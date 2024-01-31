@@ -474,10 +474,12 @@ def get_last_directory_name(path):
 def get_last_directory_name(path):
     """
     Returns the name of the last directory within a given directory path.
+
+    :param path: Path to the parent folder
+    :return: "Newest" directory file name
+    :rtype: String
     """
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-    print("Directories is:")
-    print(directories)
     if directories:
         last_directory = max(directories, key=lambda d: os.path.getmtime(os.path.join(path, d)))
         return os.path.basename(last_directory)

@@ -1,12 +1,15 @@
-# Could be made nicer for future work, e.g. Displaying the JSON in nice format
-import tkinter as tk
-import json
-import utils.config
-
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtGui import QPixmap
 import numpy as np
-import cv2
+import os
+
+sys.path.append('../') # So main file is visible from this file
+
+######
+# Should be integrated in GUI file as it currently produces an error:
+#     "WARNING: QApplication was not created in the main() thread."
+######
 
 def getResponse(json_str=""):
     global response_sp_feature
@@ -14,7 +17,7 @@ def getResponse(json_str=""):
     app = QtWidgets.QApplication(sys.argv)
     window = QtWidgets.QWidget()
     window.setWindowTitle("Feedback on Action Logged")
-    window.resize(600, 400)
+    window.resize(500, 300)
 
     # Create a layout to arrange widgets
     layout = QtWidgets.QVBoxLayout(window)
@@ -33,7 +36,19 @@ def getResponse(json_str=""):
     kv_dict_label.setText(kv_dict_string)
     layout.addWidget(kv_dict_label)
 
+    screenshot_label = QtWidgets.QLabel(window)
     # Display screenshot if available
+    if "screenshot" in json_str and json_str.get("screenshot") is not "":
+        window.resize(800, 500)
+        # Read the screenshot image: https://stackoverflow.com/questions/71935118/how-to-putting-image-in-the-label-on-pyqt
+        pixmap = QPixmap(json_str.get("screenshot"))
+        pix = pixmap.scaled(500, 450, QtCore.Qt.AspectRatioMode.KeepAspectRatio,QtCore.Qt.TransformationMode.FastTransformation)
+        screenshot_label.setPixmap(pix)
+        screenshot_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        # Enhancement: Make the screenshot_label clickable so that the image can be opened from clicking on it in the GUI
+        
+
+    layout.addWidget(screenshot_label)
 
     # Create buttons to provide feedback
     yes_button = QtWidgets.QPushButton(window, text="Yes")
@@ -53,57 +68,10 @@ def getResponse(json_str=""):
     app.exec_()
     return response_sp_feature
 
+def open_screenshot(path):
+    os.startfile(path)
+
 def handle_button_click(selected_option, window):
     global response_sp_feature
     response_sp_feature = selected_option
     window.close()
-
-# def getResponse(jsonSTR=""):
-#     """
-#     Opens a tkinter GUI requesting feedback on the action logged
-
-#     :param jsonSTR: Descriptive string of all user action attributes
-#     :return: Boolean on "is the display action necessary?"
-#     :rtype: bool
-#     """
-
-#     def yes_clicked():
-#         global response_sp_feature
-#         response_sp_feature = True
-#         root.destroy()
-
-#     def no_clicked():
-#         global response_sp_feature
-#         response_sp_feature = False
-#         root.destroy()
-
-#     def close_clicked():
-#         global response_sp_feature
-#         response_sp_feature = None
-#         root.destroy()
-
-#     # Only activate if the global setting is put to true
-#     if utils.config.MyConfig.get_instance().supervisionFeature:
-#         root = tk.Tk()
-        
-#         # Create a label to display the formatted JSON data
-#         label = tk.Label(root, text=jsonSTR, justify=tk.LEFT)
-#         label.pack(fill="both", expand=True, padx=10, pady=10)
-
-#         # Create a button to close the window
-#         button = tk.Button(root, text="Close", command=close_clicked)
-#         button.pack()
-
-#         label = tk.Label(root, text="Is the displayed action necessary?")
-#         label.pack()
-
-#         yes_button = tk.Button(root, text="Yes", command=yes_clicked)
-#         yes_button.pack()
-
-#         no_button = tk.Button(root, text="No", command=no_clicked)
-#         no_button.pack()
-
-#         root.mainloop()
-#         return response_sp_feature
-
-#     return None
