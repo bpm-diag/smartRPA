@@ -609,7 +609,7 @@ def staticNoiseIdentification(uilog: pd.DataFrame) -> pd.DataFrame:
             noiseDf = concatIntoNoiseDf(noiseDf,row['cell_range'],'cell_range',i)
         if not pd.isnull(row["slides"]) and not re.match(slides_regex, str(row["slides"])):
             noiseDf = concatIntoNoiseDf(noiseDf,row['slides'],'slides',i)
-        if not pd.isnull(row["mouse_coord"]) and not re.match(slides_regex, str(row["slides"])):
+        if not pd.isnull(row["mouse_coord"]) and not re.match(mouseCoord_regex, str(row["slides"])):
             noiseDf = concatIntoNoiseDf(noiseDf,row['mouse_coord'],'mouse_coord',i)
         
         # Length Tests
