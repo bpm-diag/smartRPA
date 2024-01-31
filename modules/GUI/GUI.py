@@ -144,6 +144,8 @@ class MainApplication(QMainWindow, QDialog):
         helpMenu = menu.addMenu('Help')
         about = helpMenu.addAction('About')
         about.triggered.connect(self.showAboutMessage)
+        hints = helpMenu.addAction('Hints')
+        hints.triggered.connect(self.showHints)
 
     def createSystemLoggerGroupBox(self):
         """
@@ -992,6 +994,23 @@ class MainApplication(QMainWindow, QDialog):
         msgBox.setWindowTitle("About")
         msgBox.setText("SmartRPA allows to train RPA routines in order to automatically find the best way "
                        "to perform a specific user task.")
+        websiteBtn = QPushButton('Website')
+        websiteBtn.clicked.connect(lambda: webbrowser.open(
+            'https://github.com/bpm-diag/smartRPA'))
+        msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
+        closeBtn = QPushButton('Close')
+        if darkdetect.isDark():
+            closeBtn.setStyleSheet('QPushButton {background-color: #656565;}')
+        msgBox.addButton(closeBtn, QMessageBox.RejectRole)
+        msgBox.exec_()
+
+    def showHints(self):
+        """
+        Show best practice hints for using smartRPA curated by the developers
+        """
+        msgBox = QMessageBox()
+        msgBox.setWindowTitle("About")
+        msgBox.setText("1. Use smartRPA only with one active screen for performance improvement and standardized RPA results.")
         websiteBtn = QPushButton('Website')
         websiteBtn.clicked.connect(lambda: webbrowser.open(
             'https://github.com/bpm-diag/smartRPA'))

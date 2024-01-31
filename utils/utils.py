@@ -508,7 +508,8 @@ def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().captu
         if dxcam.output_info().count("Output[") > 1:
             # If there are more than two screens attached it is easier to use the pillow impage capture
             screenshot = ImageGrab.grab(all_screens=True)
-            short_hash = calculateImageHash(screenshot)
+            # Have to use tobytes as the PIL image cannot be hashed using sha256_hash method
+            short_hash = calculateImageHash(screenshot.tobytes())
             stamp = timestamp("%Y-%m-%d_%H-%M-%S")
             filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
             screenshot.save(filename, format=scrshtFormat)

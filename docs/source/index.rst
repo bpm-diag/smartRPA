@@ -83,6 +83,7 @@ Contents
    modules/event_abstraction
    modules/process_discovery
    modules/rpa
+   modules/supervision
 
 .. toctree::
    :maxdepth: 2

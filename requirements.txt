@@ -21,7 +21,6 @@ python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win if visua
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
 psutil==5.4.6
-#lxml==4.5.2
 lxml==4.9.3
 pydot==1.4.1
 deprecated
@@ -37,6 +36,9 @@ xlwings==0.18.0; platform_system == "Darwin"
 
 #16 Screenshot recorder dependencies / versions on 27/11/2023
 pillow==10.1.0
+
+#Static Noise Filtering Features added
+validators=0.18.2
 
 # deprecated dependencies
 # matplotlib==3.3.2

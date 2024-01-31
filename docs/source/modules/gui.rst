@@ -24,12 +24,13 @@ When the app opens the user needs to select the options that should be enabled a
    :members:
    :private-members:
 
+.. _preferences_window_label:
 Preferences window
 ------------------
 
 User preferences are stored in a local preferences file, because they need to remain consistent across different runs. The cross-platform Python package nativeconfig2 was used. It uses native mechanisms such as Windows Registry or NSUserDefaults to store user settings.
 
-.. figure:: ../../../images/preferences.png
+.. figure:: ../../../images/preferences_v2.png
    :figwidth: 60%
    :align: center
 
@@ -91,5 +92,19 @@ The user can choose which user actions enact by means of a decision dialog, whic
 
 .. automodule:: modules.GUI.decisionDialogWebView
    :members: dataframeToHTML
+   :private-members:
+
+
+Supervision dialog
+------------------
+
+The user can annotate the actions he/she has done using the supervision feature enabled in the :ref:'preferences_window_label'.
+
+.. figure:: ../../images/supervision_input.png
+   :figwidth: 80%
+   :align: center
+
+.. automodule:: modules.supervision.getResponse
+   :members: 
    :private-members:
 
