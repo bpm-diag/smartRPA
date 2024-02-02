@@ -115,6 +115,11 @@ class DecisionPoints:
         """
         count = 0
         s = self.df1.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        #Issue 32: Intention is to get the number of changes in each process from the base line
+        # If there are more than one cumsum values in the col s, than there is a variation point
+        # Suggestion: Merge s with df1 and test if there are more than 1 s values per case.
+        #    if yes: Variation points detected, Amount = max(s) - min(s) value
+        #    if no: There is no variation point in this variant identified (still may be another process)
         for _, group in self.df1.groupby([s, 'category']):
             if len(group.groupby('case:concept:name')) >= 2 and not group['duplicated'].unique():
                 count += 1
