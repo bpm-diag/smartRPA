@@ -12,6 +12,14 @@ sys.path.append('../') # So main file is visible from this file
 ######
 
 def getResponse(json_str=""):
+    """
+    Takes a dict object containing the key-values of the recorded user action.
+    Displays a UI to the user for feedback on the relevancy of the previous action.
+
+    :param json_str: String containing a dictonary with event key-values
+    :return: Response TRUE, FALSE, NONE
+    :rtype: bool
+    """
     global response_sp_feature
     response_sp_feature = False
     app = QtWidgets.QApplication(sys.argv)

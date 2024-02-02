@@ -24,7 +24,6 @@ When the app opens the user needs to select the options that should be enabled a
    :members:
    :private-members:
 
-.. _preferences_window_label:
 Preferences window
 ------------------
 
@@ -98,13 +97,13 @@ The user can choose which user actions enact by means of a decision dialog, whic
 Supervision dialog
 ------------------
 
-The user can annotate the actions he/she has done using the supervision feature enabled in the :ref:'preferences_window_label'.
+The user can annotate the actions he/she has done using the supervision feature enabled in the preferences window.
 
-.. figure:: ../../images/supervision_input.png
+.. figure:: ../../../images/supervision.png
    :figwidth: 80%
    :align: center
 
-.. automodule:: modules.supervision.getResponse
-   :members: 
+.. automodule:: modules.supervision
+   :members: getResponse
    :private-members:
 

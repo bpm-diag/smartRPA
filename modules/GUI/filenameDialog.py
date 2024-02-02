@@ -22,7 +22,7 @@ def getFilenameDialog(customDialog=True,
     :param isFolder: allow selection of folders
     :param forOpen: select files for opening or saving
     :param directory: start directory
-    :param filter_format: filter to select only certain file types (for example *.csv)
+    :param filter_format: filter to select only certain file types (for example \*.csv)
     :return: path of selected file (list of paths if multiple files are selected)
     """
 

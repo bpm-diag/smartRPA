@@ -32,7 +32,7 @@ SmartRPA has been developed at DIAG, *Department of Computer, Control, and Manag
 * Massimo Mecella
 
 Contributors
-=======
+============
 
 * Jose Luis Alonso Rocha 
 * Antonio Martinez Rojas
@@ -83,7 +83,6 @@ Contents
    modules/event_abstraction
    modules/process_discovery
    modules/rpa
-   modules/supervision
 
 .. toctree::
    :maxdepth: 2
