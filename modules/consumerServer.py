@@ -63,12 +63,6 @@ def writeLog():
     # All elements of content are key - value pairs with the values being of type "str"
     content = request.json
     print(f"\nPOST received with content: {content}\n")
-    
-    # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
-    # Could be removed if it was added to all: Currently missing browser logger, thus has to be in place
-    if utils.config.MyConfig.get_instance().supervisionFeature and not "event_relevance" in content:
-        answer =  sp.getResponse(content)
-        content["event_relevance"] = answer
 
     # check if user enabled browser logging
     application = content.get("application")
@@ -86,6 +80,12 @@ def writeLog():
         # Latest check TOHO: For multiple screens ~0.5 sec, for single screen ~0.25 sec
         # timeAfterScreenshot = utils.utils.timestamp()
         # print(str(timeAfterScreenshot) + " " + str(content["timestamp"]))
+
+    # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
+    # Could be removed if it was added to all: Currently missing browser logger, thus has to be in place
+    if utils.config.MyConfig.get_instance().supervisionFeature and not "event_relevance" in content:
+        answer =  sp.getResponse(content)
+        content["event_relevance"] = answer
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))
