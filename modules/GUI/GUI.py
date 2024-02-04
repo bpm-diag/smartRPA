@@ -935,7 +935,15 @@ class MainApplication(QMainWindow, QDialog):
                     # ask what to do if decisions could be made
                     d = modules.decisionPoints.DecisionPoints(
                         pm.dataframe, self.status_queue)
-                    decided_dataframe = d.generateDecisionDataframe()
+                    decided_dataframe = []
+                    try:
+                        decided_dataframe = d.generateDecisionDataframe()
+                    # Does handle the exception if the decision GUI was closed manually
+                    except ValueError as err:
+                        self.status_queue.put(
+                            f"[PROCESS MINING] Variant dataframe could not be generated.\n ")
+                        print(traceback.print_tb(err.__traceback__))
+                        return
 
                     # pm.highLevelBPMN(df=decided_dataframe, decisionPoints=True)
                     modules.flowchart.Flowchart(
@@ -975,14 +983,14 @@ class MainApplication(QMainWindow, QDialog):
             # decision point in RPA script at run time
             elif utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis:
                 # at least 2 traces are needed to perform decision analysis
-                if num_traces >= 2:
+                try:
                     # create UiPath RPA script passing dataframe of entire process
                     UiPath = modules.RPA.uipath.UIPathXAML(
                         log_filepath[-1], self.status_queue, pm.dataframe)
                     UiPath.generateUiPathRPA(decision=True)
-                else:
-                    self.status_queue.put(f"[GUI] Could not perform decision points analysis, "
-                                          f"at least 2 traces are needed in the event log\n")
+                except Exception as e:
+                    self.status_queue.put(f"[GUI] Could not perform UiPath compilation, "
+                                          f"{repr(e)}\n")
 
         self.status_queue.put(f"[GUI] Done\n")
 

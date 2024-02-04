@@ -122,6 +122,13 @@ class DecisionPoints:
         #    if yes: Variation points detected, Amount = max(s) - min(s) value
         #    if no: There is no variation point in this variant identified (still may be another process)
         for _, group in self.df1.groupby([s, 'category']):
+        # for _, group in self.df1.groupby('case:concept:name'): 
+            print("---------------")
+            print(group)
+            print(len(group.groupby('case:concept:name')))
+            print(group['duplicated'].unique())
+            print(count)
+            print("---------------")
             if len(group.groupby('case:concept:name')) >= 2 and not group['duplicated'].unique():
                 count += 1
         return count
@@ -252,7 +259,7 @@ class DecisionPoints:
     #                 .sort_index() \
     #                 .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')
 
-    def generateDecisionDataframe(self):
+    def generateDecisionDataframe(self) -> pandas.DataFrame:
         """
         Find decision points in dataframe, ask user which decisions to take and generate final trace built from decisions.
 
@@ -430,6 +437,8 @@ class DecisionPoints:
         # create and return new pandas dataframe built from rows previously saved
         final_duplication_subset = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
                                     'browser_url_hostname', 'xpath', 'tag_value', 'clipboard_content', 'cell_range']
+        
+
         return pandas\
             .concat(dataframes)\
             .drop_duplicates(subset=final_duplication_subset, ignore_index=False, keep='first')\
