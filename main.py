@@ -34,6 +34,7 @@ def startLogger(systemLoggerFilesFolder,
                 browserOpera,
                 status_queue,
                 LOG_FILEPATH,
+                SCREENSHOT_FILEPATH,
                 processesPID
                 ):
     """
@@ -59,6 +60,7 @@ def startLogger(systemLoggerFilesFolder,
     :param browserOpera: true if opera checkbox is checked in GUI
     :param status_queue: Queue to print messages on GUI
     :param LOG_FILEPATH: path of the event log file
+    :param SCREENSHOT_FILEPATH: Queue of the screenshot log file folder
     :param processesPID: PID of started processes, used to kill them when logger is stopped
     """
     # Thread names in use
@@ -88,9 +90,10 @@ def startLogger(systemLoggerFilesFolder,
         # ************
         # main logging server
         # ************     
-        log_filepath = utils.utils.createLogFile(utils.config.MyConfig.get_instance().capture_screenshots)
+        log_filepath, screenshot_filepath = utils.utils.createLogFile()
         # return log file to GUI so it can be processed
         LOG_FILEPATH.put(log_filepath)
+        SCREENSHOT_FILEPATH.put(screenshot_filepath)
 
         t0 = Thread(target=modules.consumerServer.runServer, args=[status_queue])
         t0.daemon = True

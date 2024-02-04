@@ -55,6 +55,8 @@ class MainApplication(QMainWindow, QDialog):
         self.status_queue = Queue()
         # queue used to get filepath of current log
         self.LOG_FILEPATH = Queue()
+        # queue used to get filepath of the current screenshot folder
+        self.SCREENSHOT_FILEPATH = Queue()
         # queue used to kill processes before closing main, when pressing stop
         self.processesPID = Queue()
 
@@ -754,6 +756,40 @@ class MainApplication(QMainWindow, QDialog):
         else:
             self.status_queue.put("[GUI] No csv selected...")
 
+    #Needs implementation
+    def staticNoiseFilter(uilog: pd.DataFrame, uiProcessingFlag: bool) -> pd.DataFrame:
+        """
+        Gets a UI log and checks for attribute noise using standard format definitions.
+        The cleaned dataframe does not contain attribute values that are incorrectly formated
+
+        :param uilog: User interaction log dataframe
+        :param uiProcessingFlag: True if the result should be displayed in a UI, false if only the log should be 
+        :return: Cleaned dataframe 
+        """
+        # To be defined: How should the values be replaced?
+        # Should call utils.staticNoiseIdentification()
+        return uilog
+
+
+    def handleDataQualityCheck():
+        """
+        This method is called when the user wants to check the data quality of a UI log
+        and get static noise filters applied on the log.
+
+        1. It displays a file dialog to select the file. The method returns multiple files
+        that can be checked for data compliance.
+
+        2. After the event log(s) have been selected, the method starts a worker thread to process
+        them using the staticNoiseIdentification in the utils.py. 
+        This can run in the background and after compilation display a new PyQT window.
+
+        3. Once the processing is complete a new window with errors is displayed.
+
+        :param
+        """
+        # Needs implementation
+        # Suggestion is a GUI display the wrong data based on utils.staticNoiseIdentification()
+
     def handleProcessMining(self, log_filepath: list, merged=False, fromRunCount=False):
         """
         This method can either be called by handleMerge() (when the user wants to merge multiple CSV or run RPA from log)
@@ -1126,6 +1162,7 @@ class MainApplication(QMainWindow, QDialog):
                 self.browserOpera,
                 self.status_queue,
                 self.LOG_FILEPATH,
+                self.SCREENSHOT_FILEPATH,
                 self.processesPID
             ))
 
@@ -1176,9 +1213,18 @@ class MainApplication(QMainWindow, QDialog):
                     f"[GUI] Could not locate log file.")
             
             # Remove Screenshot Folder if empty
-            # Issue 27: If folder with same filename is in main_log_filepath exists in
-            #   Screenshots and this folder is empty, than delete the folder
-
+            if not self.SCREENSHOT_FILEPATH.empty():
+                screenshot_filepath = self.SCREENSHOT_FILEPATH.get()
+                # Checking if the folder exists and contains files https://stackoverflow.com/questions/49284015/how-to-check-if-folder-is-empty-with-python
+                if os.path.exists(screenshot_filepath) and not os.listdir(screenshot_filepath):
+                    print("Screenshot Directory is empty: Deleting.")
+                    os.rmdir(screenshot_filepath)
+                else:
+                    print("Screenshot folder contains files.")
+            else:
+                self.status_queue.put(
+                    f"[GUI] Could not locate screenshot folder.")
+                
             # kill node server when closing python server, otherwise port remains busy
             if MAC and self.officeExcel:
                 os.system("pkill -f node")

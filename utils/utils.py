@@ -119,7 +119,7 @@ def createDirectory(path):
                 raise
 
 
-def createLogFile(screenshots: bool):
+def createLogFile():
     """
     Creates new log file with the current timestamp in /logs directory at the root of the project. used by main.
 
@@ -136,15 +136,15 @@ def createLogFile(screenshots: bool):
 
     filename = timestamp("%Y-%m-%d_%H-%M-%S") + '.csv'
 
-    if screenshots:
-        # If config capture_screenshots = True, we create a screenshot and screenshots sub folder
-        screenshots_dir = os.path.join(MAIN_DIRECTORY, 'screenshots')
-        createDirectory(screenshots_dir)
-        subdirectory = os.path.splitext(filename)[0]
-        # Added to store screenshot files in the same named folder
-        # if config capture_screenshots = TRUE create a dir, otherwise do not:
-        screenshots_subdir = os.path.join(screenshots_dir, subdirectory)
-        createDirectory(screenshots_subdir)
+    
+    # If config capture_screenshots = True, we create a screenshot and screenshots sub folder
+    screenshots_dir = os.path.join(MAIN_DIRECTORY, 'screenshots')
+    createDirectory(screenshots_dir)
+    subdirectory = os.path.splitext(filename)[0]
+    # Added to store screenshot files in the same named folder
+    # if config capture_screenshots = TRUE create a dir, otherwise do not:
+    screenshots_subdir = os.path.join(screenshots_dir, subdirectory)
+    createDirectory(screenshots_subdir)
 
     log_filepath = os.path.join(logs, filename)
     # utils.config.MyConfig.get_instance().log_filepath = log_filepath
@@ -152,7 +152,7 @@ def createLogFile(screenshots: bool):
     with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
         f.writerow(modules.consumerServer.HEADER)
-    return log_filepath
+    return log_filepath, screenshots_subdir
 
 def getRPADirectory(csv_file_path):
     """
@@ -556,19 +556,6 @@ def add_json_element(node, key, value):
     else:
         raise TypeError("Node must be a dictionary")
 
-#Needs implementation
-def staticNoiseFilter(uilog: pd.DataFrame) -> pd.DataFrame:
-    """
-    Gets a UI log and checks for attribute noise using standard format definitions.
-    The cleaned dataframe does not contain attribute values that are incorrectly formated
-
-    :param uilog: User interaction log dataframe
-    :return: Cleaned dataframe 
-    """
-    # To be defined: How should the values be replaced?
-
-    return uilog
-
 def concatIntoNoiseDf(noiseDf: pd.DataFrame, value: str, colName: str, rowId: int) -> pd.DataFrame:
     """
     Takes as input a df and a col/row/value combination and addes the row to the noiseDf
@@ -577,7 +564,7 @@ def concatIntoNoiseDf(noiseDf: pd.DataFrame, value: str, colName: str, rowId: in
     :param value: value of the cell that is noise
     :param colName: Column name of the noisy cell
     :param rowId: Row ID of the noisy cell
-    :return: noiseDf with the added row
+    :return: noiseDf with the added row 
     """
     errorDf = pd.DataFrame([[value,colName,rowId]], columns=["Value","Column Name","Row ID"])
     return pd.concat([noiseDf,errorDf], ignore_index=True)
