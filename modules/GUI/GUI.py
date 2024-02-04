@@ -737,10 +737,13 @@ class MainApplication(QMainWindow, QDialog):
         :param multipleItems: boolean value indicating the ability to select multiple items
         """
         self.statusListWidget.clear()
+        dir = sys.path[0]
+
         csv_to_merge = getFilenameDialog(customDialog=False,
                                          title=title,
                                          multipleItems=multipleItems,
-                                         filter_format="CSV log files (*.csv)")
+                                         filter_format="CSV log files (*.csv)",
+                                         directory=dir)
         if csv_to_merge:
             if merged:
                 self.status_queue.put("[GUI] Merging selected files...")
@@ -1046,6 +1049,7 @@ class MainApplication(QMainWindow, QDialog):
         """
         msgBox = QMessageBox()
         msgBox.setWindowTitle("About")
+        # Add more hints, if you identify tipps for using smartRPA
         msgBox.setText("1. Use smartRPA only with one active screen for performance improvement and standardized RPA results.")
         websiteBtn = QPushButton('Website')
         websiteBtn.clicked.connect(lambda: webbrowser.open(
@@ -1217,10 +1221,9 @@ class MainApplication(QMainWindow, QDialog):
                 screenshot_filepath = self.SCREENSHOT_FILEPATH.get()
                 # Checking if the folder exists and contains files https://stackoverflow.com/questions/49284015/how-to-check-if-folder-is-empty-with-python
                 if os.path.exists(screenshot_filepath) and not os.listdir(screenshot_filepath):
-                    print("Screenshot Directory is empty: Deleting.")
                     os.rmdir(screenshot_filepath)
-                else:
-                    print("Screenshot folder contains files.")
+                    self.status_queue.put(
+                        f"[GUI] Deleted empty screenshot directory.")
             else:
                 self.status_queue.put(
                     f"[GUI] Could not locate screenshot folder.")

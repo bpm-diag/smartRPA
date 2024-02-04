@@ -62,6 +62,7 @@ def getFilenameDialog(customDialog=True,
         dialog.setDirectory(str(directory))
     else:
         dialog.setDirectory(DESKTOP)
+        
 
     if dialog.exec_() == QDialog.Accepted:
         path = dialog.selectedFiles()  # returns a list
