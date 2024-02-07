@@ -1059,7 +1059,8 @@ class MainApplication(QMainWindow, QDialog):
         msgBox = QMessageBox()
         msgBox.setWindowTitle("About")
         # Add more hints, if you identify tipps for using smartRPA
-        msgBox.setText("1. Use smartRPA only with one active screen for performance improvement and standardized RPA results.")
+        msgBox.setText("1. Use smartRPA only with one active screen for performance improvement and standardized RPA results."
+                       "2. Remember to merge only equal tasks/processes. Otherwise decision points are not identified.")
         websiteBtn = QPushButton('Website')
         websiteBtn.clicked.connect(lambda: webbrowser.open(
             'https://github.com/bpm-diag/smartRPA'))

@@ -107,6 +107,38 @@ class DecisionPoints:
 
         return df1
 
+    # def add_end_marker(self):
+    #     """
+    #     Adds an artifical end event for each unique case ID with a timestamp 1 millisecond after the last event.
+
+    #     :param df: A pandas DataFrame containing the event log data.
+    #     """
+    #     # Group by case ID
+    #     grouped_df = self.df1.groupby("case:concept:name")
+    #     self.df1['time:timestamp'] = pandas.to_datetime(self.df1['time:timestamp'])
+    #     # Get the last timestamp for each case
+    #     last_timestamps = grouped_df["time:timestamp"].max()
+
+    #     # Add 1 millisecond to the last timestamps
+    #     end_timestamps = last_timestamps + pandas.Timedelta(milliseconds=1)
+
+    #     # Create a DataFrame with the end markers
+    #     end_markers = pandas.DataFrame({"case:concept:name": last_timestamps.index, 
+    #                                     "time:timestamp": end_timestamps,
+    #                                     "case:creator":	"SmartRPA by marco2012", # Could be added dynamically
+    #                                     "lifecycle:transition": "complete", # Could be added dynamically
+    #                                     "concept:name": "endMarker",
+    #                                     "application": "", # May be None, Design decision
+    #                                     'duplicated': True, # Could be calculated; as it is equal for all it is True
+    #                                     'category': "EndMarker"                              
+    #                                     })
+
+    #     # Combine the event log data with the end markers
+    #     self.df1 = pandas.concat([self.df1, end_markers], ignore_index=True)
+    #     # Replace NaN values with empty strings in all columns
+    #     self.df1.fillna('', inplace=True)
+
+
     def number_of_decision_points(self):
         """
         Calculates the number of decision points in a trace
@@ -114,8 +146,11 @@ class DecisionPoints:
         :return: number of decision points
         """
         count = 0
+        # self.add_end_marker()
+        # self.df1.sort_values(by=['case:concept:name', 'time:timestamp'], ascending=True, inplace=True)
+        self.df1.to_csv("checking.csv")
         s = self.df1.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
-        print(s)
+        
         #Issue 32: Intention is to get the number of changes in each process from the base line
         # If there are more than one cumsum values in the col s, than there is a variation point
         # Suggestion: Merge s with df1 and test if there are more than 1 s values per case.
@@ -123,12 +158,6 @@ class DecisionPoints:
         #    if no: There is no variation point in this variant identified (still may be another process)
         for _, group in self.df1.groupby([s, 'category']):
         # for _, group in self.df1.groupby('case:concept:name'): 
-            print("---------------")
-            print(group)
-            print(len(group.groupby('case:concept:name')))
-            print(group['duplicated'].unique())
-            print(count)
-            print("---------------")
             if len(group.groupby('case:concept:name')) >= 2 and not group['duplicated'].unique():
                 count += 1
         return count
@@ -210,7 +239,7 @@ class DecisionPoints:
         n = self.number_of_decision_points()
         status = f"[DECISION POINTS] Discovered {n} decision point"
         if n > 1:
-            status += "s"
+            status += "s" # Adding s to string > points
         self.status_queue.put(status)
 
         s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
