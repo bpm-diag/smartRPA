@@ -792,6 +792,7 @@ class MainApplication(QMainWindow, QDialog):
         """
         # Needs implementation
         # Suggestion is a GUI display the wrong data based on utils.staticNoiseIdentification()
+        return
 
     def handleProcessMining(self, log_filepath: list, merged=False, fromRunCount=False):
         """
