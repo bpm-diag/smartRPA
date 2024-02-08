@@ -38,6 +38,7 @@ xlwings==0.18.0; platform_system == "Darwin"
 
 #16 Screenshot recorder dependencies / versions on 27/11/2023
 pillow==10.1.0
+dxcam
 
 #Static Noise Filtering Features added
 validators==0.18.2

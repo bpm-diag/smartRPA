@@ -679,9 +679,9 @@ class MainApplication(QMainWindow, QDialog):
             self.systemLoggerPrograms = checked
         elif (tag == "systemLoggerClipboard"):
             self.systemLoggerClipboard = checked
-        elif (tag == "systemLoggerStandardCB"):
+        elif (tag == "systemLoggerStandard"):
             # Added for Standard Mouse Events by josaloroc and a8081
-            self.systemLoggerStandardCB = checked
+            self.systemLoggerStandard = checked
         elif (tag == "systemLoggerHotkeys"):
             self.systemLoggerHotkeys = checked
         elif (tag == "systemLoggerUSB"):
