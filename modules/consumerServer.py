@@ -78,8 +78,6 @@ def writeLog():
         content["screenshot"] = screenshot
         # Double check the delay between the browser event logged and the screenshot taken here
         # Latest check TOHO: For multiple screens ~0.5 sec, for single screen ~0.25 sec
-        # timeAfterScreenshot = utils.utils.timestamp()
-        # print(str(timeAfterScreenshot) + " " + str(content["timestamp"]))
 
     # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
     # Could be removed if it was added to all: Currently missing browser logger, thus has to be in place

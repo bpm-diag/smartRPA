@@ -43,6 +43,7 @@ dxcam
 #Static Noise Filtering Features added
 validators==0.18.2
 
+
 # deprecated dependencies
 # matplotlib==3.3.2
 # opyenxes==0.3.0
