@@ -29,7 +29,7 @@ Preferences window
 
 User preferences are stored in a local preferences file, because they need to remain consistent across different runs. The cross-platform Python package nativeconfig2 was used. It uses native mechanisms such as Windows Registry or NSUserDefaults to store user settings.
 
-.. figure:: ../../../images/preferences.png
+.. figure:: ../../../images/preferences_v2.png
    :figwidth: 60%
    :align: center
 
@@ -91,5 +91,19 @@ The user can choose which user actions enact by means of a decision dialog, whic
 
 .. automodule:: modules.GUI.decisionDialogWebView
    :members: dataframeToHTML
+   :private-members:
+
+
+Supervision dialog
+------------------
+
+The user can annotate the actions he/she has done using the supervision feature enabled in the preferences window.
+
+.. figure:: ../../../images/supervision.png
+   :figwidth: 80%
+   :align: center
+
+.. automodule:: modules.supervision
+   :members: getResponse
    :private-members:
 

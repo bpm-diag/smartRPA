@@ -4,7 +4,9 @@ setuptools
 pyperclip==1.7.0
 keyboard==0.13.4
 requests_futures==1.0.0
-Flask==1.1.1
+# Double check the dependencies between flask and werkzeug when updating versions
+Flask==2.1.0 # https://stackoverflow.com/questions/71718167/importerror-cannot-import-name-escape-from-jinja2
+Werkzeug==2.2.2 # https://stackoverflow.com/questions/77213053/why-did-flask-start-failing-with-importerror-cannot-import-name-url-quote-fr
 darkdetect==0.1.1
 PyQt5==5.13.0; platform_system == "Darwin" # only version compatible with macOS 11 (big sur)
 PyQtWebEngine==5.13.0; platform_system == "Darwin"
@@ -21,7 +23,6 @@ python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win if visua
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
 psutil==5.4.6
-#lxml==4.5.2
 lxml==4.9.3
 pydot==1.4.1
 deprecated
@@ -37,6 +38,10 @@ xlwings==0.18.0; platform_system == "Darwin"
 
 #16 Screenshot recorder dependencies / versions on 27/11/2023
 pillow==10.1.0
+dxcam
+
+#Static Noise Filtering Features added
+validators==0.18.2
 
 
 # deprecated dependencies

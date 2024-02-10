@@ -55,6 +55,8 @@ class MainApplication(QMainWindow, QDialog):
         self.status_queue = Queue()
         # queue used to get filepath of current log
         self.LOG_FILEPATH = Queue()
+        # queue used to get filepath of the current screenshot folder
+        self.SCREENSHOT_FILEPATH = Queue()
         # queue used to kill processes before closing main, when pressing stop
         self.processesPID = Queue()
 
@@ -144,6 +146,8 @@ class MainApplication(QMainWindow, QDialog):
         helpMenu = menu.addMenu('Help')
         about = helpMenu.addAction('About')
         about.triggered.connect(self.showAboutMessage)
+        hints = helpMenu.addAction('Hints')
+        hints.triggered.connect(self.showHints)
 
     def createSystemLoggerGroupBox(self):
         """
@@ -675,9 +679,9 @@ class MainApplication(QMainWindow, QDialog):
             self.systemLoggerPrograms = checked
         elif (tag == "systemLoggerClipboard"):
             self.systemLoggerClipboard = checked
-        elif (tag == "systemLoggerStandardCB"):
+        elif (tag == "systemLoggerStandard"):
             # Added for Standard Mouse Events by josaloroc and a8081
-            self.systemLoggerStandardCB = checked
+            self.systemLoggerStandard = checked
         elif (tag == "systemLoggerHotkeys"):
             self.systemLoggerHotkeys = checked
         elif (tag == "systemLoggerUSB"):
@@ -733,10 +737,13 @@ class MainApplication(QMainWindow, QDialog):
         :param multipleItems: boolean value indicating the ability to select multiple items
         """
         self.statusListWidget.clear()
+        dir = sys.path[0]
+
         csv_to_merge = getFilenameDialog(customDialog=False,
                                          title=title,
                                          multipleItems=multipleItems,
-                                         filter_format="CSV log files (*.csv)")
+                                         filter_format="CSV log files (*.csv)",
+                                         directory=dir)
         if csv_to_merge:
             if merged:
                 self.status_queue.put("[GUI] Merging selected files...")
@@ -751,6 +758,41 @@ class MainApplication(QMainWindow, QDialog):
             self.threadpool.start(worker)
         else:
             self.status_queue.put("[GUI] No csv selected...")
+
+    #Needs implementation
+    def staticNoiseFilter(uilog: pd.DataFrame, uiProcessingFlag: bool) -> pd.DataFrame:
+        """
+        Gets a UI log and checks for attribute noise using standard format definitions.
+        The cleaned dataframe does not contain attribute values that are incorrectly formated
+
+        :param uilog: User interaction log dataframe
+        :param uiProcessingFlag: True if the result should be displayed in a UI, false if only the log should be 
+        :return: Cleaned dataframe 
+        """
+        # To be defined: How should the values be replaced?
+        # Should call utils.staticNoiseIdentification()
+        return uilog
+
+
+    def handleDataQualityCheck():
+        """
+        This method is called when the user wants to check the data quality of a UI log
+        and get static noise filters applied on the log.
+
+        1. It displays a file dialog to select the file. The method returns multiple files
+        that can be checked for data compliance.
+
+        2. After the event log(s) have been selected, the method starts a worker thread to process
+        them using the staticNoiseIdentification in the utils.py. 
+        This can run in the background and after compilation display a new PyQT window.
+
+        3. Once the processing is complete a new window with errors is displayed.
+
+        :param
+        """
+        # Needs implementation
+        # Suggestion is a GUI display the wrong data based on utils.staticNoiseIdentification()
+        return
 
     def handleProcessMining(self, log_filepath: list, merged=False, fromRunCount=False):
         """
@@ -894,7 +936,15 @@ class MainApplication(QMainWindow, QDialog):
                     # ask what to do if decisions could be made
                     d = modules.decisionPoints.DecisionPoints(
                         pm.dataframe, self.status_queue)
-                    decided_dataframe = d.generateDecisionDataframe()
+                    decided_dataframe = []
+                    try:
+                        decided_dataframe = d.generateDecisionDataframe()
+                    # Does handle the exception if the decision GUI was closed manually
+                    except ValueError as err:
+                        self.status_queue.put(
+                            f"[PROCESS MINING] Variant dataframe could not be generated.\n ")
+                        print(traceback.print_tb(err.__traceback__))
+                        return
 
                     # pm.highLevelBPMN(df=decided_dataframe, decisionPoints=True)
                     modules.flowchart.Flowchart(
@@ -934,14 +984,14 @@ class MainApplication(QMainWindow, QDialog):
             # decision point in RPA script at run time
             elif utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis:
                 # at least 2 traces are needed to perform decision analysis
-                if num_traces >= 2:
+                try:
                     # create UiPath RPA script passing dataframe of entire process
                     UiPath = modules.RPA.uipath.UIPathXAML(
                         log_filepath[-1], self.status_queue, pm.dataframe)
                     UiPath.generateUiPathRPA(decision=True)
-                else:
-                    self.status_queue.put(f"[GUI] Could not perform decision points analysis, "
-                                          f"at least 2 traces are needed in the event log\n")
+                except Exception as e:
+                    self.status_queue.put(f"[GUI] Could not perform UiPath compilation, "
+                                          f"{repr(e)}\n")
 
         self.status_queue.put(f"[GUI] Done\n")
 
@@ -992,6 +1042,25 @@ class MainApplication(QMainWindow, QDialog):
         msgBox.setWindowTitle("About")
         msgBox.setText("SmartRPA allows to train RPA routines in order to automatically find the best way "
                        "to perform a specific user task.")
+        websiteBtn = QPushButton('Website')
+        websiteBtn.clicked.connect(lambda: webbrowser.open(
+            'https://github.com/bpm-diag/smartRPA'))
+        msgBox.addButton(websiteBtn, QMessageBox.AcceptRole)
+        closeBtn = QPushButton('Close')
+        if darkdetect.isDark():
+            closeBtn.setStyleSheet('QPushButton {background-color: #656565;}')
+        msgBox.addButton(closeBtn, QMessageBox.RejectRole)
+        msgBox.exec_()
+
+    def showHints(self):
+        """
+        Show best practice hints for using smartRPA curated by the developers
+        """
+        msgBox = QMessageBox()
+        msgBox.setWindowTitle("About")
+        # Add more hints, if you identify tipps for using smartRPA
+        msgBox.setText("1. Use smartRPA only with one active screen for performance improvement and standardized RPA results."
+                       "2. Remember to merge only equal tasks/processes. Otherwise decision points are not identified.")
         websiteBtn = QPushButton('Website')
         websiteBtn.clicked.connect(lambda: webbrowser.open(
             'https://github.com/bpm-diag/smartRPA'))
@@ -1107,6 +1176,7 @@ class MainApplication(QMainWindow, QDialog):
                 self.browserOpera,
                 self.status_queue,
                 self.LOG_FILEPATH,
+                self.SCREENSHOT_FILEPATH,
                 self.processesPID
             ))
 
@@ -1156,9 +1226,17 @@ class MainApplication(QMainWindow, QDialog):
                     f"[GUI] Could not locate log file.")
             
             # Remove Screenshot Folder if empty
-            # Issue 27: If folder with same filename is in main_log_filepath exists in
-            #   Screenshots and this folder is empty, than delete the folder
-
+            if not self.SCREENSHOT_FILEPATH.empty():
+                screenshot_filepath = self.SCREENSHOT_FILEPATH.get()
+                # Checking if the folder exists and contains files https://stackoverflow.com/questions/49284015/how-to-check-if-folder-is-empty-with-python
+                if os.path.exists(screenshot_filepath) and not os.listdir(screenshot_filepath):
+                    os.rmdir(screenshot_filepath)
+                    self.status_queue.put(
+                        f"[GUI] Deleted empty screenshot directory.")
+            else:
+                self.status_queue.put(
+                    f"[GUI] Could not locate screenshot folder.")
+                
             # kill node server when closing python server, otherwise port remains busy
             if MAC and self.officeExcel:
                 os.system("pkill -f node")

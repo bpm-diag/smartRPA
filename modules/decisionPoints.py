@@ -107,6 +107,38 @@ class DecisionPoints:
 
         return df1
 
+    # def add_end_marker(self):
+    #     """
+    #     Adds an artifical end event for each unique case ID with a timestamp 1 millisecond after the last event.
+
+    #     :param df: A pandas DataFrame containing the event log data.
+    #     """
+    #     # Group by case ID
+    #     grouped_df = self.df1.groupby("case:concept:name")
+    #     self.df1['time:timestamp'] = pandas.to_datetime(self.df1['time:timestamp'])
+    #     # Get the last timestamp for each case
+    #     last_timestamps = grouped_df["time:timestamp"].max()
+
+    #     # Add 1 millisecond to the last timestamps
+    #     end_timestamps = last_timestamps + pandas.Timedelta(milliseconds=1)
+
+    #     # Create a DataFrame with the end markers
+    #     end_markers = pandas.DataFrame({"case:concept:name": last_timestamps.index, 
+    #                                     "time:timestamp": end_timestamps,
+    #                                     "case:creator":	"SmartRPA by marco2012", # Could be added dynamically
+    #                                     "lifecycle:transition": "complete", # Could be added dynamically
+    #                                     "concept:name": "endMarker",
+    #                                     "application": "", # May be None, Design decision
+    #                                     'duplicated': True, # Could be calculated; as it is equal for all it is True
+    #                                     'category': "EndMarker"                              
+    #                                     })
+
+    #     # Combine the event log data with the end markers
+    #     self.df1 = pandas.concat([self.df1, end_markers], ignore_index=True)
+    #     # Replace NaN values with empty strings in all columns
+    #     self.df1.fillna('', inplace=True)
+
+
     def number_of_decision_points(self):
         """
         Calculates the number of decision points in a trace
@@ -114,8 +146,18 @@ class DecisionPoints:
         :return: number of decision points
         """
         count = 0
+        # self.add_end_marker()
+        # self.df1.sort_values(by=['case:concept:name', 'time:timestamp'], ascending=True, inplace=True)
+        self.df1.to_csv("checking.csv")
         s = self.df1.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        
+        #Issue 32: Intention is to get the number of changes in each process from the base line
+        # If there are more than one cumsum values in the col s, than there is a variation point
+        # Suggestion: Merge s with df1 and test if there are more than 1 s values per case.
+        #    if yes: Variation points detected, Amount = max(s) - min(s) value
+        #    if no: There is no variation point in this variant identified (still may be another process)
         for _, group in self.df1.groupby([s, 'category']):
+        # for _, group in self.df1.groupby('case:concept:name'): 
             if len(group.groupby('case:concept:name')) >= 2 and not group['duplicated'].unique():
                 count += 1
         return count
@@ -174,79 +216,7 @@ class DecisionPoints:
             .sort_values(['hostname', 'category','application', 'path', 'clipboard', 'cells'])
         return keywordsDataframe
 
-    # def generateDecisionDataframe_old(self):
-    #     df = self.df1
-    #     # there must be at least 2 traces in order to make a decision
-    #     assert len(df['case:concept:name'].drop_duplicates()) >= 2
-    #
-    #     # list to store dataframe rows
-    #     series = []
-    #     # dictionary to store dataframe rows that should be XORed
-    #     caseActivities = defaultdict(list)
-    #
-    #     # When a change happens, nodes are added to sequence and lists are emptied
-    #     df['previousDuplicated'] = df['duplicated'].shift(1)
-    #
-    #     for index, row in df.iterrows():
-    #
-    #         # define variables
-    #         # duplicated row is only available when performing decision points
-    #         duplicated = row['duplicated']
-    #         previousDuplicated = row['previousDuplicated']
-    #         caseid = row['case:concept:name']
-    #
-    #         # define conditions used to determine when to append xml nodes to main sequence or switch
-    #         # on last loop iteration all the remaining xml nodes should be written
-    #         lastIndex = (index == len(df) - 1)
-    #         # determine if entering switch block or vice versa
-    #         enterSwitch = previousDuplicated is True and duplicated is False
-    #         exitSwitch = previousDuplicated is False and duplicated is True
-    #
-    #         # add to main sequence
-    #         if duplicated:
-    #             series.append(row)
-    #         # add to switch case
-    #         else:
-    #             caseActivities[caseid].append(row)
-    #
-    #         # handle switch
-    #         # if decision analysis and there are at least 2 cases in switch and
-    #         # the switch case is finished so the next row will go in main sequence
-    #         # or this is the last index
-    #         if len(caseActivities) >= 2 and (exitSwitch or lastIndex):
-    #             # create dataframe containing only decision rows that should be XORed
-    #             s = []
-    #             [s.extend(v) for _, v in caseActivities.items()]
-    #             decisionDataframe = pandas.DataFrame(s).sort_index()
-    #
-    #             # create keywords dataframe to display to the user
-    #             keywordsDF = self.__generateKeywordsDataframe(decisionDataframe)
-    #
-    #             # empty caseActivities dictionary for later use
-    #             caseActivities.clear()
-    #
-    #             app = QtWidgets.QApplication(sys.argv)
-    #             decisionDialog = modules.GUI.decisionDialog.DecisionDialog(
-    #                 keywordsDF)
-    #             # decisionDialog.show()
-    #             # when button is pressed
-    #             if decisionDialog.exec_() in [0, 1]:
-    #                 if decisionDialog.selectedTrace:
-    #                     try:
-    #                         selectedTrace = int(decisionDialog.selectedTrace)
-    #                     except ValueError:
-    #                         selectedTrace = decisionDialog.selectedTrace
-    #                     decidedDF = decisionDataframe.loc[
-    #                         decisionDataframe['case:concept:name'] == selectedTrace]
-    #                     [series.append(row) for _, row in decidedDF.iterrows()]
-    #
-    #         if lastIndex:
-    #             # create and return new pandas datfaframe built from rows previously saved
-    #             return pandas.DataFrame(series) \
-    #                 .sort_index() \
-    #                 .drop_duplicates(subset=self.duplication_subset, ignore_index=True, keep='first')
-
-    def generateDecisionDataframe(self):
+    def generateDecisionDataframe(self) -> pandas.DataFrame:
         """
         Find decision points in dataframe, ask user which decisions to take and generate final trace built from decisions.
 
@@ -269,7 +239,7 @@ class DecisionPoints:
         n = self.number_of_decision_points()
         status = f"[DECISION POINTS] Discovered {n} decision point"
         if n > 1:
-            status += "s"
+            status += "s" # Adding s to string > points
         self.status_queue.put(status)
 
         s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
@@ -424,6 +394,8 @@ class DecisionPoints:
         # create and return new pandas dataframe built from rows previously saved
         final_duplication_subset = ['category', 'application', 'concept:name', 'event_src_path', 'event_dest_path',
                                     'browser_url_hostname', 'xpath', 'tag_value', 'clipboard_content', 'cell_range']
+        
+
         return pandas\
             .concat(dataframes)\
             .drop_duplicates(subset=final_duplication_subset, ignore_index=False, keep='first')\

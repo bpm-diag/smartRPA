@@ -18,7 +18,7 @@ from urllib.parse import urlparse
 import utils.config
 import modules.consumerServer
 import unicodedata
-import pandas
+import pandas as pd
 from unidecode import unidecode
 from itertools import tee, islice, chain
 # asynchronous session.post requests to log server, used by multiple modules
@@ -33,6 +33,10 @@ from datetime import datetime
 
 # screenshot recording feature for multiple screen
 from PIL import ImageGrab
+
+# Data Validation
+import re
+import validators
 
 session = FuturesSession()
 
@@ -115,7 +119,7 @@ def createDirectory(path):
                 raise
 
 
-def createLogFile(screenshots: bool):
+def createLogFile():
     """
     Creates new log file with the current timestamp in /logs directory at the root of the project. used by main.
 
@@ -132,15 +136,15 @@ def createLogFile(screenshots: bool):
 
     filename = timestamp("%Y-%m-%d_%H-%M-%S") + '.csv'
 
-    if screenshots:
-        # If config capture_screenshots = True, we create a screenshot and screenshots sub folder
-        screenshots_dir = os.path.join(MAIN_DIRECTORY, 'screenshots')
-        createDirectory(screenshots_dir)
-        subdirectory = os.path.splitext(filename)[0]
-        # Added to store screenshot files in the same named folder
-        # if config capture_screenshots = TRUE create a dir, otherwise do not:
-        screenshots_subdir = os.path.join(screenshots_dir, subdirectory)
-        createDirectory(screenshots_subdir)
+    
+    # If config capture_screenshots = True, we create a screenshot and screenshots sub folder
+    screenshots_dir = os.path.join(MAIN_DIRECTORY, 'screenshots')
+    createDirectory(screenshots_dir)
+    subdirectory = os.path.splitext(filename)[0]
+    # Added to store screenshot files in the same named folder
+    # if config capture_screenshots = TRUE create a dir, otherwise do not:
+    screenshots_subdir = os.path.join(screenshots_dir, subdirectory)
+    createDirectory(screenshots_subdir)
 
     log_filepath = os.path.join(logs, filename)
     # utils.config.MyConfig.get_instance().log_filepath = log_filepath
@@ -148,7 +152,7 @@ def createLogFile(screenshots: bool):
     with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
         f.writerow(modules.consumerServer.HEADER)
-    return log_filepath
+    return log_filepath, screenshots_subdir
 
 def getRPADirectory(csv_file_path):
     """
@@ -247,8 +251,8 @@ def CSVEmpty(log_filepath, min_len=0):
     :return: true if csv is empty
     """
     try:
-        df = pandas.read_csv(log_filepath, encoding='utf-8-sig')
-    except pandas.errors.EmptyDataError:
+        df = pd.read_csv(log_filepath, encoding='utf-8-sig')
+    except pd.errors.EmptyDataError:
         return True
     print(len(df))
     return df.empty or len(df) <= min_len
@@ -290,12 +294,12 @@ def combineMultipleCsv(list_of_csv_to_combine, combined_csv_path):
     existing_csv_to_combine = [p for p in list_of_csv_to_combine if os.path.exists(p)]
     try:
         # combine all files in the list
-        combined_csv = pandas.concat([pandas.read_csv(f, encoding="latin") for f in existing_csv_to_combine])
+        combined_csv = pd.concat([pd.read_csv(f, encoding="latin") for f in existing_csv_to_combine])
         # export to csv
         combined_csv.to_csv(combined_csv_path, index=False, encoding='utf-8-sig')
         print(f"[UTILS] {combined_csv_path} created by merging {existing_csv_to_combine}")
         return True
-    except (pandas.errors.ParserError, FileNotFoundError) as e:
+    except (pd.errors.ParserError, FileNotFoundError) as e:
         print(e)
         return False
 
@@ -470,10 +474,12 @@ def get_last_directory_name(path):
 def get_last_directory_name(path):
     """
     Returns the name of the last directory within a given directory path.
+
+    :param path: Path to the parent folder
+    :return: "Newest" directory file name
+    :rtype: String
     """
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-    print("Directories is:")
-    print(directories)
     if directories:
         last_directory = max(directories, key=lambda d: os.path.getmtime(os.path.join(path, d)))
         return os.path.basename(last_directory)
@@ -504,7 +510,8 @@ def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().captu
         if dxcam.output_info().count("Output[") > 1:
             # If there are more than two screens attached it is easier to use the pillow impage capture
             screenshot = ImageGrab.grab(all_screens=True)
-            short_hash = calculateImageHash(screenshot)
+            # Have to use tobytes as the PIL image cannot be hashed using sha256_hash method
+            short_hash = calculateImageHash(screenshot.tobytes())
             stamp = timestamp("%Y-%m-%d_%H-%M-%S")
             filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
             screenshot.save(filename, format=scrshtFormat)
@@ -548,6 +555,76 @@ def add_json_element(node, key, value):
         node[key] = value
     else:
         raise TypeError("Node must be a dictionary")
+
+def concatIntoNoiseDf(noiseDf: pd.DataFrame, value: str, colName: str, rowId: int) -> pd.DataFrame:
+    """
+    Takes as input a df and a col/row/value combination and addes the row to the noiseDf
+
+    :param noiseDf: Dataframe with Cols Value, Column Name, and Row ID
+    :param value: value of the cell that is noise
+    :param colName: Column name of the noisy cell
+    :param rowId: Row ID of the noisy cell
+    :return: noiseDf with the added row 
+    """
+    errorDf = pd.DataFrame([[value,colName,rowId]], columns=["Value","Column Name","Row ID"])
+    return pd.concat([noiseDf,errorDf], ignore_index=True)
+
+# Needs Testing
+def staticNoiseIdentification(uilog: pd.DataFrame) -> pd.DataFrame:
+    """
+    Gets a UI log and identifies all cells containing static noise
+    Static noise is noise that is identified using attributes default formats
+    
+    :param uilog: User interaction log dataframe
+    :return: Dataframe with value, col, row that are considered noise
+    """
+    noiseDf = pd.DataFrame(columns=["Value","Column Name","Row ID"])
+    # RegEx for Data validation
+    excel_cell = r'^[a-zA-Z]+\d+$'  # Any combination of text + number without special characters
+    slides_regex = r'^[0-9,\s]+$' # Any sequence of numbers seperated with ",", may contain spaces
+    mouseCoord_regex = r'/[\-?\[0-9]+,\s?\-?[0-9]+]' # Any positiv/negative combo of [x,y] coords
+    
+    # Check if each timestamp and ID (unnamed: 0) can be converted to a Python Primitive Data
+    for i, row in uilog.iterrows():
+        # Value casting tests
+        try: pd.to_numeric(row['Unnamed: 0'], downcast="integer")
+        except ValueError:
+            noiseDf = concatIntoNoiseDf(noiseDf,row['Unnamed: 0'],'Unnamed: 0',i)
+        try: pd.to_datetime(row['time:timestamp'])
+        except ValueError:
+            noiseDf = concatIntoNoiseDf(noiseDf,row['time:timestamp'],'time:timestamp',i)
+        
+        # RegEx Tests
+        if not pd.isnull(row["cell_range"]) and not re.match(excel_cell, str(row["cell_range"])):
+            noiseDf = concatIntoNoiseDf(noiseDf,row['cell_range'],'cell_range',i)
+        if not pd.isnull(row["slides"]) and not re.match(slides_regex, str(row["slides"])):
+            noiseDf = concatIntoNoiseDf(noiseDf,row['slides'],'slides',i)
+        if not pd.isnull(row["mouse_coord"]) and not re.match(mouseCoord_regex, str(row["slides"])):
+            noiseDf = concatIntoNoiseDf(noiseDf,row['mouse_coord'],'mouse_coord',i)
+        
+        # Length Tests
+        if not pd.isnull(row["workbook"]) and len(row["workbook"]) > 255:
+            # https://learn.microsoft.com/en-gb/windows/win32/fileio/naming-a-file?redirectedfrom=MSDN
+            noiseDf = concatIntoNoiseDf(noiseDf,row['workbook'],'workbook',i)
+        if not pd.isnull(row["current_worksheet"]) and len(row["current_worksheet"]) > 255:
+            # https://learn.microsoft.com/en-gb/windows/win32/fileio/naming-a-file?redirectedfrom=MSDN
+            noiseDf = concatIntoNoiseDf(noiseDf,row['current_worksheet'],'current_worksheet',i) 
+
+        # Package based tests
+        if not pd.isnull(row["browser_url"]) and not validators.url(row["browser_url"]):
+            noiseDf = concatIntoNoiseDf(noiseDf,row['browser_url'],'browser_url',i) 
+        
+        # Data Comparison Checks
+        if not pd.isnull(row["tag_category"]) and str(row["tag_category"]).lower() not in HTMLElements:
+            noiseDf = concatIntoNoiseDf(noiseDf,row['tag_category'],'tag_category',i) 
+        if not pd.isnull(row["concept:name"]) and str(row["concept:name"]).lower() not in conceptNames:
+            noiseDf = concatIntoNoiseDf(noiseDf,row['concept:name'],'concept:name',i) 
+
+    # After reading the UI log all values are stored in STR format
+    # Some columns should be converted into other datatypes
+    # For each column with standard format a method is called to check on the data
+
+    return noiseDf, uilog
 
 # ************
 # Class
@@ -643,3 +720,44 @@ else:
     EDGE = False
     OPERA = isInstalledLinux('opera')
 
+# Sets for static noise filtering
+# https://stackoverflow.com/questions/52928550/js-get-list-of-all-available-standard-html-tags Fighter178 Answer
+HTMLElements = {
+    "!DOCTYPE","a","abbr","abbr","acronym", # NOT HTML5
+    "address", #"applet", # NOT HTML5 (NOT MAJORLY SUPPORTED)
+    "area","article","aside","audio","b","base","basefont", # NOT HTML5
+    "bdi","bdo","big", # NOT HTML5
+    "blockquote","body","br","button","canvas","caption","center", # NOT HTML5
+    "cite","code","col","colgroup","data","datalist","dd","del","details","dfn","dialog",#"dir", NOT HTML5 (use "ul" instead)
+    "div","dl","dt","em","embed","fieldset","figcaption","figure",#"font", // NOT HTML5 (use CSS)
+    "footer","form",#"frame", // NOT HTML5 #"frameset", // NOT HTML5
+    "h1","h2","h3","h4","h5","h6","head","header","hr","html","i","iframe","img","input","ins","kbd","label",
+    "legend","li","link","main","map","mark","meta","meter","nav",#"noframes", # NOT HTML5
+    "noscript","object","ol","optgroup","option","output","p","param","picture","pre","progress","q","rp",
+    "rt","ruby","s","samp","script","section","select","small","source","span", #"strike", # NOT HTML5 (Use <del> or <s> instead)
+    "strong","style","sub","summary","sup","svg","table","tbody","td","template","textarea","tfoot","th","thead","time",
+    "title","tr","track",#"tt", # NOT HTML5 (Use CSS)
+    "u","ul","var","video","wbr"
+    } # Total of 116 (excluding non-html5 and also comments, which are "<!-- [comment] -->").
+
+# https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf
+# beforeSaveWorkbook was missing from the tags in the PDF
+conceptNames = {
+    'beforeSaveWorkbook','urlHashChange','contextMenu','clickCheckboxButton','clickRadioButton','navigateTo','link','typed','form','reload','clickTextField',
+    'clickButton','clickLink','selectOptions','selectText','submit','changeField','doubleClick','dragElement','cancelDialog','fullscreen','attachTab',
+    'detachTab','newBookmark','removeBookmark','modifyBookmark','moveBookmark','startDownload','erasedDownload','installBrowserExtension','uninstallBrowserExtension',
+    'enableBrowserExtension','disableBrowserExtension','closedNotification','clickedNotification','newWindow','closeWindow','newTab','closeTab','moveTab',
+    'mutedTab','unmutedTab','pinnedTab','unpinnedTab','audibleTab','zoomTab','changeHistory','created','modified','deleted','Mount','Unmount','moved',
+    'programOpen','programClose','selectFile','selectFolder','hotkey','insertUSB','printSubmitted','openFile','openFolder','copy','paste','cut','openWindow','closeWindow',
+    'resizeWindow','newWorkbook','openWorkbook','addWorksheet','saveWorkbook','printWorkbook','closeWorkbook','activateWorkbook','deactivateWorkbook','modelChangeWorkbook',
+    'newChartWorkbook','afterCalculate','selectWorksheet','deleteWorksheet','doubleClickCellWithValue','doubleClickEmptyCell','rightClickCellWithValue',
+    'rightClickEmptyCell','sheetCalculate','editCellSheet','deselectWorksheet','followHiperlinkSheet','pivotTableValueChangeSheet','getRange',
+    'getCell','worksheetTableUpdated','addinInstalledWorkbook','addinUninstalledWorkbook','XMLImportWorkbook','XMLExportWorkbook','activateWindow',
+    'deactivateWindow','doubleClickWindow','rightClickWindow','newDocument','openDocument','changeDocument','saveDocument','printDocument','activateWindow',
+    'deactivateWindow','rightClickPresentation','doubleClickPresentation','newPresentation','newPresentationSlide','closePresentation','savePresentation',
+    'openPresentation','printPresentation','slideshowBegin','nextSlideshow','clickNextSlideshow','previousSlideshow','slideshowEnd','SlideSelectionChanged',
+    'startupOutlook','quitOutlook','receiveMail','sendMail','logonComplete','newReminder'
+    }
+
+HTMLElements = [x.lower() for x in HTMLElements]
+conceptNames = [x.lower() for x in conceptNames]
