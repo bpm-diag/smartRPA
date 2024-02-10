@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,29 +12,30 @@
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -72,7 +74,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -80,11 +81,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Main</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Main</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../main.html">Main</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/gui.html">Graphical User Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/action_logger.html">Action logger</a></li>
@@ -93,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../modules/process_discovery.html">Process Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/rpa.html">RPA</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Utils</span></p>
+<p class="caption" role="heading"><span class="caption-text">Utils</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
 </ul>
@@ -101,7 +102,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -140,7 +140,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -188,6 +188,14 @@
     <span class="c1"># into one and a XES file is automatically generated, to be used for process mining techniques</span>
     <span class="n">totalNumberOfRunGuiXes</span> <span class="o">=</span> <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;totalNumberOfRunGuiXes&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
+    <span class="c1"># Option in settings to control screenshot feature, if enabled, each event creats a screenshot of all screens visible</span>
+    <span class="c1"># and stores it in folder &quot;screenshots&quot;</span>
+    <span class="n">capture_screenshots</span> <span class="o">=</span> <span class="n">BooleanOption</span><span class="p">(</span><span class="s1">&#39;capture_screenshots&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Option in settings to control supervision feature, if enabled, after each event the user is asked to provide a noise tag</span>
+    <span class="c1"># &quot;was the action relevant/necessary or irrelevant/unnecessary&quot;</span>
+    <span class="n">supervisionFeature</span> <span class="o">=</span> <span class="n">BooleanOption</span><span class="p">(</span><span class="s1">&#39;supervisionFeature&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
     <span class="c1"># Option in settings to control process discovery, if disabled, csv is generated but process discovery techniques</span>
     <span class="c1"># are not applied</span>
     <span class="n">perform_process_discovery</span> <span class="o">=</span> <span class="n">BooleanOption</span><span class="p">(</span><span class="s1">&#39;perform_process_discovery&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -207,19 +215,11 @@
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, marco2012
+        &copy; Copyright 2023, marco2012
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -230,6 +230,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

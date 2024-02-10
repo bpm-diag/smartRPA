@@ -1,39 +1,42 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Main &mdash; SmartRPA</title>
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Graphical User Interface" href="modules/gui.html" />
@@ -74,7 +77,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -82,11 +84,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Main</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Main</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Main</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules/gui.html">Graphical User Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/action_logger.html">Action logger</a></li>
@@ -95,7 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="modules/process_discovery.html">Process Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/rpa.html">RPA</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Utils</span></p>
+<p class="caption" role="heading"><span class="caption-text">Utils</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
 </ul>
@@ -103,7 +105,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -142,7 +143,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>Main</li>
     
@@ -163,25 +164,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="main">
-<h1>Main<a class="headerlink" href="#main" title="Permalink to this headline">¶</a></h1>
+  <section id="main">
+<h1>Main<a class="headerlink" href="#main" title="Permalink to this heading">¶</a></h1>
 <p>This file controls all the modules that should be activated.
 They have been separated from the GUI class to improve readability of the code.
 When the user presses the “Start Logger” button in the GUI, this function is started as a process.
 It takes as parameters all the modules that should be activated.
 They are Boolean variables and are set in the GUI when the user checks a checkbox.</p>
 <span class="target" id="module-main"></span><dl class="py function">
-<dt id="main.startLogger">
-<code class="sig-prename descclassname">main.</code><code class="sig-name descname">startLogger</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">systemLoggerFilesFolder</span></em>, <em class="sig-param"><span class="n">systemLoggerPrograms</span></em>, <em class="sig-param"><span class="n">systemLoggerClipboard</span></em>, <em class="sig-param"><span class="n">systemLoggerHotkeys</span></em>, <em class="sig-param"><span class="n">systemLoggerUSB</span></em>, <em class="sig-param"><span class="n">systemLoggerEvents</span></em>, <em class="sig-param"><span class="n">excelFilepath</span></em>, <em class="sig-param"><span class="n">officeExcel</span></em>, <em class="sig-param"><span class="n">officeWord</span></em>, <em class="sig-param"><span class="n">officePowerpoint</span></em>, <em class="sig-param"><span class="n">officeOutlook</span></em>, <em class="sig-param"><span class="n">browserChrome</span></em>, <em class="sig-param"><span class="n">browserFirefox</span></em>, <em class="sig-param"><span class="n">browserEdge</span></em>, <em class="sig-param"><span class="n">browserOpera</span></em>, <em class="sig-param"><span class="n">status_queue</span></em>, <em class="sig-param"><span class="n">LOG_FILEPATH</span></em>, <em class="sig-param"><span class="n">processesPID</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#startLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#main.startLogger" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="main.startLogger">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">startLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">systemLoggerFilesFolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemLoggerPrograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemLoggerClipboard</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemLoggerStandard</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemLoggerHotkeys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemLoggerUSB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemLoggerEvents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">excelFilepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">officeExcel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">officeWord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">officePowerpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">officeOutlook</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">browserChrome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">browserFirefox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">browserEdge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">browserOpera</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LOG_FILEPATH</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SCREENSHOT_FILEPATH</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processesPID</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#startLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.startLogger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function where program starts.
 This method is called by the GUI when the user presses “start logger” button.
 All the values are passed by the GUI module</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>systemLoggerFilesFolder</strong> – true if files/folder checkbox is checked in GUI</p></li>
 <li><p><strong>systemLoggerPrograms</strong> – true if programs checkbox is checked in GUI</p></li>
 <li><p><strong>systemLoggerClipboard</strong> – true if clipboard checkbox is checked in GUI</p></li>
+<li><p><strong>systemLoggerStandard</strong> – true if mouse and keyboard checkbox is checked in GUI</p></li>
 <li><p><strong>systemLoggerHotkeys</strong> – true if hotkeys checkbox is checked in GUI</p></li>
 <li><p><strong>systemLoggerUSB</strong> – true if usb checkbox is checked in GUI</p></li>
 <li><p><strong>systemLoggerEvents</strong> – deprecated</p></li>
@@ -196,13 +198,14 @@ All the values are passed by the GUI module</p>
 <li><p><strong>browserOpera</strong> – true if opera checkbox is checked in GUI</p></li>
 <li><p><strong>status_queue</strong> – Queue to print messages on GUI</p></li>
 <li><p><strong>LOG_FILEPATH</strong> – path of the event log file</p></li>
+<li><p><strong>SCREENSHOT_FILEPATH</strong> – Queue of the screenshot log file folder</p></li>
 <li><p><strong>processesPID</strong> – PID of started processes, used to kill them when logger is stopped</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -224,19 +227,11 @@ All the values are passed by the GUI module</p>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, marco2012
+        &copy; Copyright 2023, marco2012
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -247,6 +242,7 @@ All the values are passed by the GUI module</p>
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

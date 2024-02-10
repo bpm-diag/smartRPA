@@ -43,6 +43,8 @@ dxcam
 #Static Noise Filtering Features added
 validators==0.18.2
 
+#Documentation Dependencies
+sphinx-rtd-theme # can be removed, not necessary to run smartRPA
 
 # deprecated dependencies
 # matplotlib==3.3.2

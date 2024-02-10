@@ -26,10 +26,22 @@ Authors
 
 SmartRPA has been developed at DIAG, *Department of Computer, Control, and Management Engineering* Antonio Ruberti in Sapienza University of Rome by:
 
-* Simone Agostinelli
-* Marco Lupia
-* Andrea Marrella
-* Massimo Mecella
+| Simone Agostinelli
+| Marco Lupia
+| Andrea Marrella
+| Massimo Mecella
+
+Contributors
+============
+
+*La Universidad de Sevilla*
+
+| Jose Luis Alonso Rocha 
+| Antonio Martinez Rojas
+
+*KU Eichstätt-Ingolstadt / TH Ingolstadt*
+
+| Tom Hohenadl
 
 Architecture
 ============
@@ -40,7 +52,8 @@ The architecture of SmartRPA integrates five main SW components.
    :figwidth: 60%
    :align: center
 
-Key features include:
+| 
+| Key features include:
 
 * **Action Logger**, log user behaviour, cross-platform, modular, supports wide range of applications;
 * **Log Processing**, generates both CSV and XES event log;
