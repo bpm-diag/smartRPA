@@ -1,39 +1,42 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Log processing &mdash; SmartRPA</title>
   
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Event abstraction" href="event_abstraction.html" />
@@ -74,7 +77,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -82,11 +84,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Main</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Main</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../main.html">Main</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical User Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_logger.html">Action logger</a></li>
@@ -95,7 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="process_discovery.html">Process Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rpa.html">RPA</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Utils</span></p>
+<p class="caption" role="heading"><span class="caption-text">Utils</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../utils.html">Utils</a></li>
 </ul>
@@ -103,7 +105,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -142,7 +143,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../index.html">Docs</a> &raquo;</li>
         
       <li>Log processing</li>
     
@@ -163,15 +164,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="log-processing">
-<h1>Log processing<a class="headerlink" href="#log-processing" title="Permalink to this headline">¶</a></h1>
+  <section id="log-processing">
+<h1>Log processing<a class="headerlink" href="#log-processing" title="Permalink to this heading">¶</a></h1>
 <p>The Log Processing tool that comes into play when any training session is considered as completed.</p>
-<div class="figure align-center" style="width: 60%">
+<figure class="align-center" style="width: 60%">
 <img alt="../_images/2_log_processing.png" src="../_images/2_log_processing.png" />
-</div>
+</figure>
 <span class="target" id="module-modules.logProcessing"></span><dl class="py function">
-<dt id="modules.logProcessing.handle_log">
-<code class="sig-prename descclassname">modules.logProcessing.</code><code class="sig-name descname">handle_log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_queue</span><span class="p">:</span> <span class="n">multiprocessing.queues.Queue</span></em>, <em class="sig-param"><span class="n">file_extension</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">filepath</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">save_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">RPA_log_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/logProcessing.html#handle_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modules.logProcessing.handle_log" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="modules.logProcessing.handle_log">
+<span class="sig-prename descclassname"><span class="pre">modules.logProcessing.</span></span><span class="sig-name descname"><span class="pre">handle_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status_queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RPA_log_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/modules/logProcessing.html#handle_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#modules.logProcessing.handle_log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process event log.</p>
 <p>For each log:</p>
 <ul class="simple">
@@ -184,7 +185,7 @@
 <p>A dataframe is created from the merged event logs and will be used in the rest of the process.</p>
 <p>Dataframe is also exported in XES.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>status_queue</strong> – queue to print values in GUI</p></li>
 <li><p><strong>file_extension</strong> – extension of input event log (either CSV or XES)</p></li>
@@ -194,13 +195,13 @@
 <li><p><strong>RPA_log_path</strong> – path of RPA folder</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>processed event log</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -222,19 +223,11 @@
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, marco2012
+        &copy; Copyright 2023, marco2012
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -245,6 +238,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

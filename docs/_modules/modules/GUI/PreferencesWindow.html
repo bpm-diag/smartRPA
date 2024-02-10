@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,29 +12,30 @@
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -72,7 +74,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -80,11 +81,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Main</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Main</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../main.html">Main</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/gui.html">Graphical User Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/action_logger.html">Action logger</a></li>
@@ -93,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/process_discovery.html">Process Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/rpa.html">RPA</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Utils</span></p>
+<p class="caption" role="heading"><span class="caption-text">Utils</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utils</a></li>
 </ul>
@@ -101,7 +102,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -140,7 +140,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -186,6 +186,7 @@
 <span class="sd">        * enable or disable process discovery analysis</span>
 <span class="sd">        * select the number of runs after which event log is generated</span>
 <span class="sd">        * select analysis type (either decision points or most frequent routine)</span>
+<span class="sd">        * Future: enable or disable the screenshot recording feature</span>
 
 <span class="sd">        :param status_queue: queue to send messages to main GUI</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -224,6 +225,24 @@
         <span class="n">perform_process_discovery</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">perform_process_discovery</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">perform_process_discovery</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decisionGroupBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">perform_process_discovery</span><span class="p">)</span>
+
+        <span class="c1"># Additional Box to check the capture screenshots feature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenshot_cb</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span>
+            <span class="s2">&quot;Enable screenshot feature on event logging&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenshot_cb</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;If enabled, screenshots will be stored for each recorded event in the log&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenshot_cb</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;screenshot_cb&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenshot_cb</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_cb_scrsht</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_cb_scrsht</span><span class="p">()</span>
+    
+        <span class="c1"># Additional Box to check the capture screenshots feature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supervision_cb</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span>
+            <span class="s2">&quot;Lets users add relevancy tag after each event&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supervision_cb</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;If enabled, after each event users are asked to rate the previous event.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supervision_cb</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;supervision_cb&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supervision_cb</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_cb_supervision</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_cb_supervision</span><span class="p">()</span>
+        
+        <span class="c1"># self.decisionGroupBox.setEnabled(capture_screenshots)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mfr</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;Most frequent routine&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mfr</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_radio</span><span class="p">)</span>
@@ -275,6 +294,16 @@
         <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="p">)</span>
         <span class="n">processDiscoveryGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
 
+        <span class="n">captureScreenshotsGroupBox</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Capture Screenshots&quot;</span><span class="p">)</span>
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">screenshot_cb</span><span class="p">)</span>
+        <span class="n">captureScreenshotsGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+
+        <span class="n">supervisionFeatureGroupBox</span> <span class="o">=</span> <span class="n">QGroupBox</span><span class="p">(</span><span class="s2">&quot;Supervision Feature&quot;</span><span class="p">)</span>
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supervision_cb</span><span class="p">)</span>
+        <span class="n">supervisionFeatureGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+
         <span class="n">vbox</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mfr</span><span class="p">)</span>
         <span class="n">vbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decision</span><span class="p">)</span>
@@ -294,6 +323,8 @@
         <span class="n">xesGroupBox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
 
         <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">captureScreenshotsGroupBox</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">supervisionFeatureGroupBox</span><span class="p">)</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">processDiscoveryGroupBox</span><span class="p">)</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decisionGroupBox</span><span class="p">)</span>
         <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">xesGroupBox</span><span class="p">)</span>
@@ -305,21 +336,57 @@
         <span class="n">wid</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
         <span class="n">wid</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="nf">handle_slider</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Preferences.handle_slider"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.PreferencesWindow.Preferences.handle_slider">[docs]</a>    <span class="k">def</span> <span class="nf">handle_slider</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets number of runs before mining in config.py</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sld</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lcd</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">totalNumberOfRunGuiXes</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">totalNumberOfRunGuiXes</span> <span class="o">=</span> <span class="n">value</span></div>
 
-    <span class="k">def</span> <span class="nf">handle_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Preferences.handle_cb"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.PreferencesWindow.Preferences.handle_cb">[docs]</a>    <span class="k">def</span> <span class="nf">handle_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets process discovery option in config.py</span>
+<span class="sd">        Triggered after number of GUI Runs specified in preferences</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">perform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_discovery_cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decisionGroupBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">perform</span><span class="p">)</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">perform_process_discovery</span> <span class="o">=</span> <span class="n">perform</span>
         <span class="k">if</span> <span class="n">perform</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Process discovery enabled&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Process discovery disabled&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Process discovery disabled&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">handle_radio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Preferences.handle_cb_scrsht"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.PreferencesWindow.Preferences.handle_cb_scrsht">[docs]</a>    <span class="k">def</span> <span class="nf">handle_cb_scrsht</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets screenshot option in config.py</span>
+<span class="sd">        If enabled each event stored creates a screenshot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">perform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screenshot_cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="c1"># self.decisionGroupBox.setEnabled(perform)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">capture_screenshots</span> <span class="o">=</span> <span class="n">perform</span>
+        <span class="k">if</span> <span class="n">perform</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Screenshot capture enabled&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Screenshot capture disabled&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Preferences.handle_cb_supervision"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.PreferencesWindow.Preferences.handle_cb_supervision">[docs]</a>    <span class="k">def</span> <span class="nf">handle_cb_supervision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets supervision option in confi.py</span>
+<span class="sd">        If enabled, after each event the user is asked for tagging the event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">perform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supervision_cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="c1"># self.decisionGroupBox.setEnabled(perform)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">supervisionFeature</span> <span class="o">=</span> <span class="n">perform</span>
+        <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">supervisionFeature</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Action supervision enabled&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;[GUI] Action supervision disabled&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Preferences.handle_radio"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.PreferencesWindow.Preferences.handle_radio">[docs]</a>    <span class="k">def</span> <span class="nf">handle_radio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets most frequent or decision point analysis in config.py</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mfr_checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfr</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
         <span class="n">decision_checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
         <span class="n">decisionRPA_checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decisionRPA</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
@@ -342,10 +409,13 @@
             <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Decision point analysis enabled&quot;</span>
         <span class="k">elif</span> <span class="n">decisionRPA_checked</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Decision point analysis in RPA script enabled&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">handleButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+<div class="viewcode-block" id="Preferences.handleButton"><a class="viewcode-back" href="../../../modules/gui.html#modules.GUI.PreferencesWindow.Preferences.handleButton">[docs]</a>    <span class="k">def</span> <span class="nf">handleButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Closes preference window</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>
@@ -358,19 +428,11 @@
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, marco2012
+        &copy; Copyright 2023, marco2012
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -381,6 +443,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

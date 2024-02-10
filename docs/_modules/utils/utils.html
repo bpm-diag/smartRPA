@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,29 +12,30 @@
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -72,7 +74,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -80,11 +81,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Main</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Main</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../main.html">Main</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Modules</span></p>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/gui.html">Graphical User Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/action_logger.html">Action logger</a></li>
@@ -93,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../modules/process_discovery.html">Process Discovery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/rpa.html">RPA</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Utils</span></p>
+<p class="caption" role="heading"><span class="caption-text">Utils</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
 </ul>
@@ -101,7 +102,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -140,7 +140,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -180,11 +180,25 @@
 <span class="kn">import</span> <span class="nn">utils.config</span>
 <span class="kn">import</span> <span class="nn">modules.consumerServer</span>
 <span class="kn">import</span> <span class="nn">unicodedata</span>
-<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">unidecode</span> <span class="kn">import</span> <span class="n">unidecode</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">tee</span><span class="p">,</span> <span class="n">islice</span><span class="p">,</span> <span class="n">chain</span>
 <span class="c1"># asynchronous session.post requests to log server, used by multiple modules</span>
 <span class="kn">from</span> <span class="nn">requests_futures.sessions</span> <span class="kn">import</span> <span class="n">FuturesSession</span>
+
+<span class="c1"># screenshot recording feature for single screen</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">dxcam</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># screenshot recording feature for multiple screen</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">ImageGrab</span>
+
+<span class="c1"># Data Validation</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">validators</span>
 
 <span class="n">session</span> <span class="o">=</span> <span class="n">FuturesSession</span><span class="p">()</span>
 
@@ -229,21 +243,26 @@
 <span class="n">PROCESS_DISCOVERY_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;process_discovery&quot;</span>
 <span class="n">SW_ROBOT_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;SW_Robot&quot;</span>
 <span class="n">UIPATH_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;UiPath&quot;</span>
+<span class="c1"># Global variable for camera on taking screenshots</span>
+<span class="n">camera</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="c1"># ************</span>
 <span class="c1"># Functions</span>
 <span class="c1"># ************</span>
 
 
-<div class="viewcode-block" id="timestamp"><a class="viewcode-back" href="../../utils.html#utils.utils.timestamp">[docs]</a><span class="k">def</span> <span class="nf">timestamp</span><span class="p">():</span>
+<div class="viewcode-block" id="timestamp"><a class="viewcode-back" href="../../utils.html#utils.utils.timestamp">[docs]</a><span class="k">def</span> <span class="nf">timestamp</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate current timestamp in ISO format (e.g. &#39;2020-08-29T16:42:30.690&#39;)</span>
 
-<span class="sd">    :return: timestamp in ISO format</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    :param format: format (Default None) specifies the datetime format, if none it is ISO Format</span>
 
-    <span class="c1">#return datetime.now().strftime(&quot;%Y-%m-%d %H:%M:%S:%f&quot;)  # [:-3]</span>
-    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(</span><span class="n">timespec</span><span class="o">=</span><span class="s1">&#39;milliseconds&#39;</span><span class="p">)</span></div>
+<span class="sd">    :return: timestamp in (ISO) format</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(</span><span class="n">timespec</span><span class="o">=</span><span class="s1">&#39;milliseconds&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="createDirectory"><a class="viewcode-back" href="../../utils.html#utils.utils.createDirectory">[docs]</a><span class="k">def</span> <span class="nf">createDirectory</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -276,15 +295,26 @@
     <span class="c1"># logs = os.path.join(current_directory, &#39;logs&#39;)</span>
     <span class="n">logs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MAIN_DIRECTORY</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">)</span>
     <span class="n">createDirectory</span><span class="p">(</span><span class="n">logs</span><span class="p">)</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+
+    
+    <span class="c1"># If config capture_screenshots = True, we create a screenshot and screenshots sub folder</span>
+    <span class="n">screenshots_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MAIN_DIRECTORY</span><span class="p">,</span> <span class="s1">&#39;screenshots&#39;</span><span class="p">)</span>
+    <span class="n">createDirectory</span><span class="p">(</span><span class="n">screenshots_dir</span><span class="p">)</span>
+    <span class="n">subdirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># Added to store screenshot files in the same named folder</span>
+    <span class="c1"># if config capture_screenshots = TRUE create a dir, otherwise do not:</span>
+    <span class="n">screenshots_subdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">screenshots_dir</span><span class="p">,</span> <span class="n">subdirectory</span><span class="p">)</span>
+    <span class="n">createDirectory</span><span class="p">(</span><span class="n">screenshots_subdir</span><span class="p">)</span>
+
     <span class="n">log_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logs</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
     <span class="c1"># utils.config.MyConfig.get_instance().log_filepath = log_filepath</span>
     <span class="c1"># create HEADER</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">modules</span><span class="o">.</span><span class="n">consumerServer</span><span class="o">.</span><span class="n">HEADER</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">log_filepath</span></div>
-
+    <span class="k">return</span> <span class="n">log_filepath</span><span class="p">,</span> <span class="n">screenshots_subdir</span></div>
 
 <div class="viewcode-block" id="getRPADirectory"><a class="viewcode-back" href="../../utils.html#utils.utils.getRPADirectory">[docs]</a><span class="k">def</span> <span class="nf">getRPADirectory</span><span class="p">(</span><span class="n">csv_file_path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -292,7 +322,7 @@
 
 <span class="sd">    RPA_directory is like /Users/marco/Desktop/ComputerLogger/RPA/2020-02-25_23-21-57</span>
 
-<span class="sd">    :param csv_file_path: path of event log in input</span>
+<span class="sd">    :param csv_file_path str: path of event log in input</span>
 <span class="sd">    :return: path of RPA directory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">csv_filename</span> <span class="o">=</span> <span class="n">getFilename</span><span class="p">(</span><span class="n">csv_file_path</span><span class="p">)</span>
@@ -374,7 +404,7 @@
         <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">connect_ex</span><span class="p">((</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="CSVEmpty"><a class="viewcode-back" href="../../utils.html#utils.utils.CSVEmpty">[docs]</a><span class="k">def</span> <span class="nf">CSVEmpty</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="n">min_len</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="CSVEmpty"><a class="viewcode-back" href="../../utils.html#utils.utils.CSVEmpty">[docs]</a><span class="k">def</span> <span class="nf">CSVEmpty</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="n">min_len</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if given csv is empty by counting number of rows</span>
 
@@ -383,9 +413,10 @@
 <span class="sd">    :return: true if csv is empty</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">pandas</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">EmptyDataError</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">log_filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">pd</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">EmptyDataError</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">min_len</span></div>
 
 
@@ -425,12 +456,12 @@
     <span class="n">existing_csv_to_combine</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">list_of_csv_to_combine</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># combine all files in the list</span>
-        <span class="n">combined_csv</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;latin&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">existing_csv_to_combine</span><span class="p">])</span>
+        <span class="n">combined_csv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;latin&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">existing_csv_to_combine</span><span class="p">])</span>
         <span class="c1"># export to csv</span>
         <span class="n">combined_csv</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">combined_csv_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8-sig&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[UTILS] </span><span class="si">{</span><span class="n">combined_csv_path</span><span class="si">}</span><span class="s2"> created by merging </span><span class="si">{</span><span class="n">existing_csv_to_combine</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">except</span> <span class="p">(</span><span class="n">pandas</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">ParserError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">ParserError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -590,6 +621,172 @@
     <span class="n">nexts</span> <span class="o">=</span> <span class="n">chain</span><span class="p">(</span><span class="n">islice</span><span class="p">(</span><span class="n">nexts</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span>
     <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prevs</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">nexts</span><span class="p">)</span>
 
+<span class="c1"># Methods copied from https://github.com/RPA-US/screen-action-logger</span>
+<span class="k">def</span> <span class="nf">get_last_directory_name</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the name of the last directory within a given directory path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">directories</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">d</span><span class="p">))]</span>
+    <span class="k">if</span> <span class="n">directories</span><span class="p">:</span>
+        <span class="n">last_directory</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">directories</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">d</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">last_directory</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="get_last_directory_name"><a class="viewcode-back" href="../../utils.html#utils.utils.get_last_directory_name">[docs]</a><span class="k">def</span> <span class="nf">get_last_directory_name</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the name of the last directory within a given directory path.</span>
+
+<span class="sd">    :param path: Path to the parent folder</span>
+<span class="sd">    :return: &quot;Newest&quot; directory file name</span>
+<span class="sd">    :rtype: String</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">directories</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">d</span><span class="p">))]</span>
+    <span class="k">if</span> <span class="n">directories</span><span class="p">:</span>
+        <span class="n">last_directory</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">directories</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">d</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">last_directory</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<span class="k">def</span> <span class="nf">calculateImageHash</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="c1"># Calculamos el hash de la imagen</span>
+    <span class="n">sha256_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span>
+    <span class="n">sha256_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sha256_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<div class="viewcode-block" id="takeScreenshot"><a class="viewcode-back" href="../../utils.html#utils.utils.takeScreenshot">[docs]</a><span class="k">def</span> <span class="nf">takeScreenshot</span><span class="p">(</span><span class="n">save_image</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">MyConfig</span><span class="o">.</span><span class="n">get_instance</span><span class="p">()</span><span class="o">.</span><span class="n">capture_screenshots</span><span class="p">,</span> <span class="n">scrshtFormat</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a screenshot and saves it to a directory with a filename based on its hash, current date/time and order of capture.</span>
+
+<span class="sd">    :param scrshtFormat: (Optional) File format of screenshot, Default type is png</span>
+<span class="sd">    :param save_image: (Boolean) Default True</span>
+<span class="sd">    :return: Name of the screenshot file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Future improvement: use onlx dxcam to capture multiple screens, because it is faster</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">save_image</span><span class="p">:</span>
+        <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;screenshots&quot;</span><span class="p">,</span> <span class="n">get_last_directory_name</span><span class="p">(</span><span class="s2">&quot;screenshots&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dxcam</span><span class="o">.</span><span class="n">output_info</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;Output[&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># If there are more than two screens attached it is easier to use the pillow impage capture</span>
+            <span class="n">screenshot</span> <span class="o">=</span> <span class="n">ImageGrab</span><span class="o">.</span><span class="n">grab</span><span class="p">(</span><span class="n">all_screens</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># Have to use tobytes as the PIL image cannot be hashed using sha256_hash method</span>
+            <span class="n">short_hash</span> <span class="o">=</span> <span class="n">calculateImageHash</span><span class="p">(</span><span class="n">screenshot</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+            <span class="n">stamp</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S&quot;</span><span class="p">)</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">short_hash</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">stamp</span><span class="si">}</span><span class="s2">.&quot;</span> <span class="o">+</span> <span class="n">scrshtFormat</span><span class="p">)</span>
+            <span class="n">screenshot</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">scrshtFormat</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">global</span> <span class="n">camera</span>  <span class="c1"># usa la variable global camera</span>
+
+            <span class="c1"># Si no hay instancia de cámara, crear una nueva instancia</span>
+            <span class="k">if</span> <span class="n">camera</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">camera</span> <span class="o">=</span> <span class="n">dxcam</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating new camera instance&quot;</span><span class="p">)</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">camera</span><span class="o">.</span><span class="n">grab</span><span class="p">()</span>
+
+            <span class="c1"># Acortar el hash para el nombre</span>
+            <span class="n">short_hash</span> <span class="o">=</span> <span class="n">calculateImageHash</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+            <span class="c1"># Guardar la imagen en el directorio correspondiente. Nombre dependiente de hash</span>
+            <span class="c1"># directory = &quot;screenshots/&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+                <span class="n">createDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+            <span class="n">stamp</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S&quot;</span><span class="p">)</span>
+            <span class="c1"># counter = len([filename for filename in os.listdir(directory) if filename.endswith(&#39;.png&#39;)])</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">short_hash</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">stamp</span><span class="si">}</span><span class="s2">.&quot;</span> <span class="o">+</span> <span class="n">scrshtFormat</span><span class="p">)</span>
+            
+            <span class="c1"># Guarda la imagen y elimina compresión</span>
+            <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">compress_level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">filename</span></div>
+
+<div class="viewcode-block" id="add_json_element"><a class="viewcode-back" href="../../utils.html#utils.utils.add_json_element">[docs]</a><span class="k">def</span> <span class="nf">add_json_element</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a JSON element to the specified node.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        node (dict): The node to add the element to.</span>
+<span class="sd">        key (str): The key of the element.</span>
+<span class="sd">        value (any): The value of the element.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">node</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Node must be a dictionary&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="concatIntoNoiseDf"><a class="viewcode-back" href="../../utils.html#utils.utils.concatIntoNoiseDf">[docs]</a><span class="k">def</span> <span class="nf">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">colName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rowId</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes as input a df and a col/row/value combination and addes the row to the noiseDf</span>
+
+<span class="sd">    :param noiseDf: Dataframe with Cols Value, Column Name, and Row ID</span>
+<span class="sd">    :param value: value of the cell that is noise</span>
+<span class="sd">    :param colName: Column name of the noisy cell</span>
+<span class="sd">    :param rowId: Row ID of the noisy cell</span>
+<span class="sd">    :return: noiseDf with the added row </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">errorDf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">value</span><span class="p">,</span><span class="n">colName</span><span class="p">,</span><span class="n">rowId</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span><span class="s2">&quot;Column Name&quot;</span><span class="p">,</span><span class="s2">&quot;Row ID&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">errorDf</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<span class="c1"># Needs Testing</span>
+<div class="viewcode-block" id="staticNoiseIdentification"><a class="viewcode-back" href="../../utils.html#utils.utils.staticNoiseIdentification">[docs]</a><span class="k">def</span> <span class="nf">staticNoiseIdentification</span><span class="p">(</span><span class="n">uilog</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets a UI log and identifies all cells containing static noise</span>
+<span class="sd">    Static noise is noise that is identified using attributes default formats</span>
+<span class="sd">    </span>
+<span class="sd">    :param uilog: User interaction log dataframe</span>
+<span class="sd">    :return: Dataframe with value, col, row that are considered noise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span><span class="s2">&quot;Column Name&quot;</span><span class="p">,</span><span class="s2">&quot;Row ID&quot;</span><span class="p">])</span>
+    <span class="c1"># RegEx for Data validation</span>
+    <span class="n">excel_cell</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^[a-zA-Z]+\d+$&#39;</span>  <span class="c1"># Any combination of text + number without special characters</span>
+    <span class="n">slides_regex</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^[0-9,\s]+$&#39;</span> <span class="c1"># Any sequence of numbers seperated with &quot;,&quot;, may contain spaces</span>
+    <span class="n">mouseCoord_regex</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;/[\-?\[0-9]+,\s?\-?[0-9]+]&#39;</span> <span class="c1"># Any positiv/negative combo of [x,y] coords</span>
+    
+    <span class="c1"># Check if each timestamp and ID (unnamed: 0) can be converted to a Python Primitive Data</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">uilog</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="c1"># Value casting tests</span>
+        <span class="k">try</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Unnamed: 0&#39;</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;integer&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Unnamed: 0&#39;</span><span class="p">],</span><span class="s1">&#39;Unnamed: 0&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;time:timestamp&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;time:timestamp&#39;</span><span class="p">],</span><span class="s1">&#39;time:timestamp&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        
+        <span class="c1"># RegEx Tests</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;cell_range&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">excel_cell</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;cell_range&quot;</span><span class="p">])):</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;cell_range&#39;</span><span class="p">],</span><span class="s1">&#39;cell_range&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;slides&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">slides_regex</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;slides&quot;</span><span class="p">])):</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;slides&#39;</span><span class="p">],</span><span class="s1">&#39;slides&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;mouse_coord&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">mouseCoord_regex</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;slides&quot;</span><span class="p">])):</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;mouse_coord&#39;</span><span class="p">],</span><span class="s1">&#39;mouse_coord&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        
+        <span class="c1"># Length Tests</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;workbook&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;workbook&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
+            <span class="c1"># https://learn.microsoft.com/en-gb/windows/win32/fileio/naming-a-file?redirectedfrom=MSDN</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;workbook&#39;</span><span class="p">],</span><span class="s1">&#39;workbook&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;current_worksheet&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;current_worksheet&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
+            <span class="c1"># https://learn.microsoft.com/en-gb/windows/win32/fileio/naming-a-file?redirectedfrom=MSDN</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;current_worksheet&#39;</span><span class="p">],</span><span class="s1">&#39;current_worksheet&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> 
+
+        <span class="c1"># Package based tests</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;browser_url&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">validators</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;browser_url&quot;</span><span class="p">]):</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;browser_url&#39;</span><span class="p">],</span><span class="s1">&#39;browser_url&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> 
+        
+        <span class="c1"># Data Comparison Checks</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;tag_category&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;tag_category&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HTMLElements</span><span class="p">:</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_category&#39;</span><span class="p">],</span><span class="s1">&#39;tag_category&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;concept:name&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;concept:name&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">conceptNames</span><span class="p">:</span>
+            <span class="n">noiseDf</span> <span class="o">=</span> <span class="n">concatIntoNoiseDf</span><span class="p">(</span><span class="n">noiseDf</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;concept:name&#39;</span><span class="p">],</span><span class="s1">&#39;concept:name&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> 
+
+    <span class="c1"># After reading the UI log all values are stored in STR format</span>
+    <span class="c1"># Some columns should be converted into other datatypes</span>
+    <span class="c1"># For each column with standard format a method is called to check on the data</span>
+
+    <span class="k">return</span> <span class="n">noiseDf</span><span class="p">,</span> <span class="n">uilog</span></div>
 
 <span class="c1"># ************</span>
 <span class="c1"># Class</span>
@@ -684,6 +881,48 @@
     <span class="n">FIREFOX</span> <span class="o">=</span> <span class="n">isInstalledLinux</span><span class="p">(</span><span class="s1">&#39;firefox&#39;</span><span class="p">)</span>
     <span class="n">EDGE</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">OPERA</span> <span class="o">=</span> <span class="n">isInstalledLinux</span><span class="p">(</span><span class="s1">&#39;opera&#39;</span><span class="p">)</span>
+
+<span class="c1"># Sets for static noise filtering</span>
+<span class="c1"># https://stackoverflow.com/questions/52928550/js-get-list-of-all-available-standard-html-tags Fighter178 Answer</span>
+<span class="n">HTMLElements</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;!DOCTYPE&quot;</span><span class="p">,</span><span class="s2">&quot;a&quot;</span><span class="p">,</span><span class="s2">&quot;abbr&quot;</span><span class="p">,</span><span class="s2">&quot;abbr&quot;</span><span class="p">,</span><span class="s2">&quot;acronym&quot;</span><span class="p">,</span> <span class="c1"># NOT HTML5</span>
+    <span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="c1">#&quot;applet&quot;, # NOT HTML5 (NOT MAJORLY SUPPORTED)</span>
+    <span class="s2">&quot;area&quot;</span><span class="p">,</span><span class="s2">&quot;article&quot;</span><span class="p">,</span><span class="s2">&quot;aside&quot;</span><span class="p">,</span><span class="s2">&quot;audio&quot;</span><span class="p">,</span><span class="s2">&quot;b&quot;</span><span class="p">,</span><span class="s2">&quot;base&quot;</span><span class="p">,</span><span class="s2">&quot;basefont&quot;</span><span class="p">,</span> <span class="c1"># NOT HTML5</span>
+    <span class="s2">&quot;bdi&quot;</span><span class="p">,</span><span class="s2">&quot;bdo&quot;</span><span class="p">,</span><span class="s2">&quot;big&quot;</span><span class="p">,</span> <span class="c1"># NOT HTML5</span>
+    <span class="s2">&quot;blockquote&quot;</span><span class="p">,</span><span class="s2">&quot;body&quot;</span><span class="p">,</span><span class="s2">&quot;br&quot;</span><span class="p">,</span><span class="s2">&quot;button&quot;</span><span class="p">,</span><span class="s2">&quot;canvas&quot;</span><span class="p">,</span><span class="s2">&quot;caption&quot;</span><span class="p">,</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="c1"># NOT HTML5</span>
+    <span class="s2">&quot;cite&quot;</span><span class="p">,</span><span class="s2">&quot;code&quot;</span><span class="p">,</span><span class="s2">&quot;col&quot;</span><span class="p">,</span><span class="s2">&quot;colgroup&quot;</span><span class="p">,</span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="s2">&quot;datalist&quot;</span><span class="p">,</span><span class="s2">&quot;dd&quot;</span><span class="p">,</span><span class="s2">&quot;del&quot;</span><span class="p">,</span><span class="s2">&quot;details&quot;</span><span class="p">,</span><span class="s2">&quot;dfn&quot;</span><span class="p">,</span><span class="s2">&quot;dialog&quot;</span><span class="p">,</span><span class="c1">#&quot;dir&quot;, NOT HTML5 (use &quot;ul&quot; instead)</span>
+    <span class="s2">&quot;div&quot;</span><span class="p">,</span><span class="s2">&quot;dl&quot;</span><span class="p">,</span><span class="s2">&quot;dt&quot;</span><span class="p">,</span><span class="s2">&quot;em&quot;</span><span class="p">,</span><span class="s2">&quot;embed&quot;</span><span class="p">,</span><span class="s2">&quot;fieldset&quot;</span><span class="p">,</span><span class="s2">&quot;figcaption&quot;</span><span class="p">,</span><span class="s2">&quot;figure&quot;</span><span class="p">,</span><span class="c1">#&quot;font&quot;, // NOT HTML5 (use CSS)</span>
+    <span class="s2">&quot;footer&quot;</span><span class="p">,</span><span class="s2">&quot;form&quot;</span><span class="p">,</span><span class="c1">#&quot;frame&quot;, // NOT HTML5 #&quot;frameset&quot;, // NOT HTML5</span>
+    <span class="s2">&quot;h1&quot;</span><span class="p">,</span><span class="s2">&quot;h2&quot;</span><span class="p">,</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span><span class="s2">&quot;h4&quot;</span><span class="p">,</span><span class="s2">&quot;h5&quot;</span><span class="p">,</span><span class="s2">&quot;h6&quot;</span><span class="p">,</span><span class="s2">&quot;head&quot;</span><span class="p">,</span><span class="s2">&quot;header&quot;</span><span class="p">,</span><span class="s2">&quot;hr&quot;</span><span class="p">,</span><span class="s2">&quot;html&quot;</span><span class="p">,</span><span class="s2">&quot;i&quot;</span><span class="p">,</span><span class="s2">&quot;iframe&quot;</span><span class="p">,</span><span class="s2">&quot;img&quot;</span><span class="p">,</span><span class="s2">&quot;input&quot;</span><span class="p">,</span><span class="s2">&quot;ins&quot;</span><span class="p">,</span><span class="s2">&quot;kbd&quot;</span><span class="p">,</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;legend&quot;</span><span class="p">,</span><span class="s2">&quot;li&quot;</span><span class="p">,</span><span class="s2">&quot;link&quot;</span><span class="p">,</span><span class="s2">&quot;main&quot;</span><span class="p">,</span><span class="s2">&quot;map&quot;</span><span class="p">,</span><span class="s2">&quot;mark&quot;</span><span class="p">,</span><span class="s2">&quot;meta&quot;</span><span class="p">,</span><span class="s2">&quot;meter&quot;</span><span class="p">,</span><span class="s2">&quot;nav&quot;</span><span class="p">,</span><span class="c1">#&quot;noframes&quot;, # NOT HTML5</span>
+    <span class="s2">&quot;noscript&quot;</span><span class="p">,</span><span class="s2">&quot;object&quot;</span><span class="p">,</span><span class="s2">&quot;ol&quot;</span><span class="p">,</span><span class="s2">&quot;optgroup&quot;</span><span class="p">,</span><span class="s2">&quot;option&quot;</span><span class="p">,</span><span class="s2">&quot;output&quot;</span><span class="p">,</span><span class="s2">&quot;p&quot;</span><span class="p">,</span><span class="s2">&quot;param&quot;</span><span class="p">,</span><span class="s2">&quot;picture&quot;</span><span class="p">,</span><span class="s2">&quot;pre&quot;</span><span class="p">,</span><span class="s2">&quot;progress&quot;</span><span class="p">,</span><span class="s2">&quot;q&quot;</span><span class="p">,</span><span class="s2">&quot;rp&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rt&quot;</span><span class="p">,</span><span class="s2">&quot;ruby&quot;</span><span class="p">,</span><span class="s2">&quot;s&quot;</span><span class="p">,</span><span class="s2">&quot;samp&quot;</span><span class="p">,</span><span class="s2">&quot;script&quot;</span><span class="p">,</span><span class="s2">&quot;section&quot;</span><span class="p">,</span><span class="s2">&quot;select&quot;</span><span class="p">,</span><span class="s2">&quot;small&quot;</span><span class="p">,</span><span class="s2">&quot;source&quot;</span><span class="p">,</span><span class="s2">&quot;span&quot;</span><span class="p">,</span> <span class="c1">#&quot;strike&quot;, # NOT HTML5 (Use &lt;del&gt; or &lt;s&gt; instead)</span>
+    <span class="s2">&quot;strong&quot;</span><span class="p">,</span><span class="s2">&quot;style&quot;</span><span class="p">,</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="s2">&quot;summary&quot;</span><span class="p">,</span><span class="s2">&quot;sup&quot;</span><span class="p">,</span><span class="s2">&quot;svg&quot;</span><span class="p">,</span><span class="s2">&quot;table&quot;</span><span class="p">,</span><span class="s2">&quot;tbody&quot;</span><span class="p">,</span><span class="s2">&quot;td&quot;</span><span class="p">,</span><span class="s2">&quot;template&quot;</span><span class="p">,</span><span class="s2">&quot;textarea&quot;</span><span class="p">,</span><span class="s2">&quot;tfoot&quot;</span><span class="p">,</span><span class="s2">&quot;th&quot;</span><span class="p">,</span><span class="s2">&quot;thead&quot;</span><span class="p">,</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">,</span><span class="s2">&quot;tr&quot;</span><span class="p">,</span><span class="s2">&quot;track&quot;</span><span class="p">,</span><span class="c1">#&quot;tt&quot;, # NOT HTML5 (Use CSS)</span>
+    <span class="s2">&quot;u&quot;</span><span class="p">,</span><span class="s2">&quot;ul&quot;</span><span class="p">,</span><span class="s2">&quot;var&quot;</span><span class="p">,</span><span class="s2">&quot;video&quot;</span><span class="p">,</span><span class="s2">&quot;wbr&quot;</span>
+    <span class="p">}</span> <span class="c1"># Total of 116 (excluding non-html5 and also comments, which are &quot;&lt;!-- [comment] --&gt;&quot;).</span>
+
+<span class="c1"># https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf</span>
+<span class="c1"># beforeSaveWorkbook was missing from the tags in the PDF</span>
+<span class="n">conceptNames</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;beforeSaveWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;urlHashChange&#39;</span><span class="p">,</span><span class="s1">&#39;contextMenu&#39;</span><span class="p">,</span><span class="s1">&#39;clickCheckboxButton&#39;</span><span class="p">,</span><span class="s1">&#39;clickRadioButton&#39;</span><span class="p">,</span><span class="s1">&#39;navigateTo&#39;</span><span class="p">,</span><span class="s1">&#39;link&#39;</span><span class="p">,</span><span class="s1">&#39;typed&#39;</span><span class="p">,</span><span class="s1">&#39;form&#39;</span><span class="p">,</span><span class="s1">&#39;reload&#39;</span><span class="p">,</span><span class="s1">&#39;clickTextField&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;clickButton&#39;</span><span class="p">,</span><span class="s1">&#39;clickLink&#39;</span><span class="p">,</span><span class="s1">&#39;selectOptions&#39;</span><span class="p">,</span><span class="s1">&#39;selectText&#39;</span><span class="p">,</span><span class="s1">&#39;submit&#39;</span><span class="p">,</span><span class="s1">&#39;changeField&#39;</span><span class="p">,</span><span class="s1">&#39;doubleClick&#39;</span><span class="p">,</span><span class="s1">&#39;dragElement&#39;</span><span class="p">,</span><span class="s1">&#39;cancelDialog&#39;</span><span class="p">,</span><span class="s1">&#39;fullscreen&#39;</span><span class="p">,</span><span class="s1">&#39;attachTab&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;detachTab&#39;</span><span class="p">,</span><span class="s1">&#39;newBookmark&#39;</span><span class="p">,</span><span class="s1">&#39;removeBookmark&#39;</span><span class="p">,</span><span class="s1">&#39;modifyBookmark&#39;</span><span class="p">,</span><span class="s1">&#39;moveBookmark&#39;</span><span class="p">,</span><span class="s1">&#39;startDownload&#39;</span><span class="p">,</span><span class="s1">&#39;erasedDownload&#39;</span><span class="p">,</span><span class="s1">&#39;installBrowserExtension&#39;</span><span class="p">,</span><span class="s1">&#39;uninstallBrowserExtension&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;enableBrowserExtension&#39;</span><span class="p">,</span><span class="s1">&#39;disableBrowserExtension&#39;</span><span class="p">,</span><span class="s1">&#39;closedNotification&#39;</span><span class="p">,</span><span class="s1">&#39;clickedNotification&#39;</span><span class="p">,</span><span class="s1">&#39;newWindow&#39;</span><span class="p">,</span><span class="s1">&#39;closeWindow&#39;</span><span class="p">,</span><span class="s1">&#39;newTab&#39;</span><span class="p">,</span><span class="s1">&#39;closeTab&#39;</span><span class="p">,</span><span class="s1">&#39;moveTab&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;mutedTab&#39;</span><span class="p">,</span><span class="s1">&#39;unmutedTab&#39;</span><span class="p">,</span><span class="s1">&#39;pinnedTab&#39;</span><span class="p">,</span><span class="s1">&#39;unpinnedTab&#39;</span><span class="p">,</span><span class="s1">&#39;audibleTab&#39;</span><span class="p">,</span><span class="s1">&#39;zoomTab&#39;</span><span class="p">,</span><span class="s1">&#39;changeHistory&#39;</span><span class="p">,</span><span class="s1">&#39;created&#39;</span><span class="p">,</span><span class="s1">&#39;modified&#39;</span><span class="p">,</span><span class="s1">&#39;deleted&#39;</span><span class="p">,</span><span class="s1">&#39;Mount&#39;</span><span class="p">,</span><span class="s1">&#39;Unmount&#39;</span><span class="p">,</span><span class="s1">&#39;moved&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;programOpen&#39;</span><span class="p">,</span><span class="s1">&#39;programClose&#39;</span><span class="p">,</span><span class="s1">&#39;selectFile&#39;</span><span class="p">,</span><span class="s1">&#39;selectFolder&#39;</span><span class="p">,</span><span class="s1">&#39;hotkey&#39;</span><span class="p">,</span><span class="s1">&#39;insertUSB&#39;</span><span class="p">,</span><span class="s1">&#39;printSubmitted&#39;</span><span class="p">,</span><span class="s1">&#39;openFile&#39;</span><span class="p">,</span><span class="s1">&#39;openFolder&#39;</span><span class="p">,</span><span class="s1">&#39;copy&#39;</span><span class="p">,</span><span class="s1">&#39;paste&#39;</span><span class="p">,</span><span class="s1">&#39;cut&#39;</span><span class="p">,</span><span class="s1">&#39;openWindow&#39;</span><span class="p">,</span><span class="s1">&#39;closeWindow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;resizeWindow&#39;</span><span class="p">,</span><span class="s1">&#39;newWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;openWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;addWorksheet&#39;</span><span class="p">,</span><span class="s1">&#39;saveWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;printWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;closeWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;activateWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;deactivateWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;modelChangeWorkbook&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;newChartWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;afterCalculate&#39;</span><span class="p">,</span><span class="s1">&#39;selectWorksheet&#39;</span><span class="p">,</span><span class="s1">&#39;deleteWorksheet&#39;</span><span class="p">,</span><span class="s1">&#39;doubleClickCellWithValue&#39;</span><span class="p">,</span><span class="s1">&#39;doubleClickEmptyCell&#39;</span><span class="p">,</span><span class="s1">&#39;rightClickCellWithValue&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;rightClickEmptyCell&#39;</span><span class="p">,</span><span class="s1">&#39;sheetCalculate&#39;</span><span class="p">,</span><span class="s1">&#39;editCellSheet&#39;</span><span class="p">,</span><span class="s1">&#39;deselectWorksheet&#39;</span><span class="p">,</span><span class="s1">&#39;followHiperlinkSheet&#39;</span><span class="p">,</span><span class="s1">&#39;pivotTableValueChangeSheet&#39;</span><span class="p">,</span><span class="s1">&#39;getRange&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;getCell&#39;</span><span class="p">,</span><span class="s1">&#39;worksheetTableUpdated&#39;</span><span class="p">,</span><span class="s1">&#39;addinInstalledWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;addinUninstalledWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;XMLImportWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;XMLExportWorkbook&#39;</span><span class="p">,</span><span class="s1">&#39;activateWindow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;deactivateWindow&#39;</span><span class="p">,</span><span class="s1">&#39;doubleClickWindow&#39;</span><span class="p">,</span><span class="s1">&#39;rightClickWindow&#39;</span><span class="p">,</span><span class="s1">&#39;newDocument&#39;</span><span class="p">,</span><span class="s1">&#39;openDocument&#39;</span><span class="p">,</span><span class="s1">&#39;changeDocument&#39;</span><span class="p">,</span><span class="s1">&#39;saveDocument&#39;</span><span class="p">,</span><span class="s1">&#39;printDocument&#39;</span><span class="p">,</span><span class="s1">&#39;activateWindow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;deactivateWindow&#39;</span><span class="p">,</span><span class="s1">&#39;rightClickPresentation&#39;</span><span class="p">,</span><span class="s1">&#39;doubleClickPresentation&#39;</span><span class="p">,</span><span class="s1">&#39;newPresentation&#39;</span><span class="p">,</span><span class="s1">&#39;newPresentationSlide&#39;</span><span class="p">,</span><span class="s1">&#39;closePresentation&#39;</span><span class="p">,</span><span class="s1">&#39;savePresentation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;openPresentation&#39;</span><span class="p">,</span><span class="s1">&#39;printPresentation&#39;</span><span class="p">,</span><span class="s1">&#39;slideshowBegin&#39;</span><span class="p">,</span><span class="s1">&#39;nextSlideshow&#39;</span><span class="p">,</span><span class="s1">&#39;clickNextSlideshow&#39;</span><span class="p">,</span><span class="s1">&#39;previousSlideshow&#39;</span><span class="p">,</span><span class="s1">&#39;slideshowEnd&#39;</span><span class="p">,</span><span class="s1">&#39;SlideSelectionChanged&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;startupOutlook&#39;</span><span class="p">,</span><span class="s1">&#39;quitOutlook&#39;</span><span class="p">,</span><span class="s1">&#39;receiveMail&#39;</span><span class="p">,</span><span class="s1">&#39;sendMail&#39;</span><span class="p">,</span><span class="s1">&#39;logonComplete&#39;</span><span class="p">,</span><span class="s1">&#39;newReminder&#39;</span>
+    <span class="p">}</span>
+
+<span class="n">HTMLElements</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">HTMLElements</span><span class="p">]</span>
+<span class="n">conceptNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">conceptNames</span><span class="p">]</span>
 </pre></div>
 
            </div>
@@ -696,19 +935,11 @@
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, marco2012
+        &copy; Copyright 2023, marco2012
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -719,6 +950,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {
