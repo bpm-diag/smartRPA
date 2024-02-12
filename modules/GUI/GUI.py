@@ -206,8 +206,8 @@ class MainApplication(QMainWindow, QDialog):
         layout.addWidget(self.systemLoggerFilesFolderCB)
         layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerClipboardCB)
-        # Added by josaloroc / a8081
-        layout.addWidget(self.systemLoggerStandardCB)
+        # Added by josaloroc / a8081 / Removed for SoftwareX publication - not mature enough
+        # layout.addWidget(self.systemLoggerStandardCB)
         ###
         layout.addWidget(self.systemLoggerHotkeysCB)
         layout.addWidget(self.systemLoggerUSBCB)
