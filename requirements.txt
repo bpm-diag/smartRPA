@@ -8,6 +8,7 @@ requests_futures==1.0.0
 Flask==2.1.0 # https://stackoverflow.com/questions/71718167/importerror-cannot-import-name-escape-from-jinja2
 Werkzeug==2.2.2 # https://stackoverflow.com/questions/77213053/why-did-flask-start-failing-with-importerror-cannot-import-name-url-quote-fr
 darkdetect==0.1.1
+# Platforms do not work with conda install. They have to selected based on your os
 PyQt5==5.13.0; platform_system == "Darwin" # only version compatible with macOS 11 (big sur)
 PyQtWebEngine==5.13.0; platform_system == "Darwin"
 PyQt5==5.15.1; platform_system == "Windows" # version 5.13.0 is not available on windows
