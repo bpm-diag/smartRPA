@@ -49,7 +49,7 @@ def getResponse(json_str=""):
 
         screenshot_label = QtWidgets.QLabel(window)
         # Display screenshot if available
-        if "screenshot" in json_str and json_str.get("screenshot") is not "":
+        if "screenshot" in json_str and json_str.get("screenshot") != "":
             window.resize(800, 500)
             # Read the screenshot image: https://stackoverflow.com/questions/71935118/how-to-putting-image-in-the-label-on-pyqt
             pixmap = QPixmap(json_str.get("screenshot"))

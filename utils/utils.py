@@ -27,9 +27,9 @@ from requests_futures.sessions import FuturesSession
 # screenshot recording feature for single screen
 from PIL import Image
 import os
-import dxcam
 import hashlib
 from datetime import datetime
+from screeninfo import get_monitors
 
 # screenshot recording feature for multiple screen
 from PIL import ImageGrab
@@ -57,6 +57,9 @@ if WINDOWS:
     RECENT_ITEMS_PATH_WIN = shell.SHGetFolderPath(0, shellcon.CSIDL_RECENT, None, 0)
     # RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
 
+if not MAC:
+    import dxcam
+
 # return shortcut lnk full path
 # def shortcut_target(filename):
 #     pythoncom.CoInitialize()
@@ -81,6 +84,7 @@ EVENT_LOG_FOLDER = "event_log"
 PROCESS_DISCOVERY_FOLDER = "process_discovery"
 SW_ROBOT_FOLDER = "SW_Robot"
 UIPATH_FOLDER = "UiPath"
+
 # Global variable for camera on taking screenshots
 camera = None
 
@@ -507,16 +511,7 @@ def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().captu
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        if dxcam.output_info().count("Output[") > 1:
-            # If there are more than two screens attached it is easier to use the pillow impage capture
-            screenshot = ImageGrab.grab(all_screens=True)
-            # Have to use tobytes as the PIL image cannot be hashed using sha256_hash method
-            short_hash = calculateImageHash(screenshot.tobytes())
-            stamp = timestamp("%Y-%m-%d_%H-%M-%S")
-            filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
-            screenshot.save(filename, format=scrshtFormat)
-
-        else:
+        if not MAC and len(get_monitors()) == 1:
             global camera  # usa la variable global camera
 
             # Si no hay instancia de cámara, crear una nueva instancia
@@ -538,6 +533,15 @@ def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().captu
             
             # Guarda la imagen y elimina compresión
             Image.fromarray(img).save(filename, compress_level=0)
+
+        else:
+            # If there are more than two screens attached it is easier to use the pillow impage capture
+            screenshot = ImageGrab.grab(all_screens=True)
+            # Have to use tobytes as the PIL image cannot be hashed using sha256_hash method
+            short_hash = calculateImageHash(screenshot.tobytes())
+            stamp = timestamp("%Y-%m-%d_%H-%M-%S")
+            filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
+            screenshot.save(filename, format=scrshtFormat)
 
     return filename
 

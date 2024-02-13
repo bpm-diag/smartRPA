@@ -14,7 +14,7 @@ import utils.config
 import modules.consumerServer
 import utils.utils
 from modules.events import systemEvents, officeEvents, clipboardEvents, standardEvents
-
+import platform
 
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
