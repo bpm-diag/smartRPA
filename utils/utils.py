@@ -511,11 +511,7 @@ def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().captu
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        print("---------------------")
-        print(MAC)
-        print(len(get_monitors()))
-        print("---------------------")
-        if MAC and len(get_monitors()) == 1:
+        if not MAC and len(get_monitors()) == 1:
             global camera  # usa la variable global camera
 
             # Si no hay instancia de cámara, crear una nueva instancia
