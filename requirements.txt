@@ -18,7 +18,7 @@ watchdog==0.10.2
 pandas==1.1.4
 numpy==1.19.3
 nativeconfig==3.4.0
-pynput==1.6.7
+pynput==1.7.6
 selenium==3.7.0
 python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win if visual studio c libraries missing
 fuzzywuzzy==0.18.0
