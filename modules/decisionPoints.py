@@ -149,7 +149,7 @@ class DecisionPoints:
         # self.add_end_marker()
         # self.df1.sort_values(by=['case:concept:name', 'time:timestamp'], ascending=True, inplace=True)
         self.df1.to_csv("checking.csv")
-        s = self.df1.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        s = self.df1.groupby('case:concept:name',group_keys=False)['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
         
         #Issue 32: Intention is to get the number of changes in each process from the base line
         # If there are more than one cumsum values in the col s, than there is a variation point
@@ -171,7 +171,7 @@ class DecisionPoints:
         """
 
         series = []
-        for group, df2 in dataframe.groupby('case:concept:name'):
+        for group, df2 in dataframe.groupby('case:concept:name',group_keys=False):
             category = ','.join(df2['category'].unique())
             application = ','.join(df2['application'].unique())
             keywords = ''
@@ -242,7 +242,7 @@ class DecisionPoints:
             status += "s" # Adding s to string > points
         self.status_queue.put(status)
 
-        s = df.groupby('case:concept:name')['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
+        s = df.groupby('case:concept:name',group_keys=False)['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
         duplicated_groups = df.groupby([s, 'category'])
 
         for group_index, dataframe in duplicated_groups:
@@ -267,7 +267,7 @@ class DecisionPoints:
                     dataframes.append(dataframe[dataframe['case:concept:name'] == first_caseid_in_group])
 
             # decision point if not duplicated and there are at least 2 traces in the current group
-            elif not duplicated and len(dataframe.groupby('case:concept:name')) >= 2:
+            elif not duplicated and len(dataframe.groupby('case:concept:name',group_keys=False)) >= 2:
 
                 # if the current group does not contain rows from selected trace, skip iteration
                 if selectedTrace and selectedTrace not in dataframe['case:concept:name'].unique():
@@ -290,13 +290,13 @@ class DecisionPoints:
                     try:
                         decisionTraces = pandas \
                             .merge(previousDataframe, previousDecision, on=on) \
-                            .groupby('case:concept:name_x')['case:concept:name_x'] \
+                            .groupby('case:concept:name_x',group_keys=False)['case:concept:name_x'] \
                             .filter(lambda group: len(group) >= len(previousDecision) * 0.76) \
                             .unique().tolist()
                     except KeyError:
                         decisionTraces = pandas \
                             .merge(previousDataframe, previousDecision, on=on) \
-                            .groupby('case:concept:name')['case:concept:name'] \
+                            .groupby('case:concept:name',group_keys=False)['case:concept:name'] \
                             .filter(lambda group: len(group) >= len(previousDecision) * 0.76) \
                             .unique().tolist()
 
@@ -361,7 +361,7 @@ class DecisionPoints:
                     if len(filtered_df) == 0 or \
                             filtered_df.empty:
                         continue
-                    elif len(filtered_df.groupby('case:concept:name')) >= 2:
+                    elif len(filtered_df.groupby('case:concept:name',group_keys=False)) >= 2:
                         # there are at least 2 traces, create keywords dataframe and prompt user
                         keywordsDF = self.__generateKeywordsDataframe(filtered_df)
                     else:
