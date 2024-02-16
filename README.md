@@ -189,7 +189,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
   1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
   2. Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
   3. `pip3 install pm4py==1.5.0.1`
-
+  <br/>
     <details>
     <summary>
         Click to show how to <b>fix installation errors</b> on Windows
@@ -203,23 +203,24 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
   <details>
   <summary>
-    Fix graphviz error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
+    Fix **graphviz** error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
   </summary>
   </br>
 
   If you get the error <code> Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] </code> and you use Anaconda or conda, you have to use another version of the graphviz python library.</br>
   With conda you can run <code>conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1</code> in your environment.
   </details>
+  <br/>
 
   <details>
   <summary>
-    Fix nativeconfig error: From collections import OrderedDict, Mapping ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nativeconfig) in <img src="https://img.shields.io/badge/Python-3.8 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />
+    Fix **nativeconfig** error: From collections import OrderedDict, Mapping in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />
   </summary>
   </br>
   
-  The current library version nativeconfig (3.4.0) uses an outdated version of collections in Python 3.10 <img src="https://img.shields.io/badge/Python-3.8 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />.<br/>
+  The current library version nativeconfig (3.4.0) uses an outdated version of collections in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />.<br/>
   To fix this error navigate to your nativeconfig python installation. Replace the collections import in the base_config file with the following code:
-  <code>from collections.abc import Mapping<br/> from collections import OrderedDict</code>
+  <code>from collections.abc import Mapping</code><br/><code> from collections import OrderedDict</code>
   </details>
 
 - On **MacOS**:
