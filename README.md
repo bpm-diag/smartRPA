@@ -214,13 +214,13 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
   <details>
   <summary>
-    Fix **nativeconfig** error: From collections import OrderedDict, Mapping in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />
+    Fix <b>nativeconfig</b> error: From collections import OrderedDict, Mapping in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />
   </summary>
   </br>
   
   The current library version nativeconfig (3.4.0) uses an outdated version of collections in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />.</br>
-  To fix this error navigate to your nativeconfig python installation. Replace the collections import in the base_config file with the following code:
-  <code>from collections.abc import Mapping</code></br/><code> from collections import OrderedDict</code>
+  To fix this error navigate to your nativeconfig python installation. Replace the collections import in the base_config file with the following code:</br>
+  <code>from collections.abc import Mapping</code></br><code> from collections import OrderedDict</code>
   </details>
 
 - On **MacOS**:
