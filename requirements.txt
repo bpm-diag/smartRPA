@@ -28,9 +28,6 @@ lxml==4.9.3
 pydot==1.4.1
 deprecated
 
-# Must match Chrome version installed, might raise error running Python RPA
-chromedriver_binary
-
 # Windows specific dependencies
 pywin32==227; platform_system == "Windows"
 WMI==1.4.9; platform_system == "Windows"
