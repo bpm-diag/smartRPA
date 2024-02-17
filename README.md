@@ -282,7 +282,11 @@ The cross-platform python script requires the following dependencies to work.
 
 To run the generated RPA scripts you must install `automagica` module available in the `libraries` directory.
 
-`pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
+ - With Python <= 3.7
+  `pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
+ - With Python > 3.7
+  `pip3 install libraries/smartRPA-automagica-2-1-12.zip`
+
 
   <details>
   <summary>
