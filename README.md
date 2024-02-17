@@ -329,6 +329,20 @@ If you don't find the `Python 3.8` folder under `/Applications`, make sure you i
 
 </details>
 
+<details>
+<summary>
+    Message: session not created: This version of ChromeDriver only supports Chrome version 123
+</summary>
+<br>
+If you get the error <code>Message: session not created: This version of ChromeDriver only supports Chrome version 123</code> when running a smartRPA created bot:
+
+1. Navigate <a href="https://pypi.org/project/chromedriver-binary/#history">Pypi Chromedriver-binary</a>
+2. Select the chromedriver-binary matching your current Chrome version. E.g. 121.0.6134.0.0 for Chrome 121
+3. Install the package again using the pip command from Pypi, e.g. <code>pip install chromedriver-binary==121.0.6134.0.0</code>
+
+</details>
+
+
 ### UiPath (Windows Only)
 
 The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
