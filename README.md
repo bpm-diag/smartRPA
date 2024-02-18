@@ -189,7 +189,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
   1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
   2. Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
   3. `pip3 install pm4py==1.5.0.1`
-
+  </br>
     <details>
     <summary>
         Click to show how to <b>fix installation errors</b> on Windows
@@ -200,6 +200,28 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
     </details>
   <br>
+
+  <details>
+  <summary>
+    Fix <b>graphviz</b> error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
+  </summary>
+  </br>
+
+  If you get the error <code> Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] </code> and you use Anaconda or conda, you have to use another version of the graphviz python library.</br>
+  With conda you can run <code>conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1</code> in your environment.
+  </details>
+  </br>
+
+  <details>
+  <summary>
+    Fix <b>nativeconfig</b> error: From collections import OrderedDict, Mapping in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />
+  </summary>
+  </br>
+  
+  The current library version nativeconfig (3.4.0) uses an outdated version of collections in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />.</br>
+  To fix this error navigate to your nativeconfig python installation. Replace the collections import in the base_config file with the following code:</br>
+  <code>from collections.abc import Mapping</code></br><code>from collections import OrderedDict</code>
+  </details>
 
 - On **MacOS**:
 
@@ -260,7 +282,11 @@ The cross-platform python script requires the following dependencies to work.
 
 To run the generated RPA scripts you must install `automagica` module available in the `libraries` directory.
 
-`pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
+ - With Python <= 3.7
+  `pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
+ - With Python > 3.7
+  `pip3 install libraries/smartRPA-automagica-2-1-12.zip`
+
 
   <details>
   <summary>
@@ -306,6 +332,20 @@ If you get the error <code>RuntimeError: Failed to download chromedriver archive
 If you don't find the `Python 3.8` folder under `/Applications`, make sure you installed Python using <a href="https://www.python.org/downloads/mac-osx/">the official installer</a> and not from a package manager like brew.
 
 </details>
+
+<details>
+<summary>
+    Message: session not created: This version of ChromeDriver only supports Chrome version 123
+</summary>
+<br>
+If you get the error <code>Message: session not created: This version of ChromeDriver only supports Chrome version 123</code> when running a smartRPA created bot:
+
+1. Navigate <a href="https://pypi.org/project/chromedriver-binary/#history">Pypi Chromedriver-binary</a>
+2. Select the chromedriver-binary matching your current Chrome version. E.g. 121.0.6134.0.0 for Chrome 121
+3. Install the package again using the pip command from Pypi, e.g. <code>pip install chromedriver-binary==121.0.6134.0.0</code>
+
+</details>
+
 
 ### UiPath (Windows Only)
 

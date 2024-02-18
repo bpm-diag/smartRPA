@@ -1,0 +1,70 @@
+# Python 310 requirements
+# Common dependencies
+wheel
+setuptools
+pyperclip==1.7.0
+keyboard==0.13.4
+requests_futures==1.0.0
+# Double check the dependencies between flask and werkzeug when updating versions
+Flask==2.1.0 # https://stackoverflow.com/questions/71718167/importerror-cannot-import-name-escape-from-jinja2
+Werkzeug==2.0.0 # https://stackoverflow.com/questions/77213053/why-did-flask-start-failing-with-importerror-cannot-import-name-url-quote-fr
+darkdetect==0.1.1
+# Platforms do not work with conda install. They have to be selected based on your os
+# !!  ----- Check PyQt and WebEngine for MacOS ---- !!
+PyQt5==5.13.0; platform_system == "Darwin" # only version compatible with macOS 11 (big sur)
+PyQtWebEngine==5.13.0; platform_system == "Darwin"
+PyQt5==5.15.10; platform_system == "Windows" # version 5.13.0 is not available on windows
+PyQtWebEngine==5.15.6; platform_system == "Windows"
+beautifulsoup4==4.9.3
+watchdog==0.10.2
+pandas==2.2.0
+numpy==1.26.4
+# In native config the base_config.py has to be fixed
+# The collections import does not work and has to be replaced by
+# from collections.abc import Mapping
+# from collections import OrderedDict
+nativeconfig==3.4.0
+pynput==1.7.6
+selenium==3.7.0
+python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win if visual studio c libraries missing
+fuzzywuzzy==0.18.0
+Unidecode==1.1.1
+psutil==5.4.6
+lxml==4.9.3
+pydot==1.4.1
+deprecated
+
+# Windows specific dependencies
+pywin32==306; platform_system == "Windows"
+WMI==1.4.9; platform_system == "Windows"
+
+# MacOS specific dependencies
+applescript==2019.4.13; platform_system == "Darwin"
+MacFSEvents==0.8.1; platform_system == "Darwin"
+xlwings==0.18.0; platform_system == "Darwin"
+
+#16 Screenshot recorder dependencies / versions on 27/11/2023
+pillow==10.2.0
+dxcam; platform_system == "Windows"
+screeninfo
+
+#Process Mining specific dependencies
+pm4py==2.7.9.4
+python-Levenshtein==0.25.0
+
+#Static Noise Filtering Features added
+validators==0.18.2
+
+#Documentation Dependencies
+sphinx-rtd-theme # can be removed, not necessary to run smartRPA
+
+# deprecated dependencies
+# matplotlib==3.3.2
+# opyenxes==0.3.0
+# networkx==2.4
+## pm4py-bpmn
+# bpmn_python==0.0.18
+# intervaltree
+# lime
+# joblib
+# pydotplus

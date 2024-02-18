@@ -147,7 +147,9 @@ class ProcessMining:
             # elif "BPMN" in img_name:
             #     bpmn_vis_factory.save(gviz, img_path)
         except Exception as e:
-            print(f"[PROCESS MINING] Could not save image: {e}")
+            # Sometimes it does save the image - have to debugg at later point in time
+            # Error in conda is gone with: conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1
+            print(f"[PROCESS MINING] Could not save image {self.filename}_{img_name}.pdf: {e}")
 
     def create_alpha_miner(self):
         net, initial_marking, final_marking = alpha_miner.apply(self._log)
