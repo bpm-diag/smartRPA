@@ -29,7 +29,7 @@ selenium==3.7.0
 python-Levenshtein==0.12.0; platform_system == "Darwin" # errors on win if visual studio c libraries missing
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
-psutil==5.4.6
+psutil==5.6.6
 lxml==4.9.3
 pydot==1.4.1
 deprecated
@@ -49,7 +49,7 @@ dxcam; platform_system == "Windows"
 screeninfo
 
 #Process Mining specific dependencies
-pm4py==2.7.9.4
+pm4py==1.5.0.1
 python-Levenshtein==0.25.0
 
 #Static Noise Filtering Features added
