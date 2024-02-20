@@ -178,11 +178,11 @@ The following dependencies are required to enable process discovery analysis, a 
   - Visual C++ tools for CMake
   - C++ x64/x86 build tools
 
-  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://www.scivision.co/python-windows-visual-c-14-required/).
+  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required).
 
 #### 1) PM4PY
 
-To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/features) python module.
+To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/) python module.
 
 - On **Windows**:
 
