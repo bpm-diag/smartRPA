@@ -1,13 +1,13 @@
 <p align="center">
 <img width="100%" src="images/readme-header.png"><br/><br/>
     <a href="https://www.python.org/downloads/" alt="Activity">
-        <img src="https://img.shields.io/badge/Python-3.8 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
     <a href="#" alt="Activity">
         <img src="https://img.shields.io/badge/Javascript-ES6-blue?style=flat&labelColor=F7DF1E&color=F7DF1E&logo=javascript&logoColor=white" /></a>
     <a href="#" alt="Activity">
-        <img src="https://img.shields.io/badge/Windows-10-blue?style=flat&labelColor=0078D6&color=0078D6&logo=windows&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/Windows-10/11-blue?style=flat&labelColor=0078D6&color=0078D6&logo=windows&logoColor=white" /></a>
     <a href="#" alt="Activity">
-        <img src="https://img.shields.io/badge/MacOS-10.15-blue?style=flat&labelColor=999999&color=999999&logo=apple&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/MacOS-14-blue?style=flat&labelColor=999999&color=999999&logo=apple&logoColor=white" /></a>
     </br>
     <a href="https://www.office.com/" alt="Activity">
         <img src="https://img.shields.io/badge/Office-365-blue?style=flat&labelColor=E74025&color=E74025&logo=microsoft-office&logoColor=white" /></a>
@@ -74,13 +74,13 @@ The full **documentation** of the tool is available [here](https://bpm-diag.gith
 
 ### 1. **Install dependencies**
 
-[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required.
+[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.10 is recommended.
 
 - Install [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only) on Windows and [Brew](https://brew.sh) on MacOS
 - Install **project** dependencies _(required to record UI log)_
 
   ```bash
-  pip3 install -r requirements.txt
+  pip3 install -r requirements310.txt
   ```
 
 - Install **Process Discovery** dependencies _(required to perform process discovery analysis)_
@@ -174,7 +174,7 @@ The following dependencies are required to enable process discovery analysis, a 
 - On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
   It is vital to install all C++ related development tools like:
 
-  - Windows 10 SDK
+  - Windows 10/11 SDK
   - Visual C++ tools for CMake
   - C++ x64/x86 build tools
 
@@ -263,7 +263,7 @@ This package provides a 4-10x speedup in String Matching.
 
 - On **Windows**:
   1.  Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only)
-  2.  `pip3 install python-Levenshtein==0.12.0`
+  2.  `pip3 install python-Levenshtein==0.25.0`
 
 ## RPA dependencies
 
@@ -356,7 +356,7 @@ The generated UiPath project requires _UiPath Studio_, available at [https://www
 To sum up, you should have installed:
 
 - Action Logger dependencies
-  - `pip3 install -r requirements.txt`
+  - `pip3 install -r requirements310.txt`
   - [Browser extension](#2-install-browser-extension)
   - [Excel AddIn (MacOS Only)](#3-install-excel-addin-macos-only)
 - [Process Discovery dependencies](#process-discovery-dependencies)
