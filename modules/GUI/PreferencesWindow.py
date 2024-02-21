@@ -23,7 +23,7 @@ class Preferences(QMainWindow):
 
         * enable or disable process discovery analysis
         * select the number of runs after which event log is generated
-        * select analysis type (either decision points or most frequent routine)
+        * select analysis type (either decision/variation points or most frequent routine)
         * Future: enable or disable the screenshot recording feature
 
         :param status_queue: queue to send messages to main GUI
@@ -87,12 +87,12 @@ class Preferences(QMainWindow):
         self.mfr.setChecked(utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis)
         self.mfr.setToolTip("Create SW Robot based on most frequent routine in the event log")
 
-        self.decision = QRadioButton("Decision points")
+        self.decision = QRadioButton("Variation points")
         self.decision.clicked.connect(self.handle_radio)
         self.decision.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_analysis)
         self.decision.setToolTip("Create SW Robot based on user decisions")
 
-        self.decisionRPA = QRadioButton("Decision points in UiPath")
+        self.decisionRPA = QRadioButton("Variation points in UiPath")
         self.decisionRPA.clicked.connect(self.handle_radio)
         self.decisionRPA.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis)
         self.decisionRPA.setToolTip("Create SW Robot that asks for user decisions in UiPath script")
@@ -113,7 +113,7 @@ class Preferences(QMainWindow):
         label_maximum = QLabel(str(slider_maximum), alignment=Qt.AlignRight, font=font)
 
         self.slider_label = QLabel(
-            "Number of runs after which \nevent is generated:")
+            "Number of runs after which \nthe event log is generated:")
         self.slider_label.setToolTip(
             "When the selected number of runs is reached, all CSV logs collected are merged into one \nand a XES file "
             "is automatically generated, to be used for process mining techniques")
