@@ -57,7 +57,7 @@ The architecture of SmartRPA integrates five main SW components.
 
 **Key features** include:
 
-- [x] **Action Logger**, log user behaviour, cross-platform, modular, supports wide range of applications;
+- [x] **Action Logger**, log user behaviour, take screenshots, tag actions, supports wide range of applications, cross-platform;
 - [x] **Log Processing**, generates both CSV and XES event log;
 - [x] **Event abstraction**, abstracts events to a higher level;
 - [x] **Process Discovery**, selects the most suitable routine variant to automate and generates high-level flowchart diagram, thus skipping completely the manual modeling activity;
