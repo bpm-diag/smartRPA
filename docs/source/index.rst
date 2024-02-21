@@ -1,6 +1,6 @@
-======================
+==========================
 SmartRPA documentation
-======================
+==========================
 
 .. figure:: ../../images/readme-header.png
    :figwidth: 80%
@@ -12,14 +12,6 @@ What is SmartRPA
 **Robotic Process Automation (RPA)** is a technology which automates mouse and keyboard interactions by means of a software (SW) robot to remove intensive routines. The current generation of RPA tools is driven by predefined rules and manual configurations made by expert users rather than automated techniques.
 
 **SmartRPA** is a cross-platform tool that tackles such issues. It allows to easily record event logs and to automatically generating executable RPA scripts that will drive a SW robots in emulating an observed user behavior (previously recorded in dedicated UI logs) during the enactment of a routine of interest.
-
-Links
-=====
-
-* **Source code** is available on `GitHub <https://github.com/bpm-diag/smartRPA/>`_.
-* The associated **paper** is available on `Springer <https://doi.org/10.1007/978-3-030-58779-6_8/>`_, and has been presented at the RPA Forum of 18th International Conference on Business Process Management.
-* A **screencast** of the tool is available on `Vimeo <https://vimeo.com/marco2012/smartRPA/>`_.
-
 
 Authors
 =======
@@ -55,7 +47,7 @@ The architecture of SmartRPA integrates five main SW components.
 | 
 | Key features include:
 
-* **Action Logger**, log user behaviour, cross-platform, modular, supports wide range of applications;
+* **Action Logger**, log user behaviour, take screenshots, tag actions, supports wide range of applications, cross-platform;
 * **Log Processing**, generates both CSV and XES event log;
 * **Event abstraction**, abstracts events to a higher level;
 * **Process Discovery**, selects the most suitable routine variant to automate and generates high-level flowchart diagram, thus skipping completely the manual modeling activity;
@@ -69,6 +61,24 @@ A list of events supported by the Action Logger is available in `SmartRPA_events
 
 `Download  <https://github.com/bpm-diag/smartRPA/releases>`_
 ============================================================
+
+Links
+=====
+
+#. **Source code** is available on `GitHub <https://github.com/bpm-diag/smartRPA/>`_.
+
+#. The associated **papers** are available here: 
+
+   #. Agostinelli S., Lupia M., Marrella A., Mecella M.: `Reactive Synthesis of Software Robots in RPA from User Interface Logs <https://doi.org/10.1016/j.compind.2022.103721>`_. Accepted at Computers in Industry (Elsevier), 2022
+   
+   #. Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.: `Automated Generation of Executable RPA Scripts from User Interface Logs <https://doi.org/10.1007/978-3-030-58779-6_8>`_. In: 18th Int. Conf. on Business Process Management (RPA Forum). pp. 116-131, 2020
+   
+   #. Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.:  `SmartRPA: A Tool to Reactively Synthesize Software Robots from User Interface Logs <https://doi.org/10.1007/978-3-030-79108-7_16>`_. In: 33rd Int. Conf. on Advanced Information Systems Engineering (CAiSE Forum). pp. 137-145, 2021
+      
+      * The synthetic UI logs generated for the test are available at: https://tinyurl.com/yyk68psx.
+      * The complete results can be analyzed at: https://tinyurl.com/y55v56qa.
+
+#. A **screencast** of the tool is available on `Vimeo <https://vimeo.com/569988752>`_.
 
 Contents
 ========

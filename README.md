@@ -45,7 +45,7 @@ Many thanks also to [Tom Hohenadl](https://www.linkedin.com/in/thohenadl/) (**Te
 
 <!--The **associated paper** is available on [Springer](https://doi.org/10.1007/978-3-030-58779-6_8), and has been presented at the [RPA Forum](https://congreso.us.es/bpm2020/calls/rpa/) of _18th International Conference on Business Process Management_.-->
 
-**Screencasts** of the tool are available on Vimeo \[[1](https://vimeo.com/marco2012/smartRPA)\] \[[2](https://vimeo.com/569988752)\].
+**Screencasts** of the tool are available on \[[Vimeo](https://vimeo.com/569988752)\].
 
 ## Architecture
 
