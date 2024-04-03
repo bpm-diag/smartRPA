@@ -44,7 +44,7 @@ MacFSEvents==0.8.1; platform_system == "Darwin"
 xlwings==0.18.0; platform_system == "Darwin"
 
 #16 Screenshot recorder dependencies / versions on 27/11/2023
-pillow==10.2.0
+pillow==10.3.0
 dxcam; platform_system == "Windows"
 screeninfo
 
