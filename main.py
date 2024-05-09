@@ -5,6 +5,8 @@
 
 import os
 import sys
+sys.path.append('src/')
+
 import time
 from threading import Thread
 from multiprocessing import Process, Queue
@@ -15,6 +17,8 @@ import modules.consumerServer
 import utils.utils
 from modules.events import systemEvents, officeEvents, clipboardEvents, standardEvents
 import platform
+
+
 
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
