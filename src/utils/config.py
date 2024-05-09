@@ -4,8 +4,6 @@
 # ****************************** #
 
 import os
-# from nativeconfig import PreferredConfig, StringOption, BooleanOption, IntOption
-# from datetime import datetime
 
 
 class MyConfig:
@@ -21,7 +19,7 @@ class MyConfig:
     """
 
     _instance = None
-    
+
     def __init__(self):
         self.REGISTRY_PATH = r'Software\ComputerLogger'
         self.JSON_PATH = os.path.expanduser('~/.config/ComputerLogger/config')
