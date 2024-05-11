@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt, QSize, QThreadPool, QTimer
 import utils.config
 import darkdetect
 from utils.utils import WINDOWS, MAC
+import modules.supervision
 
 
 # Preferences window
@@ -60,7 +61,7 @@ class Preferences(QMainWindow):
                                              "after selecting event log file, otherwise only event log is generated")
         self.process_discovery_cb.tag = "process_discovery_cb"
         self.process_discovery_cb.stateChanged.connect(self.handle_cb)
-        perform_process_discovery = utils.config.MyConfig.get_instance().perform_process_discovery
+        perform_process_discovery = utils.config.read_config("perform_process_discovery",bool)
         self.process_discovery_cb.setChecked(perform_process_discovery)
         self.decisionGroupBox.setEnabled(perform_process_discovery)
 
@@ -84,20 +85,20 @@ class Preferences(QMainWindow):
 
         self.mfr = QRadioButton("Most frequent routine")
         self.mfr.clicked.connect(self.handle_radio)
-        self.mfr.setChecked(utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis)
+        self.mfr.setChecked(utils.config.read_config("enable_most_frequent_routine_analysis",bool))
         self.mfr.setToolTip("Create SW Robot based on most frequent routine in the event log")
 
         self.decision = QRadioButton("Variation points")
         self.decision.clicked.connect(self.handle_radio)
-        self.decision.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_analysis)
+        self.decision.setChecked(utils.config.read_config("enable_decision_point_analysis",bool))
         self.decision.setToolTip("Create SW Robot based on user decisions")
 
         self.decisionRPA = QRadioButton("Variation points in UiPath")
         self.decisionRPA.clicked.connect(self.handle_radio)
-        self.decisionRPA.setChecked(utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis)
+        self.decisionRPA.setChecked(utils.config.read_config("enable_decision_point_RPA_analysis",bool))
         self.decisionRPA.setToolTip("Create SW Robot that asks for user decisions in UiPath script")
 
-        slider_minimum = 1 if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis else 2
+        slider_minimum = 1 if utils.config.read_config("enable_most_frequent_routine_analysis",bool) else 2
         slider_maximum = 30
 
         self.lcd = QLCDNumber(self)
@@ -106,7 +107,7 @@ class Preferences(QMainWindow):
         self.sld = QSlider(Qt.Horizontal, self)
         self.sld.setMinimum(slider_minimum)
         self.sld.setMaximum(slider_maximum)
-        self.sld.setValue(utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes)
+        self.sld.setValue(utils.config.read_config("totalNumberOfRunGuiXes",int))
         self.sld.valueChanged.connect(self.handle_slider)
 
         label_minimum = QLabel(str(1), alignment=Qt.AlignLeft, font=font)
@@ -180,7 +181,7 @@ class Preferences(QMainWindow):
         """
         value = self.sld.value()
         self.lcd.display(value)
-        utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = value
+        utils.config.write_config("totalNumberOfRunGuiXes",value)
 
     def handle_cb(self):
         """
@@ -189,7 +190,7 @@ class Preferences(QMainWindow):
         """
         perform = self.process_discovery_cb.isChecked()
         self.decisionGroupBox.setEnabled(perform)
-        utils.config.MyConfig.get_instance().perform_process_discovery = perform
+        utils.config.write_config("perform_process_discovery",perform)
         if perform:
             self.status_queue.put("[GUI] Process discovery enabled")
         else:
@@ -202,7 +203,7 @@ class Preferences(QMainWindow):
         """
         perform = self.screenshot_cb.isChecked()
         # self.decisionGroupBox.setEnabled(perform)
-        utils.config.MyConfig.get_instance().capture_screenshots = perform
+        utils.config.write_config("capture_screenshots",perform)
         if perform:
             self.status_queue.put("[GUI] Screenshot capture enabled")
         else:
@@ -214,9 +215,9 @@ class Preferences(QMainWindow):
         If enabled, after each event the user is asked for tagging the event
         """
         perform = self.supervision_cb.isChecked()
+        utils.config.write_config("supervisionFeature",perform)
         # self.decisionGroupBox.setEnabled(perform)
-        utils.config.MyConfig.get_instance().supervisionFeature = perform
-        if utils.config.MyConfig.get_instance().supervisionFeature:
+        if perform:
             self.status_queue.put("[GUI] Action supervision enabled")
         else:
             self.status_queue.put("[GUI] Action supervision disabled")
@@ -229,9 +230,9 @@ class Preferences(QMainWindow):
         decision_checked = self.decision.isChecked()
         decisionRPA_checked = self.decisionRPA.isChecked()
 
-        utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis = mfr_checked
-        utils.config.MyConfig.get_instance().enable_decision_point_analysis = decision_checked
-        utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis = decisionRPA_checked
+        utils.config.write_config("enable_most_frequent_routine_analysis",mfr_checked)
+        utils.config.write_config("enable_decision_point_analysis",decision_checked)
+        utils.config.write_config("enable_decision_point_RPA_analysis",decisionRPA_checked)
 
         # update lcd value, if decision there should be at least 2 traces
         if mfr_checked:

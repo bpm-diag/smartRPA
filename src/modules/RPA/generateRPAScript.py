@@ -10,7 +10,7 @@ import pandas
 import os
 import ntpath
 from threading import Thread
-import utils.config
+# import utils.config
 import utils
 from utils.utils import CHROME, DESKTOP, getActiveWindowInfo, WINDOWS, MAC
 import sys

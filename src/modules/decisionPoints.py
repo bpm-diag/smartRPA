@@ -148,7 +148,6 @@ class DecisionPoints:
         count = 0
         # self.add_end_marker()
         # self.df1.sort_values(by=['case:concept:name', 'time:timestamp'], ascending=True, inplace=True)
-        self.df1.to_csv("checking.csv")
         s = self.df1.groupby('case:concept:name',group_keys=False)['duplicated'].apply(lambda d: d.ne(d.shift()).cumsum())
         
         #Issue 32: Intention is to get the number of changes in each process from the base line

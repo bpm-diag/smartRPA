@@ -17,13 +17,13 @@ from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from modules import consumerServer, supervision
 from modules.consumerServer import SERVER_ADDR
-from utils.utils import *
+import utils.utils
 import psutil
 import pynput
 
 mouse = pynput.mouse.Controller()
 
-if WINDOWS:
+if utils.utils.WINDOWS:
     import pythoncom  # for win32 thread
     import win32com.client  # access running programs, part of pywin32
     import win32file
@@ -32,7 +32,7 @@ if WINDOWS:
     import wmi
     from win32com.shell import shell, shellcon
 
-if MAC:
+if utils.utils.MAC:
     import applescript
     import fsevents
 
@@ -66,13 +66,13 @@ def watchFolder():
             else:
                 if event.event_type == "moved":  # destination path is available
                     print(
-                        f"{timestamp()} {USER} OperatingSystem {event.event_type} {event.src_path} {event.dest_path}")
-                    screenshot = takeScreenshot()
-                    session.post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": timestamp(),
-                        "user": USER,
+                        f"{ utils.utils.timestamp()} { utils.utils.USER} OperatingSystem {event.event_type} {event.src_path} {event.dest_path}")
+                    screenshot = utils.utils.takeScreenshot()
+                    utils.utils.session.post(consumerServer.SERVER_ADDR, json={
+                        "timestamp":  utils.utils.timestamp(),
+                        "user":  utils.utils.USER,
                         "category": "OperatingSystem",
-                        "application": "Finder" if MAC else "Explorer",
+                        "application": "Finder" if utils.utils.MAC else "Explorer",
                         "event_type": event.event_type,
                         "event_src_path": event.src_path,
                         "event_dest_path": event.dest_path,
@@ -86,13 +86,13 @@ def watchFolder():
                     # do not log temporary windows files
                     if "~$" not in event.src_path:
                         print(
-                            f"{timestamp()} {USER} OperatingSystem {event.event_type} {event.src_path}")
-                        screenshot = takeScreenshot()
-                        session.post(consumerServer.SERVER_ADDR, json={
-                            "timestamp": timestamp(),
-                            "user": USER,
+                            f"{ utils.utils.timestamp()} { utils.utils.USER} OperatingSystem {event.event_type} {event.src_path}")
+                        screenshot = utils.utils.takeScreenshot()
+                        utils.utils.session.post(consumerServer.SERVER_ADDR, json={
+                            "timestamp":  utils.utils.timestamp(),
+                            "user":  utils.utils.USER,
                             "category": "OperatingSystem",
-                            "application": "Finder" if MAC else "Explorer",
+                            "application": "Finder" if utils.utils.MAC else "Explorer",
                             "event_type": event.event_type,
                             "event_src_path": event.src_path,
                             "mouse_coord": mouse.position,
@@ -102,7 +102,7 @@ def watchFolder():
     print("[systemEvents] Files/Folder logging started")
 
     my_observer = Observer()
-    my_observer.schedule(WatchFilesHandler(), HOME_FOLDER, recursive=True)
+    my_observer.schedule(WatchFilesHandler(), utils.utils.HOME_FOLDER, recursive=True)
     my_observer.start()
 
     try:
@@ -201,15 +201,15 @@ def watchFolderMac():
         if path not in logged.keys(): logged[path] = ""
         # ~ means temporary file
         if event_type != "UserDropped" and event_type not in logged.get(path) and "~" not in file_event.name:
-            screenshot = takeScreenshot()
+            screenshot = utils.utils.takeScreenshot()
             logged[path] = event_type
             # file_extension = os.path.splitext(path)[1]
-            print(f"{timestamp()} {USER} OperatingSystem {event_type} {file_event.name}")
+            print(f"{ utils.utils.timestamp()} { utils.utils.USER} OperatingSystem {event_type} {file_event.name}")
             json_string={
-                "timestamp": timestamp(),
-                "user": USER,
+                "timestamp":  utils.utils.timestamp(),
+                "user":  utils.utils.USER,
                 "category": "OperatingSystem",
-                "application": "Finder" if MAC else "Explorer",
+                "application": "Finder" if utils.utils.MAC else "Explorer",
                 "event_type": event_type,
                 "event_src_path": file_event.name,
                 "mouse_coord": mouse.position,
@@ -226,7 +226,7 @@ def watchFolderMac():
     # the HOME directory and it recursively observes all other folders but this does not work on macOS. Moreover the
     # home directory itself can't be observed.
     stream = fsevents.Stream(callback,
-                             DESKTOP, DOCUMENTS, DOWNLOADS,
+                             utils.utils.DESKTOP, utils.utils.DOCUMENTS, utils.utils.DOWNLOADS,
                              file_events=True)
     observer.start()
     observer.schedule(stream)
@@ -243,16 +243,16 @@ def logProcessesWin():
     print("[systemEvents] WIN Processes logging started")
 
     def _logProcessData(app, event):
-        screenshot = takeScreenshot()
+        screenshot = utils.utils.takeScreenshot()
         try:
             exe = [p.exe() for p in psutil.process_iter() if p.name() == app]
         except (PermissionError, psutil.AccessDenied):
             exe = []
         path = exe[0] if exe else ""
-        print(f"{timestamp()} {USER} {event} {app} {path}")
+        print(f"{ utils.utils.timestamp()} { utils.utils.USER} {event} {app} {path}")
         json_string={
-            "timestamp": timestamp(),
-            "user": USER,
+            "timestamp":  utils.utils.timestamp(),
+            "user":  utils.utils.USER,
             "category": "OperatingSystem",
             "application": app,
             "event_type": event,
@@ -372,7 +372,7 @@ def watchRecentsFilesWin():
         return name
 
     files_changed = Queue()
-    Watcher(RECENT_ITEMS_PATH_WIN, files_changed)
+    Watcher(utils.utils.RECENT_ITEMS_PATH_WIN, files_changed)
 
     print("[systemEvents] Recent files/folders logging started")
 
@@ -380,19 +380,19 @@ def watchRecentsFilesWin():
         try:
             file_type, filename, action = files_changed.get_nowait()
             if action == "Created":
-                screenshot = takeScreenshot()
+                screenshot = utils.utils.takeScreenshot()
                 lnk_target = _shortcut_target(filename)
                 file_extension = os.path.splitext(lnk_target)[1]
                 if file_extension:
                     eventType = "openFile"
                 else:
                     eventType = "openFolder"
-                print(f"{timestamp()} {USER} OperatingSystem {eventType} {lnk_target}")
+                print(f"{ utils.utils.timestamp()} { utils.utils.USER} OperatingSystem {eventType} {lnk_target}")
                 json_string={
-                    "timestamp": timestamp(),
-                    "user": USER,
+                    "timestamp":  utils.utils.timestamp(),
+                    "user":  utils.utils.USER,
                     "category": "OperatingSystem",
-                    "application": "Finder" if MAC else "Explorer",
+                    "application": "Finder" if utils.utils.MAC else "Explorer",
                     "event_type": eventType,
                     "event_src_path": lnk_target,
                     "mouse_coord": mouse.position,
@@ -441,17 +441,17 @@ def detectSelectionWindowsExplorer():
                     for j in range(selectedItems.Count):
                         path = selectedItems.Item(j).Path
                         if path != [] and path not in selected.get(i):
-                            screenshot = takeScreenshot()
+                            screenshot = utils.utils.takeScreenshot()
                             selected[i].append(path)
                             # file_extension = os.path.splitext(path)[1]
                             if os.path.isfile(path):
                                 eventType = "selectedFile"
                             else:
                                 eventType = "selectedFolder"
-                            print(f"{timestamp()} {USER} OperatingSystem {eventType} {path}")
+                            print(f"{ utils.utils.timestamp()} { utils.utils.USER} OperatingSystem {eventType} {path}")
                             json_string={
-                                "timestamp": timestamp(),
-                                "user": USER,
+                                "timestamp":  utils.utils.timestamp(),
+                                "user":  utils.utils.USER,
                                 "category": "OperatingSystem",
                                 "application": "Explorer",
                                 "event_type": eventType,
@@ -520,8 +520,8 @@ def logHotkeys():
     }
 
     def handleH(hotkey):
-        screenshot = takeScreenshot()
-        window_name = getActiveWindowName()
+        screenshot = utils.utils.takeScreenshot()
+        window_name = utils.utils.getActiveWindowName()
         try:
             appName = window_name.split('-')[-1].strip()
         except Exception:
@@ -534,10 +534,10 @@ def logHotkeys():
             clipboard_content = pyperclip.paste()
         if hotkey == "ctrl+h" and 'chrome' in appName.lower():
             meaning = "Show history"
-        print(f"{timestamp()} {USER} OperatingSystem {event_type} {hotkey.upper()} {meaning} {clipboard_content}")
+        print(f"{ utils.utils.timestamp()} { utils.utils.USER} OperatingSystem {event_type} {hotkey.upper()} {meaning} {clipboard_content}")
         json_string={
-            "timestamp": timestamp(),
-            "user": USER,
+            "timestamp":  utils.utils.timestamp(),
+            "user":  utils.utils.USER,
             "category": "OperatingSystem",
             "application": appName,
             "event_type": event_type,
@@ -574,20 +574,20 @@ def logPasteHotkey():
     def handleCB():
         # paste event in browser is handled separately so this should log only if I'm not in browser
         browsers = ["chrome", "edge", "firefox", "opera"]
-        window_name = getActiveWindowName()
+        window_name = utils.utils.getActiveWindowName()
         if not (any(b in window_name.lower() for b in browsers)):
-            screenshot = takeScreenshot()
+            screenshot = utils.utils.takeScreenshot()
             clipboard_content = pyperclip.paste()
             try:
                 appName = window_name.split('-')[-1].strip()
             except Exception:
                 appName = "Clipboard"
             # remove milliseconds from timestamp so duplicated events are easier to remove
-            ts = timestamp()[:-3] + '000'
-            print(f"{ts} {USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
+            ts =  utils.utils.timestamp()[:-3] + '000'
+            print(f"{ts} { utils.utils.USER} OperatingSystem paste CTRL+V Paste {clipboard_content}")
             json_string={
                 "timestamp": ts,
-                "user": USER,
+                "user":  utils.utils.USER,
                 "category": "OperatingSystem",
                 "application": appName,
                 "title": window_name,
@@ -651,12 +651,12 @@ def logUSBDrives():
         if LogicalDisk_DeviceID and DiskDrive_Caption:
             id = LogicalDisk_DeviceID[:-1]
             if id not in drive_list.keys():
-                screenshot = takeScreenshot()
+                screenshot = utils.utils.takeScreenshot()
                 drive_list[id] = DiskDrive_Caption
-                print(f"{timestamp()} {USER} OperatingSystem insertUSB {id} {DiskDrive_Caption}")
+                print(f"{ utils.utils.timestamp()} { utils.utils.USER} OperatingSystem insertUSB {id} {DiskDrive_Caption}")
                 json_string={
-                    "timestamp": timestamp(),
-                    "user": USER,
+                    "timestamp":  utils.utils.timestamp(),
+                    "user":  utils.utils.USER,
                     "category": "OperatingSystem",
                     "application": "Explorer",
                     "event_type": "insertUSB",
@@ -697,12 +697,12 @@ def logProcessesMac():
         if len(new_programs) != new_programs_len:  # set is changed
             for app in new_programs:
                 if app not in open_programs:
-                    screenshot = takeScreenshot()
+                    screenshot = utils.utils.takeScreenshot()
                     open_programs.append(app)
-                    print(f"{timestamp()} {USER} programOpen {app.strip()}.app")
+                    print(f"{ utils.utils.timestamp()} { utils.utils.USER} programOpen {app.strip()}.app")
                     json_string={
-                        "timestamp": timestamp(),
-                        "user": USER,
+                        "timestamp":  utils.utils.timestamp(),
+                        "user":  utils.utils.USER,
                         "category": "OperatingSystem",
                         "application": app.strip(),
                         "event_type": "programOpen",
@@ -720,11 +720,11 @@ def logProcessesMac():
             for app in closed_programs:
                 if app in open_programs:
                     open_programs.remove(app)
-                    print(f"{timestamp()} {USER} programClose {app.strip()}.app")
-                    screenshot = takeScreenshot()
-                    session.post(consumerServer.SERVER_ADDR, json={
-                        "timestamp": timestamp(),
-                        "user": USER,
+                    print(f"{ utils.utils.timestamp()} { utils.utils.USER} programClose {app.strip()}.app")
+                    screenshot = utils.utils.takeScreenshot()
+                    utils.utils.session.post(consumerServer.SERVER_ADDR, json={
+                        "timestamp":  utils.utils.timestamp(),
+                        "user":  utils.utils.USER,
                         "category": "OperatingSystem",
                         "application": app.strip(),
                         "event_type": "programClose",
@@ -751,13 +751,13 @@ def printerLogger():
         delay_secs=1
     )
     while 1:
-        screenshot = takeScreenshot()
+        screenshot = utils.utils.takeScreenshot()
         pj = print_job_watcher()
         print(
-            f"{timestamp()} {pj.Owner} OperatingSystem printSubmitted {pj.Name}")
+            f"{ utils.utils.timestamp()} {pj.Owner} OperatingSystem printSubmitted {pj.Name}")
         json_string={
-            "timestamp": timestamp(),
-            "user": USER,
+            "timestamp":  utils.utils.timestamp(),
+            "user":  utils.utils.USER,
             "category": "OperatingSystem",
             "application": "Printer",
             "event_type": "printSubmitted",

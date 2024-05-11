@@ -82,7 +82,7 @@ class ProcessMining:
         self.dfg_path = os.path.join(self.discovery_path, f"{self.filename}_DFG_model.pdf")
         self.bpmn_path = os.path.join(self.discovery_path, f"{self.filename}_BPMN.pdf")
 
-        if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
+        if utils.config.read_config("enable_most_frequent_routine_analysis",bool):
             print(f"[PROCESS MINING] Performing process discovery")
             # low level trace used for RPA generation
             self.mostFrequentCase = modules.mostFrequentRoutine.selectMostFrequentCase(self.dataframe, self.status_queue)

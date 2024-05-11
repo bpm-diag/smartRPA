@@ -22,7 +22,7 @@ def getResponse(json_str=""):
     :rtype: bool
     """
     # Only activate if the global setting is put to true
-    if utils.config.MyConfig.get_instance().supervisionFeature:
+    if utils.config.read_config("supervisionFeature",bool):
         global response_sp_feature
         response_sp_feature = False
         app = QtWidgets.QApplication(sys.argv)

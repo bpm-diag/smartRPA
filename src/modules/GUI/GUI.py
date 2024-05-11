@@ -15,18 +15,19 @@ from multiprocessing import Process, Queue
 import webbrowser
 import time
 from modules.GUI.filenameDialog import getFilenameDialog
-from utils.utils import *
+import utils.utils
 import main
 import modules.GUI.PreferencesWindow
-import utils.config
+# import utils.config
 import modules.flowchart
 import modules.decisionPoints
 import modules.RPA.generateRPAScript
 import modules.process_mining
-import utils.utils
+
 import traceback
 import sys
-
+import pandas as pd
+import os
 sys.path.append('../')  # this way main file is visible from this file
 
 
@@ -82,8 +83,8 @@ class MainApplication(QMainWindow, QDialog):
 
         # In action logger version, set preferences statically here
         # Defined by josaloroc and a8081 - Is this necessary?
-        # utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes = 1
-        # utils.config.MyConfig.get_instance().perform_process_discovery = False
+        # utils.utils.totalNumberOfRunGuiXes = 1
+        # utils.utils.perform_process_discovery = False
 
         # Boolean variables that save the state of each checkbox
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
@@ -123,7 +124,7 @@ class MainApplication(QMainWindow, QDialog):
         wid.setLayout(mainLayout)
         # self.setLayout(mainLayout)
 
-        updateUIThread = Thread(target=self.updateListWidget)
+        updateUIThread = utils.utils.Thread(target=self.updateListWidget)
         updateUIThread.daemon = True
         updateUIThread.start()
 
@@ -389,10 +390,10 @@ class MainApplication(QMainWindow, QDialog):
         """
         create status layout, the window below the start button where all logging appears
         """
-        if WINDOWS:
+        if utils.utils.WINDOWS:
             monospaceFont = 'Lucida Console'
             fontSize = 8
-        elif MAC:
+        elif utils.utils.MAC:
             monospaceFont = 'Courier'
             fontSize = 12
         else:
@@ -405,7 +406,7 @@ class MainApplication(QMainWindow, QDialog):
         self.statusListWidget.setFont(
             QFont(monospaceFont, fontSize, QFont.Normal))
         self.statusListWidget.setSelectionMode(QAbstractItemView.NoSelection)
-        if WINDOWS:
+        if utils.utils.WINDOWS:
             self.statusListWidget.setFixedHeight(200)
         else:
             self.statusListWidget.setFixedHeight(140)
@@ -422,7 +423,7 @@ class MainApplication(QMainWindow, QDialog):
         self.statusLayout.addWidget(self.statusListWidget)
         self.statusListWidget.addItem(QListWidgetItem(
             "Ready to log, press Start button..."))
-        if not utils.config.MyConfig.get_instance().perform_process_discovery:
+        if not utils.config.read_config("perform_process_discovery",bool):
             self.status_queue.put("[GUI] Process discovery disabled")
 
     def createProgressDialog(self, title, message, timeout=None):
@@ -439,7 +440,7 @@ class MainApplication(QMainWindow, QDialog):
             message, None, 0, 0, self, flags)
         self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.progress_dialog.setWindowTitle(title)
-        if WINDOWS:
+        if utils.utils.WINDOWS:
             self.progress_dialog.resize(470, 100)
         else:
             self.progress_dialog.resize(260, 100)
@@ -464,9 +465,9 @@ class MainApplication(QMainWindow, QDialog):
         """
         set native GUI style for each OS
         """
-        if WINDOWS:
+        if utils.utils.WINDOWS:
             QApplication.setStyle(QStyleFactory.create('windowsvista'))
-        elif MAC:
+        elif utils.utils.MAC:
             QApplication.setStyle(QStyleFactory.create('macintosh'))
         else:
             QApplication.setStyle(QStyleFactory.create('Fusion'))
@@ -503,7 +504,7 @@ class MainApplication(QMainWindow, QDialog):
         disable checkboxes not available on macOS like word and powerpoint.
         """
 
-        if WINDOWS:
+        if utils.utils.WINDOWS:
             # window size
             self.resize(640, 600)
             # margins
@@ -511,7 +512,7 @@ class MainApplication(QMainWindow, QDialog):
             self.bottomLayout.setContentsMargins(0, 20, 0, 20)
 
             # disable checkbox if corresponding program is not installed in system
-            if not OFFICE:
+            if not utils.utils.OFFICE:
                 self.officeGroupBox.setEnabled(False)
                 self.officeExcelCB.setChecked(False)
                 self.officeWordCB.setChecked(False)
@@ -525,9 +526,9 @@ class MainApplication(QMainWindow, QDialog):
             self.statusListWidget.setStyleSheet(
                 "QListWidget{background: #F0F0F0;}")
 
-        elif MAC or LINUX:
+        elif utils.utils.MAC or utils.utils.LINUX:
 
-            if not OFFICE:
+            if not utils.utils.OFFICE:
                 self.officeExcelCB.setChecked(False)
                 self.officeExcel = False
 
@@ -560,22 +561,22 @@ class MainApplication(QMainWindow, QDialog):
                 self.statusListWidget.setStyleSheet(
                     "QListWidget{background: #ECECEC;}")
 
-        if not CHROME:
+        if not utils.utils.CHROME:
             self.browserChromeCB.setEnabled(False)
             self.browserChromeCB.setChecked(False)
             self.browserChrome = False
 
-        if not FIREFOX:
+        if not utils.utils.FIREFOX:
             self.browserFirefoxCB.setEnabled(False)
             self.browserFirefoxCB.setChecked(False)
             self.browserFirefox = False
 
-        if not EDGE:
+        if not utils.utils.EDGE:
             self.browserEdgeCB.setEnabled(False)
             self.browserEdgeCB.setChecked(False)
             self.browserEdge = False
 
-        if not OPERA:
+        if not utils.utils.OPERA:
             self.browserOperaCB.setEnabled(False)
             self.browserOperaCB.setChecked(False)
             self.browserOpera = False
@@ -587,22 +588,22 @@ class MainApplication(QMainWindow, QDialog):
         Display message if a program like office, firefox, chrome, edge, opera is not installed in the operating system.
         """
         self.statusListWidget.clear()
-        if MAC:
+        if utils.utils.MAC:
             self.statusListWidget.addItem(QListWidgetItem(
                 "- Office module not available on MacOS"))
-        if WINDOWS and not OFFICE:
+        if utils.utils.WINDOWS and not utils.utils.OFFICE:
             self.statusListWidget.addItem(
                 QListWidgetItem("- Office not installed"))
-        if not CHROME:
+        if not utils.utils.CHROME:
             self.statusListWidget.addItem(
                 QListWidgetItem("- Chrome not installed"))
-        if not FIREFOX:
+        if not utils.utils.FIREFOX:
             self.statusListWidget.addItem(
                 QListWidgetItem("- Firefox not installed"))
-        if not EDGE:
+        if not utils.utils.EDGE:
             self.statusListWidget.addItem(
                 QListWidgetItem("- Edge (chromium) not installed"))
-        if not OPERA:
+        if not utils.utils.OPERA:
             self.statusListWidget.addItem(
                 QListWidgetItem("- Opera not installed"))
 
@@ -630,25 +631,25 @@ class MainApplication(QMainWindow, QDialog):
         self.officeExcelCB.setChecked(self.allCBChecked)
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
 
-        if WINDOWS:
+        if utils.utils.WINDOWS:
             self.systemLoggerHotkeysCB.setChecked(self.allCBChecked)
             self.systemLoggerUSBCB.setChecked(self.allCBChecked)
             self.systemLoggerEventsCB.setChecked(self.allCBChecked)
 
         # office checkboxes
-        if WINDOWS and OFFICE:
+        if utils.utils.WINDOWS and utils.utils.OFFICE:
             self.officeWordCB.setChecked(self.allCBChecked)
             self.officePowerpointCB.setChecked(self.allCBChecked)
             self.officeOutlookCB.setChecked(self.allCBChecked)
 
         # browser checkboxes
-        if CHROME:
+        if utils.utils.CHROME:
             self.browserChromeCB.setChecked(self.allCBChecked)
-        if FIREFOX:
+        if utils.utils.FIREFOX:
             self.browserFirefoxCB.setChecked(self.allCBChecked)
-        if EDGE:
+        if utils.utils.EDGE:
             self.browserEdgeCB.setChecked(self.allCBChecked)
-        if OPERA:
+        if utils.utils.OPERA:
             self.browserOperaCB.setChecked(self.allCBChecked)
 
         # Create a dialog to select a file and return its path
@@ -856,7 +857,7 @@ class MainApplication(QMainWindow, QDialog):
         rpa = modules.RPA.generateRPAScript.RPAScript(
             log_filepath, self.status_queue)
         rpa_success = rpa.run()
-        msg = f"- RPA generated in /RPA/{getFilename(log_filepath)}"
+        msg = f"- RPA generated in /RPA/{utils.utils.getFilename(log_filepath)}"
         self.statusListWidget.addItem(QListWidgetItem(msg))
 
     def choices(self, pm, log_filepath):
@@ -885,8 +886,8 @@ class MainApplication(QMainWindow, QDialog):
         :param pm: instance of the Process Mining class
         :param log_filepath: path of the event log to analyze
         """
-        # print(f"[DEBUG] PM enabled = {utils.config.MyConfig.get_instance().perform_process_discovery}")
-        if utils.config.MyConfig.get_instance().perform_process_discovery:
+        # print(f"[DEBUG] PM enabled = {utils.utils.perform_process_discovery}")
+        if utils.config.read_config("perform_process_discovery",bool):
             num_traces = len(
                 pm.dataframe['case:concept:name'].drop_duplicates())
             pm.highLevelDFG()
@@ -894,7 +895,7 @@ class MainApplication(QMainWindow, QDialog):
             self.status_queue.put(f"[PROCESS MINING] Generated diagrams")
 
             # most frequent routine
-            if utils.config.MyConfig.get_instance().enable_most_frequent_routine_analysis:
+            if utils.config.read_config("enable_most_frequent_routine_analysis",bool):
                 # create high level DFG model based on most frequent routine
                 # pm.highLevelBPMN()
                 modules.flowchart.Flowchart(
@@ -926,7 +927,7 @@ class MainApplication(QMainWindow, QDialog):
                     UiPath.generateUiPathRPA()
 
             # decision
-            elif utils.config.MyConfig.get_instance().enable_decision_point_analysis:
+            elif utils.config.read_config("enable_decision_point_analysis",bool):
 
                 if num_traces >= 2:
                     # open high level DFG
@@ -981,7 +982,7 @@ class MainApplication(QMainWindow, QDialog):
                                           f"at least 2 traces are needed in the event log\n")
 
             # decision point in RPA script at run time
-            elif utils.config.MyConfig.get_instance().enable_decision_point_RPA_analysis:
+            elif utils.config.read_config("enable_decision_point_RPA_analysis",bool):
                 # at least 2 traces are needed to perform decision analysis
                 try:
                     # create UiPath RPA script passing dataframe of entire process
@@ -1016,7 +1017,7 @@ class MainApplication(QMainWindow, QDialog):
 
             self.runCount += 1
 
-        totalRunCount = utils.config.MyConfig.get_instance().totalNumberOfRunGuiXes
+        totalRunCount = int(utils.config.read_config("totalNumberOfRunGuiXes"))
         if self.runCount == totalRunCount:
             self.status_queue.put(
                 f"[GUI] Run {self.runCount} of {totalRunCount}")
@@ -1202,7 +1203,7 @@ class MainApplication(QMainWindow, QDialog):
                 except PermissionError:
                     print(
                         f"[GUI] Could not kill process {pid}, trying another way")
-                    if WINDOWS:
+                    if utils.utils.WINDOWS:
                         try:
                             import subprocess
                             subprocess.check_output(f"Taskkill /F /PID {pid}")
@@ -1215,7 +1216,7 @@ class MainApplication(QMainWindow, QDialog):
 
             self.status_queue.put(f"[GUI] Logger stopped")
             # once log file is created, RPA actions are automatically generated for each category
-            # log_filepath = utils.config.MyConfig.get_instance().log_filepath
+            # log_filepath = utils.utils.log_filepath
             if not self.LOG_FILEPATH.empty():
                 main_log_filepath = self.LOG_FILEPATH.get()
                 if main_log_filepath and os.path.exists(main_log_filepath):
@@ -1237,7 +1238,7 @@ class MainApplication(QMainWindow, QDialog):
                     f"[GUI] Could not locate screenshot folder.")
                 
             # kill node server when closing python server, otherwise port remains busy
-            if MAC and self.officeExcel:
+            if utils.utils.MAC and self.officeExcel:
                 os.system("pkill -f node")
 
 

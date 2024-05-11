@@ -15,7 +15,7 @@ from importlib import util
 from threading import Thread
 from platform import system
 from urllib.parse import urlparse
-import utils.config
+# import utils.config
 import modules.consumerServer
 import unicodedata
 import pandas as pd
@@ -30,6 +30,7 @@ import os
 import hashlib
 from datetime import datetime
 from screeninfo import get_monitors
+import utils.config
 
 # screenshot recording feature for multiple screen
 from PIL import ImageGrab
@@ -359,7 +360,7 @@ def getChromedriverPath():
 
     :return: hromedriver pat
     """
-    automagica_path = utils.utils.getPythonModuleLocation('automagica')
+    automagica_path = getPythonModuleLocation('automagica')
     chromedriver_relative = ""
     if WINDOWS:
         chromedriver_relative = "bin/win32/chromedriver.exe"
@@ -496,7 +497,7 @@ def calculateImageHash(img):
     sha256_hash.update(img)
     return sha256_hash.hexdigest()
 
-def takeScreenshot(save_image: bool = utils.config.MyConfig.get_instance().capture_screenshots, scrshtFormat: str ="png"):
+def takeScreenshot(save_image: bool = utils.config.read_config("capture_screenshots",bool), scrshtFormat: str ="png"):
     """
     Takes a screenshot and saves it to a directory with a filename based on its hash, current date/time and order of capture.
 
