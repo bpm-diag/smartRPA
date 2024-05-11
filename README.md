@@ -169,8 +169,6 @@ The following dependencies are required to enable process discovery analysis, a 
 
 #### 0) Visual Studio (Windows Only)
 
-<img width="40%" src="images/visual_studio.png">
-
 - On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
   It is vital to install all C++ related development tools like:
 
@@ -180,25 +178,20 @@ The following dependencies are required to enable process discovery analysis, a 
 
   If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required).
 
-#### 1) PM4PY
+#### 1) PM4PY - Troubleshooting
 
 To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/) python module.
 
 - On **Windows**:
-
-  1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
-  2. Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
-  3. `pip3 install pm4py==1.5.0.1` if not already installed by the requirements.txt
+  <details>
+  <summary>
+      Click to show how to <b>fix installation errors</b> on Windows
+  </summary>
   </br>
-    <details>
-    <summary>
-        Click to show how to <b>fix installation errors</b> on Windows
-    </summary>
-    </br>
 
   If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/downloads/windows/">64bit version of Python3</a>.
 
-    </details>
+  </details>
   <br>
 
   <details>
@@ -246,13 +239,6 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
     </details>
 
-#### 2) Python-Levenshtein (Windows Only)
-
-This package provides a 4-10x speedup in String Matching.
-
-- On **Windows**:
-  1.  Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only)
-  2.  `pip3 install python-Levenshtein==0.25.0`
 
 ## RPA dependencies
 
