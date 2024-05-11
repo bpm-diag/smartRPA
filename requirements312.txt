@@ -62,4 +62,3 @@ sphinx-rtd-theme # can be removed, not necessary to run smartRPA
 # lime
 # joblib
 # pydotplus
-# nativeconfig==3.4.0

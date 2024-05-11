@@ -70,17 +70,15 @@ The full **documentation** of the tool is available [here](https://bpm-diag.gith
 
 # Installation and execution:
 
-**NOTE**: If you only want the action logger to record event logs without further analysis, you can find it [here](https://github.com/bpm-diag/smartRPA/tree/action_logger).
-
 ### 1. **Install dependencies**
 
-[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.10 is recommended.
+[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.12 is recommended.
 
 - Install [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only) on Windows and [Brew](https://brew.sh) on MacOS
 - Install **project** dependencies _(required to record UI log)_
 
   ```bash
-  pip3 install -r requirements310.txt
+  pip3 install -r requirements312.txt
   ```
 
 - Install **Process Discovery** dependencies _(required to perform process discovery analysis)_
@@ -102,6 +100,8 @@ The browser extension is required to log browser events. It is available in `ext
 - [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
 
 - [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
+
+Currently the browser extension requires the developer mode to be active in your browser. Please check the browser documentation on how to enable the developer mode.
 
 Once main logger is running, **you must click** on the browser extension to enable it.
 
@@ -150,7 +150,7 @@ python3 main.py
 </summary>
 </br>
 
-If you have installed all the [dependencies](#1-install-dependencies)(`pip3 install -r requirements.txt `) but you still get <code>ModuleNotFoundError</code>, run the tool with:
+If you have installed all the [dependencies](#1-install-dependencies)(`pip3 install -r requirements312.txt `) but you still get <code>ModuleNotFoundError</code>, run the tool with:
 
 ```bash
 py main.py
@@ -188,7 +188,7 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
 
   1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
   2. Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
-  3. `pip3 install pm4py==1.5.0.1`
+  3. `pip3 install pm4py==1.5.0.1` if not already installed by the requirements.txt
   </br>
     <details>
     <summary>

@@ -19,17 +19,12 @@ beautifulsoup4==4.9.3
 watchdog==0.10.2
 pandas==2.2.0
 numpy==1.26.4
-# In native config the base_config.py has to be fixed
-# The collections import does not work and has to be replaced by
-# from collections.abc import Mapping
-# from collections import OrderedDict
-nativeconfig==3.4.0
 pynput==1.7.6
 selenium==3.7.0
 python-Levenshtein==0.25.0; 
 fuzzywuzzy==0.18.0
 Unidecode==1.1.1
-psutil==5.6.6
+psutil==5.6.7
 lxml==4.9.3
 pydot==1.4.1
 deprecated
