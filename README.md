@@ -257,7 +257,7 @@ The advantages of the UiPath integration is that the generated SW Robot can be e
 
 ## Error Handling for possible installation errors
 
-### > Visual Studio Errors
+### 1. Visual Studio Errors
 
 <details>
 <summary> 
@@ -267,18 +267,18 @@ The advantages of the UiPath integration is that the generated SW Robot can be e
   If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required).
 </details>
 
-### > Graphviz Errors
+### 2. Graphviz Errors
 
 <details>
-  <summary>
-  Windows: Fix <b>graphviz</b> error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
-  </summary>
-  </br>
+<summary>
+Windows: Fix <b>graphviz</b> error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
+</summary>
+</br>
 
-  If you get the error <code> Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] </code> and you use Anaconda or conda, you have to use another version of the graphviz python library.</br>
-  With conda you can run <code>conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1</code> in your environment.
-  </details>
-  </br>
+If you get the error <code> Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] </code> and you use Anaconda or conda, you have to use another version of the graphviz python library.</br>
+With conda you can run <code>conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1</code> in your environment.
+</details>
+
 
 <details>
 <summary>
@@ -293,7 +293,7 @@ py main.py
 ```
 
 </details>
-<br>
+
 
 <details>
 <summary>
@@ -301,29 +301,29 @@ py main.py
 </summary>
 </br>
 
-  If you get an error during installation:
+If you get an error during installation:
 
-  - If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, install `pm4py` again
+- If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, install `pm4py` again
 
-    ```
-    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-    ```
+```bash
+sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+```
 
-  - If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, install `pm4py` again
+- If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, install `pm4py` again
 
-    ```
-    export CPATH=`xcrun --show-sdk-path`/usr/include
-    ```
+```bash
+export CPATH=`xcrun --show-sdk-path`/usr/include
+```
 
-  - If you're on **MacOS 11.0 Big Sur**, install the latest nightly build version of `scikit-learn` running the following command and then install `pm4py` again
+- If you're on **MacOS 11.0 Big Sur**, install the latest nightly build version of `scikit-learn` running the following command and then install `pm4py` again
 
-    ```
-    pip3 install --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
-    ```
+```bash
+pip3 install --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
+```
 
 </details>
 
-### > Automagica Errors
+### 3. Automagica Errors
 
 <details>
 <summary>
@@ -342,7 +342,7 @@ pip3 install libraries/Automagica-2.0.25-py3-none-any.whl
 ```
 </details>
 
-### > Chromedriver Errors
+### 4. Chromedriver Errors
 
 <details>
 <summary>
