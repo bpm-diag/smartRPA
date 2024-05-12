@@ -72,7 +72,7 @@ The full **documentation** of the tool is available [here](https://bpm-diag.gith
 
 The following dependencies are required to enable process discovery analysis, a key component of the tool.
 
-## 1. **Install Prerequisits**
+## 1. **Install Prerequisites**
 
 ### 1.1 Visual Studio (Windows Only)
 
@@ -246,7 +246,7 @@ The advantages of the UiPath integration is that the generated SW Robot can be e
 
 To sum up, you should have installed:
 
-- [Process Discovery dependencies](#process-discovery-dependencies)
+- [Prerequisites](#Install Prerequisites)
   - [Visual Studio C/C++ Build Tools (Windows Only)](#0-visual-studio-windows-only)
 - Action Logger dependencies
   - `pip3 install -r requirements310.txt`
