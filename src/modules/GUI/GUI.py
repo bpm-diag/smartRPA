@@ -1017,7 +1017,7 @@ class MainApplication(QMainWindow, QDialog):
 
             self.runCount += 1
 
-        totalRunCount = int(utils.config.read_config("totalNumberOfRunGuiXes"))
+        totalRunCount = utils.config.read_config("totalNumberOfRunGuiXes",int)
         if self.runCount == totalRunCount:
             self.status_queue.put(
                 f"[GUI] Run {self.runCount} of {totalRunCount}")

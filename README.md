@@ -64,85 +64,49 @@ The architecture of SmartRPA integrates five main SW components.
 - [x] **Decision Points**, discover differencies between multiple traces in a process and build a new routine based on user decisions;
 - [x] **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform _Python script_ and as a _UiPath_ project.
 
-A **list of events** supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf).
+A **list of events** supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/src/images/SmartRPA_events.pdf).
 
 The full **documentation** of the tool is available [here](https://bpm-diag.github.io/smartRPA/).
 
 # Installation and execution:
 
-### 1. **Install dependencies**
+The following dependencies are required to enable process discovery analysis, a key component of the tool.
 
-[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.12 is recommended.
+## 1. **Install dependencies**
 
-- Install [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only) on Windows and [Brew](https://brew.sh) on MacOS
-- Install **project** dependencies _(required to record UI log)_
+### Visual Studio (Windows Only)
 
-  ```bash
-  pip3 install -r requirements312.txt
-  ```
+<img width="40%" src="src/images/visual_studio.png">
 
-- Install **Process Discovery** dependencies _(required to perform process discovery analysis)_
+- On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
+  It is vital to install all C++ related development tools like:
 
-  [Details here](#process-discovery-dependencies)
-
-- Install **RPA** dependencies _(required to run RPA SW Robot)_
-
-  [Details here](#rpa-dependencies)
-
-### 2. **Install browser extension**
-
-The browser extension is required to log browser events. It is available in `extensions/browserlogger` and supports 4 major browsers:
-
-- [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
-
-- [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): install [`browserlogger.xpi`](https://github.com/bpm-diag/smartRPA/blob/develop/extensions/browserlogger/browserlogger.xpi?raw=true) in `about:addons`
-
-- [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
-
-- [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
-
-Currently the browser extension requires the developer mode to be active in your browser. Please check the browser documentation on how to enable the developer mode.
-
-Once main logger is running, **you must click** on the browser extension to enable it.
-
-### 3. **Install Excel Addin (MacOS Only)**
-
-The excel addin is required to log Excel events <u>only on MacOS</u>.
-
-[`Node.js`](https://nodejs.org/en/download/) must be installed to run this addin.
-
-```bash
-cd extensions/excelAddinMac
-npm install # install dependencies
-npm start   # sideload Add-in
-npm stop    # stop server
-```
+  - Windows 10/11 SDK
+  - Visual C++ tools for CMake
+  - C++ x64/x86 build tools
 
 <details>
-<summary>
-    Click to show how to <b>activate the Add-in</b> in Excel
+<summary> 
+  Error: Microsoft Visual C++ 14.0 is required
 </summary>
-</br>
-
-<ol type="a">
-  <li>Start the Action Logger selecting Excel module</li>
-  <li>Go to <code>Insert</code> tab</li>
-  <li>Click on the small down-arrow to the right of <code>My Add-ins</code> > <code>OfficeLogger</code></li>
-  <img width="50%" src="images/excel_logger.png">
-  <li>Go to <code>Home</code> tab</li>
-  <li>Click the <code>Show Taskpane</code> button in the ribbon</li>
-  <li>Enable the checkbox</li>
-</ol>
-
-If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy <code>extensions/excelAddinMac/manifest.xml</code> into <code>~/Library/Containers/com.microsoft.Excel/Data/Documents/wef</code>, as described <a href="https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-an-office-add-in-on-ipad-and-mac#sideload-an-add-in-in-office-on-mac">here</a>.
-
+  </br>
+  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required).
 </details>
+  
+### GraphViz (Windows Only)
 
-### 4. **Run main logger**
+Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
 
-```bash
-python3 main.py
-```
+<details>
+  <summary>
+  Fix <b>graphviz</b> error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
+  </summary>
+  </br>
+
+  If you get the error <code> Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] </code> and you use Anaconda or conda, you have to use another version of the graphviz python library.</br>
+  With conda you can run <code>conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1</code> in your environment.
+  </details>
+  </br>
 
 <details>
 <summary>
@@ -159,24 +123,77 @@ py main.py
 </details>
 <br>
 
+### Python and its Requirements
+
+[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.12 is recommended.
+
+- Install [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only) on Windows and [Brew](https://brew.sh) on MacOS
+- Install **project** dependencies _(required to record UI log)_
+
+  ```bash
+  pip3 install -r requirements312.txt
+  ```
+
+## 2. **Install browser extension**
+
+The browser extension is required to log browser events. It is available in `extensions/browserlogger` and supports 4 major browsers:
+
+- [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
+
+- [_Mozilla Firefox_](https://www.mozilla.org/en-US/firefox/new/): install [`browserlogger.xpi`](https://github.com/bpm-diag/smartRPA/blob/develop/extensions/browserlogger/browserlogger.xpi?raw=true) in `about:addons`
+
+- [_Microsoft Edge (chromium)_](https://www.microsoft.com/en-us/edge): load unpacked `browserlogger` directory in `edge://extensions/`
+
+- [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
+
+Currently the browser extension requires the developer mode to be active in your browser. Please check the browser documentation on how to enable the developer mode.
+
+Once main logger is running, **you must click** on the browser extension to enable it.
+
+## 3. **Install Excel Addin (MacOS Only)**
+
+The excel addin is required to log Excel events <u>only on MacOS</u>.
+
+[`Node.js`](https://nodejs.org/en/download/) must be installed to run this addin.
+
+```bash
+cd src/extensions/excelAddinMac
+npm install # install dependencies
+npm start   # sideload Add-in
+npm stop    # stop server
+```
+
+<details>
+<summary>
+    Click to show how to <b>activate the Add-in</b> in Excel
+</summary>
+</br>
+
+<ol type="a">
+  <li>Start the Action Logger selecting Excel module</li>
+  <li>Go to <code>Insert</code> tab</li>
+  <li>Click on the small down-arrow to the right of <code>My Add-ins</code> > <code>OfficeLogger</code></li>
+  <img width="50%" src="src/images/excel_logger.png">
+  <li>Go to <code>Home</code> tab</li>
+  <li>Click the <code>Show Taskpane</code> button in the ribbon</li>
+  <li>Enable the checkbox</li>
+</ol>
+
+If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy <code>extensions/excelAddinMac/manifest.xml</code> into <code>~/Library/Containers/com.microsoft.Excel/Data/Documents/wef</code>, as described <a href="https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-an-office-add-in-on-ipad-and-mac#sideload-an-add-in-in-office-on-mac">here</a>.
+
+</details>
+
+## 4. **Run main logger**
+
+```bash
+python3 main.py
+```
+
+
 The resulting event log will be saved in `/RPA` directory.
 
 **NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
 
-## Process Discovery dependencies
-
-The following dependencies are required to enable process discovery analysis, a key component of the tool.
-
-#### 0) Visual Studio (Windows Only)
-
-- On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
-  It is vital to install all C++ related development tools like:
-
-  - Windows 10/11 SDK
-  - Visual C++ tools for CMake
-  - C++ x64/x86 build tools
-
-  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required).
 
 #### 1) PM4PY - Troubleshooting
 
@@ -194,22 +211,12 @@ To enable process discovery techniques you must install [PM4PY](https://pm4py.fi
   </details>
   <br>
 
-  <details>
-  <summary>
-    Fix <b>graphviz</b> error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
-  </summary>
-  </br>
-
-  If you get the error <code> Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] </code> and you use Anaconda or conda, you have to use another version of the graphviz python library.</br>
-  With conda you can run <code>conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1</code> in your environment.
-  </details>
-  </br>
 
 - On **MacOS**:
 
   1. Make sure you installed [brew](https://brew.sh/) package manager
-  2. Install graphviz with `brew install graphviz`
-  3. `pip3 install pm4py==1.5.0.1`
+  2. Check [brew] installation for graphviz with `brew install graphviz`
+  3. Check pm4py installation and run `pip3 install pm4py==1.5.0.1` if necessary
 
     <details>
     <summary>
@@ -261,7 +268,6 @@ To run the generated RPA scripts you must install `automagica` module available 
   `pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
  - With Python > 3.7
   `pip3 install libraries/smartRPA-automagica-2-1-12.zip`
-
 
   <details>
   <summary>

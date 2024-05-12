@@ -9,8 +9,6 @@ import csv
 from logging import getLogger
 import utils.config
 import utils.utils
-# import utils.GUI
-import datetime
 import modules.supervision as sp
 
 # server port
@@ -81,7 +79,7 @@ def writeLog():
 
     # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
     # Could be removed if it was added to all: Currently missing browser logger, thus has to be in place
-    if bool(utils.config.read_config("supervisionFeature")) and not "event_relevance" in content:
+    if utils.config.read_config("supervisionFeature",bool) and not "event_relevance" in content:
         answer =  sp.getResponse(content)
         content["event_relevance"] = answer
 
@@ -102,6 +100,7 @@ def writeLog():
         row.append(content.get(col))
 
     with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
+
         f = csv.writer(out_file)
         f.writerow(row)
 

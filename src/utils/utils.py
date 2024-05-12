@@ -155,6 +155,7 @@ def createLogFile():
     # utils.config.MyConfig.get_instance().log_filepath = log_filepath
     # create HEADER
     with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
+        print("Log File is created.")
         f = csv.writer(out_file)
         f.writerow(modules.consumerServer.HEADER)
     return log_filepath, screenshots_subdir

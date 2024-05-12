@@ -367,7 +367,7 @@ class UIPathXAML:
         RPA_filename = utils.utils.getFilename(
             self.csv_file_path).strip('_combined')
         uipath_template = os.path.join(
-            utils.utils.MAIN_DIRECTORY, 'utils', 'UiPath_Template')
+            utils.utils.MAIN_DIRECTORY, 'src/utils', 'UiPath_Template')
         copy_tree(uipath_template, self.UiPath_directory)
         filename = os.path.join(self.UiPath_directory, f"{RPA_filename}.xaml")
         with open(filename, "wb") as writer:
