@@ -83,7 +83,7 @@ The following dependencies are required to enable all functionalities within Sma
   - [Browser extension](#3-install-browser-extension)
 - [Excel AddIn (MacOS Only)](#4-install-excel-addin-macos-only)
 
-Furthermore, there are possible installation issues that can arise with the installation of the libraries. You can find fixes to the most common issues here [Installation Errors](#error-handling-for-possible-installation-errors)
+Furthermore, there are possible installation issues that can arise with the installation of the prerequisites or libraries. You can find fixes to the most common issues in the section [Installation Errors](#error-handling-for-possible-installation-errors) .
 
 ## 1. **Install Prerequisites**
 
@@ -127,7 +127,7 @@ We have specified three requirements files for distinct Python versions. We reco
 
 <details>
 <summary>
-CMD installation lines for Python 3.8 and Python 3.12
+CMD installation lines for Python 3.7 and Python 3.10
 </summary>
   <br/>
 
@@ -137,7 +137,7 @@ CMD installation lines for Python 3.8 and Python 3.12
   <br/>
 
   ```bash
-  pip3 install -r src/requirements312.txt
+  pip3 install -r src/requirements310.txt
   ```
   <br/>
 </details>
@@ -163,9 +163,7 @@ To run the generated RPA scripts you must install `automagica` module available 
 
 ### 2.3 Chromedriver (Required for Chrome/Edge users)
 
-Required for executing the emulated Python bots in Chrome and Edge.
-
-Install _chromedriver_ to enable automation in Google Chrome and MS Edge.
+Required for executing the emulated **Automagica Python** bots in Chrome and Edge.
 Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history).
 
 ```bash
@@ -174,7 +172,7 @@ pip3 install chromedriver-binary
 
 ### 2.4 UiPath (Windows Only) (Optional)
 
-The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio). Without UiPath Studio you cannot import and execute the generated UiPath bots from SmartRPA.
+The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio). </br>Without UiPath Studio you cannot import and execute the generated UiPath bots from SmartRPA.
 
 
 ## 3. **Install browser extension**
@@ -254,6 +252,11 @@ The resulting event log will be saved in `logs/` directory. If the screenshot fe
 The advantages of the UiPath integration is that the generated SW Robot can be easily customized by the end user.
 
 **NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
+
+### Action Logger Only
+
+If you only want the action logger to record event logs without further analysis, you can find it [here](https://github.com/bpm-diag/smartRPA/tree/action_logger) .
+Please note that this logger is associated with version 1.0 of SmartRPA and has not been updated with the new functionalities (Supervision Feature, Screenshot Feature, Updated Python Libraries) of SmartRPA 2.0.
 
 ## Error Handling for possible installation errors
 
