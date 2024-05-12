@@ -184,11 +184,14 @@ Currently the browser extension **requires the developer mode to be active** in 
 <summary>
 Enabling the Browser Logger
 </summary>
+
 Once the main logger is running, **you must click** on the browser extension to enable it.
 </br>
+
 | Inactive Browser Logging  | Active Browser Logging |
 | ------------- | ------------- |
-| <img width="50%" src="src/images/disabledBrowserLogger.png"/>  | <img width="50%" src="src/images/enabledBrowserLogger.png"/> |
+| <img width="25%" src="src/images/disabledBrowserLogger.png"/>  | <img width="25%" src="src/images/enabledBrowserLogger.png"/> |
+
 </details>
 
 ## 3. **Install Excel Addin (MacOS Only)**
