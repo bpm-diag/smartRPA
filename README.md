@@ -72,7 +72,7 @@ The full **documentation** of the tool is available [here](https://bpm-diag.gith
 
 The following dependencies are required to enable process discovery analysis, a key component of the tool.
 
-## 1. **Install dependencies**
+## 1. **Install Prerequisits**
 
 ### Visual Studio (Windows Only)
 
@@ -100,7 +100,7 @@ Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stab
   3. Check pm4py installation and run `pip3 install pm4py==1.5.0.1` if necessary
 
 
-### Python and its Requirements
+## 2. **Python Installation**
 
 #### Requirements.txt
 
@@ -148,26 +148,27 @@ To run the generated RPA scripts you must install `automagica` module available 
 
   </details>
 
-#### Chromedriver
+#### **Chromedriver** (Optional for Chrome/Edge users)
 
-**Hint** Required for executing the emulated Python bots in Chrome and Edge.
+**Hint**: Required for executing the emulated Python bots in Chrome and Edge.
 
-Install _chromedriver_ to enable automation in Google Chrome.
-
+Install _chromedriver_ to enable automation in Google Chrome and MS Edge.
 Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history).
 
 ```bash
 pip3 install chromedriver-binary
 ```
 
-### UiPath (Windows Only)
+### UiPath (Windows Only) (Optional)
+
+**Hint**: Without UiPath Studio you cannot import and execute the generated UiPath bots from SmartRPA.
 
 The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
 
 
 ## 2. **Install browser extension**
 
-The browser extension is required to log browser events. It is available in `extensions/browserlogger` and supports 4 major browsers:
+The browser extension is required to log browser events. It is available in `src/extensions/browserlogger` and supports 4 major browsers:
 
 - [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 
@@ -177,9 +178,18 @@ The browser extension is required to log browser events. It is available in `ext
 
 - [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
-Currently the browser extension requires the developer mode to be active in your browser. Please check the browser documentation on how to enable the developer mode.
+Currently the browser extension **requires the developer mode to be active** in your browser. Please check the browser documentation on how to enable the developer mode.
 
-Once main logger is running, **you must click** on the browser extension to enable it.
+<details>
+<summary>
+Enabling the Browser Logger
+</summary>
+Once the main logger is running, **you must click** on the browser extension to enable it.
+</br>
+| Inactive Browser Logging  | Active Browser Logging |
+| ------------- | ------------- |
+| <img width="50%" src="src/images/disabledBrowserLogger.png"/>  | <img width="50%" src="src/images/enabledBrowserLogger.png"/> |
+</details>
 
 ## 3. **Install Excel Addin (MacOS Only)**
 
