@@ -70,7 +70,20 @@ The full **documentation** of the tool is available [here](https://bpm-diag.gith
 
 # Installation and execution:
 
-The following dependencies are required to enable process discovery analysis, a key component of the tool.
+The following dependencies are required to enable all functionalities within SmartRPA. Check all boxes and you are able to log user actions, discover process models, and emulate RPA bots in UiPath and Automagica automatically:
+
+- [Prerequisites](#1-install-prerequisites)
+  - [Visual Studio C/C++ Build Tools (Windows Only)](#11-visual-studio-windows-only)
+  - [Graphviz Windows/Mac](#12a-graphviz-windows)
+  - [Automagica](#22-automagica-library)
+  - [Chromedriver for Edge/Chrome](#23-chromedriver-required-for-chromeedge-users)
+  - [UiPath Studio](#24-uipath-windows-only-optional)
+- Action Logger dependencies
+  - [Python Requirements](#21-requirementstxt)
+  - [Browser extension](#3-install-browser-extension)
+- [Excel AddIn (MacOS Only)](#4-install-excel-addin-macos-only)
+
+Furthermore, there are possible installation issues that can arise with the installation of the libraries. You can find fixes to the most common issues here [Installation Errors](#error-handling-for-possible-installation-errors)
 
 ## 1. **Install Prerequisites**
 
@@ -242,24 +255,7 @@ The advantages of the UiPath integration is that the generated SW Robot can be e
 
 **NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
 
-## 6. Installation Recap
-
-To sum up, you should have installed:
-
-- [Prerequisites](#Install-Prerequisites)
-  - [Visual Studio C/C++ Build Tools (Windows Only)](#0-visual-studio-windows-only)
-- Action Logger dependencies
-  - `pip3 install -r requirements310.txt`
-  - [Browser extension](#2-install-browser-extension)
-  - [Excel AddIn (MacOS Only)](#3-install-excel-addin-macos-only)
-- [RPA dependencies](#rpa-dependencies)
-  - [Python script](#python-script)
-    - [Automagica](#1-automagica)
-    - [Chromedriver](#2-chromedriver)
-  - [UiPath](#uipath-windows-only)
-
-
-# Error Handling for possible installation errors
+## Error Handling for possible installation errors
 
 ### > Visual Studio Errors
 
