@@ -246,7 +246,7 @@ The advantages of the UiPath integration is that the generated SW Robot can be e
 
 To sum up, you should have installed:
 
-- [Prerequisites](#Install Prerequisites)
+- [Prerequisites](#Install-Prerequisites)
   - [Visual Studio C/C++ Build Tools (Windows Only)](#0-visual-studio-windows-only)
 - Action Logger dependencies
   - `pip3 install -r requirements310.txt`
