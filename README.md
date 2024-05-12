@@ -74,7 +74,7 @@ The following dependencies are required to enable process discovery analysis, a 
 
 ## 1. **Install Prerequisits**
 
-### Visual Studio (Windows Only)
+### 1.1 Visual Studio (Windows Only)
 
 <img width="40%" src="src/images/visual_studio.png">
 
@@ -86,12 +86,12 @@ The following dependencies are required to enable process discovery analysis, a 
   - C++ x64/x86 build tools
 
   
-### GraphViz Windows
+### 1.2a GraphViz Windows
 
 Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
 
 
-### GraphViz Mac
+### 1.2b GraphViz Mac
 
 - On **MacOS**:
 
@@ -102,7 +102,7 @@ Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stab
 
 ## 2. **Python Installation**
 
-#### Requirements.txt
+### 2.1 Requirements.txt
 
 [Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.12 is recommended.
 
@@ -129,7 +129,7 @@ CMD installation lines for Python 3.8 and Python 3.12
   <br/>
 </details>
 
-#### Automagica Library
+### 2.2 Automagica Library
 
 To run the generated RPA scripts you must install `automagica` module available in the `libraries` directory.
 
@@ -148,9 +148,9 @@ To run the generated RPA scripts you must install `automagica` module available 
 
   </details>
 
-#### **Chromedriver** (Optional for Chrome/Edge users)
+### 2.3 Chromedriver (Required for Chrome/Edge users)
 
-**Hint**: Required for executing the emulated Python bots in Chrome and Edge.
+Required for executing the emulated Python bots in Chrome and Edge.
 
 Install _chromedriver_ to enable automation in Google Chrome and MS Edge.
 Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history).
@@ -159,14 +159,12 @@ Make sure to install the release that matches your Google Chrome version (check 
 pip3 install chromedriver-binary
 ```
 
-### UiPath (Windows Only) (Optional)
+### 2.4 UiPath (Windows Only) (Optional)
 
-**Hint**: Without UiPath Studio you cannot import and execute the generated UiPath bots from SmartRPA.
-
-The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
+The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio). Without UiPath Studio you cannot import and execute the generated UiPath bots from SmartRPA.
 
 
-## 2. **Install browser extension**
+## 3. **Install browser extension**
 
 The browser extension is required to log browser events. It is available in `src/extensions/browserlogger` and supports 4 major browsers:
 
@@ -190,11 +188,11 @@ Once the main logger is running, **you must click** on the browser extension to 
 
 | Inactive Browser Logging  | Active Browser Logging |
 | ------------- | ------------- |
-| <img width="25%" src="src/images/disabledBrowserLogger.png"/>  | <img width="25%" src="src/images/enabledBrowserLogger.png"/> |
+| <img width="100%" src="src/images/disabledBrowserLogger.png"/>  | <img width="100%" src="src/images/enabledBrowserLogger.png"/> |
 
 </details>
 
-## 3. **Install Excel Addin (MacOS Only)**
+## 4. Install Excel Addin (MacOS Only)
 
 The excel addin is required to log Excel events <u>only on MacOS</u>.
 
@@ -227,18 +225,26 @@ If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy 
 
 </details>
 
-## 4. **Run main logger**
+## 5. Run main logger
 
 ```bash
 python3 main.py
 ```
 
 A detailed **screencast** of the tool is available on \[[Vimeo](https://vimeo.com/569988752)\] including the core functions of recording, analyzing, and emulating RPA bots.
+The resulting event log will be saved in `logs/` directory. If the screenshot feature is active the screenshots are stored in the `Screenshots` directory. 
+</br>SmartRPA generates two types of SW Robots in the `RPA/` directory:
 
-# Recap
+1. a cross-platform executable **Python script**, available on both Windows and MacOS
+2. a **UiPath project**, available only on Windows
+
+The advantages of the UiPath integration is that the generated SW Robot can be easily customized by the end user.
+
+**NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
+
+## 6. Installation Recap
 
 To sum up, you should have installed:
-
 
 - [Process Discovery dependencies](#process-discovery-dependencies)
   - [Visual Studio C/C++ Build Tools (Windows Only)](#0-visual-studio-windows-only)
@@ -252,21 +258,10 @@ To sum up, you should have installed:
     - [Chromedriver](#2-chromedriver)
   - [UiPath](#uipath-windows-only)
 
-After installing the dependencies, you can [run the tool](#4-run-main-logger).
-
-The resulting event log will be saved in `/RPA` directory. SmartRPA generates two types of SW Robots in the `/RPA` directory:
-
-1. a cross-platform executable **Python script**, available on both Windows and MacOS
-2. a **UiPath project**, available only on Windows
-
-The advantages of the UiPath integration is that the generated SW Robot can be easily customized by the end user.
-
-**NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
-
 
 # Error Handling for possible installation errors
 
-### Visual Studio Errors
+### > Visual Studio Errors
 
 <details>
 <summary> 
@@ -276,7 +271,7 @@ The advantages of the UiPath integration is that the generated SW Robot can be e
   If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required).
 </details>
 
-### Graphviz Errors
+### > Graphviz Errors
 
 <details>
   <summary>
@@ -332,7 +327,7 @@ py main.py
 
 </details>
 
-### Automagica Errors
+### > Automagica Errors
 
 <details>
 <summary>
@@ -351,7 +346,7 @@ pip3 install libraries/Automagica-2.0.25-py3-none-any.whl
 ```
 </details>
 
-### Chromedriver Errors
+### > Chromedriver Errors
 
 <details>
 <summary>
