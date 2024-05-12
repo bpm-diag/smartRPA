@@ -152,7 +152,7 @@ To run the generated RPA scripts you must install `automagica` module available 
 
   <details>
   <summary>
-  Python <= 3.7: CMD for Automagica Installation
+  CMD installation lines Automagica with Python <= 3.7
   </summary>
   
   ```bash
@@ -264,7 +264,7 @@ The advantages of the UiPath integration is that the generated SW Robot can be e
   Error: Microsoft Visual C++ 14.0 is required
 </summary>
   </br>
-  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required).
+  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required) .
 </details>
 
 ### 2. Graphviz Errors
@@ -275,10 +275,18 @@ Windows: Fix <b>graphviz</b> error: Command '[WindowsPath('dot'), '-Kdot', '-Tpd
 </summary>
 </br>
 
-If you get the error <code> Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] </code> and you use Anaconda or conda, you have to use another version of the graphviz python library.</br>
-With conda you can run <code>conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1</code> in your environment.
-</details>
+```bash
+Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] 
+```
 
+If you recieve the shown error and you use Anaconda or conda, you have to use another version of the graphviz python library. 
+With conda run the following comand in your environment:
+
+```bash
+conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1
+```
+
+</details>
 
 <details>
 <summary>
@@ -286,14 +294,13 @@ With conda you can run <code>conda install conda-forge::python-graphviz conda-fo
 </summary>
 </br>
 
-If you have installed all the [dependencies](#1-install-dependencies)(`pip3 install -r requirements312.txt `) but you still get <code>ModuleNotFoundError</code>, run the tool with:
+If you have installed all the [requirements](#21-requirementstxt) but you still get <code>ModuleNotFoundError</code>, run SmartRPA with:
 
 ```bash
 py main.py
 ```
 
 </details>
-
 
 <details>
 <summary>
