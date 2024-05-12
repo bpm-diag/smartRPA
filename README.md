@@ -133,12 +133,24 @@ CMD installation lines for Python 3.8 and Python 3.12
 
 To run the generated RPA scripts you must install `automagica` module available in the `libraries` directory.
 
- - With Python <= 3.7
-  `pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
- - With Python > 3.7
-  `pip3 install libraries/smartRPA-automagica-2-1-12.zip`
+  ```bash
+  pip3 install src/libraries/smartRPA-automagica-2-1-12.zip
+  ```
 
-#### 2) Chromedriver
+  <details>
+  <summary>
+  Python <= 3.7: CMD for Automagica Installation
+  </summary>
+  
+  ```bash
+  pip3 install src/libraries/Automagica-2.0.25-py3-none-any.whl`
+  ```
+
+  </details>
+
+#### Chromedriver
+
+**Hint** Required for executing the emulated Python bots in Chrome and Edge.
 
 Install _chromedriver_ to enable automation in Google Chrome.
 
