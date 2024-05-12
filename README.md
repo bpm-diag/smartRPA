@@ -1,5 +1,5 @@
 <p align="center">
-<img width="100%" src="images/readme-header.png"><br/><br/>
+<img width="100%" src="src/images/readme-header.png"><br/><br/>
     <a href="https://www.python.org/downloads/" alt="Activity">
         <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
     <a href="#" alt="Activity">
@@ -22,7 +22,7 @@
     <br/>
     <a href="#"><img src="https://img.shields.io/badge/Sapienza University of Rome-blue?style=flat&labelColor=781A2D&color=781A2D&logoColor=white" /></a> 
   <br/><br/>
-  <img width="80%" src="images/gui.png"/>
+  <img width="80%" src="src/images/gui.png"/>
 
 </p>
 
@@ -106,12 +106,28 @@ Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stab
 
 [Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.12 is recommended.
 
-- Install [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only) on Windows and [Brew](https://brew.sh) on MacOS
-- Install **project** dependencies _(required to record UI log)_
+  ```bash
+  pip3 install -r src/requirements.txt
+  ```
+
+We have specified three requirements files for distinct Python versions. We recommend using the specified requirements file. The **requirements.txt** is for Python 3.12.
+
+<details>
+<summary>
+CMD installation lines for Python 3.8 and Python 3.12
+</summary>
+  <br/>
 
   ```bash
-  pip3 install -r requirements312.txt
+  pip3 install -r src/requirements308.txt
   ```
+  <br/>
+
+  ```bash
+  pip3 install -r src/requirements312.txt
+  ```
+  <br/>
+</details>
 
 #### Automagica Library
 
