@@ -52,7 +52,7 @@ A **Screencast** of the tool is available on \[[Vimeo](https://vimeo.com/5699887
 The architecture of SmartRPA integrates five main SW components.
 
 <p align="center">
-  <img width="55%" src="images/architecture.jpeg"/>
+  <img width="55%" src="src/images/architecture.jpeg"/>
 </p>
 
 **Key features** include:
