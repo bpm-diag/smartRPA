@@ -164,11 +164,12 @@ To run the generated RPA scripts you must install `automagica` module available 
 ### 2.3 Chromedriver (Required for Chrome/Edge users)
 
 Required for executing the emulated **Automagica Python** bots in Chrome and Edge.
-Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history).
+To select the correct version of the pip installation for the Chromedriver go to the Chrome or Edge [settings/help](chrome://settings/help). Get the version number, e.g., Version 124.0.2478.97. Navigate to [PyPi Chromedriver History](https://pypi.org/project/chromedriver-binary/#history). Select the release with a same main number, e.g., chromedriver-binary 124.0.6367.207.0, and install this version using pip, i.e.,
 
 ```bash
-pip3 install chromedriver-binary
+pip install chromedriver-binary==124.0.6367.207.0
 ```
+
 
 ### 2.4 UiPath (Windows Only) (Optional)
 
