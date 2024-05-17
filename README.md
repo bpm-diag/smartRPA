@@ -67,6 +67,7 @@ The architecture of SmartRPA integrates five main SW components.
 A **list of events** supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/src/images/SmartRPA_events.pdf).
 
 The full **documentation** of the tool is available [here](https://bpm-diag.github.io/smartRPA/).
+A **user manual** for SmartRPA is available [in this repository here](src/images/SmartRPA_UserManual.pdf).
 
 # Installation and execution:
 
