@@ -1,0 +1,27 @@
+body {
+    background-color: #1a222c;
+    color: white;
+    font: small-caps 16.5px Courier, sans-serif;
+}
+
+#main_container {
+    padding: 15px;
+    outline: dashed;
+    width: 220px;
+}
+
+#main_header img {
+    float: left;
+    width: 32px;
+    height: 32px;
+}
+
+#main_header h2 {
+    position: relative;
+    top: 2px;
+    left: 6px;
+}
+
+#server_status {
+    color: red;
+}

@@ -1,7 +1,0 @@
-=============
-Action logger
-=============
-
-.. autoclass:: modules.GUI.GUI.MainApplication
-   :members:
-   :private-members:

@@ -1,0 +1,38 @@
+=================
+Process Discovery
+=================
+
+-----------------------------
+Most suitable routine variant
+-----------------------------
+
+Decision points
+===============
+
+.. autoclass:: modules.decisionPoints.DecisionPoints
+   :members:
+   :private-members:
+
+Most frequent routine
+=====================
+
+.. note::
+    This method has been deprecated after the introduction of decision points analysis
+
+.. automodule:: modules.mostFrequentRoutine
+   :members:
+   :private-members:
+
+--------
+Diagrams
+--------
+
+The following classes are used to generate diagrams.
+
+.. autoclass:: modules.process_mining.ProcessMining
+   :members:
+   :private-members:
+
+.. autoclass:: modules.flowchart.Flowchart
+   :members:
+   :private-members:

@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+
+<html class="writer-html5" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Process Discovery — SmartRPA</title>
+<link href="_static/css/theme.css" rel="stylesheet" type="text/css"/>
+<link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+<script data-url_root="./" id="documentation_options" src="_static/documentation_options.js" type="text/javascript"></script>
+<script src="_static/jquery.js"></script>
+<script src="_static/underscore.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/language_data.js"></script>
+<script src="_static/js/theme.js" type="text/javascript"></script>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="utils.html" rel="next" title="Utils"/>
+<link href="gui.html" rel="prev" title="Action logger"/>
+</head>
+<body class="wy-body-for-nav">
+<div class="wy-grid-for-nav">
+<nav class="wy-nav-side" data-toggle="wy-nav-shift">
+<div class="wy-side-scroll">
+<div class="wy-side-nav-search">
+<a href="index.html">
+<img alt="Logo" class="logo" src="_static/logo_white.png"/>
+</a>
+<div role="search">
+<form action="search.html" class="wy-form" id="rtd-search-form" method="get">
+<input name="q" placeholder="Search docs" type="text"/>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+</div>
+</div>
+<div aria-label="main navigation" class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation">
+<p class="caption"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="main.html">Main</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Action logger</a></li>
+<li class="toctree-l1 current expanded"><a class="current reference internal" href="#">Process Discovery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#most-suitable-routine-variant">Most suitable routine variant</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#decision-points">Decision points</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#most-frequent-routine">Most frequent routine</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#diagrams">Diagrams</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
+</ul>
+</div>
+</div>
+</nav>
+<section class="wy-nav-content-wrap" data-toggle="wy-nav-shift">
+<nav aria-label="top navigation" class="wy-nav-top">
+<i class="fa fa-bars" data-toggle="wy-nav-top"></i>
+<a href="index.html">SmartRPA</a>
+</nav>
+<div class="wy-nav-content">
+<div class="rst-content">
+<div aria-label="breadcrumbs navigation" role="navigation">
+<ul class="wy-breadcrumbs">
+<li><a class="icon icon-home" href="index.html"></a> »</li>
+<li>Process Discovery</li>
+<li class="wy-breadcrumbs-aside">
+<a href="_sources/process_discovery.rst.txt" rel="nofollow"> View page source</a>
+</li>
+</ul>
+<hr/>
+</div>
+<div class="document" itemscope="itemscope" itemtype="http://schema.org/Article" role="main">
+<div itemprop="articleBody">
+<div class="section" id="process-discovery">
+<h1>Process Discovery<a class="headerlink" href="#process-discovery" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="most-suitable-routine-variant">
+<h2>Most suitable routine variant<a class="headerlink" href="#most-suitable-routine-variant" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="decision-points">
+<h3>Decision points<a class="headerlink" href="#decision-points" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt id="modules.decisionPoints.DecisionPoints">
+<em class="property">class </em><code class="sig-prename descclassname">modules.decisionPoints.</code><code class="sig-name descname">DecisionPoints</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">status_queue</span><span class="p">:</span> <span class="n">multiprocessing.context.BaseContext.Queue</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.decisionPoints.DecisionPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decision points class</p>
+<dl class="py method">
+<dt id="modules.decisionPoints.DecisionPoints.__generateKeywordsDataframe">
+<code class="sig-name descname">__generateKeywordsDataframe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataframe</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.decisionPoints.DecisionPoints.__generateKeywordsDataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate keywords dataframe, used in GUI when selecting decision points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dataframe</strong> – pandas dataframe</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>keywords dataframe with duplicates removed and values sorted</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.decisionPoints.DecisionPoints.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">status_queue</span><span class="p">:</span> <span class="n">multiprocessing.context.BaseContext.Queue</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.decisionPoints.DecisionPoints.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decision points class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> – pandas dataframe of entire process</p></li>
+<li><p><strong>status_queue</strong> – queue to print values in the GUI</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.decisionPoints.DecisionPoints.generateDecisionDataframe">
+<code class="sig-name descname">generateDecisionDataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.decisionPoints.DecisionPoints.generateDecisionDataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find decision points in dataframe, ask user which decisions to take and generate final trace built from decisions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dataframe built from user decisions</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.decisionPoints.DecisionPoints.handle_df">
+<code class="sig-name descname">handle_df</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.decisionPoints.DecisionPoints.handle_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pre-process dataframe.
+Filter irrelevant rows, add hostname column, and finally add duplicated columns to mark duplicated rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>processed dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.decisionPoints.DecisionPoints.number_of_decision_points">
+<code class="sig-name descname">number_of_decision_points</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.decisionPoints.DecisionPoints.number_of_decision_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the number of decision points in a trace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of decision points</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</div>
+<div class="section" id="most-frequent-routine">
+<h3>Most frequent routine<a class="headerlink" href="#most-frequent-routine" title="Permalink to this headline">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method has been deprecated after the introduction of decision points analysis</p>
+</div>
+<span class="target" id="module-modules.mostFrequentRoutine"></span><dl class="py function">
+<dt id="modules.mostFrequentRoutine.selectMostFrequentCase">
+<code class="sig-prename descclassname">modules.mostFrequentRoutine.</code><code class="sig-name descname">selectMostFrequentCase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataframe</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">status_queue</span><span class="p">:</span> <span class="n">multiprocessing.queues.Queue</span></em>, <em class="sig-param"><span class="n">flattened</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">90</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.mostFrequentRoutine.selectMostFrequentCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the most frequent routine in the process by using levenhstein distance to calculate similarity between strings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframe</strong> – low level pandas dataframe of process</p></li>
+<li><p><strong>status_queue</strong> – queue to print messages in GUI</p></li>
+<li><p><strong>flattened</strong> – </p></li>
+<li><p><strong>threshold</strong> – threshold of similarity, traces are considered similar if they are equal by at least 90%</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>most frequent trace</p>
+</dd>
+</dl>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.1.0: </span>Replaced by decision points</p>
+</div>
+</dd></dl>
+</div>
+</div>
+<div class="section" id="diagrams">
+<h2>Diagrams<a class="headerlink" href="#diagrams" title="Permalink to this headline">¶</a></h2>
+<p>The following classes are used to generate diagrams.</p>
+<dl class="py class">
+<dt id="modules.process_mining.ProcessMining">
+<em class="property">class </em><code class="sig-prename descclassname">modules.process_mining.</code><code class="sig-name descname">ProcessMining</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">status_queue</span><span class="p">:</span> <span class="n">multiprocessing.queues.Queue</span></em>, <em class="sig-param"><span class="n">merged</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process Discovery component is initialised by the GUI when a calculation on a log file needs to be performed.</p>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">status_queue</span><span class="p">:</span> <span class="n">multiprocessing.queues.Queue</span></em>, <em class="sig-param"><span class="n">merged</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> – path of the csv file</p></li>
+<li><p><strong>status_queue</strong> – queue to print messages on GUI</p></li>
+<li><p><strong>merged</strong> – true if class has been called when merging multiple files</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining._createDFG">
+<code class="sig-name descname">_createDFG</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parameters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">high_level</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining._createDFG" title="Permalink to this definition">¶</a></dt>
+<dd><p>create df using dataframe with all traces</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log</strong> – low-level event log</p></li>
+<li><p><strong>parameters</strong> – ooptional parameters to generate image</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining._createImageParameters">
+<code class="sig-name descname">_createImageParameters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">high_level</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining._createImageParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create parameters for diagrams that needs to ben generated.
+Parameters include source and target nodes as well as file format (diagrams are saved as pdf).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log</strong> – event log</p></li>
+<li><p><strong>high_level</strong> – boolean, if true generate high level diagram</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining._create_directories">
+<code class="sig-name descname">_create_directories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining._create_directories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates directories inside RPA folder where processed files will be saved.
+Directories include event_log, SW_robot, process_discovery.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining._create_image">
+<code class="sig-name descname">_create_image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gviz</span></em>, <em class="sig-param"><span class="n">img_name</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining._create_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create image file of the generated diagram (DFG,BPMN,Petr net)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gviz</strong> – image file generated by pm4py</p></li>
+<li><p><strong>img_name</strong> – name of the image to be saved</p></li>
+<li><p><strong>verbose</strong> – display log while generating images</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining._create_petri_net">
+<code class="sig-name descname">_create_petri_net</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remove_duplicates</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining._create_petri_net" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate low level petri net</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>remove_duplicates</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>petri net</p>
+</dd>
+</dl>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.1.0: </span>Not in use anymore</p>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining._getSourceTargetNodes">
+<code class="sig-name descname">_getSourceTargetNodes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">high_level</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining._getSourceTargetNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies the first and the last line in the event log, and mark them as source and target node.
+Used to color first and last node in the generated diagrams.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log</strong> – low level event log</p></li>
+<li><p><strong>high_level</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>source and target nodes</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining.highLevelDFG">
+<code class="sig-name descname">highLevelDFG</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining.highLevelDFG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create high level DFG of entire process</p>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining.highLevelPetriNet">
+<code class="sig-name descname">highLevelPetriNet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining.highLevelPetriNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create high level petri net of entire process</p>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining.save_dfg">
+<code class="sig-name descname">save_dfg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'DFG'</span></em>, <em class="sig-param"><span class="n">high_level</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining.save_dfg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save DFG to file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – optional name of dfg file</p></li>
+<li><p><strong>high_level</strong> – generate high level dfg</p></li>
+</ul>
+</dd>
+</dl>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.1.0: </span>Not in use anymore</p>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.process_mining.ProcessMining.save_petri_net">
+<code class="sig-name descname">save_petri_net</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.process_mining.ProcessMining.save_petri_net" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save low level petri net in pdf format from low level event log</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – name of the generated petri net</p>
+</dd>
+</dl>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.1.0: </span>Not in use anymore</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="modules.flowchart.Flowchart">
+<em class="property">class </em><code class="sig-prename descclassname">modules.flowchart.</code><code class="sig-name descname">Flowchart</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.flowchart.Flowchart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate high level flowchart diagram (BPMN) from a given trace</p>
+<dl class="py method">
+<dt id="modules.flowchart.Flowchart.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.flowchart.Flowchart.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – high level pandas dataframe of a trace</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.flowchart.Flowchart.__make_link">
+<code class="sig-name descname">__make_link</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a_node</span></em>, <em class="sig-param"><span class="n">b_node</span></em>, <em class="sig-param"><span class="n">label</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">style</span><span class="o">=</span><span class="default_value">'dashed'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.flowchart.Flowchart.__make_link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make an edge between two nodes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a_node</strong> – first node</p></li>
+<li><p><strong>b_node</strong> – second node</p></li>
+<li><p><strong>label</strong> – label between nodes</p></li>
+<li><p><strong>width</strong> – width of the link</p></li>
+<li><p><strong>style</strong> – link style (dashed or straight)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>edge</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.flowchart.Flowchart.__make_node">
+<code class="sig-name descname">__make_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.flowchart.Flowchart.__make_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate pydot node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – name of the node</p></li>
+<li><p><strong>shape</strong> – shape of the node (default is square)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pydot node</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.flowchart.Flowchart.__pairwise">
+<code class="sig-name descname">__pairwise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iterable</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.flowchart.Flowchart.__pairwise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate list of pairs from a given list.
+Used to connect nodes and generate diagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>iterable</strong> – list of values</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of pairs</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="modules.flowchart.Flowchart.generateFlowchart">
+<code class="sig-name descname">generateFlowchart</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#modules.flowchart.Flowchart.generateFlowchart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate flowchart between all the nodes in a trace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – where to save diagram</p></li>
+<li><p><strong>name</strong> – name of generated diagram</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</div>
+</div>
+</div>
+</div>
+<footer>
+<div aria-label="footer navigation" class="rst-footer-buttons" role="navigation">
+<a accesskey="n" class="btn btn-neutral float-right" href="utils.html" rel="next" title="Utils">Next <span class="fa fa-arrow-circle-right"></span></a>
+<a accesskey="p" class="btn btn-neutral float-left" href="gui.html" rel="prev" title="Action logger"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+</div>
+<hr/>
+<div role="contentinfo">
+<p>
+        
+        © Copyright 2020, marco2012
+
+    </p>
+</div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+</div>
+</div>
+</section>
+</div>
+<script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+</body>
+</html>

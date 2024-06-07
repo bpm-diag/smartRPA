@@ -1,0 +1,397 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.eventAbstraction &mdash; SmartRPA</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/logo_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Main</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">Main</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/gui.html">Graphical User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/action_logger.html">Action logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/log_processing.html">Log processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/event_abstraction.html">Event abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/process_discovery.html">Process Discovery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rpa.html">RPA</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Utils</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SmartRPA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>modules.eventAbstraction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.eventAbstraction</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">utils.utils</span>
+<span class="kn">import</span> <span class="nn">ntpath</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pm4py.util</span> <span class="kn">import</span> <span class="n">constants</span>
+    <span class="kn">from</span> <span class="nn">pm4py.objects.conversion.log</span> <span class="kn">import</span> <span class="n">factory</span> <span class="k">as</span> <span class="n">conversion_factory</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[PROCESS MINING] Process mining analysis has been disabled because &#39;pm4py&#39; module is not installed.&quot;</span>
+          <span class="s2">&quot;See https://github.com/bpm-diag/smartRPA#1-pm4py&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="_getHighLevelEvent"><a class="viewcode-back" href="../../modules/event_abstraction.html#modules.eventAbstraction._getHighLevelEvent">[docs]</a><span class="k">def</span> <span class="nf">_getHighLevelEvent</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert low-level dataframe row into high-level.</span>
+
+<span class="sd">    Generate descriptive string for each row based on event type and other fields.</span>
+
+<span class="sd">    :param row: row of the dataframe</span>
+<span class="sd">    :return: high level description of the row</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;concept:name&quot;</span><span class="p">]</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">getHostname</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;browser_url&#39;</span><span class="p">])</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">]</span>
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">removeWhitespaces</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;clipboard_content&#39;</span><span class="p">])</span>
+    <span class="c1"># general</span>
+    <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;copy&quot;</span><span class="p">,</span> <span class="s2">&quot;cut&quot;</span><span class="p">,</span> <span class="s2">&quot;paste&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">cb</span><span class="p">:</span>  <span class="c1"># take only first 40 characters of clipboard</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="mi">40</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">cutoff</span><span class="p">:</span>
+            <span class="n">cb</span> <span class="o">=</span> <span class="n">cb</span><span class="p">[:</span><span class="n">cutoff</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;...&#39;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Copy and Paste -&gt; &#39;</span><span class="si">{</span><span class="n">cb</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+
+    <span class="c1"># browser</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;clickRadioButton&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Click </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; with value &#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_value&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; on </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;clickButton&quot;</span><span class="p">,</span> <span class="s2">&quot;clickTextField&quot;</span><span class="p">,</span> <span class="s2">&quot;doubleClick&quot;</span><span class="p">,</span> <span class="s2">&quot;clickTextField&quot;</span><span class="p">,</span> <span class="s2">&quot;mouseClick&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;clickCheckboxButton&quot;</span><span class="p">,</span> <span class="s2">&quot;clickRadioButton&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;submit&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Submit </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_category&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_category&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Click </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; on </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Click </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_category&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; on </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;clickLink&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Click &#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_innerText&#39;</span><span class="p">][:</span><span class="mi">40</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; on </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;link&quot;</span><span class="p">,</span> <span class="s2">&quot;reload&quot;</span><span class="p">,</span> <span class="s2">&quot;generated&quot;</span><span class="p">,</span> <span class="s2">&quot;urlHashChange&quot;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;typed&quot;</span> <span class="ow">and</span> <span class="s2">&quot;fromAddressBar&quot;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;eventQual&#39;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Navigate to </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;submit&quot;</span><span class="p">,</span> <span class="s2">&quot;formSubmit&quot;</span><span class="p">,</span> <span class="s2">&quot;selectOptions&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="s2">&quot;Submit&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;selectTab&quot;</span><span class="p">,</span> <span class="s2">&quot;moveTab&quot;</span><span class="p">,</span> <span class="s2">&quot;zoomTab&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="s2">&quot;Browser Tab&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;newTab&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Open tab&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;closeTab&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Close tab&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;newWindow&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Open window&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;closeWindow&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Close window&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;typed&quot;</span><span class="p">,</span> <span class="s2">&quot;selectText&quot;</span><span class="p">,</span> <span class="s2">&quot;contextMenu&quot;</span><span class="p">]:</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_category&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Edit on </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Edit </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_category&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;changeField&quot;</span><span class="p">]:</span>
+        <span class="c1"># sometimes 2 out of 3 tags fields are equal, like TEXTAREA, textarea</span>
+        <span class="c1"># I don&#39;t want to repeat them so I remove duplicates by creating a set and then print the remaining ones</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_type&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_category&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>  <span class="c1"># , row[&#39;tag_name&#39;]</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Write in </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;tag_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; on </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> -&gt; &#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;startDownload&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Download started&quot;</span>
+
+    <span class="c1"># system</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;itemSelected&quot;</span><span class="p">,</span> <span class="s2">&quot;deleted&quot;</span><span class="p">,</span> <span class="s2">&quot;created&quot;</span><span class="p">,</span> <span class="s2">&quot;Mount&quot;</span><span class="p">,</span> <span class="s2">&quot;openFile&quot;</span><span class="p">,</span> <span class="s2">&quot;openFolder&quot;</span><span class="p">]:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;event_src_path&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">ntpath</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">ntpath</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">fileorfolder</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
+            <span class="n">fileorfolder</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fileorfolder</span> <span class="o">=</span> <span class="s2">&quot;folder&quot;</span>
+        <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">,</span> <span class="s2">&quot;Mount&quot;</span><span class="p">]:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;Create&quot;</span>
+        <span class="k">elif</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;deleted&quot;</span><span class="p">:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;Delete&quot;</span>
+        <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;openFile&quot;</span><span class="p">,</span> <span class="s2">&quot;openFolder&quot;</span><span class="p">]:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;Open&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[OS] </span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">fileorfolder</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;moved&#39;</span><span class="p">,</span> <span class="s1">&#39;Unmount&#39;</span><span class="p">]:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;event_dest_path&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">e</span> <span class="o">==</span> <span class="s2">&quot;moved&quot;</span> <span class="k">else</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;event_src_path&#39;</span><span class="p">]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">ntpath</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Rename file as &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Rename folder as &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;programOpen&quot;</span><span class="p">,</span> <span class="s2">&quot;programClose&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[OS] Use program &#39;</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;hotkey&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">] Press &#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; hotkey (</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="c1"># excel win</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;newWorkbook&quot;</span><span class="p">,</span> <span class="s2">&quot;openWorkbook&quot;</span><span class="p">,</span> <span class="s2">&quot;activateWorkbook&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;workbook&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Excel] Open </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;workbook&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">ntpath</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;event_src_path&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Excel] Open &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;getCell&quot;</span><span class="p">,</span> <span class="s2">&quot;getRange&quot;</span><span class="p">,</span> <span class="s2">&quot;WorksheetCalculated&quot;</span><span class="p">,</span> <span class="s2">&quot;WorksheetFormatChanged&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;current_worksheet&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Excel] Edit Cell on </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;current_worksheet&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Excel] Edit Cell&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;editCellSheet&quot;</span><span class="p">,</span> <span class="s2">&quot;editCell&quot;</span><span class="p">,</span> <span class="s2">&quot;editRange&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Excel] Edit cell </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;cell_range&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;current_worksheet&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> with value &#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;cell_content&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;addWorksheet&quot;</span><span class="p">,</span> <span class="s2">&quot;deselectWorksheet&quot;</span><span class="p">,</span> <span class="s2">&quot;selectWorksheet&quot;</span><span class="p">,</span> <span class="s2">&quot;WorksheetActivated&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Excel] Select </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;current_worksheet&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># powerpoint</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;newPresentation&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[PowerPoint] Open </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;newPresentationSlide&quot;</span><span class="p">,</span> <span class="s2">&quot;savePresentation&quot;</span><span class="p">,</span> <span class="s2">&quot;SlideSelectionChanged&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[PowerPoint] Edit presentation&quot;</span>
+
+    <span class="c1"># word</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;newDocument&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Word] Open document&quot;</span>
+    <span class="k">elif</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;changeDocument&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Word] Edit document&quot;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">e</span></div>
+
+
+<div class="viewcode-block" id="aggregateData"><a class="viewcode-back" href="../../modules/event_abstraction.html#modules.eventAbstraction.aggregateData">[docs]</a><span class="k">def</span> <span class="nf">aggregateData</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">remove_duplicates</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transforms low level actions used for RPA generation to high level used for DFG, petri net, BPMN.</span>
+
+<span class="sd">    * rows with specific events are filtered because irrelevant for the analysis</span>
+<span class="sd">    * rows with empty clipboard are removed because they don&#39;t need to be abstracted to high level</span>
+<span class="sd">    * similar events are grouped together</span>
+<span class="sd">    * a new column called &#39;customClassifier&#39; is added to the dataframe, containing the high level description of each row, generated using _getHighLevelEvent() method</span>
+<span class="sd">    * if remove_duplicates is true, duplicate rows are removed</span>
+<span class="sd">    * dataframe with high level descriptions for each row is returned</span>
+
+<span class="sd">    :param df: input dataframe</span>
+<span class="sd">    :param remove_duplicates: if true, duplicate rows are removed</span>
+<span class="sd">    :return: high-level dataframe, log, parameters to generate diagrams</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># filter rows</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">browser_url</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;chrome-extension://&#39;</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">eventQual</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;clientRedirect&#39;</span><span class="p">)]</span>
+    <span class="c1"># df = df[~df.eventQual.str.contains(&#39;serverRedirect&#39;)]</span>
+
+    <span class="c1"># remove rows that contain empty clipboard text</span>
+    <span class="k">for</span> <span class="n">row_index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">concept_name</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;concept:name&#39;</span><span class="p">]</span>
+        <span class="n">cb_content</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;clipboard_content&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">concept_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;cut&#39;</span><span class="p">,</span> <span class="s1">&#39;copy&#39;</span><span class="p">,</span> <span class="s1">&#39;paste&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="n">utils</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">removeWhitespaces</span><span class="p">(</span><span class="n">cb_content</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">row_index</span><span class="p">)</span>  <span class="c1"># returns a copy, previously was inplace so it returned null and side-effect db</span>
+
+    <span class="n">rows_to_remove</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;activateWindow&quot;</span><span class="p">,</span> <span class="s2">&quot;deactivateWindow&quot;</span><span class="p">,</span> <span class="s2">&quot;openWindow&quot;</span><span class="p">,</span> <span class="s2">&quot;newWindow&quot;</span><span class="p">,</span> <span class="s2">&quot;closeWindow&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;selectTab&quot;</span><span class="p">,</span> <span class="s2">&quot;moveTab&quot;</span><span class="p">,</span> <span class="s2">&quot;zoomTab&quot;</span><span class="p">,</span> <span class="s2">&quot;submit&quot;</span><span class="p">,</span> <span class="s2">&quot;formSubmit&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;installBrowserExtension&quot;</span><span class="p">,</span> <span class="s2">&quot;enableBrowserExtension&quot;</span><span class="p">,</span> <span class="s2">&quot;disableBrowserExtension&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;resizeWindow&quot;</span><span class="p">,</span> <span class="s2">&quot;logonComplete&quot;</span><span class="p">,</span> <span class="s2">&quot;startPage&quot;</span><span class="p">,</span> <span class="s2">&quot;doubleClickCellWithValue&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;doubleClickEmptyCell&quot;</span><span class="p">,</span> <span class="s2">&quot;rightClickCellWithValue&quot;</span><span class="p">,</span> <span class="s2">&quot;rightClickEmptyCell&quot;</span><span class="p">,</span> <span class="s2">&quot;afterCalculate&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;closePresentation&quot;</span><span class="p">,</span> <span class="s2">&quot;SlideSelectionChanged&quot;</span><span class="p">,</span> <span class="s2">&quot;closeWorkbook&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;deactivateWorkbook&quot;</span><span class="p">,</span> <span class="s2">&quot;WorksheetAdded&quot;</span><span class="p">,</span> <span class="s2">&quot;autoBookmark&quot;</span><span class="p">,</span> <span class="s2">&quot;selectedFolder&quot;</span><span class="p">,</span> <span class="s2">&quot;selectedFile&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;manualSubframe&quot;</span><span class="p">,</span> <span class="s2">&quot;KernelDropped&quot;</span><span class="p">,</span> <span class="s2">&quot;keyword&quot;</span><span class="p">,</span> <span class="s2">&quot;dragElement&quot;</span><span class="p">]</span>  <span class="c1"># mouseclick</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;concept:name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">rows_to_remove</span><span class="p">)]</span>
+
+    <span class="c1"># convert each row of events to high level</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;customClassifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">_getHighLevelEvent</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># check duplicates</span>
+    <span class="c1"># print(df[df[&#39;customClassifier&#39;].duplicated() == True])</span>
+    <span class="c1"># remove duplicates</span>
+    <span class="k">if</span> <span class="n">remove_duplicates</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;customClassifier&#39;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+
+    <span class="n">log</span> <span class="o">=</span> <span class="n">conversion_factory</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">constants</span><span class="o">.</span><span class="n">PARAMETER_CONSTANT_ACTIVITY_KEY</span><span class="p">:</span> <span class="s2">&quot;customClassifier&quot;</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">parameters</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2023, marco2012
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

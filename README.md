@@ -1,5 +1,5 @@
 <p align="center">
-<img width="100%" src="images/readme-header.png"><br/><br/>
+<img width="100%" src="src/images/readme-header.png"><br/><br/>
     <a href="https://www.python.org/downloads/" alt="Activity">
         <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" /></a>
     <a href="#" alt="Activity">
@@ -22,7 +22,7 @@
     <br/>
     <a href="#"><img src="https://img.shields.io/badge/Sapienza University of Rome-blue?style=flat&labelColor=781A2D&color=781A2D&logoColor=white" /></a> 
   <br/><br/>
-  <img width="80%" src="images/gui.png"/>
+  <img width="80%" src="src/images/gui.png"/>
 
 </p>
 
@@ -52,7 +52,7 @@ A **Screencast** of the tool is available on \[[Vimeo](https://vimeo.com/5699887
 The architecture of SmartRPA integrates five main SW components.
 
 <p align="center">
-  <img width="55%" src="images/architecture.jpeg"/>
+  <img width="55%" src="src/images/architecture.jpeg"/>
 </p>
 
 **Key features** include:
@@ -64,36 +64,122 @@ The architecture of SmartRPA integrates five main SW components.
 - [x] **Decision Points**, discover differencies between multiple traces in a process and build a new routine based on user decisions;
 - [x] **RPA**, implements and enacts a SW robot emulating a routine reflecting the observed behavior (either the most frequent one or the one based on decision points). Available both as a cross-platform _Python script_ and as a _UiPath_ project.
 
-A **list of events** supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/images/SmartRPA_events.pdf).
+A **list of events** supported by the Action Logger is available in [`SmartRPA_events.pdf`](https://github.com/bpm-diag/smartRPA/blob/master/src/images/SmartRPA_events.pdf).
 
 The full **documentation** of the tool is available [here](https://bpm-diag.github.io/smartRPA/).
+A **user manual** for SmartRPA is available [in this repository here](src/images/SmartRPA_UserManual.pdf).
 
 # Installation and execution:
 
-**NOTE**: If you only want the action logger to record event logs without further analysis, you can find it [here](https://github.com/bpm-diag/smartRPA/tree/action_logger).
+The following dependencies are required to enable all functionalities within SmartRPA. Check all boxes and you are able to log user actions, discover process models, and emulate RPA bots in UiPath and Automagica automatically:
 
-### 1. **Install dependencies**
+- [Prerequisites](#1-install-prerequisites)
+  - [Visual Studio C/C++ Build Tools (Windows Only)](#11-visual-studio-windows-only)
+  - [Graphviz Windows/Mac](#12a-graphviz-windows)
+  - [Automagica](#22-automagica-library)
+  - [Chromedriver for Edge/Chrome](#23-chromedriver-required-for-chromeedge-users)
+  - [UiPath Studio](#24-uipath-windows-only-optional)
+- Action Logger dependencies
+  - [Python Requirements](#21-requirementstxt)
+  - [Browser extension](#3-install-browser-extension)
+- [Excel AddIn (MacOS Only)](#4-install-excel-addin-macos-only)
 
-[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.10 is recommended.
+Furthermore, there are possible installation issues that can arise with the installation of the prerequisites or libraries. You can find fixes to the most common issues in the section [Installation Errors](#error-handling-for-possible-installation-errors) .
 
-- Install [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only) on Windows and [Brew](https://brew.sh) on MacOS
-- Install **project** dependencies _(required to record UI log)_
+## 1. **Install Prerequisites**
+
+### 1.1 Visual Studio (Windows Only)
+
+<img width="40%" src="src/images/visual_studio.png">
+
+- On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
+  It is vital to install all C++ related development tools listed here:
+
+  - Windows 10/11 SDK
+  - Visual C++ tools for CMake
+  - C++ x64/x86 build tools
+
+  
+### 1.2a GraphViz Windows
+
+Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
+
+
+### 1.2b GraphViz Mac
+
+- On **MacOS**:
+
+  1. Make sure you installed [brew](https://brew.sh/) package manager
+  2. Check [brew] installation for graphviz with `brew install graphviz`
+  3. Check pm4py installation and run `pip3 install pm4py==1.5.0.1` if necessary
+
+
+## 2. **Python Installation**
+
+### 2.1 Requirements.txt
+
+[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required. Python 3.12 is recommended.
 
   ```bash
-  pip3 install -r requirements310.txt
+  pip3 install -r src/requirements.txt
   ```
 
-- Install **Process Discovery** dependencies _(required to perform process discovery analysis)_
+We have specified three requirements files for distinct Python versions. We recommend using the specified requirements file. The **requirements.txt** is for Python 3.12.
 
-  [Details here](#process-discovery-dependencies)
+<details>
+<summary>
+CMD installation lines for Python 3.7 and Python 3.10
+</summary>
+  <br/>
 
-- Install **RPA** dependencies _(required to run RPA SW Robot)_
+  ```bash
+  pip3 install -r src/requirements308.txt
+  ```
+  <br/>
 
-  [Details here](#rpa-dependencies)
+  ```bash
+  pip3 install -r src/requirements310.txt
+  ```
+  <br/>
+</details>
 
-### 2. **Install browser extension**
+### 2.2 Automagica Library
 
-The browser extension is required to log browser events. It is available in `extensions/browserlogger` and supports 4 major browsers:
+To run the generated RPA scripts you must install `automagica` module available in the `libraries` directory.
+
+  ```bash
+  pip3 install src/libraries/smartRPA-automagica-2-1-12.zip
+  ```
+
+  <details>
+  <summary>
+  CMD installation lines Automagica with Python <= 3.7
+  </summary>
+  
+  ```bash
+  pip3 install src/libraries/Automagica-2.0.25-py3-none-any.whl`
+  ```
+
+  </details>
+
+### 2.3 Chromedriver (Required for Chrome/Edge users)
+
+Required for executing the emulated **Automagica Python** bots in Chrome and Edge.
+To select the correct version of the pip installation for the Chromedriver go to the Chrome or Edge [settings/help](chrome://settings/help). Get the version number, e.g., Version 124.0.2478.97. Navigate to [PyPi Chromedriver History](https://pypi.org/project/chromedriver-binary/#history). Select the release with a same main number, e.g., chromedriver-binary 124.0.6367.207.0, and install this version using pip, i.e.,
+
+```bash
+pip install chromedriver-binary==124.0.6367.207.0
+```
+
+
+### 2.4 UiPath (Windows Only) (Optional)
+
+The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio). </br>Without UiPath Studio you cannot import and execute the generated UiPath bots from SmartRPA.
+
+
+## 3. **Install browser extension**
+
+The browser extension is required to log browser events. It is available in `src/extensions/browserlogger` and supports 4 major browsers:
 
 - [_Google Chrome_](https://www.google.com/chrome/): load unpacked `browserlogger` directory in `chrome://extensions/`
 
@@ -103,16 +189,30 @@ The browser extension is required to log browser events. It is available in `ext
 
 - [_Opera_](https://www.opera.com/): load unpacked `browserlogger` directory in `opera:extensions`
 
-Once main logger is running, **you must click** on the browser extension to enable it.
+Currently the browser extension **requires the developer mode to be active** in your browser. Please check the browser documentation on how to enable the developer mode.
 
-### 3. **Install Excel Addin (MacOS Only)**
+<details>
+<summary>
+Enabling the Browser Logger
+</summary>
+
+Once the main logger is running, **you must click** on the browser extension to enable it.
+</br>
+
+| Inactive Browser Logging  | Active Browser Logging |
+| ------------- | ------------- |
+| <img width="100%" src="src/images/disabledBrowserLogger.png"/>  | <img width="100%" src="src/images/enabledBrowserLogger.png"/> |
+
+</details>
+
+## 4. Install Excel Addin (MacOS Only)
 
 The excel addin is required to log Excel events <u>only on MacOS</u>.
 
 [`Node.js`](https://nodejs.org/en/download/) must be installed to run this addin.
 
 ```bash
-cd extensions/excelAddinMac
+cd src/extensions/excelAddinMac
 npm install # install dependencies
 npm start   # sideload Add-in
 npm stop    # stop server
@@ -128,7 +228,7 @@ npm stop    # stop server
   <li>Start the Action Logger selecting Excel module</li>
   <li>Go to <code>Insert</code> tab</li>
   <li>Click on the small down-arrow to the right of <code>My Add-ins</code> > <code>OfficeLogger</code></li>
-  <img width="50%" src="images/excel_logger.png">
+  <img width="50%" src="src/images/excel_logger.png">
   <li>Go to <code>Home</code> tab</li>
   <li>Click the <code>Show Taskpane</code> button in the ribbon</li>
   <li>Enable the checkbox</li>
@@ -138,11 +238,60 @@ If you don't find <code>OfficeLogger</code> under <code>My Add-ins</code>, copy 
 
 </details>
 
-### 4. **Run main logger**
+## 5. Run main logger
 
 ```bash
 python3 main.py
 ```
+
+A detailed **screencast** of the tool is available on \[[Vimeo](https://vimeo.com/569988752)\] including the core functions of recording, analyzing, and emulating RPA bots.
+The resulting event log will be saved in `logs/` directory. If the screenshot feature is active the screenshots are stored in the `Screenshots` directory. 
+</br>SmartRPA generates two types of SW Robots in the `RPA/` directory:
+
+1. a cross-platform executable **Python script**, available on both Windows and MacOS
+2. a **UiPath project**, available only on Windows
+
+The advantages of the UiPath integration is that the generated SW Robot can be easily customized by the end user.
+
+**NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
+
+### Action Logger Only
+
+If you only want the action logger to record event logs without further analysis, you can find it [here](https://github.com/bpm-diag/smartRPA/tree/action_logger) .
+Please note that this logger is associated with version 1.0 of SmartRPA and has not been updated with the new functionalities (Supervision Feature, Screenshot Feature, Updated Python Libraries) of SmartRPA 2.0.
+
+## Error Handling for possible installation errors
+
+### 1. Visual Studio Errors
+
+<details>
+<summary> 
+  Error: Microsoft Visual C++ 14.0 is required
+</summary>
+  </br>
+  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required) .
+</details>
+
+### 2. Graphviz Errors
+
+<details>
+<summary>
+Windows: Fix <b>graphviz</b> error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
+</summary>
+</br>
+
+```bash
+Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] 
+```
+
+If you recieve the shown error and you use Anaconda or conda, you have to use another version of the graphviz python library. 
+With conda run the following comand in your environment:
+
+```bash
+conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1
+```
+
+</details>
 
 <details>
 <summary>
@@ -150,149 +299,49 @@ python3 main.py
 </summary>
 </br>
 
-If you have installed all the [dependencies](#1-install-dependencies)(`pip3 install -r requirements.txt `) but you still get <code>ModuleNotFoundError</code>, run the tool with:
+If you have installed all the [requirements](#21-requirementstxt) but you still get <code>ModuleNotFoundError</code>, run SmartRPA with:
 
 ```bash
 py main.py
 ```
 
 </details>
-<br>
 
-The resulting event log will be saved in `/RPA` directory.
+<details>
+<summary>
+    MacOS: Click to show how to <b>fix installation errors</b> on MacOS
+</summary>
+</br>
 
-**NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
+If you get an error during installation:
 
-## Process Discovery dependencies
+- If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, install `pm4py` again
 
-The following dependencies are required to enable process discovery analysis, a key component of the tool.
+```bash
+sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+```
 
-#### 0) Visual Studio (Windows Only)
+- If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, install `pm4py` again
 
-<img width="40%" src="images/visual_studio.png">
+```bash
+export CPATH=`xcrun --show-sdk-path`/usr/include
+```
 
-- On **Windows**, [Visual Studio C/C++ Build Tools](https://visualstudio.microsoft.com/en/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) must be installed.
-  It is vital to install all C++ related development tools like:
+- If you're on **MacOS 11.0 Big Sur**, install the latest nightly build version of `scikit-learn` running the following command and then install `pm4py` again
 
-  - Windows 10/11 SDK
-  - Visual C++ tools for CMake
-  - C++ x64/x86 build tools
+```bash
+pip3 install --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
+```
 
-  If you encounter errors like `Microsoft Visual C++ 14.0 is required`, [check here](https://bobbyhadz.com/blog/error-microsoft-visual-c-14-0-or-greater-is-required).
+</details>
 
-#### 1) PM4PY
+### 3. Automagica Errors
 
-To enable process discovery techniques you must install [PM4PY](https://pm4py.fit.fraunhofer.de/) python module.
-
-- On **Windows**:
-
-  1. Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only).
-  2. Install the latest version of [graphviz](https://www2.graphviz.org/Packages/stable/windows/10/cmake/Release/x64/). Make sure to add it to system PATH. Detailed instructions [here](https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224).
-  3. `pip3 install pm4py==1.5.0.1`
-  </br>
-    <details>
-    <summary>
-        Click to show how to <b>fix installation errors</b> on Windows
-    </summary>
-    </br>
-
-  If you get the error <code>ERROR: Could not find a version that satisfies the requirement ortools</code> make sure you are using <a href="https://www.python.org/downloads/windows/">64bit version of Python3</a>.
-
-    </details>
-  <br>
-
-  <details>
-  <summary>
-    Fix <b>graphviz</b> error: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1.
-  </summary>
-  </br>
-
-  If you get the error <code> Could not save image: Command '[WindowsPath('dot'), '-Kdot', '-Tpdf', '-O', 'tmp24z1pppy.gv']' returned non-zero exit status 1. [stderr: b'There is no layout engine support for "dot"\r\nPerhaps "dot -c" needs to be run (with installer\'s privileges) to register the plugins?\r\n'] </code> and you use Anaconda or conda, you have to use another version of the graphviz python library.</br>
-  With conda you can run <code>conda install conda-forge::python-graphviz conda-forge::graphviz=2.46.1</code> in your environment.
-  </details>
-  </br>
-
-  <details>
-  <summary>
-    Fix <b>nativeconfig</b> error: From collections import OrderedDict, Mapping in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />
-  </summary>
-  </br>
-  
-  The current library version nativeconfig (3.4.0) uses an outdated version of collections in <img src="https://img.shields.io/badge/Python-3.10 (x64)-blue?style=flat&labelColor=3776AB&color=3776AB&logo=python&logoColor=white" />.</br>
-  To fix this error navigate to your nativeconfig python installation. Replace the collections import in the base_config file with the following code:</br>
-  <code>from collections.abc import Mapping</code></br><code>from collections import OrderedDict</code>
-  </details>
-
-- On **MacOS**:
-
-  1. Make sure you installed [brew](https://brew.sh/) package manager
-  2. Install graphviz with `brew install graphviz`
-  3. `pip3 install pm4py==1.5.0.1`
-
-    <details>
-    <summary>
-        Click to show how to <b>fix installation errors</b> on MacOS
-    </summary>
-    </br>
-
-  If you get an error during installation:
-
-  - If you're on **MacOS 10.14 Mojave**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-435169249), and then, in the same terminal window, install `pm4py` again
-
-    ```
-    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-    ```
-
-  - If you're on **MacOS 10.15 Catalina**, run the following command as suggested [here](https://github.com/python-pillow/Pillow/issues/3438#issuecomment-543812237), and then, in the same terminal window, install `pm4py` again
-
-    ```
-    export CPATH=`xcrun --show-sdk-path`/usr/include
-    ```
-
-  - If you're on **MacOS 11.0 Big Sur**, install the latest nightly build version of `scikit-learn` running the following command and then install `pm4py` again
-
-    ```
-    pip3 install --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
-    ```
-
-    </details>
-
-#### 2) Python-Levenshtein (Windows Only)
-
-This package provides a 4-10x speedup in String Matching.
-
-- On **Windows**:
-  1.  Make sure you installed [Visual Studio C/C++ Build Tools](#0-visual-studio-windows-only)
-  2.  `pip3 install python-Levenshtein==0.25.0`
-
-## RPA dependencies
-
-SmartRPA generates two types of SW Robots in the `/RPA` directory:
-
-1. a cross-platform executable **Python script**, available on both Windows and MacOS
-2. a **UiPath project**, available only on Windows
-
-The advantages of the UiPath integration is that the generated SW Robot can be easily customized by the end user.
-
-### Python script
-
-The cross-platform python script requires the following dependencies to work.
-
-#### 1) Automagica
-
-To run the generated RPA scripts you must install `automagica` module available in the `libraries` directory.
-
- - With Python <= 3.7
-  `pip3 install libraries/Automagica-2.0.25-py3-none-any.whl`
- - With Python > 3.7
-  `pip3 install libraries/smartRPA-automagica-2-1-12.zip`
-
-
-  <details>
-  <summary>
-      Click to show how to <b>fix installation errors</b> on Windows
-  </summary>
-  </br>
+<details>
+<summary>
+    Click to show how to <b>fix installation errors</b> on Windows
+</summary>
+</br>
 
 1. Make sure you are using <a href="https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe">64bit version of Python3</a>
 2. Install `Win64 OpenSSL v1.1.1` from <a href="https://slproweb.com/products/Win32OpenSSL.html">this website</a>. When prompted select _"Copy OpenSSL DLLs to: the Windows system directory"_
@@ -303,18 +352,9 @@ set LIB=C:\Program Files\OpenSSL-Win64\lib;%LIB%
 set INCLUDE=C:\Program Files\OpenSSL-Win64\include;%INCLUDE%
 pip3 install libraries/Automagica-2.0.25-py3-none-any.whl
 ```
-
 </details>
 
-#### 2) Chromedriver
-
-Install _chromedriver_ to enable automation in Google Chrome.
-
-Make sure to install the release that matches your Google Chrome version (check `chrome://settings/help`). A complete list of releases can be found [here](https://pypi.org/project/chromedriver-binary/#history).
-
-```bash
-pip3 install chromedriver-binary
-```
+### 4. Chromedriver Errors
 
 <details>
 <summary>
@@ -345,31 +385,6 @@ If you get the error <code>Message: session not created: This version of ChromeD
 3. Install the package again using the pip command from Pypi, e.g. <code>pip install chromedriver-binary==121.0.6134.0.0</code>
 
 </details>
-
-
-### UiPath (Windows Only)
-
-The generated UiPath project requires _UiPath Studio_, available at [https://www.uipath.com/product/studio](https://www.uipath.com/product/studio) .
-
-# Recap
-
-To sum up, you should have installed:
-
-- Action Logger dependencies
-  - `pip3 install -r requirements310.txt`
-  - [Browser extension](#2-install-browser-extension)
-  - [Excel AddIn (MacOS Only)](#3-install-excel-addin-macos-only)
-- [Process Discovery dependencies](#process-discovery-dependencies)
-  - [Visual Studio C/C++ Build Tools (Windows Only)](#0-visual-studio-windows-only)
-  - [PM4PY](#1-pm4py)
-  - [Python Levenshtein (Windows Only)](#2-python-levenshtein-windows-only)
-- [RPA dependencies](#rpa-dependencies)
-  - [Python script](#python-script)
-    - [Automagica](#1-automagica)
-    - [Chromedriver](#2-chromedriver)
-  - [UiPath](#uipath-windows-only)
-
-After installing the dependencies, you can [run the tool](#4-run-main-logger).
 
 # Publications
 

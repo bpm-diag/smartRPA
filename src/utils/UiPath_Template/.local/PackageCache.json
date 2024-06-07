@@ -1,0 +1,748 @@
+{
+  "Packages": [
+    {
+      "Package": {
+        "Id": "UiPath.Excel.Activities",
+        "Version": "2.9.0-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\closedxml/0.87.1\\lib/net40/ClosedXML.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\csvhelper/2.13.5\\lib/net40-client/CsvHelper.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\documentformat.openxml/2.5.0\\lib/DocumentFormat.OpenXml.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.visualstudio.ole.interop/7.10.6071\\lib/Microsoft.VisualStudio.OLE.Interop.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\npoi/2.4.1\\lib/net45/NPOI.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\npoi/2.4.1\\lib/net45/NPOI.OOXML.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\npoi/2.4.1\\lib/net45/NPOI.OpenXml4Net.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\npoi/2.4.1\\lib/net45/NPOI.OpenXmlFormats.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\sharpziplib/1.2.0\\lib/net45/ICSharpCode.SharpZipLib.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.excel.activities/2.9.0-preview\\lib/net461/UiPath.Excel.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.excel.activities/2.9.0-preview\\lib/net461/UiPath.Excel.Activities.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.excel.activities/2.9.0-preview\\lib/net461/UiPath.Excel.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.excel.activities\\2.9.0-preview"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.Mail.Activities",
+        "Version": "1.9.0-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\bouncycastle/1.8.5\\lib/BouncyCastle.Crypto.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\interop.domino.dll/1.0.0\\lib/Interop.Domino.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.exchange.webservices/2.2.0\\lib/40/Microsoft.Exchange.WebServices.Auth.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.exchange.webservices/2.2.0\\lib/40/Microsoft.Exchange.WebServices.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.identity.client/4.14.0\\lib/net45/Microsoft.Identity.Client.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\system.valuetuple/4.5.0\\lib/net461/System.ValueTuple.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities/1.9.0-preview\\lib/net461/MailKit.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities/1.9.0-preview\\lib/net461/MimeKit.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities/1.9.0-preview\\lib/net461/UiPath.Mail.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities/1.9.0-preview\\lib/net461/UiPath.Mail.Activities.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities/1.9.0-preview\\lib/net461/UiPath.Mail.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities\\1.9.0-preview"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.System.Activities",
+        "Version": "20.6.1-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\csvhelper/2.13.5\\lib/net40-client/CsvHelper.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.aspnet.signalr.client/2.4.0\\lib/net45/Microsoft.AspNet.SignalR.Client.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.rest.clientruntime/2.3.21\\lib/net461/Microsoft.Rest.ClientRuntime.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\newtonsoft.json/11.0.2\\lib/net45/Newtonsoft.Json.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\sharpziplib/1.2.0\\lib/net45/ICSharpCode.SharpZipLib.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.Docking.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.Ribbon.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.Shared.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.SyntaxEditor.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.Text.Addons.DotNet.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.Text.LLParser.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.Text.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/ActiproSoftware.Wizard.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/UiPath.OrchestratorClient.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/UiPath.System.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities/20.6.1-preview\\lib/net461/UiPath.System.Activities.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.UIAutomation.Activities",
+        "Version": "20.6.0-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\avalonedit/5.0.3\\lib/Net40/ICSharpCode.AvalonEdit.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit/2.8.0\\lib/net40/Xceed.Wpf.AvalonDock.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit/2.8.0\\lib/net40/Xceed.Wpf.AvalonDock.Themes.Aero.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit/2.8.0\\lib/net40/Xceed.Wpf.AvalonDock.Themes.Metro.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit/2.8.0\\lib/net40/Xceed.Wpf.AvalonDock.Themes.VS2010.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit/2.8.0\\lib/net40/Xceed.Wpf.DataGrid.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit/2.8.0\\lib/net40/Xceed.Wpf.Toolkit.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\humanizer.core/2.4.2\\lib/netstandard2.0/Humanizer.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\newtonsoft.json/11.0.2\\lib/net45/Newtonsoft.Json.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\system.io.abstractions/3.0.10\\lib/net40/System.IO.Abstractions.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\system.threading.tasks.dataflow/4.10.0\\lib/netstandard2.0/System.Threading.Tasks.Dataflow.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\system.valuetuple/4.5.0\\lib/net461/System.ValueTuple.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath/20.6.7473.25550-preview\\lib/UiPath.Interop.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.ocr.contracts/2.6.0\\lib/net461/UiPath.OCR.Contracts.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.platform/20.4.0\\lib/net461/UiPath.Platform.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.telemetry.client/1.2.20\\lib/net461/TelemetryClient.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.DataGrid.Contrib.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.Docking.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.Editors.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.Ribbon.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.Shared.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.SyntaxEditor.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.Text.Addons.DotNet.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.Text.LLParser.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.Text.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/ActiproSoftware.Wizard.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/UiPath.CV.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/UiPath.CV.Activities.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/UiPath.CV.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/UiPath.UIAutomation.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/UiPath.UiAutomation.Activities.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities/20.6.0-preview\\lib/net461/UiPath.Wizards.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision/2.1.0-preview\\lib/net461/UiPath.Vision.AzureComputerVision.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision/2.1.0-preview\\lib/net461/UiPath.Vision.Core.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision/2.1.0-preview\\lib/net461/UiPath.Vision.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision/2.1.0-preview\\lib/net461/UiPath.Vision.GoogleCloud.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision/2.1.0-preview\\lib/net461/UiPath.Vision.Microsoft.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision/2.1.0-preview\\lib/net461/UiPath.Vision.MicrosoftCloud.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision/2.1.0-preview\\lib/net461/UiPath.Vision.Tesseract.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview"
+    }
+  ],
+  "Conflicts": [],
+  "ResolvedDependencies": {
+    "AvalonEdit": {
+      "Id": "AvalonEdit",
+      "Version": "5.0.3",
+      "Dependencies": []
+    },
+    "BouncyCastle": {
+      "Id": "BouncyCastle",
+      "Version": "1.8.5",
+      "Dependencies": []
+    },
+    "ClosedXML": {
+      "Id": "ClosedXML",
+      "Version": "0.87.1",
+      "Dependencies": [
+        {
+          "Item1": "DocumentFormat.OpenXml",
+          "Item2": "[2.5.0, )"
+        }
+      ]
+    },
+    "CsvHelper": {
+      "Id": "CsvHelper",
+      "Version": "2.13.5",
+      "Dependencies": []
+    },
+    "DocumentFormat.OpenXml": {
+      "Id": "DocumentFormat.OpenXml",
+      "Version": "2.5.0",
+      "Dependencies": []
+    },
+    "Extended.Wpf.Toolkit": {
+      "Id": "Extended.Wpf.Toolkit",
+      "Version": "2.8.0",
+      "Dependencies": []
+    },
+    "Humanizer.Core": {
+      "Id": "Humanizer.Core",
+      "Version": "2.4.2",
+      "Dependencies": []
+    },
+    "interop.domino.dll": {
+      "Id": "interop.domino.dll",
+      "Version": "1.0.0",
+      "Dependencies": []
+    },
+    "Microsoft.AspNet.SignalR.Client": {
+      "Id": "Microsoft.AspNet.SignalR.Client",
+      "Version": "2.4.0",
+      "Dependencies": [
+        {
+          "Item1": "Newtonsoft.Json",
+          "Item2": "[6.0.4, )"
+        }
+      ]
+    },
+    "Microsoft.Exchange.WebServices": {
+      "Id": "Microsoft.Exchange.WebServices",
+      "Version": "2.2.0",
+      "Dependencies": []
+    },
+    "Microsoft.Identity.Client": {
+      "Id": "Microsoft.Identity.Client",
+      "Version": "4.14.0",
+      "Dependencies": []
+    },
+    "Microsoft.Rest.ClientRuntime": {
+      "Id": "Microsoft.Rest.ClientRuntime",
+      "Version": "2.3.21",
+      "Dependencies": [
+        {
+          "Item1": "Newtonsoft.Json",
+          "Item2": "[10.0.3, )"
+        }
+      ]
+    },
+    "Microsoft.VisualStudio.OLE.Interop": {
+      "Id": "Microsoft.VisualStudio.OLE.Interop",
+      "Version": "7.10.6071",
+      "Dependencies": []
+    },
+    "Newtonsoft.Json": {
+      "Id": "Newtonsoft.Json",
+      "Version": "11.0.2",
+      "Dependencies": []
+    },
+    "NPOI": {
+      "Id": "NPOI",
+      "Version": "2.4.1",
+      "Dependencies": [
+        {
+          "Item1": "SharpZipLib",
+          "Item2": "[1.0.0, )"
+        }
+      ]
+    },
+    "SharpZipLib": {
+      "Id": "SharpZipLib",
+      "Version": "1.2.0",
+      "Dependencies": []
+    },
+    "System.IO.Abstractions": {
+      "Id": "System.IO.Abstractions",
+      "Version": "3.0.10",
+      "Dependencies": []
+    },
+    "System.Threading.Tasks.Dataflow": {
+      "Id": "System.Threading.Tasks.Dataflow",
+      "Version": "4.10.0",
+      "Dependencies": []
+    },
+    "System.ValueTuple": {
+      "Id": "System.ValueTuple",
+      "Version": "4.5.0",
+      "Dependencies": []
+    },
+    "UiPath": {
+      "Id": "UiPath",
+      "Version": "20.6.7473.25550-preview",
+      "Dependencies": []
+    },
+    "UiPath.Excel.Activities": {
+      "Id": "UiPath.Excel.Activities",
+      "Version": "2.9.0-preview",
+      "Dependencies": [
+        {
+          "Item1": "ClosedXML",
+          "Item2": "[0.87.1, )"
+        },
+        {
+          "Item1": "CsvHelper",
+          "Item2": "[2.13.5, )"
+        },
+        {
+          "Item1": "DocumentFormat.OpenXml",
+          "Item2": "[2.5.0, )"
+        },
+        {
+          "Item1": "Microsoft.VisualStudio.OLE.Interop",
+          "Item2": "[7.10.6071, )"
+        },
+        {
+          "Item1": "NPOI",
+          "Item2": "[2.4.1, )"
+        },
+        {
+          "Item1": "SharpZipLib",
+          "Item2": "[1.0.0, )"
+        }
+      ]
+    },
+    "UiPath.Mail.Activities": {
+      "Id": "UiPath.Mail.Activities",
+      "Version": "1.9.0-preview",
+      "Dependencies": [
+        {
+          "Item1": "System.ValueTuple",
+          "Item2": "[4.5.0, )"
+        },
+        {
+          "Item1": "Microsoft.Exchange.WebServices",
+          "Item2": "[2.2.0, )"
+        },
+        {
+          "Item1": "Microsoft.Identity.Client",
+          "Item2": "[4.14.0, )"
+        },
+        {
+          "Item1": "BouncyCastle",
+          "Item2": "[1.8.5, )"
+        },
+        {
+          "Item1": "interop.domino.dll",
+          "Item2": "[1.0.0, )"
+        }
+      ]
+    },
+    "UiPath.OCR.Contracts": {
+      "Id": "UiPath.OCR.Contracts",
+      "Version": "2.6.0",
+      "Dependencies": []
+    },
+    "UiPath.Platform": {
+      "Id": "UiPath.Platform",
+      "Version": "20.4.0",
+      "Dependencies": [
+        {
+          "Item1": "Newtonsoft.Json",
+          "Item2": "[11.0.2, )"
+        },
+        {
+          "Item1": "System.IO.Abstractions",
+          "Item2": "[3.0.10, )"
+        },
+        {
+          "Item1": "System.ValueTuple",
+          "Item2": "[4.5.0, )"
+        }
+      ]
+    },
+    "UiPath.System.Activities": {
+      "Id": "UiPath.System.Activities",
+      "Version": "20.6.1-preview",
+      "Dependencies": [
+        {
+          "Item1": "CsvHelper",
+          "Item2": "[2.13.5, )"
+        },
+        {
+          "Item1": "Microsoft.AspNet.SignalR.Client",
+          "Item2": "[2.4.0, )"
+        },
+        {
+          "Item1": "Microsoft.Rest.ClientRuntime",
+          "Item2": "[2.3.21, )"
+        },
+        {
+          "Item1": "Newtonsoft.Json",
+          "Item2": "[11.0.2, )"
+        },
+        {
+          "Item1": "SharpZipLib",
+          "Item2": "[1.2.0, )"
+        }
+      ]
+    },
+    "UiPath.Telemetry.Client": {
+      "Id": "UiPath.Telemetry.Client",
+      "Version": "1.2.20",
+      "Dependencies": [
+        {
+          "Item1": "Newtonsoft.Json",
+          "Item2": "[11.0.1, )"
+        },
+        {
+          "Item1": "System.Threading.Tasks.Dataflow",
+          "Item2": "[4.10.0, )"
+        }
+      ]
+    },
+    "UiPath.UIAutomation.Activities": {
+      "Id": "UiPath.UIAutomation.Activities",
+      "Version": "20.6.0-preview",
+      "Dependencies": [
+        {
+          "Item1": "UiPath",
+          "Item2": "[20.6.7473.25550-preview, 20.6.7473.25550-preview]"
+        },
+        {
+          "Item1": "UiPath.Vision",
+          "Item2": "[2.1.0-preview, )"
+        },
+        {
+          "Item1": "UiPath.OCR.Contracts",
+          "Item2": "[2.6.0, )"
+        },
+        {
+          "Item1": "UiPath.Platform",
+          "Item2": "[20.4.0, )"
+        },
+        {
+          "Item1": "AvalonEdit",
+          "Item2": "[5.0.3, )"
+        },
+        {
+          "Item1": "Extended.Wpf.Toolkit",
+          "Item2": "[2.8.0, )"
+        },
+        {
+          "Item1": "Humanizer.Core",
+          "Item2": "[2.4.2, )"
+        },
+        {
+          "Item1": "Newtonsoft.Json",
+          "Item2": "[11.0.2, )"
+        },
+        {
+          "Item1": "System.IO.Abstractions",
+          "Item2": "[3.0.10, )"
+        },
+        {
+          "Item1": "System.ValueTuple",
+          "Item2": "[4.5.0, )"
+        },
+        {
+          "Item1": "UiPath.Telemetry.Client",
+          "Item2": "[1.2.20, )"
+        }
+      ]
+    },
+    "UiPath.Vision": {
+      "Id": "UiPath.Vision",
+      "Version": "2.1.0-preview",
+      "Dependencies": [
+        {
+          "Item1": "UiPath.OCR.Contracts",
+          "Item2": "[2.6.0, )"
+        }
+      ]
+    }
+  },
+  "AllPackages": [
+    {
+      "Package": {
+        "Id": "AvalonEdit",
+        "Version": "5.0.3"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\avalonedit\\5.0.3\\lib\\Net40\\ICSharpCode.AvalonEdit.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\avalonedit\\5.0.3"
+    },
+    {
+      "Package": {
+        "Id": "BouncyCastle",
+        "Version": "1.8.5"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\bouncycastle\\1.8.5\\lib\\BouncyCastle.Crypto.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\bouncycastle\\1.8.5"
+    },
+    {
+      "Package": {
+        "Id": "ClosedXML",
+        "Version": "0.87.1"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\closedxml\\0.87.1\\lib\\net40\\ClosedXML.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\closedxml\\0.87.1"
+    },
+    {
+      "Package": {
+        "Id": "CsvHelper",
+        "Version": "2.13.5"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\csvhelper\\2.13.5\\lib\\net40-client\\CsvHelper.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\csvhelper\\2.13.5"
+    },
+    {
+      "Package": {
+        "Id": "DocumentFormat.OpenXml",
+        "Version": "2.5.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\documentformat.openxml\\2.5.0\\lib\\DocumentFormat.OpenXml.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\documentformat.openxml\\2.5.0"
+    },
+    {
+      "Package": {
+        "Id": "Extended.Wpf.Toolkit",
+        "Version": "2.8.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit\\2.8.0\\lib\\net40\\Xceed.Wpf.AvalonDock.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit\\2.8.0\\lib\\net40\\Xceed.Wpf.AvalonDock.Themes.Aero.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit\\2.8.0\\lib\\net40\\Xceed.Wpf.AvalonDock.Themes.Metro.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit\\2.8.0\\lib\\net40\\Xceed.Wpf.AvalonDock.Themes.VS2010.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit\\2.8.0\\lib\\net40\\Xceed.Wpf.DataGrid.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit\\2.8.0\\lib\\net40\\Xceed.Wpf.Toolkit.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\extended.wpf.toolkit\\2.8.0"
+    },
+    {
+      "Package": {
+        "Id": "Humanizer.Core",
+        "Version": "2.4.2"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\humanizer.core\\2.4.2\\lib\\netstandard2.0\\Humanizer.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\humanizer.core\\2.4.2"
+    },
+    {
+      "Package": {
+        "Id": "interop.domino.dll",
+        "Version": "1.0.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\interop.domino.dll\\1.0.0\\lib\\Interop.Domino.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\interop.domino.dll\\1.0.0"
+    },
+    {
+      "Package": {
+        "Id": "Microsoft.AspNet.SignalR.Client",
+        "Version": "2.4.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.aspnet.signalr.client\\2.4.0\\lib\\net45\\Microsoft.AspNet.SignalR.Client.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\microsoft.aspnet.signalr.client\\2.4.0"
+    },
+    {
+      "Package": {
+        "Id": "Microsoft.Exchange.WebServices",
+        "Version": "2.2.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.exchange.webservices\\2.2.0\\lib\\40\\Microsoft.Exchange.WebServices.Auth.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.exchange.webservices\\2.2.0\\lib\\40\\Microsoft.Exchange.WebServices.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\microsoft.exchange.webservices\\2.2.0"
+    },
+    {
+      "Package": {
+        "Id": "Microsoft.Identity.Client",
+        "Version": "4.14.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.identity.client\\4.14.0\\lib\\net45\\Microsoft.Identity.Client.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\microsoft.identity.client\\4.14.0"
+    },
+    {
+      "Package": {
+        "Id": "Microsoft.Rest.ClientRuntime",
+        "Version": "2.3.21"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.rest.clientruntime\\2.3.21\\lib\\net461\\Microsoft.Rest.ClientRuntime.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\microsoft.rest.clientruntime\\2.3.21"
+    },
+    {
+      "Package": {
+        "Id": "Microsoft.VisualStudio.OLE.Interop",
+        "Version": "7.10.6071"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\microsoft.visualstudio.ole.interop\\7.10.6071\\lib\\Microsoft.VisualStudio.OLE.Interop.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\microsoft.visualstudio.ole.interop\\7.10.6071"
+    },
+    {
+      "Package": {
+        "Id": "Newtonsoft.Json",
+        "Version": "11.0.2"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\newtonsoft.json\\11.0.2\\lib\\net45\\Newtonsoft.Json.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\newtonsoft.json\\11.0.2"
+    },
+    {
+      "Package": {
+        "Id": "NPOI",
+        "Version": "2.4.1"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\npoi\\2.4.1\\lib\\net45\\NPOI.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\npoi\\2.4.1\\lib\\net45\\NPOI.OOXML.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\npoi\\2.4.1\\lib\\net45\\NPOI.OpenXml4Net.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\npoi\\2.4.1\\lib\\net45\\NPOI.OpenXmlFormats.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\npoi\\2.4.1"
+    },
+    {
+      "Package": {
+        "Id": "SharpZipLib",
+        "Version": "1.2.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\sharpziplib\\1.2.0\\lib\\net45\\ICSharpCode.SharpZipLib.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\sharpziplib\\1.2.0"
+    },
+    {
+      "Package": {
+        "Id": "System.IO.Abstractions",
+        "Version": "3.0.10"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\system.io.abstractions\\3.0.10\\lib\\net40\\System.IO.Abstractions.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\system.io.abstractions\\3.0.10"
+    },
+    {
+      "Package": {
+        "Id": "System.Threading.Tasks.Dataflow",
+        "Version": "4.10.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\system.threading.tasks.dataflow\\4.10.0\\lib\\netstandard2.0\\System.Threading.Tasks.Dataflow.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\system.threading.tasks.dataflow\\4.10.0"
+    },
+    {
+      "Package": {
+        "Id": "System.ValueTuple",
+        "Version": "4.5.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\system.valuetuple\\4.5.0\\lib\\net461\\System.ValueTuple.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\system.valuetuple\\4.5.0"
+    },
+    {
+      "Package": {
+        "Id": "UiPath",
+        "Version": "20.6.7473.25550-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath\\20.6.7473.25550-preview\\lib\\UiPath.Interop.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath\\20.6.7473.25550-preview"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.Excel.Activities",
+        "Version": "2.9.0-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.excel.activities\\2.9.0-preview\\lib\\net461\\UiPath.Excel.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.excel.activities\\2.9.0-preview\\lib\\net461\\UiPath.Excel.Activities.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.excel.activities\\2.9.0-preview\\lib\\net461\\UiPath.Excel.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.excel.activities\\2.9.0-preview"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.Mail.Activities",
+        "Version": "1.9.0-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities\\1.9.0-preview\\lib\\net461\\MailKit.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities\\1.9.0-preview\\lib\\net461\\MimeKit.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities\\1.9.0-preview\\lib\\net461\\UiPath.Mail.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities\\1.9.0-preview\\lib\\net461\\UiPath.Mail.Activities.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities\\1.9.0-preview\\lib\\net461\\UiPath.Mail.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.mail.activities\\1.9.0-preview"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.OCR.Contracts",
+        "Version": "2.6.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.ocr.contracts\\2.6.0\\lib\\net461\\UiPath.OCR.Contracts.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.ocr.contracts\\2.6.0"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.Platform",
+        "Version": "20.4.0"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.platform\\20.4.0\\lib\\net461\\UiPath.Platform.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.platform\\20.4.0"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.System.Activities",
+        "Version": "20.6.1-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.Docking.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.Ribbon.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.Shared.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.SyntaxEditor.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.Text.Addons.DotNet.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.Text.LLParser.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.Text.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\ActiproSoftware.Wizard.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\CustomInputForm.exe",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\UiPath.OrchestratorClient.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\UiPath.System.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview\\lib\\net461\\UiPath.System.Activities.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.system.activities\\20.6.1-preview"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.Telemetry.Client",
+        "Version": "1.2.20"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.telemetry.client\\1.2.20\\lib\\net461\\TelemetryClient.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.telemetry.client\\1.2.20"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.UIAutomation.Activities",
+        "Version": "20.6.0-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.DataGrid.Contrib.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.Docking.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.Editors.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.Ribbon.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.Shared.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.SyntaxEditor.Addons.DotNet.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.SyntaxEditor.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.Text.Addons.DotNet.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.Text.LLParser.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.Text.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\ActiproSoftware.Wizard.Wpf.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\UiPath.CV.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\UiPath.CV.Activities.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\UiPath.CV.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\UiPath.UIAutomation.Activities.Design.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\UiPath.UiAutomation.Activities.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview\\lib\\net461\\UiPath.Wizards.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.uiautomation.activities\\20.6.0-preview"
+    },
+    {
+      "Package": {
+        "Id": "UiPath.Vision",
+        "Version": "2.1.0-preview"
+      },
+      "Assemblies": [
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision\\2.1.0-preview\\lib\\net461\\UiPath.Vision.Core.dll",
+        "C:\\Users\\marco\\.nuget\\packages\\uipath.vision\\2.1.0-preview\\lib\\net461\\UiPath.Vision.dll"
+      ],
+      "Path": "C:\\Users\\marco\\.nuget\\packages\\uipath.vision\\2.1.0-preview"
+    }
+  ]
+}

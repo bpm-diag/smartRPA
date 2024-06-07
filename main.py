@@ -5,16 +5,20 @@
 
 import os
 import sys
+sys.path.append('src/')
+
 import time
 from threading import Thread
 from multiprocessing import Process, Queue
 import utils.utils
 import modules.GUI.GUI
-import utils.config
+# import utils.config
 import modules.consumerServer
 import utils.utils
 from modules.events import systemEvents, officeEvents, clipboardEvents, standardEvents
 import platform
+
+
 
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
@@ -248,4 +252,5 @@ def startLogger(systemLoggerFilesFolder,
 
 if __name__ == "__main__":
     # launch GUI
+    utils.config.set_config_default()
     modules.GUI.GUI.buildGUI()
