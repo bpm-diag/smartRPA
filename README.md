@@ -393,3 +393,6 @@ If you get the error <code>Message: session not created: This version of ChromeD
   - The synthetic UI logs generated for the test are available at: https://tinyurl.com/yyk68psx.
   - The complete results can be analyzed at: https://tinyurl.com/y55v56qa.
 - **Agostinelli, S., Lupia, M., Marrella, A., Mecella, M.**: _[Automated Generation of Executable RPA Scripts from User Interface Logs](https://doi.org/10.1007/978-3-030-58779-6_8)_. In: 18th Int. Conf. on Business Process Management (RPA Forum). pp. 116-131 (2020)
+
+# Acknowledgments
+This work has been partially supported by the PNRR MUR project PE0000013-FAIR
