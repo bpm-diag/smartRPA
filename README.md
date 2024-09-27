@@ -83,6 +83,7 @@ The following dependencies are required to enable all functionalities within Sma
   - [Python Requirements](#21-requirementstxt)
   - [Browser extension](#3-install-browser-extension)
 - [Excel AddIn (MacOS Only)](#4-install-excel-addin-macos-only)
+- [LLM Tagger]()
 
 Furthermore, there are possible installation issues that can arise with the installation of the prerequisites or libraries. You can find fixes to the most common issues in the section [Installation Errors](#error-handling-for-possible-installation-errors) .
 
@@ -254,6 +255,17 @@ The resulting event log will be saved in `logs/` directory. If the screenshot fe
 The advantages of the UiPath integration is that the generated SW Robot can be easily customized by the end user.
 
 **NOTE**: In the Action Logger, when selecting a *Microsoft Office* program to log, it will automatically be opened. This is required to correctly handle events. The opened window should not be closed until logging is completed.
+
+## 6. LLM Based Activity Tagging (Beta)
+LLMs allow are capable of [Business Process Management tasks](https://link.springer.com/chapter/10.1007/978-3-031-50974-2_34) and therefore can be used to semantically tag data.
+We integrated such a feature in the processing menu. 
+
+ - Open the Processing/LLM Tagging Menu
+ - Store your Gemini API code. A manual to obtain an Gemini API key is found [here](https://ai.google.dev/gemini-api/docs/api-key).
+ - Select the UI log you want to semantically tag
+ - Start the promoting to generate short text descriptions of the activities conducted
+
+This feature is currently in Beta as the prompt results sometimes to not contain proper JSON responses for parsing or long logs cannot be processed accuratly.
 
 ### Action Logger Only
 
