@@ -123,8 +123,10 @@ class LLMDialog(QDialog):
 
         # Get the selected file path from the UI
         csvFilePath = self.file_path_label.text()
-
-        tags_json_file_path = 'tags.json'
+        directory_path = os.path.dirname(csvFilePath)
+        filename = os.path.basename(csvFilePath)
+        filename_without_extension = os.path.splitext(filename)[0]
+        tags_json_file_path = directory_path + '/' + filename_without_extension + '_tagged.json'
 
         jsonUiLog = utils.LLMtagger.csv_to_json(csvFilePath)
         jsonUiLog = utils.LLMtagger.remove_keys(jsonUiLog, ["Supervised Action Tag", "screenshot"])
@@ -150,9 +152,9 @@ class LLMDialog(QDialog):
                                             temperature=0.0,
                                             ),
                                         )
-        # print(response.text)
         print(response.usage_metadata)
 
+        # print(response.text)
         extracted_json = utils.LLMtagger.extract_json_from_text(response.text)
 
         # Write the generated tags into the tags file
