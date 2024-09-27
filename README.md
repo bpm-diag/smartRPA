@@ -83,7 +83,7 @@ The following dependencies are required to enable all functionalities within Sma
   - [Python Requirements](#21-requirementstxt)
   - [Browser extension](#3-install-browser-extension)
 - [Excel AddIn (MacOS Only)](#4-install-excel-addin-macos-only)
-- [LLM Tagger]()
+- [LLM Tagger](#6-llm-based-activity-tagging-beta)
 
 Furthermore, there are possible installation issues that can arise with the installation of the prerequisites or libraries. You can find fixes to the most common issues in the section [Installation Errors](#error-handling-for-possible-installation-errors) .
 
