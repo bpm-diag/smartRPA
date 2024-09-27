@@ -56,3 +56,13 @@ __pypackages__/
 /form/
 package-lock.json
 /docs/build/
+
+# Gemini API Code File
+# This file is not tracked with git
+# Used the following solution: https://stackoverflow.com/questions/23673174/how-to-ignore-new-changes-to-a-tracked-file-with-git
+# git update-index --assume-unchanged gemini_config.json
+#
+# To Track again:
+# git update-index --no-assume-unchanged gemini_config.json
+
+gemini_config.json

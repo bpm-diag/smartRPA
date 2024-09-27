@@ -1,0 +1,17 @@
+{
+  "element_1": "Clicked on a DIV element in the LinkedIn feed",
+  "element_2": "Moved a tab from index 4 to 5",
+  "element_3": "Clicked on a DIV element in the LinkedIn feed",
+  "element_4": "Zoomed in on the LinkedIn feed tab",
+  "element_5": "Zoomed out on the LinkedIn feed tab",
+  "element_6": "Pinned the LinkedIn feed tab",
+  "element_7": "Moved the LinkedIn feed tab to the first position",
+  "element_8": "Unpinned the LinkedIn feed tab",
+  "element_9": "Muted the LinkedIn feed tab",
+  "element_10": "Unmuted the LinkedIn feed tab",
+  "element_11": "Opened a new tab in Edge",
+  "element_12": "Selected the new tab with the Extensions page",
+  "element_13": "Automatically bookmarked the Extensions page",
+  "element_14": "Closed the Extensions tab",
+  "element_15": "Selected the LinkedIn feed tab"
+}
