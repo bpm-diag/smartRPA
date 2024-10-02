@@ -42,5 +42,5 @@ def logClipboard():
             # Post result to the consumer server, 
             # json=json_string is necessary, if only json_string the result at the server would be "None"
             utils.utils.session.post(consumerServer.SERVER_ADDR, json=json_string) 
-        sleep(0.2)
+        sleep(0.1)
 
