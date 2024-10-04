@@ -15,6 +15,7 @@ from multiprocessing import Process, Queue
 import webbrowser
 import time
 from modules.GUI.filenameDialog import getFilenameDialog
+import modules.GUI.postProcessingDialog
 import utils.utils
 import main
 import modules.GUI.PreferencesWindow
@@ -149,6 +150,17 @@ class MainApplication(QMainWindow, QDialog):
         about.triggered.connect(self.showAboutMessage)
         hints = helpMenu.addAction('Hints')
         hints.triggered.connect(self.showHints)
+
+        # LLM Tagging Menu
+        processingMenu = menu.addMenu('Processing')
+        LLMAction = processingMenu.addAction('LLM Processing')
+        LLMAction.triggered.connect(self.handleLLMMenu)
+        self.LLMDialog = modules.GUI.postProcessingDialog.LLMDialog(
+            self, self.status_queue)
+
+    def handleLLMMenu(self):
+        # Something
+        self.LLMDialog.show()
 
     def createSystemLoggerGroupBox(self):
         """

@@ -29,6 +29,9 @@ lxml==4.9.3
 pydot==1.4.1
 deprecated
 
+# Generative available
+google-generativeai=0.8.2
+
 # Windows specific dependencies
 pywin32==306; platform_system == "Windows"
 WMI==1.4.9; platform_system == "Windows"

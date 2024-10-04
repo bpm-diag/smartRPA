@@ -11,6 +11,8 @@ import utils.config
 import utils.utils
 import modules.supervision as sp
 
+import re
+
 # server port
 PORT = 4444
 SERVER_ADDR = f'http://localhost:{PORT}'
@@ -62,6 +64,18 @@ def writeLog():
     content = request.json
     print(f"\nPOST received with content: {content}\n")
 
+    # Anonymize password data in the UI Log
+    tag_type = content.get("tag_type")
+    tag_name = content.get("tag_name")
+    # List of sensitive words to check for
+    sensitive_words = ['password', 'passwort', 'pin', 'secret', 'key', 'token', 'credential']
+    # Compile a regex pattern for case-insensitive matching
+    pattern = re.compile('|'.join(sensitive_words), re.IGNORECASE)
+    # If tag_type or tag_name contain sensitive words, redact tag_value
+    if pattern.search(tag_type) or pattern.search(tag_name):
+        content['tag_value'] = '[REDACTED]'
+        content['tag_attributes'] = '[REDACTED]'
+
     # check if user enabled browser logging
     application = content.get("application")
     if (application == "Chrome" and not log_chrome) or \
@@ -82,6 +96,8 @@ def writeLog():
     if utils.config.read_config("supervisionFeature",bool) and not "event_relevance" in content:
         answer =  sp.getResponse(content)
         content["event_relevance"] = answer
+
+    print(f"\nPOST processed: {content}\n")
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))

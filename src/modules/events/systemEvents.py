@@ -61,7 +61,7 @@ def watchFolder():
 
         def on_any_event(self, event):
             if any(s in event.src_path for s in
-                   ['AppData', '.pylint', '.ini', '.DS_Store', 'node_modules', '.TMP', '.wine']):  # exclude folders
+                   ['AppData', '.pylint', '.ini', '.DS_Store', 'node_modules', '.TMP', '.wine', 'smartRPA\screenshots']):  #  // exclude folders of File system and smartRPA screenshots
                 return
             else:
                 if event.event_type == "moved":  # destination path is available
