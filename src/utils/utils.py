@@ -15,6 +15,7 @@ from importlib import util
 from threading import Thread
 from platform import system
 from urllib.parse import urlparse
+import time
 # import utils.config
 import modules.consumerServer
 import unicodedata
@@ -59,7 +60,7 @@ if WINDOWS:
     # RECENT_ITEMS_PATH_WIN = os.path.join(HOME_FOLDER, "AppData\\Roaming\\Microsoft\\Windows\\Recent")
 
 if not MAC:
-    import dxcam
+    import pyautogui
 
 # return shortcut lnk full path
 # def shortcut_target(filename):
@@ -498,52 +499,41 @@ def calculateImageHash(img):
     sha256_hash.update(img)
     return sha256_hash.hexdigest()
 
-def takeScreenshot(save_image: bool = utils.config.read_config("capture_screenshots",bool), scrshtFormat: str ="png"):
+def takeScreenshot(save_image: bool = utils.config.read_config("capture_screenshots", bool), scrshtFormat: str = "png"):
     """
-    Takes a screenshot and saves it to a directory with a filename based on its hash, current date/time and order of capture.
+    Takes a screenshot and saves it to a directory with a filename based on the timestamp,
+    hash, current date/time and order of capture.
 
     :param scrshtFormat: (Optional) File format of screenshot, Default type is png
     :param save_image: (Boolean) Default True
     :return: Name of the screenshot file
     """
-    # Future improvement: use onlx dxcam to capture multiple screens, because it is faster
+    # Future improvement: use a library that offers the fastest screenshot speed. DXCam gave problems, replaced by pyautogui.
     filename = ""
     if save_image:
         directory = os.path.join("screenshots", get_last_directory_name("screenshots"))
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        if not MAC and len(get_monitors()) == 1:
-            global camera  # usa la variable global camera
+        # Capturing screenshot using pyautogui
+        img = pyautogui.screenshot()
 
-            # Si no hay instancia de cámara, crear una nueva instancia
-            if camera is None:
-                camera = dxcam.create()
-                print("Creating new camera instance")
-            img = camera.grab()
+        # Shorten the hash for the name
+        short_hash = calculateImageHash(img.tobytes())
 
-            # Acortar el hash para el nombre
-            short_hash = calculateImageHash(img)
+        # We first use the timestamp in the name for the order of the screenshots.
+        stamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+        filename = os.path.join(directory, f"{stamp}_{short_hash}." + scrshtFormat)
+        img.save(filename, format=scrshtFormat)
 
-            # Guardar la imagen en el directorio correspondiente. Nombre dependiente de hash
-            # directory = "screenshots/"
-            if not os.path.exists(directory):
-                createDirectory(directory)
-            stamp = timestamp("%Y-%m-%d_%H-%M-%S")
-            # counter = len([filename for filename in os.listdir(directory) if filename.endswith('.png')])
-            filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
-            
-            # Guarda la imagen y elimina compresión
-            Image.fromarray(img).save(filename, compress_level=0)
-
-        else:
-            # If there are more than two screens attached it is easier to use the pillow impage capture
-            screenshot = ImageGrab.grab(all_screens=True)
-            # Have to use tobytes as the PIL image cannot be hashed using sha256_hash method
-            short_hash = calculateImageHash(screenshot.tobytes())
-            stamp = timestamp("%Y-%m-%d_%H-%M-%S")
-            filename = os.path.join(directory, f"{short_hash}_{stamp}." + scrshtFormat)
-            screenshot.save(filename, format=scrshtFormat)
+    else:
+        # If there are more than two screens attached, use the pillow image capture
+        screenshot = ImageGrab.grab(all_screens=True)
+        # Have to use tobytes as the PIL image cannot be hashed using sha256_hash method
+        short_hash = calculateImageHash(screenshot.tobytes())
+        stamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+        filename = os.path.join(directory, f"{stamp}_{short_hash}." + scrshtFormat)
+        screenshot.save(filename, format=scrshtFormat)
 
     return filename
 
