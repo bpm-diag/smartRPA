@@ -62,7 +62,6 @@ def writeLog():
     """
     # All elements of content are key - value pairs with the values being of type "str"
     content = request.json
-    print(f"\nPOST received with content: {content}\n")
 
     # Anonymize password data in the UI Log
     tag_type = content.get("tag_type")
@@ -97,7 +96,7 @@ def writeLog():
         answer =  sp.getResponse(content)
         content["event_relevance"] = answer
 
-    print(f"\nPOST processed: {content}\n")
+    print(f"\nPOST recieved and processed: {content}\n")
 
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))
