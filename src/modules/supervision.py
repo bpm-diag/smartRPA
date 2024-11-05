@@ -80,8 +80,6 @@ def getResponse(json_str=""):
         return response_sp_feature
     return None
 
-def open_screenshot(path):
-    os.startfile(path)
 
 def handle_button_click(selected_option, window):
     global response_sp_feature
