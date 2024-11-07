@@ -3,7 +3,7 @@
 # Build native user interface and start main logger
 # ****************************** #
 from PyQt5.QtCore import Qt, QSize, QThreadPool, QTimer
-from PyQt5.QtGui import QFont, QIcon, QPalette, QColor
+from PyQt5.QtGui import QFont, QIcon, QPalette, QColor, QPixmap
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel, QPushButton,
                              QStyleFactory, QVBoxLayout, QListWidget, QListWidgetItem,
@@ -30,9 +30,6 @@ import sys
 import pandas as pd
 import os
 sys.path.append('../')  # this way main file is visible from this file
-
-
-# import utils.xesConverter
 
 
 class MainApplication(QMainWindow, QDialog):

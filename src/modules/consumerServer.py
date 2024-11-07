@@ -60,12 +60,13 @@ def writeLog():
 
     All this data is appended to the csv event log.
     """
+
     # All elements of content are key - value pairs with the values being of type "str"
     content = request.json
 
     # Anonymize password data in the UI Log
-    tag_type = content.get("tag_type")
-    tag_name = content.get("tag_name")
+    tag_type = content.get("tag_type", "")
+    tag_name = content.get("tag_name", "")
     # List of sensitive words to check for
     sensitive_words = ['password', 'passwort', 'pin', 'secret', 'key', 'token', 'credential']
     # Compile a regex pattern for case-insensitive matching
@@ -74,6 +75,9 @@ def writeLog():
     if pattern.search(tag_type) or pattern.search(tag_name):
         content['tag_value'] = '[REDACTED]'
         content['tag_attributes'] = '[REDACTED]'
+    else:
+        # No sensitive words found; simply pass
+        pass
 
     # check if user enabled browser logging
     application = content.get("application")
@@ -89,7 +93,7 @@ def writeLog():
         content["screenshot"] = screenshot
         # Double check the delay between the browser event logged and the screenshot taken here
         # Latest check TOHO: For multiple screens ~0.5 sec, for single screen ~0.25 sec
-
+    
     # > Add supervision feature and outsource to other function in GUI as it should be GUI Element
     # Could be removed if it was added to all: Currently missing browser logger, thus has to be in place
     if utils.config.read_config("supervisionFeature",bool) and not "event_relevance" in content:

@@ -18,8 +18,6 @@ import utils.utils
 from modules.events import systemEvents, officeEvents, clipboardEvents, standardEvents
 import platform
 
-
-
 def startLogger(systemLoggerFilesFolder,
                 systemLoggerPrograms,
                 systemLoggerClipboard,
